@@ -814,13 +814,13 @@ class MaskedCorpus(Corpus):
 
         arrays_out = dict()
         
-        arrays_out['corpus_data'] = self.corpus_data
+        arrays_out['corpus_data'] = self.corpus.data
         
-        arrays_out['corpus_mask'] = self.corpus_mask
+        arrays_out['corpus_mask'] = self.corpus.mask
         
-        arrays_out['terms_data'] = self.terms_data
+        arrays_out['terms_data'] = self.terms.data
 
-        arrays_out['terms_mask'] = self.terms_mask
+        arrays_out['terms_mask'] = self.terms.mask
 
         arrays_out['tok_names'] = np.asarray(self.tok_names)
 
