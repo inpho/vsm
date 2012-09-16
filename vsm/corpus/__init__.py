@@ -766,11 +766,11 @@ class MaskedCorpus(Corpus):
 
         c = MaskedCorpus([])
 
-        c.corpus.data = arrays_in['corpus_data']
+        c.corpus = np.ma.array(arrays_in['corpus_data'])
 
         c.corpus.mask = arrays_in['corpus_mask']
 
-        c.terms.data = arrays_in['terms_data']
+        c.terms = np.ma.array(arrays_in['terms_data'])
 
         c.terms.mask = arrays_in['terms_mask']
 
