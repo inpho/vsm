@@ -27,7 +27,7 @@ setup(
         ],
     install_requires=[
         "numpy>=1.6.1",
-        "scipy>=10.1"
+        "scipy>=10.1",
         "nltk>=2.0.0"
     ],
     packages=['vsm',
