@@ -659,7 +659,8 @@ class MaskedCorpus(Corpus):
     def masked_terms(self):
         """
         """
-        v = np.ma.masked_where(np.logical_not(terms.mask), self.terms.data, copy=False)
+        v = np.ma.masked_where(np.logical_not(self.terms.mask),
+                               self.terms.data, copy=False)
 
         return v.compressed()
 
