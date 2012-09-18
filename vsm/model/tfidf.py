@@ -19,7 +19,7 @@ undefined.
 class TfIdfModel(model.Model):
     """
     """
-    def train(self, corpus, tok_name=None, tf_matrix=None):
+    def train(self, corpus=None, tok_name=None, tf_matrix=None):
 
         if tf_matrix is None:
 
