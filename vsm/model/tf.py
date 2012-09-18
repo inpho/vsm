@@ -2,7 +2,7 @@ import numpy as np
 from scipy import sparse
 
 from vsm import model
-
+from vsm import corpus as corp
 
 
 class TfModel(model.Model):
@@ -12,21 +12,25 @@ class TfModel(model.Model):
 
         print 'Retrieving tokens'
 
-        if isinstance(c, MaskedCorpus):
+        if isinstance(corpus, corp.MaskedCorpus):
 
             tokens = corpus.view_tokens(tok_name, compress=True)
+
+            c = corpus.corpus.compressed()
 
         else:
 
             tokens = corpus.view_tokens(tok_name)
 
+            c = corpus.corpus
+
         print 'Computing term frequencies'
 
-        data = np.ones_like(corpus.corpus)
+        data = np.ones_like(c)
         
-        row_indices = corpus.corpus
+        row_indices = c
 
-        col_indices = np.empty_like(corpus.corpus)
+        col_indices = np.empty_like(c)
 
         j, k = 0, 0
 

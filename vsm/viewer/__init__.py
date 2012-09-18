@@ -2,7 +2,9 @@ import numpy as np
 
 from vsm import corpus as cps
 from vsm import model
+
 import similarity
+
 
 
 class Viewer(object):

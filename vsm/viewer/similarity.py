@@ -42,14 +42,28 @@ def similar_rows(row_index,
 
     out = nums / dens
 
-    if filter_nan:
 
-        out = filter_nan(out)
+
+    out = list(enumerate(out.tolist()))
+    
+    dtype = [('index', np.int), ('value', np.float)]
+
+    out = np.array(out, dtype=dtype)
 
     if sort:
         
         out = sort_sim(out)
-    
+
+    #TODO: rewrite _filter_nan to preserve recarray and then move it
+    #before the sort
+
+    if filter_nan:
+
+        out = _filter_nan(out)
+
+
+
+
     return out
 
 
@@ -112,7 +126,7 @@ def sparse_mvdot(m, v, submat_size=def_submat_size):
 
 
 
-def filter_nan(results):
+def _filter_nan(results):
 
     return [(i,v) for i,v in results if np.isfinite(v)]
 
@@ -121,14 +135,8 @@ def filter_nan(results):
 def sort_sim(results):
     """
     """
-    results = zip(xrange(results.shape[0]), results.tolist())
-    
-    dtype = [('index', np.int), ('value', np.float)]
-
     # NB: numpy >= 1.4 sorts NaN to the end
-
-    results = np.array(results, dtype=dtype)
-
+    
     results.sort(order='value')
 
     results = results[::-1]
