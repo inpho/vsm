@@ -36,7 +36,20 @@ class LsaModel(model.Model):
 
             k_factors = td_matrix.shape[1] - 1
 
-        td_matrix = sparse.csc_matrix(td_matrix, dtype=np.float64)
+        td_matrix = sparse.coo_matrix(td_matrix)
+
+        # Removing infinite values for the sake of the SVD
+
+        finite_mask = np.isfinite(td_matrix.data)
+
+        shape = td_matrix.shape
+
+        coo_in = (td_matrix.data[finite_mask],
+                  (td_matrix.row[finite_mask], td_matrix.col[finite_mask]))
+
+        td_matrix = sparse.coo_matrix(coo_in, shape=shape, dtype=np.float64)
+
+        td_matrix = td_matrix.tocsr()
 
         print 'Performing sparse SVD'
 
@@ -67,7 +80,7 @@ class LsaModel(model.Model):
         
 
 
-    def save(self, file):
+    def save_matrix(self, file):
         """
         Saves matrix data as a numpy archive file with extension
         `npz`. The keys for the component matrices are `term_matrix`,
@@ -103,7 +116,7 @@ class LsaModel(model.Model):
 
 
     @staticmethod
-    def load(file):
+    def load_matrix(file):
         """
         Loads LSA matrix data from a numpy archive file with extension
         `npz`. The expected keys for the component matrices are

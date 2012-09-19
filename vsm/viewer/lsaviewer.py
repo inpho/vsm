@@ -20,13 +20,19 @@ class LsaViewer(vw.Viewer):
                  tok_name=None):
         
         self.corpus = corpus
+
         self.matrix = svd_matrices
+
         self.tok_name = tok_name
         
         self._term_matrix = None
+
         self._ev_matrix = None
+
         self._doc_matrix = None
+
         self._term_norms = None
+
         self._doc_norms = None
 
 
