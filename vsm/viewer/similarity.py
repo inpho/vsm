@@ -87,7 +87,7 @@ def sparse_mvdot(m, v, submat_size=def_submat_size):
 
     if submat_size < m.shape[1]:
 
-        print 'Note: specified submatrix size is'\
+        print 'Note: specified submatrix size is '\
               'less than the number of columns in matrix'
 
         m_rows = 1
