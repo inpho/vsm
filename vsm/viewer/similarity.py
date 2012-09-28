@@ -208,7 +208,9 @@ class SimilarityMatrix(object):
 
             results = similar_rows(0 , data, norms=norms, sort=False)
 
-            self.matrix[i, i:] = results
+            results = np.array([v for j,v in results])
+
+            self.matrix[i, i:] = results[:]
 
             data = data[1:, :]
 
@@ -218,7 +220,28 @@ class SimilarityMatrix(object):
 
         results = similar_rows(0 , data, norms=norms, sort=False)
 
-        self.matrix[i, i:] = results
+        results = np.array([v for j,v in results])
+
+        self.matrix[i, i:] = results[:]
 
 
 
+def test_simmat():
+
+    m = np.random.random((10,5))
+
+    out_1 = np.zeros((10,10))
+
+    for i, j in zip(*np.triu_indices_from(out_1)):
+
+        out_1[i, j] = (np.dot(m[i], m[j])
+                       / (np.dot(m[i], m[i])**.5
+                          * np.dot(m[j], m[j])**.5))
+
+    out_2 = SimilarityMatrix(indices = range(10))
+    
+    out_2.compute(m)
+
+    out_2 = out_2.matrix
+        
+    assert np.allclose(out_1, out_2)
