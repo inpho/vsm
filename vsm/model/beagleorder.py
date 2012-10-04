@@ -309,6 +309,8 @@ class BeagleOrderMulti(model.Model):
 
                 self.matrix[:, :] += result[:, :]
 
+                self.matrix = np.float32(self.matrix)
+                
         finally:
 
             print 'Removing', tmp_dir

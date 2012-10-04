@@ -159,6 +159,8 @@ class BeagleContextMulti(model.Model):
 
                 self.matrix[:, :] += result[:, :]
 
+                self.matrix = np.float32(self.matrix)
+
         finally:
 
             print 'Removing', tmp_dir
@@ -240,7 +242,7 @@ def test_BeagleContextSingle():
 
     n = 5
 
-    c = corpus.random_corpus(1e2, 10, 1, 10, tok_name='sentences')
+    c = corpus.random_corpus(1e5, 1e4, 1, 20, tok_name='sentences')
 
     c = c.to_maskedcorpus()
 
@@ -258,11 +260,11 @@ def test_BeagleContextMulti():
 
     from vsm import corpus
 
-    n = 5
+    n = 2048
 
     print 'Generating corpus'
     
-    c = corpus.random_corpus(1e2, 10, 1, 10, tok_name='sentences')
+    c = corpus.random_corpus(1e6, 1e5, 1, 20, tok_name='sentences')
 
     c = c.to_maskedcorpus()
 
