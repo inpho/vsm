@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 
 from vsm import model
@@ -90,4 +92,4 @@ class RandomVectorPool(object):
 
         with open(filename, 'w') as f:
 
-            pickle.dump(self)
+            pickle.dump(self, f)
