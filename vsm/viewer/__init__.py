@@ -70,12 +70,21 @@ def similar_terms(corpus, matrix, term,
 
     i = corpus.terms_int[term]
     
-    cosines = similarity.similar_rows(i, matrix,
-                                      norms=norms,
-                                      filter_nan=filter_nan)
+    sim_vals = similarity.similar_rows(i, matrix,
+                                       norms=norms,
+                                       filter_nan=filter_nan)
     
-    return [(corpus.terms[t], v) for t,v in cosines
-            if not rem_masked or t is not np.ma.masked]
+    out = []
+
+    for t,v in sim_vals:
+
+        term = corpus.terms[t]
+
+        if not (rem_masked and term is np.ma.masked):
+
+            out.append((term, v))
+
+    return out
 
 
 
@@ -133,5 +142,14 @@ def mean_similar_terms(corpus, matrix, query,
 
         sim_vals = similarity._filter_nan(sim_vals)
 
-    return [(corpus.terms[t], v) for t,v in sim_vals
-            if not rem_masked or t is not np.ma.masked]
+    out = []
+
+    for t,v in sim_vals:
+
+        term = corpus.terms[t]
+
+        if not (rem_masked and term is np.ma.masked):
+
+            out.append((term, v))
+
+    return out
