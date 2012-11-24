@@ -92,20 +92,32 @@ class LsaViewer(vw.Viewer):
 
 
     
-    def similar_terms(self, term, filter_nan=False):
+    def similar_terms(self, term, filter_nan=True, rem_masked=True):
 
         return vw.similar_terms(self.corpus,
                                 self.term_matrix,
                                 term,
                                 norms=self.term_norms,
-                                filter_nan=filter_nan)
+                                filter_nan=filter_nan,
+                                rem_masked=rem_masked)
+
+
+
+    def mean_similar_terms(self, query, filter_nan=True, rem_masked=True):
+
+        return vw.mean_similar_terms(self.corpus,
+                                     self.term_matrix,
+                                     query,
+                                     norms=self.term_norms,
+                                     filter_nan=filter_nan,
+                                     rem_masked=rem_masked)
 
 
 
     def similar_documents(self, document, filter_nan=False):
 
         return vw.similar_documents(self.corpus,
-                                    self.term_matrix,
+                                    self.doc_matrix,
                                     document,
                                     norms=self.doc_norms,
                                     filter_nan=filter_nan)
