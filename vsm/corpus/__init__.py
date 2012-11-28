@@ -436,7 +436,7 @@ class Corpus(BaseCorpus):
         self.terms_int = dict((t,i) for i,t in enumerate(self.terms))
 
 
-    def view_tokens(self, name, strings=False):
+    def view_tokens(self, name, as_strings=False):
         """
         Displays a tokenization of the corpus.
 
@@ -461,7 +461,7 @@ class Corpus(BaseCorpus):
         
         token_list = super(Corpus, self).view_tokens(name)
 
-        if strings:
+        if as_strings:
 
             token_list_ = []
 
