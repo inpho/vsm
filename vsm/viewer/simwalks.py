@@ -1,4 +1,8 @@
 
+
+
+
+
 def bf_sim_walk(sim_fn, term, go_list, global_bnd):
 
     mem = { term:
@@ -15,7 +19,7 @@ def bf_sim_walk(sim_fn, term, go_list, global_bnd):
 
             pos, sim = v['pos'], v['sim']
 
-            for i, p in enumerate(sim[pos:]):
+            for p in sim[pos:]:
 
                 mem[k]['pos'] += 1
 
