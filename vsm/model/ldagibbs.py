@@ -23,32 +23,35 @@ class LDAGibbs(object):
 
         
 
-    def train(self, corpus, tok_name, K=100,
-              alpha = 0.01, beta = 0.01, itr=1000):
+    def train(self, corpus=None, tok_name=None, 
+              K=100, alpha = 0.01, beta = 0.01, 
+              itr=1000, log_prob=True):
 
         #TODO: Support MaskedCorpus
 
-        V = corpus.terms.shape[0]
+        if not corpus == None:
 
-        W = corpus.view_tokens(tok_name)
+            self.V = corpus.terms.shape[0]
+            
+            self.W = corpus.view_tokens(tok_name)
 
-        self.Z = [np.zeros_like(d) for d in W]
+        self.Z = [np.zeros_like(d) for d in self.W]
 
         self.alpha = alpha
         
         self.beta = beta
 
-        self.doc_top = np.zeros((len(W), K)) + alpha
+        self.doc_top = np.zeros((len(self.W), K)) + alpha
 
-        self.sum_doc_top = (K * alpha) + len(W)
+        self.sum_doc_top = (K * alpha) + len(self.W)
 
-        self.top_word = np.zeros((K, V)) + beta
+        self.top_word = np.zeros((K, self.V)) + beta
 
-        self.sum_word_top = (V * beta) + np.zeros(K)
+        self.sum_word_top = (self.V * beta) + np.zeros(K)
 
         # Initialize
 
-        for d, doc in enumerate(W):
+        for d, doc in enumerate(self.W):
 
             for i, w in enumerate(doc):
 
@@ -56,11 +59,17 @@ class LDAGibbs(object):
 
         # Iterate
 
-        for t in xrange(itr):
+        for t in xrange(self.iterations, self.iterations + itr):
 
             print 'Iteration', t
 
-            for d, doc in enumerate(W):
+            self.iterations += 1
+            
+            if log_prob:
+
+                self.log_probs.append((t, self.logp()))
+
+            for d, doc in enumerate(self.W):
 
                 for i, w in enumerate(doc):
                     
@@ -124,11 +133,11 @@ class LDAGibbs(object):
 
         log_p = 0
 
-        for d, doc in enumerate(W):
+        for d, doc in enumerate(self.W):
 
             for i, w in enumerate(doc):
 
-                log_p -= np.dot(theta(d), phi(w))
+                log_p -= np.dot(self.theta(d), self.phi(w))
 
         return log_p
 

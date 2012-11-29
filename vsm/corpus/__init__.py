@@ -96,6 +96,8 @@ class BaseCorpus(object):
 
         self.corpus = np.asarray(corpus, dtype=dtype)
 
+        self.dtype = self.corpus.dtype
+
         self._extract_terms()
 
         self.tok_data = list()
@@ -254,6 +256,11 @@ class BaseCorpus(object):
         if indices[-1] == self.corpus.shape[0]:
 
             del tokens[-1]
+            
+        # Use copy=False option in astype when this becomes available
+        # in the stable branch
+
+        tokens = [t.astype(self.dtype) for t in tokens]
 
         return tokens
 
@@ -423,9 +430,11 @@ class Corpus(BaseCorpus):
 
         # Integer encoding of a string-type corpus
 
+        self.dtype = np.int32
+
         self.corpus = np.asarray([self.terms_int[term]
                                   for term in self.corpus],
-                                 dtype=np.int32)
+                                 dtype=self.dtype)
 
 
 
@@ -959,10 +968,10 @@ def mask_from_golist(corp_obj, golist):
 
 
 
-def mask_f1(corp_obj):
+def mask_freq_t(corp_obj, t):
     """
-    Takes a MaskedCorpus object and masks all terms that occur only
-    once in the corpus. The operation is in-place.
+    Takes a MaskedCorpus object and masks all terms that occur less
+    than t times in the corpus. The operation is in-place.
     """
     print 'Computing collection frequencies'
 
@@ -972,13 +981,23 @@ def mask_f1(corp_obj):
 
         cfs[term] += 1
 
-    print 'Masking frequency 1 terms'
+    print 'Masking terms of frequency <=', t
 
-    term_list = corp_obj.terms.data[(cfs == 1)]
+    term_list = corp_obj.terms.data[(cfs <= t)]
 
     corp_obj.mask_terms(term_list)
 
 
+
+# Legacy
+
+def mask_f1(corp_obj):
+    """
+    Takes a MaskedCorpus object and masks all terms that occur only
+    once in the corpus. The operation is in-place.
+    """
+
+    mask_freq_t(corp_obj, 1)
 
 #
 # Testing

@@ -241,3 +241,112 @@ class SingleArticleTokenizer(object):
         sentence_tokens = np.cumsum(sentence_spans)
 
         self.tok_data = [paragraph_tokens, sentence_tokens]
+
+
+
+def toy_corpus(plain_corpus, is_filename=False, 
+               nltk_stop=False, mask_freq=0, add_stop=None):
+    """
+    Takes plain text corpus as a string. Document tokens are delimited
+    by `\n\n`. E.g.,
+
+    <document 0>
+
+    <document 1>
+
+    ...
+
+    <document n>
+
+    where <document i> is any chunk of text to be tokenized by word.
+
+    If `is_filename` is True then `plain_corpus` is intended to be a filename.
+    """
+    from vsm.corpus import MaskedCorpus, mask_from_stoplist, mask_freq_t
+
+    if is_filename:
+
+        with open(plain_corpus, 'r') as f:
+
+            plain_corpus = f.read()
+
+    docs = plain_corpus.split('\n\n')
+
+    docs = [word_tokenize(d) for d in docs]
+
+    corpus = sum(docs, [])
+
+    tok = np.cumsum(np.array([len(d) for d in docs]))
+
+    tok = [(i, str(d)) for d, i in enumerate(tok)]
+    
+    c = MaskedCorpus(corpus, tok_data=[tok], tok_names=['documents'])
+
+    stoplist = set()
+
+    if nltk_stop:
+
+        for w in nltk.corpus.stopwords.words('english'):
+
+            stoplist.add(w)
+
+    if add_stop:
+
+        for w in add_stop:
+
+            stoplist.add(w)
+
+    if stoplist:
+
+        mask_from_stoplist(c, list(stoplist))
+
+    if mask_freq > 0:
+
+        mask_freq_t(c, mask_freq)
+
+    c = c.to_corpus(compress=True)
+
+    return c
+    
+
+
+def test_toy_corpus():
+
+    keats = ('She dwells with Beauty - Beauty that must die;\n\n'
+             'And Joy, whose hand is ever at his lips\n\n' 
+             'Bidding adieu; and aching Pleasure nigh,\n\n'
+             'Turning to poison while the bee-mouth sips:\n\n'
+             'Ay, in the very temple of Delight\n\n'
+             'Veil\'d Melancholy has her sovran shrine,\n\n'
+             'Though seen of none save him whose strenuous tongue\n\n'
+             'Can burst Joy\'s grape against his palate fine;\n\n'
+             'His soul shall taste the sadness of her might,\n\n'
+             'And be among her cloudy trophies hung.')
+
+    assert toy_corpus(keats)
+
+    assert toy_corpus(keats, nltk_stop=True)
+
+    assert toy_corpus(keats, mask_freq=1)
+
+    assert toy_corpus(keats, add_stop=['and', 'with'])
+
+    assert toy_corpus(keats, nltk_stop=True,
+                      mask_freq=1, add_stop=['ay'])
+
+    from tempfile import NamedTemporaryFile as NFT
+
+    tmp = NFT(delete=False)
+
+    tmp.write(keats)
+
+    tmp.close()
+
+    c = toy_corpus(tmp.name, is_filename=True, 
+                   nltk_stop=True, add_stop=['ay'])
+    
+    assert c
+
+    os.remove(tmp.name)
+
+    return c

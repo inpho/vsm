@@ -33,6 +33,5 @@ setup(
     packages=['vsm',
               'vsm.corpus',
               'vsm.model',
-              'vsm.viewer',
-              'vsm.hwlda'],
+              'vsm.viewer'],
 )
