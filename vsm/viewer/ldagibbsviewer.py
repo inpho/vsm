@@ -8,20 +8,12 @@ from vsm.viewer import similarity
 class LDAGibbsViewer(object):
     """
     """
-    def __init__(self,
-                 corpus=None,
-                 doc_top=None,
-                 top_word=None,
-                 tok_name=None):
+    def __init__(self, corpus, model):
         
         self.corpus = corpus
 
-        self.doc_top = doc_top
+        self.model = model
 
-        self.top_word = top_word
-
-        self.tok_name = tok_name
-        
         # self._term_norms = None
 
         # self._doc_norms = None
@@ -52,7 +44,7 @@ class LDAGibbsViewer(object):
     
     def get_topic(self, n, as_strings=False):
         
-        t = self.top_word[n, :].ravel().tolist()
+        t = self.model.phi_t(n).tolist()
         
         t = t[:self.corpus.terms.shape[0]]
         
@@ -76,37 +68,46 @@ class LDAGibbsViewer(object):
 
         t = self.get_topic(n, as_strings=True)
 
-        for w, v in t[:20]:
+        if not depth:
 
-            print '{0:<20}{1:<20}'.format(w, str(v)[:-4])
+            depth = self.model.top_word.shape[1]
+
+        for w, v in t[:depth]:
+
+            print '{0:<20}{1:.4f}'.format(w, v)
+
 
 
     def print_topics(self, depth=10):
         
         topics = []
         
-        for j in xrange(self.top_word.shape[0]):
+        if not depth:
+
+            depth = self.model.top_word.shape[1]
+
+        for j in xrange(self.model.top_word.shape[0]):
 
             topics.append(self.get_topic(j, as_strings=True)[:depth])
 
-        print '-' * 79
+        print '-' * 70
 
         for i in xrange(0, len(topics), 2):
 
-            print '{0:<40}{1:<40}'.format('    Topic ' + str(i), 
-                                          '    Topic ' + str(i+1))
+            print '{0:<40}{1}'.format('    Topic ' + str(i), 
+                                      '    Topic ' + str(i+1))
 
-            print '-' * 79
+            print '-' * 70
 
             rows = zip(topics[i], topics[i+1])
 
             for row in rows:
 
-                print ('{0:<20}{1:<20}{2:<20}{3:<20}'
-                       .format(row[0][0], str(row[0][1])[:-4], 
-                               row[1][0], str(row[1][1])[:-4]))
+                print ('{0:<20}{1:<20.5f}{2:<20}{3:.5f}'
+                       .format(row[0][0], row[0][1], 
+                               row[1][0], row[1][1]))
 
-            print '-' * 79
+            print '-' * 70
 
 
 
@@ -158,36 +159,21 @@ class LDAGibbsViewer(object):
 
 
 
-def test_ldagibbsviewer_iep():
+# def test_ldagibbsviewer_iep():
 
-    from vsm import corpus
+#     from vsm import corpus
 
-    from ldagibbs import LDAGibbs
+#     from ldagibbs import LDAGibbs
 
-    c = corpus.Corpus.load('iep-freq1-nltk-compressed.npz')
+#     c = corpus.Corpus.load('iep-freq1-nltk-compressed.npz')
 
-    m = LDAGibbs()
+#     m = LDAGibbs()
 
-    m.train(corpus=c, tok_name='articles')
+#     m.train(corpus=c, tok_name='articles')
 
-    v = LDAGibbsViewer(c, m.doc_top, m.top_word, K=50, itr=500)
+#     v = LDAGibbsViewer(c, m.doc_top, m.top_word, K=50, itr=500)
 
-    return m, v
+#     return m, v
 
 
 
-def test_ldagibbsviewer_church():
-
-    from vsm import corpus
-
-    from ldagibbs import LDAGibbs
-
-    m = LDAGibbs()
-
-    c = corpus.Corpus.load('church-nltk.npz')
-
-    m.train(corpus=c, tok_name='documents', K=2, itr=500)
-
-    v = LDAGibbsViewer(c, m.doc_top, m.top_word)
-
-    return m, v

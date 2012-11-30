@@ -113,19 +113,27 @@ class LDAGibbs(object):
 
 
 
-    def theta(self, d):
+    def theta_d(self, d):
 
-        theta_d = self.doc_top[d, :] / self.sum_doc_top
+        th_d = self.doc_top[d, :] / self.sum_doc_top
 
-        return theta_d
+        return th_d
 
 
 
-    def phi(self, w):
+    def phi_w(self, w):
 
-        phi_w = self.top_word[:, w] / self.sum_word_top
+        ph_w = self.top_word[:, w] / self.sum_word_top
 
-        return phi_w
+        return ph_w
+
+
+
+    def phi_t(self, t):
+
+        ph_t = self.top_word[t, :] / self.sum_word_top[t]
+
+        return ph_t
 
 
 
@@ -137,7 +145,7 @@ class LDAGibbs(object):
 
             for i, w in enumerate(doc):
 
-                log_p -= np.dot(self.theta(d), self.phi(w))
+                log_p -= np.dot(self.theta_d(d), self.phi_w(w))
 
         return log_p
 
