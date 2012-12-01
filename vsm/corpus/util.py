@@ -244,23 +244,57 @@ class SingleArticleTokenizer(object):
 
 
 
-def toy_corpus(plain_corpus, is_filename=False, 
+def toy_corpus(plain_corpus, is_filename=False, compress=True,
                nltk_stop=False, mask_freq=0, add_stop=None):
     """
-    Takes plain text corpus as a string. Document tokens are delimited
-    by `\n\n`. E.g.,
+    `toy_corpus` is a convenience function for generating Corpus or
+    MaskedCorpus objects from a given string or a single file.
 
-    <document 0>
+    `toy_corpus` will perform both word and document-level
+    tokenization. It will also strip punctuation and arabic numerals
+    outside the range 1-29. It will also make all letters lowercase.
 
-    <document 1>
+    Document tokens are delimited by `\n\n`. E.g.,
 
-    ...
+        <document 0>
 
-    <document n>
+        <document 1>
+
+        ...
+
+        <document n>
 
     where <document i> is any chunk of text to be tokenized by word.
 
-    If `is_filename` is True then `plain_corpus` is intended to be a filename.
+    Parameters
+    ----------
+    plain_corpus : string-like
+        String containing a plain-text corpus or a filename of a file
+        containing one.
+    is_filename : boolean
+        If `True` then `plain_corpus` is treated like a filename.
+        Otherwise, `plain_corpus` is presumed to contain the corpus.
+        Default is `False`.
+    compress : boolean
+        If `True` then a Corpus object is returned with all masked
+        terms removed. Otherwise, a MaskedCorpus object is returned.
+        Default is `True`.
+    nltk_stop : boolean
+        If `True` then the corpus object is masked using the NLTK
+        English stop words. Default is `False`.
+    mask_freq : int
+        The upper bound for a term to be masked on the basis of its
+        collection frequency. Default is 0.
+    add_stop : array-like
+        A list of stop words. Default is `None`.
+
+    Returns
+    -------
+
+    c : a Corpus or a MaskedCorpus object
+        Contains the tokenized corpus built from the input plain-text
+        corpus. Document tokens are named `documents`.
+
     """
     from vsm.corpus import MaskedCorpus, mask_from_stoplist, mask_freq_t
 
@@ -278,7 +312,7 @@ def toy_corpus(plain_corpus, is_filename=False,
 
     tok = np.cumsum(np.array([len(d) for d in docs]))
 
-    tok = [(i, str(d)) for d, i in enumerate(tok)]
+    # tok = [(i, str(d)) for d, i in enumerate(tok)]
     
     c = MaskedCorpus(corpus, tok_data=[tok], tok_names=['documents'])
 
@@ -304,10 +338,12 @@ def toy_corpus(plain_corpus, is_filename=False,
 
         mask_freq_t(c, mask_freq)
 
-    c = c.to_corpus(compress=True)
+    if compress=True:
+
+        c = c.to_corpus(compress=True)
 
     return c
-    
+
 
 
 def test_toy_corpus():
