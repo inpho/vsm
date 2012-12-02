@@ -338,7 +338,7 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
 
         mask_freq_t(c, mask_freq)
 
-    if compress=True:
+    if compress:
 
         c = c.to_corpus(compress=True)
 

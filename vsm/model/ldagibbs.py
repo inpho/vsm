@@ -1,45 +1,126 @@
+"""
+Several solutions in this implementation were found in 
+
+Nakatani Shuyo's `iirda` at https://github.com/shuyo/iir
+
+and in 
+
+Hanna Wallach's `python-lda` at
+https://github.com/hannawallach/python-lda
+"""
 import numpy as np
 
 
-# TODO: This could be made faster.
 
 def smpl_cat(d):
-
+    """
+    Takes an array of probabilities d and returns a sample from the
+    categorical distribution parameterized by d.
+    """
     return np.random.multinomial(1, d).argmax()
 
 
 
 class LDAGibbs(object):
     """
-    K : the number of topics
-    alpha : 
-    beta : 
+    An implementation of LDA using collapsed Gibbs sampling.
+
+    References
+    ----------    
+    Griffiths, Tom. Gibbs sampling in the generative model of Latent Dirichlet Allocation.
+
+    Wang, Yi. Distributed Gibbs Sampling of Latent Topic Models: The Gritty Details.
+
+    Parameters
+    ----------
+    corpus : Corpus
+        Source of observed data
+    tok_name : string
+        Name of tokenization stored in `corpus` whose tokens will be
+        treated as documents.
+    K : int
+        Number of topics. Default is `100`.
+    alpha : float
+        Parameter for the prior distribution of theta_d. Default is `0.01`.
+    beta : float
+        Parameter for the prior distribution of phi_d. Default is `0.01`.
+    log_prob : boolean
+        If `True`, compute the log probabilities of the corpus given
+        the values of the latent variables at each iteration and
+        records them in `log_probs`. Default is `True`.
+
+    Attributes
+    ----------
+    W : list of integer arrays
+        List of documents, which are extracted from the input Corpus object
+    V : int
+        Number of unique terms in the corpus
+    Z : list of integer arrays
+        Topic assignments for every term coordinate in the corpus
+    iterations : int
+        Number of past iterations of the update rule
+    doc_top : 2-dim floating point array
+        Stores the unnormalized estimated posterior distribution over
+        topics for each document in a D x K matrix
+    top_word : 2-dim floating point array
+        Stores the unnormalized estimated posterior distribution over
+        terms for each topic in a K x V matrix
+    sum_doc_top : 1-dim floating point array
+        Stores the sum of documents over topics
+    sum_word_top : 1-dim floating point array
+        Stores the sum of terms over topics
+
+    Methods
+    -------
+    train
+        Takes an optional argument `itr`, which defaults to 1000, and
+        updates the model `itr` times.
+    update_z
+        Takes a document index `d`, a term index `i` relative to that
+        document and a term `w` and updates the model.
+    z_dist
+        Takes a document index `d` and a term `w` and computes the
+        distribution over topics for `w` in `d`
+    phi_t
+        Takes a topic index `t` and returns the estimated posterior
+        distribution over terms for `t`
+    phi_w
+        Takes a term `w` and returns the estimated posterior
+        distribution over topics for `w`
+    theta_d
+        Takes a document index `d` and returns the estimated posterior
+        distribution over topics for `d`
+    logp
+        Compute the log probability of the corpus `W` given the
+        estimated values of the latent variables `phi`, `theta` and
+        `Z`
+
     """
-    def __init__(self):
-
-        self.iterations = 0
-
-        self.log_probs = []
-
-        
-
-    def train(self, corpus=None, tok_name=None, 
-              K=100, alpha = 0.01, beta = 0.01, 
-              itr=1000, log_prob=True):
+    def __init__(self, corpus, tok_name,
+                 K=100, alpha = 0.01, beta = 0.01, 
+                 log_prob=True):
 
         #TODO: Support MaskedCorpus
 
-        if not corpus == None:
-
-            self.V = corpus.terms.shape[0]
-            
-            self.W = corpus.view_tokens(tok_name)
-
-        self.Z = [np.zeros_like(d) for d in self.W]
+        self.K = K
 
         self.alpha = alpha
-        
+
         self.beta = beta
+        
+        self.W = corpus.view_tokens(tok_name)
+
+        self.V = corpus.terms.shape[0]
+            
+        self.iterations = 0
+
+        if log_prob:
+
+            self.log_prob = []
+        
+        # Initialize
+
+        self.Z = [np.zeros_like(d) for d in self.W]
 
         self.doc_top = np.zeros((len(self.W), K)) + alpha
 
@@ -49,25 +130,27 @@ class LDAGibbs(object):
 
         self.sum_word_top = (self.V * beta) + np.zeros(K)
 
-        # Initialize
-
         for d, doc in enumerate(self.W):
 
             for i, w in enumerate(doc):
 
                 self.update_z(d, i, w)
 
-        # Iterate
+
+
+    def train(self, itr=1000, verbose=True):
 
         for t in xrange(self.iterations, self.iterations + itr):
 
-            print 'Iteration', t
+            if verbose:
+
+                print 'Iteration', t
 
             self.iterations += 1
             
-            if log_prob:
+            if hasattr(self, 'log_prob'):
 
-                self.log_probs.append((t, self.logp()))
+                self.log_prob.append((t, self.logp()))
 
             for d, doc in enumerate(self.W):
 
@@ -82,7 +165,6 @@ class LDAGibbs(object):
                     self.sum_word_top[z] -= 1
 
                     self.update_z(d, i, w)
-
 
 
 
@@ -148,9 +230,6 @@ class LDAGibbs(object):
                 log_p -= np.dot(self.theta_d(d), self.phi_w(w))
 
         return log_p
-
-
-
 
 
 
