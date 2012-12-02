@@ -126,8 +126,6 @@ class LDAGibbs(object):
 
         self.doc_top = np.zeros((len(self.W), K)) + alpha
 
-        self.sum_doc_top = (K * alpha) + len(self.W)
-
         self.top_word = np.zeros((K, self.V)) + beta
 
         self.sum_word_top = (self.V * beta) + np.zeros(K)
@@ -205,7 +203,7 @@ class LDAGibbs(object):
 
     def theta_d(self, d):
 
-        th_d = self.doc_top[d, :] / self.sum_doc_top
+        th_d = self.doc_top[d, :] / self.doc_top[d, :].sum()
 
         return th_d
 
