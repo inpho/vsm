@@ -226,6 +226,13 @@ class BaseCorpus(object):
 
 
 
+    def meta_int(self, name, m):
+        """
+        """
+        return self.view_metadata(name).index(m)
+
+
+
     def view_tokens(self, name):
         """
         Displays a tokenization of the corpus.

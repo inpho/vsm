@@ -5,6 +5,19 @@ from vsm.viewer import similarity
 
 
 
+def enum_sort(a):
+
+    idx = np.arange(a.size)
+
+    a = np.core.records.fromarrays([idx, a], names='i,v')
+
+    a.sort(order='v')
+    
+    a = a[::-1]
+
+    return a
+
+
 class LDAGibbsViewer(object):
     """
     """
@@ -42,20 +55,12 @@ class LDAGibbsViewer(object):
 
 
     
-    def get_topic(self, n, as_strings=False):
+    def topic(self, n, as_strings=False):
         
-        t = self.model.phi_t(n).tolist()
+        t = self.model.phi_t(n)
         
-        t = t[:self.corpus.terms.shape[0]]
-        
-        t = list(enumerate(t))
-        
-        t = np.array(t, dtype=[('i', np.int), ('v', np.float)])
-        
-        t.sort(order='v')
-        
-        t = t[::-1].tolist()
-        
+        t = enum_sort(t)
+
         if as_strings:
 
             t = [(self.corpus.terms[i], v) for i,v in t]
@@ -66,7 +71,7 @@ class LDAGibbsViewer(object):
     
     def print_topic(self, n, depth=20):
 
-        t = self.get_topic(n, as_strings=True)
+        t = self.topic(n, as_strings=True)
 
         if not depth:
 
@@ -88,7 +93,7 @@ class LDAGibbsViewer(object):
 
         for j in xrange(self.model.top_word.shape[0]):
 
-            topics.append(self.get_topic(j, as_strings=True)[:depth])
+            topics.append(self.topic(j, as_strings=True)[:depth])
 
         print '-' * 70
 
@@ -108,6 +113,50 @@ class LDAGibbsViewer(object):
                                row[1][0], row[1][1]))
 
             print '-' * 70
+
+
+
+    def doc_topics(self, doc):
+        """
+        Takes `doc` which is either a document index (integer) or the
+        metadata associated with a document (string) and returns the
+        topic distribution for `doc`.
+        """
+        if isinstance(doc, basestring):
+
+            doc = self.corpus.meta_int('documents', doc)
+
+        t = self.model.theta_d(doc)
+
+        t = enum_sort(t)
+
+        return t
+
+
+    
+    def print_doc_topics(self, doc, depth=10):
+        """
+        """
+        t = self.doc_topics(doc)
+
+        depth = min(depth, len(t))
+
+        h = 'Document: ' + str(doc)
+
+        print
+
+        print '{0:<40}'.format(h)
+
+        print '-' * len(h)
+
+        print '{0:<20}{1:<11}'.format('Topic', 'Probability')
+
+        print '-' * 31
+
+        for t, v in t[:depth]:
+
+            print '  {0:<18}{1:<20.4f}'.format(t, v)
+
 
 
 

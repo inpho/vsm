@@ -290,6 +290,7 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
     metadata : array-like
         A list of strings providing metadata about the documents. If
         provided, must have length equal to the number of documents.
+        Default is `None`.
     Returns
     -------
     c : a Corpus or a MaskedCorpus object
