@@ -8,6 +8,8 @@ and in
 Hanna Wallach's `python-lda` at
 https://github.com/hannawallach/python-lda
 """
+from sys import stdout
+
 import numpy as np
 
 
@@ -144,7 +146,9 @@ class LDAGibbs(object):
 
             if verbose:
 
-                print 'Iteration', t
+                stdout.write('\rIteration %d' % t)
+
+                stdout.flush()
 
             self.iterations += 1
             
@@ -165,6 +169,10 @@ class LDAGibbs(object):
                     self.sum_word_top[z] -= 1
 
                     self.update_z(d, i, w)
+
+        if verbose:
+
+            stdout.write('\n')
 
 
 
@@ -231,8 +239,7 @@ class LDAGibbs(object):
 
         return log_p
 
-
-
+        
 
 def test_LDAGibbs():
 

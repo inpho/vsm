@@ -245,7 +245,7 @@ class SingleArticleTokenizer(object):
 
 
 def toy_corpus(plain_corpus, is_filename=False, compress=True,
-               nltk_stop=False, mask_freq=0, add_stop=None):
+               nltk_stop=False, mask_freq=0, add_stop=None, metadata=None):
     """
     `toy_corpus` is a convenience function for generating Corpus or
     MaskedCorpus objects from a given string or a single file.
@@ -287,10 +287,11 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
         collection frequency. Default is 0.
     add_stop : array-like
         A list of stop words. Default is `None`.
-
+    metadata : array-like
+        A list of strings providing metadata about the documents. If
+        provided, must have length equal to the number of documents.
     Returns
     -------
-
     c : a Corpus or a MaskedCorpus object
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
@@ -312,7 +313,18 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
 
     tok = np.cumsum(np.array([len(d) for d in docs]))
 
-    # tok = [(i, str(d)) for d, i in enumerate(tok)]
+    if metadata:
+
+        if not len(metadata) == len(tok):
+
+            msg = 'Metadata mismatch: metadata length is {0} and number'\
+                   'of documents is {1}'.format(len(metadata), len(tok))
+
+            raise Exception(msg)
+
+        else:
+
+            tok = [(i, m) for i, m in zip(tok, metadata)]
     
     c = MaskedCorpus(corpus, tok_data=[tok], tok_names=['documents'])
 
