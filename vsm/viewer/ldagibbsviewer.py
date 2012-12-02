@@ -27,34 +27,12 @@ class LDAGibbsViewer(object):
 
         self.model = model
 
-        # self._term_norms = None
+        self._term_norms = None
 
-        # self._doc_norms = None
-
-
-
-    # @property
-    # def term_norms(self):
-
-    #     if self._term_norms is None:
-
-    #         self._term_norms = similarity.row_norms(self.term_matrix)            
-
-    #     return self._term_norms
+        self._doc_norms = None
 
 
 
-    # @property
-    # def doc_norms(self):
-
-    #     if self._doc_norms is None:
-
-    #         self._doc_norms = similarity.row_norms(self.doc_matrix)            
-
-    #     return self._doc_norms
-
-
-    
     def topic(self, n, as_strings=False):
         
         t = self.model.phi_t(n)
@@ -223,47 +201,65 @@ class LDAGibbsViewer(object):
 
 
 
+    @property
+    def term_norms(self):
+
+        if self._term_norms is None:
+
+            self._term_norms = similarity.col_norms(self.model.top_word)            
+
+        return self._term_norms
 
 
 
+    @property
+    def doc_norms(self):
 
-    # def similar_terms(self, term, filter_nan=True, rem_masked=True):
+        if self._doc_norms is None:
 
-    #     return vw.similar_terms(self.corpus,
-    #                             self.top_word,
-    #                             term,
-    #                             norms=self.term_norms,
-    #                             filter_nan=filter_nan,
-    #                             rem_masked=rem_masked)
+            self._doc_norms = similarity.row_norms(self.model.doc_top)
 
+        return self._doc_norms
 
 
-    # def mean_similar_terms(self, query, filter_nan=True, rem_masked=True):
+    
+    def similar_terms(self, term, filter_nan=True, rem_masked=True):
 
-    #     return vw.mean_similar_terms(self.corpus,
-    #                                  self.top_word,
-    #                                  query,
-    #                                  norms=self.term_norms,
-    #                                  filter_nan=filter_nan,
-    #                                  rem_masked=rem_masked)
+        return vw.similar_terms(self.corpus,
+                                self.model.top_word.T,
+                                term,
+                                norms=self.term_norms,
+                                filter_nan=filter_nan,
+                                rem_masked=rem_masked)
+
+
+
+    def mean_similar_terms(self, query, filter_nan=True, rem_masked=True):
+
+        return vw.mean_similar_terms(self.corpus,
+                                     self.model.top_word.T,
+                                     query,
+                                     norms=self.term_norms,
+                                     filter_nan=filter_nan,
+                                     rem_masked=rem_masked)
 
 
 
     # def similar_documents(self, document, filter_nan=False):
 
     #     return vw.similar_documents(self.corpus,
-    #                                 self.doc_top,
+    #                                 self.model.doc_top,
     #                                 document,
     #                                 norms=self.doc_norms,
     #                                 filter_nan=filter_nan)
 
 
 
-    # def simmat_terms(self, term_list):
+    def simmat_terms(self, term_list):
 
-    #     return vw.simmat_terms(self.corpus,
-    #                            self.top_word,
-    #                            term_list)
+        return vw.simmat_terms(self.corpus,
+                               self.model.top_word.T,
+                               term_list)
 
 
 
@@ -272,24 +268,3 @@ class LDAGibbsViewer(object):
     #     return vw.simmat_documents(self.corpus,
     #                                self.doc_top,
     #                                document_list)
-
-
-
-# def test_ldagibbsviewer_iep():
-
-#     from vsm import corpus
-
-#     from ldagibbs import LDAGibbs
-
-#     c = corpus.Corpus.load('iep-freq1-nltk-compressed.npz')
-
-#     m = LDAGibbs()
-
-#     m.train(corpus=c, tok_name='articles')
-
-#     v = LDAGibbsViewer(c, m.doc_top, m.top_word, K=50, itr=500)
-
-#     return m, v
-
-
-
