@@ -159,6 +159,73 @@ class LDAGibbsViewer(object):
 
 
 
+    def word_topics(self, word):
+        """
+        Takes `word` which is either an integer or a string and
+        returns a list of triples `(d, i, t)`:
+
+        d, i : int, int
+            Term coordinate of an occurrence of `word`; i.e, the `i`th
+            term in the `d`th document
+        t : int
+            Topic assigned to the `d,i`th term by the model
+        """
+        if isinstance(word, basestring):
+            
+            word = self.corpus.terms_int[word]
+
+        idx = [(self.model.W[d] == word) for d in xrange(len(self.model.W))]
+
+        Z = self.model.Z
+
+        Z_w = [(d, i, t) 
+               for d in xrange(len(Z)) 
+               for i,t in enumerate(Z[d])
+               if idx[d][i]]
+
+        return Z_w
+
+
+
+    def print_word_topics(self, word, metadata=False):
+        """
+        """
+        Z_w = self.word_topics(word)
+
+        dw = 12
+
+        if metadata:
+
+            docs = self.corpus.view_metadata('documents')
+
+            dw = max([len(d) for d in docs]) + 4
+
+        h = 'Term: ' + str(word)
+
+        print
+
+        print h
+
+        print '-' * len(h)
+
+        print '{0:<{dw}}{1:^13}{2:<5}'.format('Document', 'Rel. pos.', 
+                                              'Topic', dw=dw)
+
+        print '-' * (dw + 18)
+
+        for d, i, t in Z_w:
+            
+            if metadata:
+
+                d = docs[d]
+
+            print ' {0:<{dw}}{1:^13}{2:^5}'.format(d, i, t, dw=(dw-1))
+
+
+
+
+
+
 
     # def similar_terms(self, term, filter_nan=True, rem_masked=True):
 
