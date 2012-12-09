@@ -97,7 +97,7 @@ def paragraph_tokenize(text):
 
 
 
-def textfile_tokenize(path):
+def textfile_tokenize(path, sort=False):
     """
     Takes a string and returns a list of strings and a dictionary.
     Intended use: the input string is a directory name containing
@@ -109,6 +109,10 @@ def textfile_tokenize(path):
     out = [],{}
     
     filenames = os.listdir(path)
+
+    if sort:
+
+        filenames.sort()
 
     for filename in filenames:
         
@@ -123,6 +127,34 @@ def textfile_tokenize(path):
     return out
 
 
+
+def mask_corpus(c, nltk_stop=False, mask_freq=0, add_stop=None):
+
+    from vsm.corpus import mask_from_stoplist, mask_freq_t
+
+    stoplist = set()
+
+    if nltk_stop:
+
+        for w in nltk.corpus.stopwords.words('english'):
+
+            stoplist.add(w)
+
+    if add_stop:
+
+        for w in add_stop:
+
+            stoplist.add(w)
+
+    if stoplist:
+
+        mask_from_stoplist(c, list(stoplist))
+
+    if mask_freq > 0:
+
+        mask_freq_t(c, mask_freq)
+
+    return c
 
 #
 # Tokenizing classes
@@ -244,6 +276,115 @@ class SingleArticleTokenizer(object):
 
 
 
+
+def txt_tokenize(plain_dir, file_tok='pages',
+                 paragraphs=True, sentences=True):
+
+    files = []
+    
+    filenames = os.listdir(plain_dir)
+
+    filenames.sort()
+
+    for filename in filenames:
+        
+        filename = os.path.join(path, filename)
+
+        with open(filename, mode='r') as f:
+
+            files.append(f.read())
+
+
+
+    words = []
+
+    file_spans = []
+
+    paragraph_spans = []
+
+    sentence_spans = []
+
+    for f in files:
+
+        file_len = 0
+
+        para_toks = paragraph_tokenize(f)
+
+        for paragraph in para_toks:
+
+            par_len = 0
+
+            sents = sentence_tokenize(paragraph)
+
+            for sent in sents:
+                    
+                words = word_tokenize(sent)
+
+                words.extend(words)
+            
+                sentence_spans.append(len(words))
+
+                par_len += len(words)
+
+            paragraph_spans.append(par_len)
+
+            file_len += par_len
+
+        file_spans.append(file_len)
+
+
+
+    corpus_data = dict()
+
+    corpus_data['words'] = words
+
+    file_tokens = np.cumsum(file_spans)
+
+    file_tokens = zip(file_tokens, filenames)
+
+    corpus_data[file_tok] = file_tokens
+
+    if paragraphs:
+
+        paragraph_tokens = np.cumsum(sentence_spans)
+
+        paragraph_tokens = [(j, str(i)) for i,j in enumerate(paragraph_tokens)]
+
+        corpus_data['paragraphs'] = paragraph_tokens
+
+    if sentences:
+
+        sentence_tokens = np.cumsum(sentence_spans)
+
+        sentence_tokens = [(j, str(i)) for i,j in enumerate(sentence_tokens)]
+
+        corpus_data['sentences'] = sentence_tokens
+
+    return corpus_data
+
+
+
+def txt_corpus(plain_dir, file_tok='articles', paragraphs=True, sentences=True,
+               compress=True, nltk_stop=False, mask_freq=0, add_stop=None):
+
+    from vsm.corpus import MaskedCorpus
+
+    cd = txt_tokenize(plain_dir, file_tok='articles',
+                               paragraphs=True, sentences=True)
+    
+    c = MaskedCorpus(cd['words'], tok_data=cd.values(), tok_names=cd.keys())
+
+    c = mask_corpus(c, nltk_stop=nltk_stop,
+                    mask_freq=mask_freq, add_stop=add_stop)
+
+    if compress:
+
+        c = c.to_corpus(compress=True)
+
+    return c
+
+
+
 def toy_corpus(plain_corpus, is_filename=False, compress=True,
                nltk_stop=False, mask_freq=0, add_stop=None, metadata=None):
     """
@@ -329,34 +470,18 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
     
     c = MaskedCorpus(corpus, tok_data=[tok], tok_names=['documents'])
 
-    stoplist = set()
-
-    if nltk_stop:
-
-        for w in nltk.corpus.stopwords.words('english'):
-
-            stoplist.add(w)
-
-    if add_stop:
-
-        for w in add_stop:
-
-            stoplist.add(w)
-
-    if stoplist:
-
-        mask_from_stoplist(c, list(stoplist))
-
-    if mask_freq > 0:
-
-        mask_freq_t(c, mask_freq)
+    c = mask_corpus(c, nltk_stop=nltk_stop,
+                    mask_freq=mask_freq, add_stop=add_stop)
 
     if compress:
 
         c = c.to_corpus(compress=True)
 
     return c
+    
 
+
+    
 
 
 def test_toy_corpus():
