@@ -153,60 +153,100 @@ def mask_corpus(c, nltk_stop=False, mask_freq=0, add_stop=None):
 
 
 
-def txt_tokenize(pages, metadata, tok_name='pages', 
-                 paragraphs=True, sentences=True):
+def txt_tokenize(chunks, annotations, chunk_name='page', paragraphs=True):
 
-    words = []
+    words, chk_tokens, sent_tokens = [], [], []
 
-    page_tokens = []
+    sent_break, chk_n, sent_n = 0, 0, 0
 
-    paragraph_tokens = []
+    if paragraphs:
 
-    sentence_tokens = []
+        par_tokens = []
 
-    sent_break = 0
-    
-    for p in pages:
+        par_n = 0
+        
+        for chk, annot in zip(chunks, annotations):
 
-        paragraphs = paragraph_tokenize(p)
+            pars = paragraph_tokenize(chk)
 
-        for paragraph in paragraphs:
+            for par in pars:
+                
+                sents = sentence_tokenize(par)
 
-            sents = sentence_tokenize(paragraph)
+                for sent in sents:
+                    
+                    w = word_tokenize(sent)
+                    
+                    words.extend(w)
+                    
+                    sent_break += len(w)
+                    
+                    sent_tokens.append((sent_break, annot, 
+                                        chk_n, par_n, sent_n))
+
+                    sent_n += 1
+
+                par_tokens.append((sent_break, annot, chk_n, par_n))
+
+                par_n += 1
+
+            chk_tokens.append((sent_break, annot, chk_n))
+
+            chk_n += 1
+
+    else:
+
+        for chk, annot in zip(chunks, annotations):
+
+            sents = sentence_tokenize(chk)
 
             for sent in sents:
                     
                 w = word_tokenize(sent)
-
+                    
                 words.extend(w)
-            
+                    
                 sent_break += len(w)
 
-                sentence_tokens.append(sent_break)
+                sent_tokens.append((sent_break, annot, chk_n, sent_n))
 
-            paragraph_tokens.append(sent_break)
+                sent_n += 1
 
-        page_tokens.append(sent_break)
+            chk_tokens.append((sent_break, annot, chk_n))
 
+            chk_n += 1
 
+    idx_dt = ('idx', np.int32)
+
+    annot_dt = (chunk_name + '_annot', np.array(annotations).dtype)
+
+    chk_n_dt = (chunk_name + '_n', np.int32)
+
+    sent_n_dt = ('sent_n', np.int32)
 
     corpus_data = dict()
 
-    page_tokens = zip(page_tokens, metadata)
+    dtype = [idx_dt, annot_dt, chk_n_dt]
 
-    corpus_data[tok_name] = page_tokens
+    corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
 
     if paragraphs:
 
-        paragraph_tokens = [(j, str(i)) for i,j in enumerate(paragraph_tokens)]
+        par_n_dt = ('par_n', np.int32)
 
-        corpus_data['paragraphs'] = paragraph_tokens
+        dtype = [idx_dt, annot_dt, chk_n_dt, par_n_dt]
 
-    if sentences:
+        corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
 
-        sentence_tokens = [(j, str(i)) for i,j in enumerate(sentence_tokens)]
+        dtype = [idx_dt, annot_dt, chk_n_dt, par_n_dt, sent_n_dt]
 
-        corpus_data['sentences'] = sentence_tokens
+        corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+
+    else:
+
+        dtype = [idx_dt, annot_dt, chk_n_dt, sent_n_dt]
+
+        corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
     return words, corpus_data
 
@@ -214,37 +254,105 @@ def txt_tokenize(pages, metadata, tok_name='pages',
 
 def test_txt_tokenize():
 
-    pages = ['foo foo foo\n\nfoo foo',
+    chunks = ['foo foo foo\n\nfoo foo',
              'Foo bar.  Foo bar.', 
              '',
              'foo\n\nfoo']
 
-    metadata = [str(i) for i in xrange(len(pages))]
+    annotations = [str(i) for i in xrange(len(chunks))]
 
-    words, tok_data = txt_tokenize(pages, metadata)
+    words, tok_data = txt_tokenize(chunks, annotations)
 
     assert len(words) == 11
 
-    assert len(tok_data['pages']) == 4
+    assert len(tok_data['page']) == 4
 
-    assert len(tok_data['paragraphs']) == 6
+    assert len(tok_data['paragraph']) == 6
 
-    assert len(tok_data['sentences']) == 7
+    assert len(tok_data['sentence']) == 7
+    
+    assert (tok_data['page']['idx'] == [5, 9, 9, 11]).all()
 
-    assert len(tok_data['sentences'][1]) == 2
+    assert (tok_data['page']['page_annot'] == ['0', '1', '2', '3']).all()
 
-    assert len(tok_data['paragraphs'][0]) == 2
+    assert (tok_data['page']['page_n'] == [0, 1, 2, 3]).all()
+
+    assert (tok_data['paragraph']['idx'] == [3, 5, 9, 9, 10, 11]).all()
+
+    assert (tok_data['paragraph']['page_annot'] == 
+            ['0', '0', '1', '2', '3', '3']).all()
+
+    assert (tok_data['paragraph']['page_n'] == 
+            [0, 0, 1, 2, 3, 3]).all()
+
+    assert (tok_data['paragraph']['par_n'] == 
+            [0, 1, 2, 3, 4, 5]).all()
+
+    assert (tok_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
+
+    assert (tok_data['sentence']['page_annot'] == 
+            ['0', '0', '1', '1', '2', '3', '3']).all()
+
+    assert (tok_data['sentence']['page_n'] == 
+            [0, 0, 1, 1, 2, 3, 3]).all()
+
+    assert (tok_data['sentence']['par_n'] == 
+            [0, 1, 2, 2, 3, 4, 5]).all()
+
+    assert (tok_data['sentence']['sent_n'] == 
+            [0, 1, 2, 3, 4, 5, 6]).all()
 
 
 
-def txt_corpus(plain_dir, tok_name='articles', paragraphs=True, sentences=True,
+
+def txt_corpus(plain_dir, chunk_name='articles', paragraphs=True,
                compress=True, nltk_stop=True, mask_freq=1, add_stop=None):
+    """
+    `txt_corpus` is a convenience function for generating Corpus or
+    MaskedCorpus objects from a directory of plain text files.
+
+    `txt_corpus` will retain file-level tokenization and perform
+    sentence and word tokenizations. Optionally, it will provide
+    paragraph-level tokenizations.
+
+    It will also strip punctuation and arabic numerals outside the
+    range 1-29. All letters are made lowercase.
+
+    Parameters
+    ----------
+    plain_dir : string-like
+        String containing directory containing a plain-text corpus.
+    chunk_name : string-line
+        The name of the tokenization corresponding to individual
+        files. For example, if the files are pages of a book, one
+        might set `chunk_name` to `pages`. Default is `articles`.
+    paragraphs : boolean
+        If `True`, a paragraph-level tokenization is included.
+        Defaults to `True`.
+    compress : boolean
+        If `True` then a Corpus object is returned with all masked
+        terms removed. Otherwise, a MaskedCorpus object is returned.
+        Default is `True`.
+    nltk_stop : boolean
+        If `True` then the corpus object is masked using the NLTK
+        English stop words. Default is `False`.
+    mask_freq : int
+        The upper bound for a term to be masked on the basis of its
+        collection frequency. Default is 0.
+    add_stop : array-like
+        A list of stop words. Default is `None`.
+
+    Returns
+    -------
+    c : a Corpus or a MaskedCorpus object
+        Contains the tokenized corpus built from the input plain-text
+        corpus. Document tokens are named `documents`.
+
+    """
 
     from vsm.corpus import MaskedCorpus
 
-
-
-    files = []
+    chunks = []
     
     filenames = os.listdir(plain_dir)
 
@@ -256,14 +364,14 @@ def txt_corpus(plain_dir, tok_name='articles', paragraphs=True, sentences=True,
 
         with open(filename, mode='r') as f:
 
-            files.append(f.read())
+            chunks.append(f.read())
 
+    words, tok = txt_tokenize(chunks, filenames, chunk_name=chunk_name,
+                              paragraphs=paragraphs)
 
-
-    words, tok = txt_tokenize(files, filenames, tok_name=tok_name,
-                              paragraphs=True, sentences=True)
+    names, data = zip(*tok.items())
     
-    c = MaskedCorpus(words, tok_data=tok.values(), tok_names=tok.keys())
+    c = MaskedCorpus(words, tok_data=data, tok_names=names)
 
     c = mask_corpus(c, nltk_stop=nltk_stop,
                     mask_freq=mask_freq, add_stop=add_stop)
@@ -284,7 +392,7 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
 
     `toy_corpus` will perform both word and document-level
     tokenization. It will also strip punctuation and arabic numerals
-    outside the range 1-29. It will also make all letters lowercase.
+    outside the range 1-29. All letters are made lowercase.
 
     Document tokens are delimited by `\n\n`. E.g.,
 
@@ -357,7 +465,16 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
 
         else:
 
-            tok = [(i, m) for i, m in zip(tok, metadata)]
+            dtype = [('idx', np.array(tok).dtype),
+                     ('meta', np.array(metadata).dtype)]
+
+            tok = np.array(zip(tok, metadata), dtype=dtype)
+
+    else:
+
+        dtype = [('idx', np.array(tok).dtype)]
+
+        tok = np.array([(i,) for i in tok], dtype=dtype)
     
     c = MaskedCorpus(corpus, tok_data=[tok], tok_names=['documents'])
 
@@ -424,114 +541,114 @@ def test_toy_corpus():
 # (These will be superseded by functions such as those above.)
 
 
-class MultipleArticleTokenizer(object):
-    """
-    """
-    def __init__(self, path):
+# class MultipleArticleTokenizer(object):
+#     """
+#     """
+#     def __init__(self, path):
 
-        self.path = path
+#         self.path = path
 
-        self.words = []
+#         self.words = []
 
-        self.tok_names = ['articles', 'paragraphs', 'sentences']
+#         self.tok_names = ['articles', 'paragraphs', 'sentences']
 
-        self.tok_data = None
+#         self.tok_data = None
 
-        self._compute_tokens()
+#         self._compute_tokens()
     
 
 
-    def _compute_tokens(self):
+#     def _compute_tokens(self):
 
-        articles, articles_metadata = textfile_tokenize(self.path)
+#         articles, articles_metadata = textfile_tokenize(self.path)
 
-        article_tokens = []
+#         article_tokens = []
 
-        paragraph_tokens = []
+#         paragraph_tokens = []
 
-        sentence_spans = []
+#         sentence_spans = []
 
-        print 'Computing article and paragraph tokens'
+#         print 'Computing article and paragraph tokens'
 
-        for i,article in enumerate(articles):
+#         for i,article in enumerate(articles):
 
-            print 'Processing article in', articles_metadata[i]
+#             print 'Processing article in', articles_metadata[i]
 
-            paragraphs = paragraph_tokenize(article)
+#             paragraphs = paragraph_tokenize(article)
             
-            for paragraph in paragraphs:
+#             for paragraph in paragraphs:
                 
-                sentences = sentence_tokenize(paragraph)
+#                 sentences = sentence_tokenize(paragraph)
 
-                for sentence in sentences:
+#                 for sentence in sentences:
                     
-                    words = word_tokenize(sentence)
+#                     words = word_tokenize(sentence)
 
-                    self.words.extend(words)
+#                     self.words.extend(words)
                     
-                    sentence_spans.append(len(words))
+#                     sentence_spans.append(len(words))
 
-                paragraph_tokens.append(sum(sentence_spans))
+#                 paragraph_tokens.append(sum(sentence_spans))
                     
-            article_tokens.append(sum(sentence_spans))
+#             article_tokens.append(sum(sentence_spans))
 
-        print 'Computing sentence tokens'
+#         print 'Computing sentence tokens'
 
-        sentence_tokens = np.cumsum(sentence_spans)
+#         sentence_tokens = np.cumsum(sentence_spans)
 
-        article_tokens = zip(article_tokens, articles_metadata)
+#         article_tokens = zip(article_tokens, articles_metadata)
 
-        self.tok_data = [article_tokens, paragraph_tokens, sentence_tokens]
+#         self.tok_data = [article_tokens, paragraph_tokens, sentence_tokens]
 
 
 
-class SingleArticleTokenizer(object):
-    """
-    """
-    def __init__(self, filename):
+# class SingleArticleTokenizer(object):
+#     """
+#     """
+#     def __init__(self, filename):
 
-        self.filename = filename
+#         self.filename = filename
 
-        self.words = []
+#         self.words = []
 
-        self.tok_names = ['paragraphs', 'sentences']
+#         self.tok_names = ['paragraphs', 'sentences']
 
-        self.tok_data = None
+#         self.tok_data = None
 
-        self._compute_tokens()
+#         self._compute_tokens()
 
         
 
-    def _compute_tokens(self):
+#     def _compute_tokens(self):
 
-        with open(self.filename, mode='r') as f:
+#         with open(self.filename, mode='r') as f:
 
-            article = f.read()
+#             article = f.read()
 
-        paragraph_tokens = []
+#         paragraph_tokens = []
 
-        sentence_spans = []
+#         sentence_spans = []
 
-        print 'Computing paragraph tokens'
+#         print 'Computing paragraph tokens'
 
-        paragraphs = paragraph_tokenize(article)
+#         paragraphs = paragraph_tokenize(article)
             
-        for paragraph in paragraphs:
+#         for paragraph in paragraphs:
 
-            sentences = sentence_tokenize(paragraph)
+#             sentences = sentence_tokenize(paragraph)
 
-            for sentence in sentences:
+#             for sentence in sentences:
 
-                words = word_tokenize(sentence)
+#                 words = word_tokenize(sentence)
 
-                self.words.extend(words)
+#                 self.words.extend(words)
                     
-                sentence_spans.append(len(words))
+#                 sentence_spans.append(len(words))
 
-            paragraph_tokens.append(sum(sentence_spans))
+#             paragraph_tokens.append(sum(sentence_spans))
                     
-        print 'Computing sentence tokens'
+#         print 'Computing sentence tokens'
 
-        sentence_tokens = np.cumsum(sentence_spans)
+#         sentence_tokens = np.cumsum(sentence_spans)
 
-        self.tok_data = [paragraph_tokens, sentence_tokens]
+#         self.tok_data = [paragraph_tokens, sentence_tokens]
