@@ -204,7 +204,7 @@ class BaseCorpus(object):
 
         ind_set = np.ones(tok.size, dtype=bool)
 
-        for k,v in query:
+        for k,v in query.iteritems():
 
             ind_set = np.logical_and(ind_set, (tok[k] == v))
 
