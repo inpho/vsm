@@ -49,7 +49,7 @@ class LDAGibbs(object):
     log_prob : boolean
         If `True`, compute the log probabilities of the corpus given
         the values of the latent variables at each iteration and
-        records them in `log_probs`. Default is `True`.
+        records them in `log_prob`. Default is `True`.
 
     Attributes
     ----------
