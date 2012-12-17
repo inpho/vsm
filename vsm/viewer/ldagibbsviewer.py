@@ -100,9 +100,13 @@ class LDAGibbsViewer(object):
         metadata associated with a document (string) and returns the
         topic distribution for `doc`.
         """
-        if isinstance(doc, basestring):
+        try:
 
             doc = self.corpus.meta_int('documents', doc)
+
+        except (TypeError, AttributeError):
+
+            pass
 
         t = self.model.theta_d(doc)
 
@@ -112,12 +116,16 @@ class LDAGibbsViewer(object):
 
 
     
-    def print_doc_topics(self, doc, depth=10):
+    def print_doc_topics(self, doc, depth=10, disp_field=None):
         """
         """
         t = self.doc_topics(doc)
 
         depth = min(depth, len(t))
+
+        if disp_field:
+
+            doc = doc[disp_field]
 
         h = 'Document: ' + str(doc)
 

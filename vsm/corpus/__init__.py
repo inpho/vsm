@@ -221,7 +221,7 @@ class BaseCorpus(object):
 
             raise Exception(msg)
 
-        return tok[ind_set][0]
+        return ind_set.nonzero()[0][0]
 
 
 
