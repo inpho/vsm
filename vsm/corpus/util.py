@@ -321,7 +321,7 @@ def test_dir_tokenize():
 
 
 
-def dir_corpus(plain_dir, chunk_name='articles', paragraphs=True,
+def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
                compress=True, nltk_stop=True, mask_freq=1, add_stop=None):
     """
     `dir_corpus` is a convenience function for generating Corpus or
