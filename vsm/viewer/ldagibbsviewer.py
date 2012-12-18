@@ -104,8 +104,9 @@ class LDAGibbsViewer(object):
 
         depth = min(depth, len(t))
 
-        label = self.corpus.get_metadatum(self.model.tok_name,
-                                          doc_query, 'short_label')
+        tn = self.model.tok_name
+
+        label = self.corpus.get_metadatum(tn, doc_query, tn + '_label')
 
         h = 'Document: ' + str(label)
 

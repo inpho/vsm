@@ -153,7 +153,19 @@ def mask_corpus(c, nltk_stop=False, mask_freq=0, add_stop=None):
 
 
 
-def txt_tokenize(chunks, annotations, chunk_name='page', paragraphs=True):
+def file_tokenize():
+
+    pass
+
+
+
+def file_corpus():
+
+    pass
+
+
+
+def dir_tokenize(chunks, labels, chunk_name='page', paragraphs=True):
 
     words, chk_tokens, sent_tokens = [], [], []
 
@@ -165,7 +177,9 @@ def txt_tokenize(chunks, annotations, chunk_name='page', paragraphs=True):
 
         par_n = 0
         
-        for chk, annot in zip(chunks, annotations):
+        for chk, label in zip(chunks, labels):
+
+            print 'Tokenizing', label
 
             pars = paragraph_tokenize(chk)
 
@@ -181,22 +195,24 @@ def txt_tokenize(chunks, annotations, chunk_name='page', paragraphs=True):
                     
                     sent_break += len(w)
                     
-                    sent_tokens.append((sent_break, annot, 
+                    sent_tokens.append((sent_break, label, 
                                         chk_n, par_n, sent_n))
 
                     sent_n += 1
 
-                par_tokens.append((sent_break, annot, chk_n, par_n))
+                par_tokens.append((sent_break, label, chk_n, par_n))
 
                 par_n += 1
 
-            chk_tokens.append((sent_break, annot, chk_n))
+            chk_tokens.append((sent_break, label, chk_n))
 
             chk_n += 1
 
     else:
 
-        for chk, annot in zip(chunks, annotations):
+        for chk, label in zip(chunks, labels):
+
+            print 'Tokenizing', label
 
             sents = sentence_tokenize(chk)
 
@@ -208,17 +224,17 @@ def txt_tokenize(chunks, annotations, chunk_name='page', paragraphs=True):
                     
                 sent_break += len(w)
 
-                sent_tokens.append((sent_break, annot, chk_n, sent_n))
+                sent_tokens.append((sent_break, label, chk_n, sent_n))
 
                 sent_n += 1
 
-            chk_tokens.append((sent_break, annot, chk_n))
+            chk_tokens.append((sent_break, label, chk_n))
 
             chk_n += 1
 
     idx_dt = ('idx', np.int32)
 
-    annot_dt = (chunk_name + '_annot', np.array(annotations).dtype)
+    label_dt = (chunk_name + '_label', np.array(labels).dtype)
 
     chk_n_dt = (chunk_name + '_n', np.int32)
 
@@ -226,7 +242,7 @@ def txt_tokenize(chunks, annotations, chunk_name='page', paragraphs=True):
 
     corpus_data = dict()
 
-    dtype = [idx_dt, annot_dt, chk_n_dt]
+    dtype = [idx_dt, label_dt, chk_n_dt]
 
     corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
 
@@ -234,17 +250,17 @@ def txt_tokenize(chunks, annotations, chunk_name='page', paragraphs=True):
 
         par_n_dt = ('par_n', np.int32)
 
-        dtype = [idx_dt, annot_dt, chk_n_dt, par_n_dt]
+        dtype = [idx_dt, label_dt, chk_n_dt, par_n_dt]
 
         corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
 
-        dtype = [idx_dt, annot_dt, chk_n_dt, par_n_dt, sent_n_dt]
+        dtype = [idx_dt, label_dt, chk_n_dt, par_n_dt, sent_n_dt]
 
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
     else:
 
-        dtype = [idx_dt, annot_dt, chk_n_dt, sent_n_dt]
+        dtype = [idx_dt, label_dt, chk_n_dt, sent_n_dt]
 
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
@@ -252,16 +268,16 @@ def txt_tokenize(chunks, annotations, chunk_name='page', paragraphs=True):
 
 
 
-def test_txt_tokenize():
+def test_dir_tokenize():
 
     chunks = ['foo foo foo\n\nfoo foo',
              'Foo bar.  Foo bar.', 
              '',
              'foo\n\nfoo']
 
-    annotations = [str(i) for i in xrange(len(chunks))]
+    labels = [str(i) for i in xrange(len(chunks))]
 
-    words, tok_data = txt_tokenize(chunks, annotations)
+    words, tok_data = dir_tokenize(chunks, labels)
 
     assert len(words) == 11
 
@@ -273,13 +289,13 @@ def test_txt_tokenize():
     
     assert (tok_data['page']['idx'] == [5, 9, 9, 11]).all()
 
-    assert (tok_data['page']['page_annot'] == ['0', '1', '2', '3']).all()
+    assert (tok_data['page']['page_label'] == ['0', '1', '2', '3']).all()
 
     assert (tok_data['page']['page_n'] == [0, 1, 2, 3]).all()
 
     assert (tok_data['paragraph']['idx'] == [3, 5, 9, 9, 10, 11]).all()
 
-    assert (tok_data['paragraph']['page_annot'] == 
+    assert (tok_data['paragraph']['page_label'] == 
             ['0', '0', '1', '2', '3', '3']).all()
 
     assert (tok_data['paragraph']['page_n'] == 
@@ -290,7 +306,7 @@ def test_txt_tokenize():
 
     assert (tok_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
 
-    assert (tok_data['sentence']['page_annot'] == 
+    assert (tok_data['sentence']['page_label'] == 
             ['0', '0', '1', '1', '2', '3', '3']).all()
 
     assert (tok_data['sentence']['page_n'] == 
@@ -305,13 +321,13 @@ def test_txt_tokenize():
 
 
 
-def txt_corpus(plain_dir, chunk_name='articles', paragraphs=True,
+def dir_corpus(plain_dir, chunk_name='articles', paragraphs=True,
                compress=True, nltk_stop=True, mask_freq=1, add_stop=None):
     """
-    `txt_corpus` is a convenience function for generating Corpus or
+    `dir_corpus` is a convenience function for generating Corpus or
     MaskedCorpus objects from a directory of plain text files.
 
-    `txt_corpus` will retain file-level tokenization and perform
+    `dir_corpus` will retain file-level tokenization and perform
     sentence and word tokenizations. Optionally, it will provide
     paragraph-level tokenizations.
 
@@ -366,7 +382,7 @@ def txt_corpus(plain_dir, chunk_name='articles', paragraphs=True,
 
             chunks.append(f.read())
 
-    words, tok = txt_tokenize(chunks, filenames, chunk_name=chunk_name,
+    words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
                               paragraphs=paragraphs)
 
     names, data = zip(*tok.items())
@@ -466,7 +482,7 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
         else:
 
             dtype = [('idx', np.array(tok).dtype),
-                     ('short_label', np.array(metadata).dtype)]
+                     ('document_label', np.array(metadata).dtype)]
 
             tok = np.array(zip(tok, metadata), dtype=dtype)
 
@@ -476,7 +492,7 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
 
         tok = np.array([(i,) for i in tok], dtype=dtype)
     
-    c = MaskedCorpus(corpus, tok_data=[tok], tok_names=['documents'])
+    c = MaskedCorpus(corpus, tok_data=[tok], tok_names=['document'])
 
     c = mask_corpus(c, nltk_stop=nltk_stop,
                     mask_freq=mask_freq, add_stop=add_stop)

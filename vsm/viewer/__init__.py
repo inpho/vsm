@@ -54,7 +54,7 @@ def simmat_documents(corpus, matrix, tok_name, doc_queries):
 
             doc_queries[i] = corpus.meta_int(tok_name, doc_query)
 
-    doc_labels = corpus.view_metadata(tok_name)['short_label'][doc_queries]
+    doc_labels = corpus.view_metadata(tok_name)[tok_name + '_label'][doc_queries]
         
     simmat = similarity.simmat_columns(matrix, doc_queries)
 
@@ -98,7 +98,7 @@ def similar_documents(corpus, matrix, tok_name, doc_query,
     sim_vals = similarity.similar_columns(doc_query, matrix, norms=norms,
                                           filter_nan=filter_nan)
 
-    docs = corpus.view_metadata(tok_name)['short_label']
+    docs = corpus.view_metadata(tok_name)[tok_name + '_label']
 
     sim_vals = np.array([(docs[i], v) for i,v in sim_vals],
                         dtype=[('doc', docs.dtype),
