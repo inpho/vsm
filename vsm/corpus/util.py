@@ -153,19 +153,86 @@ def mask_corpus(c, nltk_stop=False, mask_freq=0, add_stop=None):
 
 
 
-def file_tokenize():
+def file_tokenize(text):
 
-    pass
+    words, par_tokens, sent_tokens = [], [], []
+
+    sent_break, par_n, sent_n = 0, 0, 0
+
+    pars = paragraph_tokenize(text)
+
+    for par in pars:
+                
+        sents = sentence_tokenize(par)
+
+        for sent in sents:
+                    
+            w = word_tokenize(sent)
+                    
+            words.extend(w)
+                    
+            sent_break += len(w)
+                    
+            sent_tokens.append((sent_break, par_n, sent_n))
+
+            sent_n += 1
+
+        par_tokens.append((sent_break, par_n))
+            
+        par_n += 1
+
+    idx_dt = ('idx', np.int32)
+
+    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
+
+    par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
+
+    corpus_data = dict()
+
+    dtype = [idx_dt, par_label_dt]
+
+    corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
+
+    dtype = [idx_dt, par_label_dt, sent_label_dt]
+
+    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+
+    return words, corpus_data
 
 
 
-def file_corpus():
 
-    pass
+def file_corpus(filename, compress=True,
+                nltk_stop=True, mask_freq=1, add_stop=None):
+    """
+    For use with a plain text corpus contained in a single string.
+    """
+
+    from vsm.corpus import MaskedCorpus
+
+    with open(filename, mode='r') as f:
+
+        text = f.read()
+
+    words, tok = dir_tokenize(text)
+
+    names, data = zip(*tok.items())
+    
+    c = MaskedCorpus(words, tok_data=data, tok_names=names)
+
+    c = mask_corpus(c, nltk_stop=nltk_stop,
+                    mask_freq=mask_freq, add_stop=add_stop)
+
+    if compress:
+
+        c = c.to_corpus(compress=True)
+
+    return c
 
 
 
-def dir_tokenize(chunks, labels, chunk_name='page', paragraphs=True):
+
+def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
     words, chk_tokens, sent_tokens = [], [], []
 
@@ -195,16 +262,15 @@ def dir_tokenize(chunks, labels, chunk_name='page', paragraphs=True):
                     
                     sent_break += len(w)
                     
-                    sent_tokens.append((sent_break, label, 
-                                        chk_n, par_n, sent_n))
+                    sent_tokens.append((sent_break, label, par_n, sent_n))
 
                     sent_n += 1
 
-                par_tokens.append((sent_break, label, chk_n, par_n))
+                par_tokens.append((sent_break, label, par_n))
 
                 par_n += 1
 
-            chk_tokens.append((sent_break, label, chk_n))
+            chk_tokens.append((sent_break, label))
 
             chk_n += 1
 
@@ -224,11 +290,11 @@ def dir_tokenize(chunks, labels, chunk_name='page', paragraphs=True):
                     
                 sent_break += len(w)
 
-                sent_tokens.append((sent_break, label, chk_n, sent_n))
+                sent_tokens.append((sent_break, label, sent_n))
 
                 sent_n += 1
 
-            chk_tokens.append((sent_break, label, chk_n))
+            chk_tokens.append((sent_break, label))
 
             chk_n += 1
 
@@ -236,31 +302,29 @@ def dir_tokenize(chunks, labels, chunk_name='page', paragraphs=True):
 
     label_dt = (chunk_name + '_label', np.array(labels).dtype)
 
-    chk_n_dt = (chunk_name + '_n', np.int32)
-
-    sent_n_dt = ('sent_n', np.int32)
+    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
 
     corpus_data = dict()
 
-    dtype = [idx_dt, label_dt, chk_n_dt]
+    dtype = [idx_dt, label_dt]
 
     corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
 
     if paragraphs:
 
-        par_n_dt = ('par_n', np.int32)
+        par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
 
-        dtype = [idx_dt, label_dt, chk_n_dt, par_n_dt]
+        dtype = [idx_dt, label_dt, par_label_dt]
 
         corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
 
-        dtype = [idx_dt, label_dt, chk_n_dt, par_n_dt, sent_n_dt]
+        dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
 
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
     else:
 
-        dtype = [idx_dt, label_dt, chk_n_dt, sent_n_dt]
+        dtype = [idx_dt, label_dt, sent_label_dt]
 
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
@@ -281,42 +345,34 @@ def test_dir_tokenize():
 
     assert len(words) == 11
 
-    assert len(tok_data['page']) == 4
+    assert len(tok_data['article']) == 4
 
     assert len(tok_data['paragraph']) == 6
 
     assert len(tok_data['sentence']) == 7
     
-    assert (tok_data['page']['idx'] == [5, 9, 9, 11]).all()
+    assert (tok_data['article']['idx'] == [5, 9, 9, 11]).all()
 
-    assert (tok_data['page']['page_label'] == ['0', '1', '2', '3']).all()
-
-    assert (tok_data['page']['page_n'] == [0, 1, 2, 3]).all()
+    assert (tok_data['article']['article_label'] == ['0', '1', '2', '3']).all()
 
     assert (tok_data['paragraph']['idx'] == [3, 5, 9, 9, 10, 11]).all()
 
-    assert (tok_data['paragraph']['page_label'] == 
+    assert (tok_data['paragraph']['article_label'] == 
             ['0', '0', '1', '2', '3', '3']).all()
 
-    assert (tok_data['paragraph']['page_n'] == 
-            [0, 0, 1, 2, 3, 3]).all()
-
-    assert (tok_data['paragraph']['par_n'] == 
-            [0, 1, 2, 3, 4, 5]).all()
+    assert (tok_data['paragraph']['par_label'] == 
+            ['0', '1', '2', '3', '4', '5']).all()
 
     assert (tok_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
 
-    assert (tok_data['sentence']['page_label'] == 
+    assert (tok_data['sentence']['article_label'] == 
             ['0', '0', '1', '1', '2', '3', '3']).all()
 
-    assert (tok_data['sentence']['page_n'] == 
-            [0, 0, 1, 1, 2, 3, 3]).all()
+    assert (tok_data['sentence']['par_label'] == 
+            ['0', '1', '2', '2', '3', '4', '5']).all()
 
-    assert (tok_data['sentence']['par_n'] == 
-            [0, 1, 2, 2, 3, 4, 5]).all()
-
-    assert (tok_data['sentence']['sent_n'] == 
-            [0, 1, 2, 3, 4, 5, 6]).all()
+    assert (tok_data['sentence']['sent_label'] == 
+            ['0', '1', '2', '3', '4', '5', '6']).all()
 
 
 
