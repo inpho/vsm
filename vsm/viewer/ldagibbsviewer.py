@@ -1,21 +1,9 @@
 import numpy as np
 
+from vsm import enum_sort
 from vsm import viewer as vw
 from vsm.viewer import similarity
 
-
-
-def enum_sort(a):
-
-    idx = np.arange(a.size)
-
-    a = np.core.records.fromarrays([idx, a], names='i,v')
-
-    a.sort(order='v')
-    
-    a = a[::-1]
-
-    return a
 
 
 class LDAGibbsViewer(object):
@@ -94,21 +82,14 @@ class LDAGibbsViewer(object):
 
 
 
-    def doc_topics(self, doc):
+    def doc_topics(self, doc_query):
         """
-        Takes `doc` which is either a document index (integer) or the
-        metadata associated with a document (string) and returns the
-        topic distribution for `doc`.
         """
-        try:
+        if isinstance(doc_query, dict):
+        
+            doc_query = self.corpus.meta_int(self.model.tok_name, doc_query)
 
-            doc = self.corpus.meta_int('documents', doc)
-
-        except (TypeError, AttributeError):
-
-            pass
-
-        t = self.model.theta_d(doc)
+        t = self.model.theta_d(doc_query)
 
         t = enum_sort(t)
 
@@ -116,18 +97,17 @@ class LDAGibbsViewer(object):
 
 
     
-    def print_doc_topics(self, doc, depth=10, disp_field=None):
+    def print_doc_topics(self, doc_query, depth=10):
         """
         """
-        t = self.doc_topics(doc)
+        t = self.doc_topics(doc_query)
 
         depth = min(depth, len(t))
 
-        if disp_field:
+        label = self.corpus.get_metadatum(self.model.tok_name,
+                                          doc_query, 'short_label')
 
-            doc = doc[disp_field]
-
-        h = 'Document: ' + str(doc)
+        h = 'Document: ' + str(label)
 
         print
 
@@ -253,13 +233,14 @@ class LDAGibbsViewer(object):
 
 
 
-    # def similar_documents(self, document, filter_nan=False):
+    def similar_documents(self, doc_query, filter_nan=True):
 
-    #     return vw.similar_documents(self.corpus,
-    #                                 self.model.doc_top,
-    #                                 document,
-    #                                 norms=self.doc_norms,
-    #                                 filter_nan=filter_nan)
+        return vw.similar_documents(self.corpus,
+                                    self.model.doc_top.T,
+                                    self.model.tok_name,
+                                    doc_query,
+                                    norms=self.doc_norms,
+                                    filter_nan=filter_nan)
 
 
 
@@ -271,8 +252,9 @@ class LDAGibbsViewer(object):
 
 
 
-    # def simmat_documents(self, document_list):
+    def simmat_documents(self, doc_queries):
 
-    #     return vw.simmat_documents(self.corpus,
-    #                                self.doc_top,
-    #                                document_list)
+        return vw.simmat_documents(self.corpus,
+                                   self.model.doc_top.T,
+                                   self.model.tok_name,
+                                   doc_queries)

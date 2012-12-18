@@ -466,7 +466,7 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
         else:
 
             dtype = [('idx', np.array(tok).dtype),
-                     ('meta', np.array(metadata).dtype)]
+                     ('short_label', np.array(metadata).dtype)]
 
             tok = np.array(zip(tok, metadata), dtype=dtype)
 

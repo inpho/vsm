@@ -2,6 +2,28 @@ import numpy as np
 from scipy import sparse
 
 
+
+def enum_array(a):
+
+    a = np.array(list(enumerate(a)),
+                 dtype=[('i', np.int32),('v', a.dtype)])
+
+    return a
+
+
+
+def enum_sort(a):
+
+    a = enum_array(a)
+
+    a.sort(order='v')
+    
+    a = a[::-1]
+
+    return a
+
+
+
 def row_norms(matrix):
 
     norms = np.empty(matrix.shape[0])

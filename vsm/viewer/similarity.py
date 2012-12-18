@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import sparse
 
-from vsm import row_norms, col_norms
+from vsm import row_norms, col_norms, enum_array, enum_sort
 
 def_submat_size = 1e5
 
@@ -44,27 +44,20 @@ def similar_rows(row_index,
 
 
 
-    out = list(enumerate(out.tolist()))
-    
-    dtype = [('index', np.int), ('value', np.float)]
-
-    out = np.array(out, dtype=dtype)
-
     if sort:
         
-        out = sort_sim(out)
+        out = enum_sort(out)
 
-    #TODO: rewrite _filter_nan to preserve recarray and then move it
-    #before the sort
+    else:
 
+        out = enum_array(out)
+    
     if filter_nan:
 
-        out = _filter_nan(out)
-
-
-
+        out = out[np.isfinite(out['v'])]
 
     return out
+
 
 
 def sparse_mvdot(m, v, submat_size=def_submat_size):
@@ -126,29 +119,16 @@ def sparse_mvdot(m, v, submat_size=def_submat_size):
 
 
 
-def _filter_nan(results):
-
-    return [(i,v) for i,v in results if np.isfinite(v)]
-
-
-
-def sort_sim(results):
+def similar_columns(col_index,
+                    matrix,
+                    filter_nan=False,
+                    sort=True,
+                    norms=None,
+                    submat_size=def_submat_size):
     """
     """
-    # NB: numpy >= 1.4 sorts NaN to the end
-    
-    results.sort(order='value')
-
-    results = results[::-1]
-
-    return results
-
-
-
-def similar_columns(column, matrix, filter_nan=False):
-    """
-    """
-    return similar_rows(column, matrix.T, filter_nan=filter_nan)
+    return similar_rows(col_index, matrix.T, filter_nan=filter_nan,
+                        sort=sort, norms=norms, submat_size=submat_size)
 
 
 

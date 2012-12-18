@@ -225,6 +225,17 @@ class BaseCorpus(object):
 
 
 
+    def get_metadatum(self, tok_name, query, field):
+        """
+        """
+        i = self.meta_int(tok_name, query)
+
+        datum = self.view_metadata(tok_name)[i][field]
+
+        return datum
+
+
+
     def view_tokens(self, name):
         """
         Displays a tokenization of the corpus.
@@ -253,8 +264,8 @@ class BaseCorpus(object):
         # np.split leaves a trailing empty array if the final index is
         # the length of the corpus. Remove it to maintain
         # correspondence with metadata.
-        
-        if indices[-1] == self.corpus.shape[0]:
+
+        if indices.any() and indices[-1] == self.corpus.shape[0]:
 
             del tokens[-1]
             
@@ -901,6 +912,14 @@ class MaskedCorpus(Corpus):
 
 
 
+def empty_corpus(tok_name):
+
+    return Corpus([],
+                  tok_data=[np.array([], dtype=[('idx', np.int)])],
+                  tok_names=[tok_name])
+
+
+
 def random_corpus(corpus_len,
                   n_terms,
                   min_token_len,
@@ -929,7 +948,7 @@ def random_corpus(corpus_len,
         metadata_ = ['token_' + str(i) for i in xrange(len(indices))]
 
         dtype=[('idx', np.array(indices).dtype), 
-               ('uid', np.array(metadata_).dtype)]
+               ('short_label', np.array(metadata_).dtype)]
         
         rand_tok = np.array(zip(indices, metadata_), dtype=dtype)
 

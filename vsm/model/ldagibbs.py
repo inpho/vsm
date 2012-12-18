@@ -12,6 +12,8 @@ from sys import stdout
 
 import numpy as np
 
+from vsm import corpus
+
 
 
 def smpl_cat(d):
@@ -103,6 +105,8 @@ class LDAGibbs(object):
                  log_prob=True):
 
         #TODO: Support MaskedCorpus
+
+        self.tok_name = tok_name
 
         self.K = K
 
@@ -237,16 +241,177 @@ class LDAGibbs(object):
 
         return log_p
 
+
+
+    @staticmethod
+    def load(filename):
+
+        print 'Loading LDA-Gibbs data from', filename
+
+        arrays_in = np.load(filename)
+
+        tok_name = arrays_in['tok_name'][()]
+
+        K = arrays_in['K'][()]
+
+        alpha = arrays_in['alpha'][()]
+
+        beta = arrays_in['beta'][()]
+
+        log_prob_init = arrays_in['log_prob_init'][()]
+
+        m = LDAGibbs(corpus.empty_corpus(tok_name),
+                     tok_name, K=K, alpha=alpha,
+                     beta=beta, log_prob=log_prob_init)
+
+        m.W = np.split(arrays_in['W_corpus'], arrays_in['W_indices'])[:-1]
+
+        m.V = arrays_in['V'][()]
+
+        m.iterations = arrays_in['iterations'][()]
+
+        if log_prob_init:
+
+            m.log_prob = arrays_in['log_prob'].tolist()
+
+        m.Z = np.split(arrays_in['Z_corpus'], arrays_in['Z_indices'])[:-1]
+
+        m.doc_top = arrays_in['doc_top']
+
+        m.top_word = arrays_in['top_word']
+
+        m.sum_word_top = arrays_in['sum_word_top']
+
+        return m
+
+
+    
+    def save(self, filename):
+
+        arrays_out = dict()
+
+        arrays_out['W_corpus'] = np.hstack(self.W)
+
+        arrays_out['W_indices'] = np.cumsum([a.size for a in self.W])
+
+        arrays_out['V'] = self.V
+
+        arrays_out['iterations'] = self.iterations
+
+        if hasattr(self, 'log_prob'):
+
+            log_prob_init = True
+
+            lp = np.array(self.log_prob,
+                          dtype=[('i', np.int), ('v', np.float)])
+
+            arrays_out['log_prob'] = lp
+
+        else:
+
+            log_prob_init = False
+            
+        arrays_out['Z_corpus'] = np.hstack(self.Z)
+
+        arrays_out['Z_indices'] = np.cumsum([a.size for a in self.Z])
+
+        arrays_out['doc_top'] = self.doc_top
+
+        arrays_out['top_word'] = self.top_word
+
+        arrays_out['sum_word_top'] = self.sum_word_top
+
+        arrays_out['tok_name'] = self.tok_name
+
+        arrays_out['K'] = self.K
+
+        arrays_out['alpha'] = self.alpha
+
+        arrays_out['beta'] = self.beta
+
+        arrays_out['log_prob_init'] = log_prob_init
+
+        print 'Saving LDA-Gibbs model to', filename
+        
+        np.savez(filename, **arrays_out)
+
         
 
 def test_LDAGibbs():
 
-    m = LDAGibbs()
+    from vsm.corpus import random_corpus
+
+    c = random_corpus(1000, 50, 6, 100)
+
+    m = LDAGibbs(c, 'random', K=10)
+
+    m.train(itr=20)
+
+    return m
+
+
+
+def test_LDAGibbs_IO():
 
     from vsm.corpus import random_corpus
 
-    c = random_corpus(10000, 50, 6, 100)
-    
-    m.train(c, 'random', K=10, itr=100)
+    from tempfile import NamedTemporaryFile
 
-    return m
+    import os
+    
+    c = random_corpus(1000, 50, 6, 100)
+    
+    tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+
+    try:
+
+        m0 = LDAGibbs(c, 'random', K=10)
+    
+        m0.train(itr=20)
+
+        m0.save(tmp.name)
+
+        m1 = LDAGibbs.load(tmp.name)
+
+        assert m0.tok_name == m1.tok_name
+
+        assert m0.K == m1.K
+
+        assert m0.alpha == m1.alpha
+
+        assert m0.beta == m1.beta
+
+        assert m0.log_prob == m1.log_prob
+
+        for i in xrange(max(len(m0.W), len(m1.W))):
+
+            assert m0.W[i].all() == m1.W[i].all()
+
+        assert m0.V == m1.V
+
+        assert m0.iterations == m1.iterations
+
+        for i in xrange(max(len(m0.Z), len(m1.Z))):
+
+            assert m0.Z[i].all() == m1.Z[i].all()
+
+        assert m0.doc_top.all() == m1.doc_top.all()
+
+        assert m0.top_word.all() == m1.top_word.all()
+
+        assert m0.sum_word_top.all() == m1.sum_word_top.all()
+
+        m0 = LDAGibbs(c, 'random', K=10, log_prob=False)
+
+        m0.train(itr=20)
+
+        m0.save(tmp.name)
+
+        m1 = LDAGibbs.load(tmp.name)
+
+        assert not hasattr(m1, 'log_prob')
+    
+    finally:
+
+        os.remove(tmp.name)
+    

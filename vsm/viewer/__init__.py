@@ -1,5 +1,6 @@
 import numpy as np
 
+from vsm import enum_sort
 from vsm import corpus as cps
 from vsm.corpus import util
 from vsm import model
@@ -31,8 +32,6 @@ class Viewer(object):
         self.corpus = cps.Corpus.load(filename)
 
 
-    
-
 
 def simmat_terms(corpus, matrix, term_list):
     """
@@ -47,18 +46,19 @@ def simmat_terms(corpus, matrix, term_list):
 
 
 
+def simmat_documents(corpus, matrix, tok_name, doc_queries):
 
-def simmat_documents(corpus, matrix, tok_name, document_list):
+    for i,doc_query in enumerate(doc_queries):
 
-    doc_names = corpus.view_metadata[tok_name]
+        if isinstance(doc_query, dict):
 
-    doc_names_int = zip(doc_names, xrange(len(doc_names)))
+            doc_queries[i] = corpus.meta_int(tok_name, doc_query)
 
-    labels = [doc_names_int[doc] for doc in document_list]
-    
-    simmat = similarity.simmat_columns(labels, matrix)
+    doc_labels = corpus.view_metadata(tok_name)['short_label'][doc_queries]
+        
+    simmat = similarity.simmat_columns(matrix, doc_queries)
 
-    simmat.labels = document_list
+    simmat.labels = doc_labels
 
     return simmat
 
@@ -73,37 +73,38 @@ def similar_terms(corpus, matrix, term,
     sim_vals = similarity.similar_rows(i, matrix,
                                        norms=norms,
                                        filter_nan=filter_nan)
-    
-    out = []
 
-    for t,v in sim_vals:
+    sim_vals = np.array([(corpus.terms[i], v) for i,v in sim_vals],
+                        dtype=[('term', corpus.terms.dtype),
+                               ('value', sim_vals.dtype['v'])])
 
-        term = corpus.terms[t]
+    if rem_masked:
 
-        if not (rem_masked and term is np.ma.masked):
+        f = np.vectorize(lambda x: x is not np.ma.masked)
 
-            out.append((term, v))
+        sim_vals = sim_vals[f(sim_vals['term'])]
 
-    return out
+    return sim_vals
 
 
 
-def similar_documents(corpus, matrix, document,
+def similar_documents(corpus, matrix, tok_name, doc_query,
                       norms=None, filter_nan=True):
 
-    doc_names = corpus.view_metadata[tok_name]
-
-    doc_names_int = zip(doc_names, xrange(len(doc_names)))
+    if isinstance(doc_query, dict):
+        
+        doc_query = corpus.meta_int(tok_name, doc_query)
     
-    i = doc_names_int[document]
-    
-    cosines = similarity.similar_columns(i, viewer.matrix,
-                                         norms=norms,
-                                         filter_nan=filter_nan)
-    
-    return [(doc_names[d], v) for d,v in cosines]
+    sim_vals = similarity.similar_columns(doc_query, matrix, norms=norms,
+                                          filter_nan=filter_nan)
 
+    docs = corpus.view_metadata(tok_name)['short_label']
 
+    sim_vals = np.array([(docs[i], v) for i,v in sim_vals],
+                        dtype=[('doc', docs.dtype),
+                               ('value', sim_vals.dtype['v'])])
+
+    return sim_vals
 
 
 
@@ -120,7 +121,7 @@ def mean_similar_terms(corpus, matrix, query,
         ra = similarity.similar_rows(i, matrix, norms=norms,
                                      sort=False, filter_nan=False)
 
-        return ra['value']
+        return ra['v']
 
 
 
@@ -130,26 +131,20 @@ def mean_similar_terms(corpus, matrix, query,
     
     sim_vals = sim_vals / len(terms)
 
-    sim_vals = list(enumerate(sim_vals.tolist()))
+    sim_vals = enum_sort(sim_vals)
     
-    dtype = [('index', np.int), ('value', np.float)]
-
-    sim_vals = np.array(sim_vals, dtype=dtype)
-
-    sim_vals = similarity.sort_sim(sim_vals)
-
     if filter_nan:
 
-        sim_vals = similarity._filter_nan(sim_vals)
+        sim_vals = sim_vals[np.isfinite(sim_vals['v'])]
 
-    out = []
+    sim_vals = np.array([(corpus.terms[i], v) for i,v in sim_vals],
+                        dtype=[('term', corpus.terms.dtype),
+                               ('value', sim_vals.dtype['v'])])
 
-    for t,v in sim_vals:
+    if rem_masked:
 
-        term = corpus.terms[t]
+        f = np.vectorize(lambda x: x is not np.ma.masked)
 
-        if not (rem_masked and term is np.ma.masked):
+        sim_vals = sim_vals[f(sim_vals['term'])]
 
-            out.append((term, v))
-
-    return out
+    return sim_vals
