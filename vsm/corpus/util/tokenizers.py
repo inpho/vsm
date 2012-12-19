@@ -1,458 +1,16 @@
-import os
-import re
+from base import *
 
-import numpy as np
 
-import nltk
 
+__all__=['toy_corpus', 'file_corpus', 'dir_corpus', 'coll_corpus']
 
 
-def strip_punc(tsent):
 
-    p1 = re.compile(r'^(\W*)')
-
-    p2 = re.compile(r'(\W*)$')
-
-    out = []
-
-    for word in tsent:
-
-        w = re.sub(p2, '', re.sub(p1, '', word))
-
-        if w:
-
-            out.append(w)
-
-    return out
-
-
-
-def rem_num(tsent):
-
-    p = re.compile(r'(^\D+$)|(^\D*[1-2]\d\D*$|^\D*\d\D*$)')
-
-    return [word for word in tsent if re.search(p, word)]
-
-
-
-def rehyph(sent):
-
-    return re.sub(r'(?P<x1>.)--(?P<x2>.)', '\g<x1> - \g<x2>', sent)
-
-
-
-def word_tokenize(text):
-    """
-    Takes a string and returns a list of strings. Intended use: the
-    input string is English text and the output consists of the
-    lower-case words in this text with numbers and punctuation, except
-    for hyphens, removed.
-
-    The core work is done by NLTK's Treebank Word Tokenizer.
-    """
-
-    text = rehyph(text)
-
-    text = nltk.TreebankWordTokenizer().tokenize(text)
-
-    tokens = [word.lower() for word in text]
-
-    tokens = strip_punc(tokens)
-
-    tokens = rem_num(tokens)
-    
-    return tokens
-
-
-
-def sentence_tokenize(text):
-    """
-    Takes a string and returns a list of strings. Intended use: the
-    input string is English text and the output consists of the
-    sentences in this text.
-
-    This is a wrapper for NLTK's pre-trained Punkt Tokenizer.
-    """
-    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-
-    return tokenizer.tokenize(text)
-
-
-
-def paragraph_tokenize(text):
-    """
-    Takes a string and returns a list of strings. Intended use: the
-    input string is English text and the output consists of the
-    paragraphs in this text. It's expected that the text marks
-    paragraphs with two consecutive line breaks.
-    """
-    
-    return text.split('\n\n')
-
-
-
-def textfile_tokenize(path, sort=False):
-    """
-    Takes a string and returns a list of strings and a dictionary.
-    Intended use: the input string is a directory name containing
-    plain text files. The output list is a list of strings, each of
-    which is the contents of one of these files. The dictionary is a
-    map from indices of this list to the names of the source files.
-    """
-
-    out = [],{}
-    
-    filenames = os.listdir(path)
-
-    if sort:
-
-        filenames.sort()
-
-    for filename in filenames:
-        
-        filename = os.path.join(path, filename)
-
-        with open(filename, mode='r') as f:
-
-            out[0].append(f.read())
-
-            out[1][len(out[0]) - 1] = filename
-
-    return out
-
-
-
-
-def mask_corpus(c, nltk_stop=False, mask_freq=0, add_stop=None):
-
-    from vsm.corpus import mask_from_stoplist, mask_freq_t
-
-    stoplist = set()
-
-    if nltk_stop:
-
-        for w in nltk.corpus.stopwords.words('english'):
-
-            stoplist.add(w)
-
-    if add_stop:
-
-        for w in add_stop:
-
-            stoplist.add(w)
-
-    if stoplist:
-
-        mask_from_stoplist(c, list(stoplist))
-
-    if mask_freq > 0:
-
-        mask_freq_t(c, mask_freq)
-
-    return c
-
-
-
-def file_tokenize(text):
-
-    words, par_tokens, sent_tokens = [], [], []
-
-    sent_break, par_n, sent_n = 0, 0, 0
-
-    pars = paragraph_tokenize(text)
-
-    for par in pars:
-                
-        sents = sentence_tokenize(par)
-
-        for sent in sents:
-                    
-            w = word_tokenize(sent)
-                    
-            words.extend(w)
-                    
-            sent_break += len(w)
-                    
-            sent_tokens.append((sent_break, par_n, sent_n))
-
-            sent_n += 1
-
-        par_tokens.append((sent_break, par_n))
-            
-        par_n += 1
-
-    idx_dt = ('idx', np.int32)
-
-    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
-
-    par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
-
-    corpus_data = dict()
-
-    dtype = [idx_dt, par_label_dt]
-
-    corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
-
-    dtype = [idx_dt, par_label_dt, sent_label_dt]
-
-    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
-
-    return words, corpus_data
-
-
-
-
-def file_corpus(filename, compress=True,
-                nltk_stop=True, mask_freq=1, add_stop=None):
-    """
-    For use with a plain text corpus contained in a single string.
-    """
-
-    from vsm.corpus import MaskedCorpus
-
-    with open(filename, mode='r') as f:
-
-        text = f.read()
-
-    words, tok = dir_tokenize(text)
-
-    names, data = zip(*tok.items())
-    
-    c = MaskedCorpus(words, tok_data=data, tok_names=names)
-
-    c = mask_corpus(c, nltk_stop=nltk_stop,
-                    mask_freq=mask_freq, add_stop=add_stop)
-
-    if compress:
-
-        c = c.to_corpus(compress=True)
-
-    return c
-
-
-
-
-def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
-
-    words, chk_tokens, sent_tokens = [], [], []
-
-    sent_break, chk_n, sent_n = 0, 0, 0
-
-    if paragraphs:
-
-        par_tokens = []
-
-        par_n = 0
-        
-        for chk, label in zip(chunks, labels):
-
-            print 'Tokenizing', label
-
-            pars = paragraph_tokenize(chk)
-
-            for par in pars:
-                
-                sents = sentence_tokenize(par)
-
-                for sent in sents:
-                    
-                    w = word_tokenize(sent)
-                    
-                    words.extend(w)
-                    
-                    sent_break += len(w)
-                    
-                    sent_tokens.append((sent_break, label, par_n, sent_n))
-
-                    sent_n += 1
-
-                par_tokens.append((sent_break, label, par_n))
-
-                par_n += 1
-
-            chk_tokens.append((sent_break, label))
-
-            chk_n += 1
-
-    else:
-
-        for chk, label in zip(chunks, labels):
-
-            print 'Tokenizing', label
-
-            sents = sentence_tokenize(chk)
-
-            for sent in sents:
-                    
-                w = word_tokenize(sent)
-                    
-                words.extend(w)
-                    
-                sent_break += len(w)
-
-                sent_tokens.append((sent_break, label, sent_n))
-
-                sent_n += 1
-
-            chk_tokens.append((sent_break, label))
-
-            chk_n += 1
-
-    idx_dt = ('idx', np.int32)
-
-    label_dt = (chunk_name + '_label', np.array(labels).dtype)
-
-    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
-
-    corpus_data = dict()
-
-    dtype = [idx_dt, label_dt]
-
-    corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
-
-    if paragraphs:
-
-        par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
-
-        dtype = [idx_dt, label_dt, par_label_dt]
-
-        corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
-
-        dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
-
-        corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
-
-    else:
-
-        dtype = [idx_dt, label_dt, sent_label_dt]
-
-        corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
-
-    return words, corpus_data
-
-
-
-def test_dir_tokenize():
-
-    chunks = ['foo foo foo\n\nfoo foo',
-             'Foo bar.  Foo bar.', 
-             '',
-             'foo\n\nfoo']
-
-    labels = [str(i) for i in xrange(len(chunks))]
-
-    words, tok_data = dir_tokenize(chunks, labels)
-
-    assert len(words) == 11
-
-    assert len(tok_data['article']) == 4
-
-    assert len(tok_data['paragraph']) == 6
-
-    assert len(tok_data['sentence']) == 7
-    
-    assert (tok_data['article']['idx'] == [5, 9, 9, 11]).all()
-
-    assert (tok_data['article']['article_label'] == ['0', '1', '2', '3']).all()
-
-    assert (tok_data['paragraph']['idx'] == [3, 5, 9, 9, 10, 11]).all()
-
-    assert (tok_data['paragraph']['article_label'] == 
-            ['0', '0', '1', '2', '3', '3']).all()
-
-    assert (tok_data['paragraph']['par_label'] == 
-            ['0', '1', '2', '3', '4', '5']).all()
-
-    assert (tok_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
-
-    assert (tok_data['sentence']['article_label'] == 
-            ['0', '0', '1', '1', '2', '3', '3']).all()
-
-    assert (tok_data['sentence']['par_label'] == 
-            ['0', '1', '2', '2', '3', '4', '5']).all()
-
-    assert (tok_data['sentence']['sent_label'] == 
-            ['0', '1', '2', '3', '4', '5', '6']).all()
-
-
-
-
-def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
-               compress=True, nltk_stop=True, mask_freq=1, add_stop=None):
-    """
-    `dir_corpus` is a convenience function for generating Corpus or
-    MaskedCorpus objects from a directory of plain text files.
-
-    `dir_corpus` will retain file-level tokenization and perform
-    sentence and word tokenizations. Optionally, it will provide
-    paragraph-level tokenizations.
-
-    It will also strip punctuation and arabic numerals outside the
-    range 1-29. All letters are made lowercase.
-
-    Parameters
-    ----------
-    plain_dir : string-like
-        String containing directory containing a plain-text corpus.
-    chunk_name : string-line
-        The name of the tokenization corresponding to individual
-        files. For example, if the files are pages of a book, one
-        might set `chunk_name` to `pages`. Default is `articles`.
-    paragraphs : boolean
-        If `True`, a paragraph-level tokenization is included.
-        Defaults to `True`.
-    compress : boolean
-        If `True` then a Corpus object is returned with all masked
-        terms removed. Otherwise, a MaskedCorpus object is returned.
-        Default is `True`.
-    nltk_stop : boolean
-        If `True` then the corpus object is masked using the NLTK
-        English stop words. Default is `False`.
-    mask_freq : int
-        The upper bound for a term to be masked on the basis of its
-        collection frequency. Default is 0.
-    add_stop : array-like
-        A list of stop words. Default is `None`.
-
-    Returns
-    -------
-    c : a Corpus or a MaskedCorpus object
-        Contains the tokenized corpus built from the input plain-text
-        corpus. Document tokens are named `documents`.
-
-    """
-
-    from vsm.corpus import MaskedCorpus
-
-    chunks = []
-    
-    filenames = os.listdir(plain_dir)
-
-    filenames.sort()
-
-    for filename in filenames:
-        
-        filename = os.path.join(plain_dir, filename)
-
-        with open(filename, mode='r') as f:
-
-            chunks.append(f.read())
-
-    words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
-                              paragraphs=paragraphs)
-
-    names, data = zip(*tok.items())
-    
-    c = MaskedCorpus(words, tok_data=data, tok_names=names)
-
-    c = mask_corpus(c, nltk_stop=nltk_stop,
-                    mask_freq=mask_freq, add_stop=add_stop)
-
-    if compress:
-
-        c = c.to_corpus(compress=True)
-
-    return c
+###################################################
+#
+#  Special purpose tokenizers & Corpus generators
+#
+###################################################
 
 
 
@@ -558,9 +116,470 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
         c = c.to_corpus(compress=True)
 
     return c
+
+
+
+def file_tokenize(text):
+
+    words, par_tokens, sent_tokens = [], [], []
+
+    sent_break, par_n, sent_n = 0, 0, 0
+
+    pars = paragraph_tokenize(text)
+
+    for par in pars:
+                
+        sents = sentence_tokenize(par)
+
+        for sent in sents:
+                    
+            w = word_tokenize(sent)
+                    
+            words.extend(w)
+                    
+            sent_break += len(w)
+                    
+            sent_tokens.append((sent_break, par_n, sent_n))
+
+            sent_n += 1
+
+        par_tokens.append((sent_break, par_n))
+            
+        par_n += 1
+
+    idx_dt = ('idx', np.int32)
+
+    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
+
+    par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
+
+    corpus_data = dict()
+
+    dtype = [idx_dt, par_label_dt]
+
+    corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
+
+    dtype = [idx_dt, par_label_dt, sent_label_dt]
+
+    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+
+    return words, corpus_data
+
+
+
+
+def file_corpus(filename, compress=True,
+                nltk_stop=True, mask_freq=1, add_stop=None):
+    """
+    For use with a plain text corpus contained in a single string.
+    """
+
+    from vsm.corpus import MaskedCorpus
+
+    with open(filename, mode='r') as f:
+
+        text = f.read()
+
+    words, tok = dir_tokenize(text)
+
+    names, data = zip(*tok.items())
     
+    c = MaskedCorpus(words, tok_data=data, tok_names=names)
+
+    c = mask_corpus(c, nltk_stop=nltk_stop,
+                    mask_freq=mask_freq, add_stop=add_stop)
+
+    if compress:
+
+        c = c.to_corpus(compress=True)
+
+    return c
 
 
+
+def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
+
+    words, chk_tokens, sent_tokens = [], [], []
+
+    sent_break, chk_n, sent_n = 0, 0, 0
+
+    if paragraphs:
+
+        par_tokens = []
+
+        par_n = 0
+        
+        for chk, label in zip(chunks, labels):
+
+            print 'Tokenizing', label
+
+            pars = paragraph_tokenize(chk)
+
+            for par in pars:
+                
+                sents = sentence_tokenize(par)
+
+                for sent in sents:
+                    
+                    w = word_tokenize(sent)
+                    
+                    words.extend(w)
+                    
+                    sent_break += len(w)
+                    
+                    sent_tokens.append((sent_break, label, par_n, sent_n))
+
+                    sent_n += 1
+
+                par_tokens.append((sent_break, label, par_n))
+
+                par_n += 1
+
+            chk_tokens.append((sent_break, label))
+
+            chk_n += 1
+
+    else:
+
+        for chk, label in zip(chunks, labels):
+
+            print 'Tokenizing', label
+
+            sents = sentence_tokenize(chk)
+
+            for sent in sents:
+                    
+                w = word_tokenize(sent)
+                    
+                words.extend(w)
+                    
+                sent_break += len(w)
+
+                sent_tokens.append((sent_break, label, sent_n))
+
+                sent_n += 1
+
+            chk_tokens.append((sent_break, label))
+
+            chk_n += 1
+
+    idx_dt = ('idx', np.int32)
+
+    label_dt = (chunk_name + '_label', np.array(labels).dtype)
+
+    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
+
+    corpus_data = dict()
+
+    dtype = [idx_dt, label_dt]
+
+    corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
+
+    if paragraphs:
+
+        par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
+
+        dtype = [idx_dt, label_dt, par_label_dt]
+
+        corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
+
+        dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
+
+        corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+
+    else:
+
+        dtype = [idx_dt, label_dt, sent_label_dt]
+
+        corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+
+    return words, corpus_data
+
+
+
+def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
+               compress=True, nltk_stop=True, mask_freq=1, add_stop=None):
+    """
+    `dir_corpus` is a convenience function for generating Corpus or
+    MaskedCorpus objects from a directory of plain text files.
+
+    `dir_corpus` will retain file-level tokenization and perform
+    sentence and word tokenizations. Optionally, it will provide
+    paragraph-level tokenizations.
+
+    It will also strip punctuation and arabic numerals outside the
+    range 1-29. All letters are made lowercase.
+
+    Parameters
+    ----------
+    plain_dir : string-like
+        String containing directory containing a plain-text corpus.
+    chunk_name : string-line
+        The name of the tokenization corresponding to individual
+        files. For example, if the files are pages of a book, one
+        might set `chunk_name` to `pages`. Default is `articles`.
+    paragraphs : boolean
+        If `True`, a paragraph-level tokenization is included.
+        Defaults to `True`.
+    compress : boolean
+        If `True` then a Corpus object is returned with all masked
+        terms removed. Otherwise, a MaskedCorpus object is returned.
+        Default is `True`.
+    nltk_stop : boolean
+        If `True` then the corpus object is masked using the NLTK
+        English stop words. Default is `False`.
+    mask_freq : int
+        The upper bound for a term to be masked on the basis of its
+        collection frequency. Default is 0.
+    add_stop : array-like
+        A list of stop words. Default is `None`.
+
+    Returns
+    -------
+    c : a Corpus or a MaskedCorpus object
+        Contains the tokenized corpus built from the input plain-text
+        corpus. Document tokens are named `documents`.
+
+    """
+
+    from vsm.corpus import MaskedCorpus
+
+    chunks = []
+    
+    filenames = os.listdir(plain_dir)
+
+    filenames.sort()
+
+    for filename in filenames:
+        
+        filename = os.path.join(plain_dir, filename)
+
+        with open(filename, mode='r') as f:
+
+            chunks.append(f.read())
+
+    words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
+                              paragraphs=paragraphs)
+
+    names, data = zip(*tok.items())
+    
+    c = MaskedCorpus(words, tok_data=data, tok_names=names)
+
+    c = mask_corpus(c, nltk_stop=nltk_stop,
+                    mask_freq=mask_freq, add_stop=add_stop)
+
+    if compress:
+
+        c = c.to_corpus(compress=True)
+
+    return c
+
+
+
+def coll_tokenize(books, book_names):
+
+    words, book_tokens, page_tokens, sent_tokens = [], [], [], []
+
+    sent_break, book_n, page_n, sent_n = 0, 0, 0, 0
+
+    for book, book_label in zip(books, book_names):
+
+        print 'Tokenizing', book_label
+
+        for page in book:
+        
+            sents = sentence_tokenize(page)
+
+            for sent in sents:
+        
+                w = word_tokenize(sent)
+        
+                words.extend(w)
+                    
+                sent_break += len(w)
+            
+                sent_tokens.append((sent_break, sent_n,
+                                    page_n, book_label))
+            
+                sent_n += 1
+
+            page_tokens.append((sent_break, page_n, book_label))
+
+            page_n += 1
+            
+        book_tokens.append((sent_break, book_label))
+
+        book_n += 1
+
+    idx_dt = ('idx', np.int32)
+
+    book_label_dt = ('book_label', np.array(book_names).dtype)
+
+    page_label_dt = ('page_label', np.array(page_n, np.str_).dtype)
+
+    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
+
+    corpus_data = dict()
+
+    dtype = [idx_dt, book_label_dt]
+
+    corpus_data['book'] = np.array(book_tokens, dtype=dtype)
+
+    dtype = [idx_dt, page_label_dt, book_label_dt]
+
+    corpus_data['page'] = np.array(page_tokens, dtype=dtype)
+
+    dtype = [idx_dt, sent_label_dt, page_label_dt, book_label_dt]
+
+    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+
+    return words, corpus_data
+
+
+
+def coll_corpus(coll_dir, ignore=['.json', '.log'], compress=True,
+                nltk_stop=True, mask_freq=1, add_stop=None):
+
+    from vsm.corpus import MaskedCorpus
+
+    books = []
+    
+    book_names = os.listdir(coll_dir)
+
+    book_names = filter_by_suffix(book_names, ignore)
+
+    book_names.sort()
+
+    for book_name in book_names:
+
+        pages = []
+
+        book_path = os.path.join(coll_dir, book_name)
+
+        page_names = os.listdir(book_path)
+
+        page_names = filter_by_suffix(page_names, ignore)
+
+        page_names.sort()
+
+        for page_name in page_names:
+        
+            page_name = os.path.join(book_path, page_name)
+
+            with open(page_name, mode='r') as f:
+
+                pages.append(f.read())
+
+        books.append(pages)
+
+    words, tok = coll_tokenize(books, book_names)
+
+    names, data = zip(*tok.items())
+    
+    c = MaskedCorpus(words, tok_data=data, tok_names=names)
+
+    c = mask_corpus(c, nltk_stop=nltk_stop,
+                    mask_freq=mask_freq, add_stop=add_stop)
+
+    if compress:
+
+        c = c.to_corpus(compress=True)
+
+    return c
+
+
+
+########################################
+#
+#                 Tests
+#
+########################################
+
+
+
+def test_dir_tokenize():
+
+    chunks = ['foo foo foo\n\nfoo foo',
+             'Foo bar.  Foo bar.', 
+             '',
+             'foo\n\nfoo']
+
+    labels = [str(i) for i in xrange(len(chunks))]
+
+    words, tok_data = dir_tokenize(chunks, labels)
+
+    assert len(words) == 11
+
+    assert len(tok_data['article']) == 4
+
+    assert len(tok_data['paragraph']) == 6
+
+    assert len(tok_data['sentence']) == 7
+    
+    assert (tok_data['article']['idx'] == [5, 9, 9, 11]).all()
+
+    assert (tok_data['article']['article_label'] == ['0', '1', '2', '3']).all()
+
+    assert (tok_data['paragraph']['idx'] == [3, 5, 9, 9, 10, 11]).all()
+
+    assert (tok_data['paragraph']['article_label'] == 
+            ['0', '0', '1', '2', '3', '3']).all()
+
+    assert (tok_data['paragraph']['par_label'] == 
+            ['0', '1', '2', '3', '4', '5']).all()
+
+    assert (tok_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
+
+    assert (tok_data['sentence']['article_label'] == 
+            ['0', '0', '1', '1', '2', '3', '3']).all()
+
+    assert (tok_data['sentence']['par_label'] == 
+            ['0', '1', '2', '2', '3', '4', '5']).all()
+
+    assert (tok_data['sentence']['sent_label'] == 
+            ['0', '1', '2', '3', '4', '5', '6']).all()
+
+
+
+def test_coll_tokenize():
+
+    books = [['foo foo foo.\n\nfoo foo',
+              'Foo bar.  Foo bar.'], 
+             ['',
+              'foo.\n\nfoo']]
+
+    book_names = [str(i) for i in xrange(len(books))]
+
+    words, tok_data = coll_tokenize(books, book_names)
+
+    assert len(words) == 11
+
+    assert len(tok_data['book']) == 2
+
+    assert len(tok_data['page']) == 4
+
+    assert len(tok_data['sentence']) == 7
+    
+    assert (tok_data['book']['idx'] == [9, 11]).all()
+
+    assert (tok_data['book']['book_label'] == ['0', '1']).all()
+
+    assert (tok_data['page']['idx'] == [5, 9, 9, 11]).all()
+
+    assert (tok_data['page']['page_label'] == ['0', '1', '2', '3']).all()
+
+    assert (tok_data['page']['book_label'] == ['0', '0', '1', '1']).all()
+
+    assert (tok_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
+
+    assert (tok_data['sentence']['sent_label'] == 
+            ['0', '1', '2', '3', '4', '5', '6']).all()
+
+    assert (tok_data['sentence']['page_label'] == 
+            ['0', '0', '1', '1', '2', '3', '3']).all()
+
+    assert (tok_data['sentence']['book_label'] == 
+            ['0', '0', '0', '0', '1', '1', '1']).all()
     
 
 
