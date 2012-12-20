@@ -1,16 +1,72 @@
+import nltk
+
 from base import *
 
 
 
-__all__=['toy_corpus', 'file_corpus', 'dir_corpus', 'coll_corpus']
+__all__=['toy_corpus', 'file_corpus', 'dir_corpus', 'coll_corpus',
+         'word_tokenize', 'sentence_tokenize', 'paragraph_tokenize']
 
 
 
-###################################################
+
+def word_tokenize(text):
+    """
+    Takes a string and returns a list of strings. Intended use: the
+    input string is English text and the output consists of the
+    lower-case words in this text with numbers and punctuation, except
+    for hyphens, removed.
+
+    The core work is done by NLTK's Treebank Word Tokenizer.
+    """
+
+    text = rehyph(text)
+
+    text = nltk.TreebankWordTokenizer().tokenize(text)
+
+    tokens = [word.lower() for word in text]
+
+    tokens = strip_punc(tokens)
+
+    tokens = rem_num(tokens)
+    
+    return tokens
+
+
+
+def sentence_tokenize(text):
+    """
+    Takes a string and returns a list of strings. Intended use: the
+    input string is English text and the output consists of the
+    sentences in this text.
+
+    This is a wrapper for NLTK's pre-trained Punkt Tokenizer.
+    """
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+
+    return tokenizer.tokenize(text)
+
+
+
+def paragraph_tokenize(text):
+    """
+    Takes a string and returns a list of strings. Intended use: the
+    input string is English text and the output consists of the
+    paragraphs in this text. It's expected that the text marks
+    paragraphs with two consecutive line breaks.
+    """
+
+    par_break = re.compile(r'[\r\n]{2,}')
+    
+    return par_break.split(text)
+
+
+
+#######################################################
 #
 #  Special purpose tokenizers & Corpus generators
 #
-###################################################
+#######################################################
 
 
 
@@ -180,7 +236,7 @@ def file_corpus(filename, compress=True,
 
         text = f.read()
 
-    words, tok = dir_tokenize(text)
+    words, tok = file_tokenize(text)
 
     names, data = zip(*tok.items())
     
@@ -623,123 +679,3 @@ def test_toy_corpus():
     os.remove(tmp.name)
 
     return c
-
-
-
-#
-# Tokenizing classes
-#
-# (These will be superseded by functions such as those above.)
-
-
-# class MultipleArticleTokenizer(object):
-#     """
-#     """
-#     def __init__(self, path):
-
-#         self.path = path
-
-#         self.words = []
-
-#         self.tok_names = ['articles', 'paragraphs', 'sentences']
-
-#         self.tok_data = None
-
-#         self._compute_tokens()
-    
-
-
-#     def _compute_tokens(self):
-
-#         articles, articles_metadata = textfile_tokenize(self.path)
-
-#         article_tokens = []
-
-#         paragraph_tokens = []
-
-#         sentence_spans = []
-
-#         print 'Computing article and paragraph tokens'
-
-#         for i,article in enumerate(articles):
-
-#             print 'Processing article in', articles_metadata[i]
-
-#             paragraphs = paragraph_tokenize(article)
-            
-#             for paragraph in paragraphs:
-                
-#                 sentences = sentence_tokenize(paragraph)
-
-#                 for sentence in sentences:
-                    
-#                     words = word_tokenize(sentence)
-
-#                     self.words.extend(words)
-                    
-#                     sentence_spans.append(len(words))
-
-#                 paragraph_tokens.append(sum(sentence_spans))
-                    
-#             article_tokens.append(sum(sentence_spans))
-
-#         print 'Computing sentence tokens'
-
-#         sentence_tokens = np.cumsum(sentence_spans)
-
-#         article_tokens = zip(article_tokens, articles_metadata)
-
-#         self.tok_data = [article_tokens, paragraph_tokens, sentence_tokens]
-
-
-
-# class SingleArticleTokenizer(object):
-#     """
-#     """
-#     def __init__(self, filename):
-
-#         self.filename = filename
-
-#         self.words = []
-
-#         self.tok_names = ['paragraphs', 'sentences']
-
-#         self.tok_data = None
-
-#         self._compute_tokens()
-
-        
-
-#     def _compute_tokens(self):
-
-#         with open(self.filename, mode='r') as f:
-
-#             article = f.read()
-
-#         paragraph_tokens = []
-
-#         sentence_spans = []
-
-#         print 'Computing paragraph tokens'
-
-#         paragraphs = paragraph_tokenize(article)
-            
-#         for paragraph in paragraphs:
-
-#             sentences = sentence_tokenize(paragraph)
-
-#             for sentence in sentences:
-
-#                 words = word_tokenize(sentence)
-
-#                 self.words.extend(words)
-                    
-#                 sentence_spans.append(len(words))
-
-#             paragraph_tokens.append(sum(sentence_spans))
-                    
-#         print 'Computing sentence tokens'
-
-#         sentence_tokens = np.cumsum(sentence_spans)
-
-#         self.tok_data = [paragraph_tokens, sentence_tokens]
