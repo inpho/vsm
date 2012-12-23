@@ -6,13 +6,13 @@ import logging
 from nltk.corpus import wordnet as wn
 import enchant
 
-from base import filter_by_suffix
+from corpustools import filter_by_suffix
 
-__all__ = ['proc_hathi_coll']
+__all__ = ['proc_htrc_coll']
 
 
 
-def proc_hathi_coll(coll_dir, ignore=['.json', '.log']):
+def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
     """
     """
     books = os.listdir(coll_dir)
@@ -27,11 +27,11 @@ def proc_hathi_coll(coll_dir, ignore=['.json', '.log']):
 
         # if book == 'uc2.ark+=13960=t74t6gz6r':
 
-        proc_hathi_book(book, coll_dir, ignore=ignore)
+        proc_htrc_book(book, coll_dir, ignore=ignore)
             
 
 
-def proc_hathi_book(book, coll_dir, ignore=['.json', '.log']):
+def proc_htrc_book(book, coll_dir, ignore=['.json', '.log']):
 
     book_root = os.path.join(coll_dir, book)
 

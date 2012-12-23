@@ -1,12 +1,105 @@
+import os
+import re
+
+import numpy as np
+
 import nltk
 
-from base import *
+
+
+__all__=['apply_stoplist', 'toy_corpus', 'file_corpus',
+         'dir_corpus', 'coll_corpus', 'word_tokenize',
+         'sentence_tokenize', 'paragraph_tokenize']
 
 
 
-__all__=['toy_corpus', 'file_corpus', 'dir_corpus', 'coll_corpus',
-         'word_tokenize', 'sentence_tokenize', 'paragraph_tokenize']
+def strip_punc(tsent):
 
+    p1 = re.compile(r'^(\W*)')
+
+    p2 = re.compile(r'(\W*)$')
+
+    out = []
+
+    for word in tsent:
+
+        w = re.sub(p2, '', re.sub(p1, '', word))
+
+        if w:
+
+            out.append(w)
+
+    return out
+
+
+
+def rem_num(tsent):
+
+    p = re.compile(r'(^\D+$)|(^\D*[1-2]\d\D*$|^\D*\d\D*$)')
+
+    return [word for word in tsent if re.search(p, word)]
+
+
+
+def rehyph(sent):
+
+    return re.sub(r'(?P<x1>.)--(?P<x2>.)', '\g<x1> - \g<x2>', sent)
+
+
+
+def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
+
+    stoplist = set()
+
+    if nltk_stop:
+
+        for w in nltk.corpus.stopwords.words('english'):
+
+            stoplist.add(w)
+
+    if add_stop:
+
+        for w in add_stop:
+
+            stoplist.add(w)
+
+    return corp.apply_stoplist(stoplist=stoplist, freq=freq)
+
+
+
+def mask_corpus(c, nltk_stop=False, mask_freq=0, add_stop=None):
+
+    from vsm.corpus import mask_from_stoplist, mask_freq_t
+
+    stoplist = set()
+
+    if nltk_stop:
+
+        for w in nltk.corpus.stopwords.words('english'):
+
+            stoplist.add(w)
+
+    if add_stop:
+
+        for w in add_stop:
+
+            stoplist.add(w)
+            
+    if stoplist:
+
+        mask_from_stoplist(c, list(stoplist))
+
+    if mask_freq > 0:
+
+        mask_freq_t(c, mask_freq)
+
+    return c
+
+
+
+def filter_by_suffix(l, ignore):
+
+    return [e for e in l if not sum([e.endswith(s) for s in ignore])]
 
 
 
@@ -70,17 +163,68 @@ def paragraph_tokenize(text):
 
 
 
-def toy_corpus(plain_corpus, is_filename=False, compress=True,
-               nltk_stop=False, mask_freq=0, add_stop=None, metadata=None):
+def empty_corpus(tok_name):
+
+    return Corpus([],
+                  tok_data=[np.array([], dtype=[('idx', np.int)])],
+                  tok_names=[tok_name])
+
+
+
+def random_corpus(corpus_len,
+                  n_terms,
+                  min_token_len,
+                  max_token_len,
+                  tok_name='random',
+                  metadata=False):
     """
-    `toy_corpus` is a convenience function for generating Corpus or
-    MaskedCorpus objects from a given string or a single file.
+    Generate a random integer corpus.
+    """
+    corpus = np.random.randint(n_terms, size=corpus_len)
+
+    indices = []
+
+    i = np.random.randint(min_token_len, max_token_len)
+
+    while i < corpus_len:
+
+        indices.append(i)
+
+        i += np.random.randint(min_token_len, max_token_len)
+
+    indices.append(corpus_len)
+
+    if metadata:
+
+        metadata_ = ['token_' + str(i) for i in xrange(len(indices))]
+
+        dtype=[('idx', np.array(indices).dtype), 
+               ('short_label', np.array(metadata_).dtype)]
+        
+        rand_tok = np.array(zip(indices, metadata_), dtype=dtype)
+
+    else:
+
+        rand_tok = np.array([(i,) for i in indices], 
+                            dtype=[('idx', np.array(indices).dtype)])
+
+    c = Corpus(corpus, tok_names=[tok_name], tok_data=[rand_tok])
+
+    return c
+
+
+
+def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
+               stop_freq=0, add_stop=None, metadata=None):
+    """
+    `toy_corpus` is a convenience function for generating Corpus
+    objects from a given string or a single file.
 
     `toy_corpus` will perform both word and document-level
     tokenization. It will also strip punctuation and arabic numerals
     outside the range 1-29. All letters are made lowercase.
 
-    Document tokens are delimited by `\n\n`. E.g.,
+    Document tokens are delimited by two or more line breaks. E.g.,
 
         <document 0>
 
@@ -101,14 +245,10 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
         If `True` then `plain_corpus` is treated like a filename.
         Otherwise, `plain_corpus` is presumed to contain the corpus.
         Default is `False`.
-    compress : boolean
-        If `True` then a Corpus object is returned with all masked
-        terms removed. Otherwise, a MaskedCorpus object is returned.
-        Default is `True`.
     nltk_stop : boolean
         If `True` then the corpus object is masked using the NLTK
         English stop words. Default is `False`.
-    mask_freq : int
+    stop_freq : int
         The upper bound for a term to be masked on the basis of its
         collection frequency. Default is 0.
     add_stop : array-like
@@ -119,12 +259,12 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
         Default is `None`.
     Returns
     -------
-    c : a Corpus or a MaskedCorpus object
+    c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
 
     """
-    from vsm.corpus import MaskedCorpus, mask_from_stoplist, mask_freq_t
+    from vsm.corpus import Corpus
 
     if is_filename:
 
@@ -132,7 +272,7 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
 
             plain_corpus = f.read()
 
-    docs = plain_corpus.split('\n\n')
+    docs = paragraph_tokenize(plain_corpus)
 
     docs = [word_tokenize(d) for d in docs]
 
@@ -162,14 +302,10 @@ def toy_corpus(plain_corpus, is_filename=False, compress=True,
 
         tok = np.array([(i,) for i in tok], dtype=dtype)
     
-    c = MaskedCorpus(corpus, tok_data=[tok], tok_names=['document'])
+    c = Corpus(corpus, tok_data=[tok], tok_names=['document'])
 
-    c = mask_corpus(c, nltk_stop=nltk_stop,
-                    mask_freq=mask_freq, add_stop=add_stop)
-
-    if compress:
-
-        c = c.to_corpus(compress=True)
+    c = apply_stoplist(c, nltk_stop=nltk_stop,
+                       freq=stop_freq, add_stop=add_stop)
 
     return c
 
@@ -224,13 +360,12 @@ def file_tokenize(text):
 
 
 
-def file_corpus(filename, compress=True,
-                nltk_stop=True, mask_freq=1, add_stop=None):
+def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     """
     For use with a plain text corpus contained in a single string.
     """
 
-    from vsm.corpus import MaskedCorpus
+    from vsm.corpus import Corpus
 
     with open(filename, mode='r') as f:
 
@@ -240,14 +375,10 @@ def file_corpus(filename, compress=True,
 
     names, data = zip(*tok.items())
     
-    c = MaskedCorpus(words, tok_data=data, tok_names=names)
+    c = Corpus(words, tok_data=data, tok_names=names)
 
-    c = mask_corpus(c, nltk_stop=nltk_stop,
-                    mask_freq=mask_freq, add_stop=add_stop)
-
-    if compress:
-
-        c = c.to_corpus(compress=True)
+    c = apply_stoplist(c, nltk_stop=nltk_stop,
+                       freq=stop_freq, add_stop=add_stop)
 
     return c
 
@@ -354,10 +485,10 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
-               compress=True, nltk_stop=True, mask_freq=1, add_stop=None):
+               nltk_stop=True, stop_freq=1, add_stop=None):
     """
-    `dir_corpus` is a convenience function for generating Corpus or
-    MaskedCorpus objects from a directory of plain text files.
+    `dir_corpus` is a convenience function for generating Corpus
+    objects from a directory of plain text files.
 
     `dir_corpus` will retain file-level tokenization and perform
     sentence and word tokenizations. Optionally, it will provide
@@ -377,14 +508,10 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     paragraphs : boolean
         If `True`, a paragraph-level tokenization is included.
         Defaults to `True`.
-    compress : boolean
-        If `True` then a Corpus object is returned with all masked
-        terms removed. Otherwise, a MaskedCorpus object is returned.
-        Default is `True`.
     nltk_stop : boolean
         If `True` then the corpus object is masked using the NLTK
         English stop words. Default is `False`.
-    mask_freq : int
+    stop_freq : int
         The upper bound for a term to be masked on the basis of its
         collection frequency. Default is 0.
     add_stop : array-like
@@ -392,7 +519,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
 
     Returns
     -------
-    c : a Corpus or a MaskedCorpus object
+    c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
 
@@ -419,14 +546,10 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
 
     names, data = zip(*tok.items())
     
-    c = MaskedCorpus(words, tok_data=data, tok_names=names)
+    c = Corpus(words, tok_data=data, tok_names=names)
 
-    c = mask_corpus(c, nltk_stop=nltk_stop,
-                    mask_freq=mask_freq, add_stop=add_stop)
-
-    if compress:
-
-        c = c.to_corpus(compress=True)
+    c = apply_stoplist(c, nltk_stop=nltk_stop,
+                       freq=stop_freq, add_stop=add_stop)
 
     return c
 
@@ -493,10 +616,10 @@ def coll_tokenize(books, book_names):
 
 
 
-def coll_corpus(coll_dir, ignore=['.json', '.log'], compress=True,
-                nltk_stop=True, mask_freq=1, add_stop=None):
+def coll_corpus(coll_dir, ignore=['.json', '.log'],
+                nltk_stop=True, stop_freq=1, add_stop=None):
 
-    from vsm.corpus import MaskedCorpus
+    from vsm.corpus import Corpus
 
     books = []
     
@@ -532,14 +655,10 @@ def coll_corpus(coll_dir, ignore=['.json', '.log'], compress=True,
 
     names, data = zip(*tok.items())
     
-    c = MaskedCorpus(words, tok_data=data, tok_names=names)
+    c = Corpus(words, tok_data=data, tok_names=names)
 
-    c = mask_corpus(c, nltk_stop=nltk_stop,
-                    mask_freq=mask_freq, add_stop=add_stop)
-
-    if compress:
-
-        c = c.to_corpus(compress=True)
+    c = apply_stoplist(c, nltk_stop=nltk_stop,
+                       freq=stop_freq, add_stop=add_stop)
 
     return c
 

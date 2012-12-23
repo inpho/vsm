@@ -32,7 +32,7 @@ setup(
     ],
     packages=['vsm',
               'vsm.corpus',
-              'vsm.corpus.util',
               'vsm.model',
+              'vsm.util',
               'vsm.viewer'],
 )
