@@ -5,6 +5,8 @@ import numpy as np
 
 import nltk
 
+from vsm.corpus import Corpus
+
 
 
 __all__=['apply_stoplist', 'toy_corpus', 'file_corpus',
@@ -264,8 +266,6 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         corpus. Document tokens are named `documents`.
 
     """
-    from vsm.corpus import Corpus
-
     if is_filename:
 
         with open(plain_corpus, 'r') as f:
@@ -364,9 +364,6 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     """
     For use with a plain text corpus contained in a single string.
     """
-
-    from vsm.corpus import Corpus
-
     with open(filename, mode='r') as f:
 
         text = f.read()
@@ -524,9 +521,6 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
         corpus. Document tokens are named `documents`.
 
     """
-
-    from vsm.corpus import MaskedCorpus
-
     chunks = []
     
     filenames = os.listdir(plain_dir)
@@ -618,8 +612,6 @@ def coll_tokenize(books, book_names):
 
 def coll_corpus(coll_dir, ignore=['.json', '.log'],
                 nltk_stop=True, stop_freq=1, add_stop=None):
-
-    from vsm.corpus import Corpus
 
     books = []
     

@@ -12,8 +12,6 @@ from sys import stdout
 
 import numpy as np
 
-from vsm import corpus
-
 
 
 def smpl_cat(d):
@@ -246,6 +244,8 @@ class LDAGibbs(object):
     @staticmethod
     def load(filename):
 
+        from vsm.util.corpustools import empty_corpus
+
         print 'Loading LDA-Gibbs data from', filename
 
         arrays_in = np.load(filename)
@@ -260,7 +260,7 @@ class LDAGibbs(object):
 
         log_prob_init = arrays_in['log_prob_init'][()]
 
-        m = LDAGibbs(corpus.empty_corpus(tok_name),
+        m = LDAGibbs(empty_corpus(tok_name),
                      tok_name, K=K, alpha=alpha,
                      beta=beta, log_prob=log_prob_init)
 
