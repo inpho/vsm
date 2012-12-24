@@ -213,7 +213,7 @@ class LDAGibbs(object):
 
     def phi_w(self, w):
 
-        ph_w = self.top_word[:, w] / sum(self.top_word[:, w])
+        ph_w = self.top_word[:, w] / self.top_word[:, w].sum()
 
         return ph_w
 
