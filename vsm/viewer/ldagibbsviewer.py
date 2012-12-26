@@ -95,6 +95,57 @@ class LDAGibbsViewer(object):
         return top_topics
 
 
+
+    def print_relevant_topics(self, term, n=0, depth=10):
+        """
+        Print [n] topic distributions that are most relevant to [term]
+        """
+
+        if n == 0:
+
+            n = set([])
+
+            res = self.word_topics(term)
+
+            for i,j,k in res:
+
+                n.add(k)
+
+            n = len(n)
+
+        if n%2 != 0:   # Making [n] even. Should be deleted if we can print an odd number of topics.
+
+            n += 1
+
+        topics = []
+
+        top_topics = self.relevant_topics(term, n)
+
+        phi_term = self.model.phi_w(self.corpus.terms_int[term])
+
+        for j in top_topics:
+
+            topics.append(self.topic(j, as_strings=True)[:depth])
+
+        for i in xrange(0, len(topics), 2):
+
+            print '{0:<40}{1}'.format(' Topic ' + str(top_topics[i]) + '(' + str(phi_term[top_topics[i]]) + ')',
+                                      ' Topic ' + str(top_topics[i+1]) + '(' + str(phi_term[top_topics[i+1]]) + ')')
+
+            print '-' * 70
+
+            rows = zip(topics[i], topics[i+1])
+
+            for row in rows:
+
+                print ('{0:<20}{1:<20.5f}{2:<20}{3:.5f}'
+                       .format(row[0][0], row[0][1],
+                               row[1][0], row[1][1]))
+
+            print '-' * 70
+
+
+
     def doc_topics(self, doc_query):
         """
         """
