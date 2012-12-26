@@ -81,6 +81,19 @@ class LDAGibbsViewer(object):
             print '-' * 70
 
 
+    def relevant_topics(self, term, n):
+        """
+        Return a list of [n] topic numbers that are most relevant to [term]
+        """
+
+        phi_term = self.model.phi_w(self.corpus.terms_int[term])
+
+        top_topics = sorted(range(len(phi_term)), key=lambda i: phi_term[i])[-n:]
+
+        top_topics.reverse()
+
+        return top_topics
+
 
     def doc_topics(self, doc_query):
         """
