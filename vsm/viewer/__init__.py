@@ -2,7 +2,7 @@ import numpy as np
 
 from vsm import enum_sort
 from vsm import corpus as cps
-from vsm.corpus import util
+from vsm import util
 from vsm import model
 
 import similarity
