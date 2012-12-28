@@ -2,7 +2,7 @@ import numpy as np
 
 from vsm import enum_sort
 from vsm import corpus as cps
-from vsm.corpus.util.corpustools import word_tokenize
+from vsm.util.corpustools import word_tokenize
 from vsm import model
 
 import similarity
