@@ -2,7 +2,7 @@ import numpy as np
 
 from vsm import enum_sort
 from vsm import corpus as cps
-from vsm import util
+from vsm.corpus.util.corpustools import word_tokenize
 from vsm import model
 
 import similarity
@@ -112,7 +112,7 @@ def mean_similar_terms(corpus, matrix, query,
                        norms=None, filter_nan=True,
                        rem_masked=True):
 
-    terms = util.word_tokenize(query)
+    terms = word_tokenize(query)
 
     def sim_terms(term):
 
