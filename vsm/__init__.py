@@ -6,7 +6,7 @@ from scipy import sparse
 def enum_array(a):
 
     a = np.array(list(enumerate(a)),
-                 dtype=[('i', np.int32),('v', a.dtype)])
+                 dtype=[('i', np.int32),('value', a.dtype)])
 
     return a
 
@@ -16,7 +16,7 @@ def enum_sort(a):
 
     a = enum_array(a)
 
-    a.sort(order='v')
+    a.sort(order='value')
     
     a = a[::-1]
 
