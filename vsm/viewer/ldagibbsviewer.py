@@ -1,8 +1,20 @@
 import numpy as np
 
-from vsm import enum_sort, map_strarr
-from vsm import viewer as viewer
-from vsm.viewer import similarity
+from vsm import (enum_sort as _enum_sort, 
+                 map_strarr as _map_strarr)
+
+from vsm.viewer import (IndexedValueArray as _IndexedValueArray,
+                        res_term_type as _res_term_type_,
+                        res_doc_type as _res_doc_type_,
+                        doc_label_name as _doc_label_name_,
+                        similar_terms as _similar_terms_,
+                        mean_similar_terms as _mean_similar_terms_,
+                        similar_documents as _similar_documents_,
+                        simmat_terms as _simmat_terms_,
+                        simmat_documents as _simmat_documents_)
+
+from vsm.viewer.similarity import (col_norms as _col_norms,
+                                   row_norms as _row_norms)
 
 
 
@@ -21,55 +33,93 @@ class LDAGibbsViewer(object):
 
 
 
-    def topics(self, n_terms=None, top_indices=None, as_strings=True):
+    @property
+    def _doc_label_name(self):
 
-        if not top_indices:
+        return _doc_label_name_(self.model.tok_name)
 
-            top_indices = xrange(self.model.top_word.shape[0])
+
+
+    def _res_doc_type(self, doc):
+
+        return _res_doc_type_(self.corpus, self.model.tok_name, 
+                              self._doc_label_name, doc)
+
+
+
+    def _res_term_type(self, term):
+
+        return _res_term_type_(self.corpus, term)
+
+
+
+    def topics(self, n_terms=None, k_indices=[], as_strings=True):
+
+        if len(k_indices) == 0:
+
+            k_indices = xrange(self.model.top_word.shape[0])
         
-        k_array = []
+        k_arr = []
 
-        for k in top_indices:
+        for k in k_indices:
 
             t = self.model.phi_t(k)
         
-            t = enum_sort(t)        
+            t = _enum_sort(t)        
         
             if as_strings:
 
-                t = map_strarr(t, self.corpus.terms, k='i', new_k='term')
+                t = _map_strarr(t, self.corpus.terms, k='i')
 
-            k_array.append(t)
+            k_arr.append(t)
 
-        k_array = np.array(k_array).view(viewer.IndexedValueArray)
+        k_arr = np.array(k_arr).view(_IndexedValueArray)
 
-        k_array.subheaders = [('Topic ' + str(k), 'Prob') 
-                              for k in top_indices]
+        k_arr.subheaders = [('Topic ' + str(k), 'Prob') 
+                              for k in k_indices]
 
         if n_terms:
 
-            return k_array[:, :n_terms]
+            return k_arr[:, :n_terms]
 
-        return k_array
+        return k_arr
 
 
 
-    def doc_topics(self, doc_query, n_topics=None):
-        """
-        """
-        if isinstance(doc_query, dict):
+    def sorted_topics(self, n_terms=None, as_strings=True, word=None):
+
+        if word:
+
+            w, word = self._res_term_type(word)
+
+            phi_w = self.model.phi_w(w)
+
+            k_indices = _enum_sort(phi_w)['i']
+
+            k_arr = self.topics(n_terms=n_terms, k_indices=k_indices, 
+                                as_strings=as_strings)
+
+            k_arr.main_header = 'Sorted by Word: ' + word
+
+        else:
+
+            k_arr = self.topics(n_terms=n_terms, as_strings=as_strings)
+
+            k_arr.main_header = 'Sorted by Topic Index'
+            
+        return k_arr
         
-            d = self.corpus.meta_int(self.model.tok_name, doc_query)
+
+
+
+    def doc_topics(self, doc, n_topics=None):
+        """
+        """
+        d, label = self._res_doc_type(doc)
 
         t = self.model.theta_d(d)
 
-        t = enum_sort(t)
-
-        t = t.view(viewer.IndexedValueArray)
-
-        tn = self.model.tok_name
-
-        label = self.corpus.get_metadatum(tn, doc_query, tn + '_label')
+        t = _enum_sort(t).view(_IndexedValueArray)
 
         t.main_header = 'Document: ' + str(label)
 
@@ -96,9 +146,7 @@ class LDAGibbsViewer(object):
         t : int
             Topic assigned to the `d,i`th term by the model
         """
-        if isinstance(word, basestring):
-            
-            w = self.corpus.terms_int[word]
+        w, word = self._res_term_type(word)
 
         idx = [(self.model.W[d] == w) for d in xrange(len(self.model.W))]
 
@@ -113,7 +161,7 @@ class LDAGibbsViewer(object):
 
             tn = self.model.tok_name
 
-            docs = self.corpus.view_metadata(tn)[tn + '_label']
+            docs = self.corpus.view_metadata(tn)[self._doc_label_name]
         
             dt = [('i', [('doc', docs.dtype), ('pos',np.int)]), 
                   ('value', np.int)]
@@ -124,80 +172,13 @@ class LDAGibbsViewer(object):
 
             dt = [('i', [('doc', np.int), ('pos',np.int)]), ('value', np.int)]
 
-        Z_w = np.array(Z_w, dtype=dt)
+        Z_w = np.array(Z_w, dtype=dt).view(_IndexedValueArray)
 
-        Z_w = Z_w.view(viewer.IndexedValueArray)
+        Z_w.main_header = 'Word: ' + word
 
-        Z_w.main_header = 'Term: ' + str(word)
-
-        Z_w.subheaders = [('Document, Pos', 'Top')]
+        Z_w.subheaders = [('Document, Pos', 'Topic')]
 
         return Z_w
-
-
-
-    def relevant_topics(self, term, n):
-        """
-        Return a list of [n] topic numbers that are most relevant to [term]
-        """
-
-        phi_term = self.model.phi_w(self.corpus.terms_int[term])
-
-        top_topics = sorted(range(len(phi_term)), key=lambda i: phi_term[i])[-n:]
-
-        top_topics.reverse()
-
-        return top_topics
-
-
-
-    def print_relevant_topics(self, term, n=0, depth=10):
-        """
-        Print [n] topic distributions that are most relevant to [term]
-        """
-
-        if n == 0:
-
-            n = set([])
-
-            res = self.word_topics(term)
-
-            for i,j,k in res:
-
-                n.add(k)
-
-            n = len(n)
-
-        if n%2 != 0:   # Making [n] even. Should be deleted if we can print an odd number of topics.
-
-            n += 1
-
-        topics = []
-
-        top_topics = self.relevant_topics(term, n)
-
-        phi_term = self.model.phi_w(self.corpus.terms_int[term])
-
-        for j in top_topics:
-
-            topics.append(self.topic(j, as_strings=True)[:depth])
-
-        for i in xrange(0, len(topics), 2):
-
-            print '{0:<40}{1}'.format(' Topic ' + str(top_topics[i]) + '(' + str(phi_term[top_topics[i]]) + ')',
-                                      ' Topic ' + str(top_topics[i+1]) + '(' + str(phi_term[top_topics[i+1]]) + ')')
-
-            print '-' * 70
-
-            rows = zip(topics[i], topics[i+1])
-
-            for row in rows:
-
-                print ('{0:<20}{1:<20.5f}{2:<20}{3:.5f}'
-                       .format(row[0][0], row[0][1],
-                               row[1][0], row[1][1]))
-
-            print '-' * 70
 
 
 
@@ -206,7 +187,7 @@ class LDAGibbsViewer(object):
 
         if self._term_norms is None:
 
-            self._term_norms = similarity.col_norms(self.model.top_word)            
+            self._term_norms = _col_norms(self.model.top_word)            
 
         return self._term_norms
 
@@ -217,7 +198,7 @@ class LDAGibbsViewer(object):
 
         if self._doc_norms is None:
 
-            self._doc_norms = similarity.row_norms(self.model.doc_top)
+            self._doc_norms = _row_norms(self.model.doc_top)
 
         return self._doc_norms
 
@@ -225,48 +206,48 @@ class LDAGibbsViewer(object):
     
     def similar_terms(self, term, filter_nan=True, rem_masked=True):
 
-        return viewer.similar_terms(self.corpus,
+        return _similar_terms_(self.corpus,
+                               self.model.top_word.T,
+                               term,
+                               norms=self.term_norms,
+                               filter_nan=filter_nan,
+                               rem_masked=rem_masked)
+    
+
+
+    def mean_similar_terms(self, query, filter_nan=True, rem_masked=True):
+
+        return _mean_similar_terms_(self.corpus,
                                     self.model.top_word.T,
-                                    term,
+                                    query,
                                     norms=self.term_norms,
                                     filter_nan=filter_nan,
                                     rem_masked=rem_masked)
 
 
 
-    def mean_similar_terms(self, query, filter_nan=True, rem_masked=True):
+    def similar_documents(self, doc, filter_nan=True):
 
-        return viewer.mean_similar_terms(self.corpus,
-                                         self.model.top_word.T,
-                                         query,
-                                         norms=self.term_norms,
-                                         filter_nan=filter_nan,
-                                         rem_masked=rem_masked)
-
-
-
-    def similar_documents(self, doc_query, filter_nan=True):
-
-        return viewer.similar_documents(self.corpus,
-                                        self.model.doc_top.T,
-                                        self.model.tok_name,
-                                        doc_query,
-                                        norms=self.doc_norms,
-                                        filter_nan=filter_nan)
-
+        return _similar_documents_(self.corpus,
+                                   self.model.doc_top.T,
+                                   self.model.tok_name,
+                                   doc,
+                                   norms=self.doc_norms,
+                                   filter_nan=filter_nan)
+    
 
 
     def simmat_terms(self, term_list):
 
-        return viewer.simmat_terms(self.corpus,
-                                   self.model.top_word.T,
-                                   term_list)
+        return _simmat_terms_(self.corpus,
+                              self.model.top_word.T,
+                              term_list)
+    
 
 
+    def simmat_documents(self, docs):
 
-    def simmat_documents(self, doc_queries):
-
-        return viewer.simmat_documents(self.corpus,
-                                       self.model.doc_top.T,
-                                       self.model.tok_name,
-                                       doc_queries)
+        return _simmat_documents_(self.corpus,
+                                  self.model.doc_top.T,
+                                  self.model.tok_name,
+                                  docs)

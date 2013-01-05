@@ -5,7 +5,8 @@ from vsm import corpus as cps
 from vsm.util.corpustools import word_tokenize
 from vsm import model
 
-import similarity
+from similarity import (similar_rows, similar_columns, 
+                        simmat_rows, simmat_columns)
 
 
 
@@ -36,29 +37,26 @@ class Viewer(object):
 def simmat_terms(corpus, matrix, term_list):
     """
     """
-    indices = [corpus.terms_int[term] for term in term_list]
+    indices, terms = zip([res_term_type(corpus, term) 
+                          for term in term_list])
 
-    simmat = similarity.simmat_rows(matrix, indices)
+    simmat = simmat_rows(matrix, indices)
 
-    simmat.labels = term_list
+    simmat.labels = terms
     
     return simmat
 
 
 
-def simmat_documents(corpus, matrix, tok_name, doc_queries):
+def simmat_documents(corpus, matrix, tok_name, doc_list):
+    """
+    """
+    indices, labels = zip([res_doc_type(corpus, tok_name, doc) 
+                           for doc in doc_list])
 
-    for i,doc_query in enumerate(doc_queries):
+    simmat = simmat_columns(matrix, indices)
 
-        if isinstance(doc_query, dict):
-
-            doc_queries[i] = corpus.meta_int(tok_name, doc_query)
-
-    doc_labels = corpus.view_metadata(tok_name)[tok_name + '_label'][doc_queries]
-        
-    simmat = similarity.simmat_columns(matrix, doc_queries)
-
-    simmat.labels = doc_labels
+    simmat.labels = labels
 
     return simmat
 
@@ -67,105 +65,106 @@ def simmat_documents(corpus, matrix, tok_name, doc_queries):
 def similar_terms(corpus, matrix, term,
                   norms=None, filter_nan=True,
                   rem_masked=True):
-
-    i = corpus.terms_int[term]
+    """
+    """
+    i, term = res_term_type(corpus, term)
     
-    sim_vals = similarity.similar_rows(i, matrix,
+    t_arr = similar_rows(i, matrix,
                                        norms=norms,
                                        filter_nan=filter_nan)
 
-    sim_vals = np.array([(corpus.terms[i], v) for i,v in sim_vals],
+    t_arr = np.array([(corpus.terms[i], v) for i,v in t_arr],
                         dtype=[('i', corpus.terms.dtype),
-                               ('value', sim_vals.dtype['value'])])
+                               ('value', t_arr.dtype['value'])])
 
     if rem_masked:
 
         f = np.vectorize(lambda x: x is not np.ma.masked)
 
-        sim_vals = sim_vals[f(sim_vals['i'])]
+        t_arr = t_arr[f(t_arr['i'])]
 
-    sim_vals = sim_vals.view(TermValueArray)
+    t_arr = t_arr.view(IndexedValueArray)
 
-    sim_vals.main_header = term
+    t_arr.main_header = term
 
-    sim_vals.subheaders = [('i', 'Cosine')]
+    t_arr.subheaders = [('Term', 'Cosine')]
 
-    return sim_vals
+    return t_arr
 
 
 
-def similar_documents(corpus, matrix, tok_name, doc_query,
+def similar_documents(corpus, matrix, tok_name, doc,
                       norms=None, filter_nan=True):
+    """
+    """
+    d, label = res_doc_type(corpus, doc)
 
-    if isinstance(doc_query, dict):
-        
-        doc_query = corpus.meta_int(tok_name, doc_query)
-    
-    sim_vals = similarity.similar_columns(doc_query, matrix, norms=norms,
+    d_arr = similar_columns(d, matrix, norms=norms,
                                           filter_nan=filter_nan)
 
-    docs = corpus.view_metadata(tok_name)[tok_name + '_label']
+    docs = corpus.view_metadata(tok_name)[doc_label_name(tok_name)]
 
-    sim_vals = np.array([(docs[i], v) for i,v in sim_vals],
-                        dtype=[('doc', docs.dtype),
-                               ('value', sim_vals.dtype['value'])])
+    d_arr = np.array([(docs[i], v) for i,v in d_arr],
+                     dtype=[('doc', docs.dtype), 
+                            ('value', d_arr.dtype['value'])])
 
-    sim_vals = sim_vals.view(TermValueArray)
+    d_arr = d_arr.view(IndexedValueArray)
 
-    sim_vals.main_header = docs[doc_query]
+    d_arr.main_header = label
 
-    sim_vals.subheaders = [('Document', 'Cosine')]
+    d_arr.subheaders = [('Document', 'Cosine')]
 
-    return sim_vals
+    return d_arr
 
 
 
 def mean_similar_terms(corpus, matrix, query,
                        norms=None, filter_nan=True,
                        rem_masked=True):
-
+    """
+    """
     terms = word_tokenize(query)
 
     def sim_terms(term):
 
         i = corpus.terms_int[term]
     
-        ra = similarity.similar_rows(i, matrix, norms=norms,
+        ra = similar_rows(i, matrix, norms=norms,
                                      sort=False, filter_nan=False)
 
         return ra['value']
 
 
 
-    sim_vals = [sim_terms(term) for term in terms]
+    t_arr = [sim_terms(term) for term in terms]
 
-    sim_vals = reduce(np.add, sim_vals)
+    t_arr = reduce(np.add, t_arr)
     
-    sim_vals = sim_vals / len(terms)
+    t_arr = t_arr / len(terms)
 
-    sim_vals = enum_sort(sim_vals)
+    t_arr = enum_sort(t_arr)
     
     if filter_nan:
 
-        sim_vals = sim_vals[np.isfinite(sim_vals['value'])]
+        t_arr = t_arr[np.isfinite(t_arr['value'])]
 
-    sim_vals = np.array([(corpus.terms[i], v) for i,v in sim_vals],
+    t_arr = np.array([(corpus.terms[i], v) for i,v in t_arr],
                         dtype=[('i', corpus.terms.dtype),
-                               ('value', sim_vals.dtype['value'])])
+                               ('value', t_arr.dtype['value'])])
 
     if rem_masked:
 
         f = np.vectorize(lambda x: x is not np.ma.masked)
 
-        sim_vals = sim_vals[f(sim_vals['i'])]
+        t_arr = t_arr[f(t_arr['i'])]
 
-    sim_vals = sim_vals.view(TermValueArray)
+    t_arr = t_arr.view(IndexedValueArray)
 
-    sim_vals.main_header = query
+    t_arr.main_header = query
 
-    sim_vals.subheaders = [('i', 'Cosine')]
+    t_arr.subheaders = [('Term', 'Cosine')]
 
-    return sim_vals
+    return t_arr
 
 
 
@@ -303,6 +302,63 @@ class IndexedValueArray(np.ndarray):
 
 
 
+def doc_label_name(tok_name):
+
+    return tok_name + '_label'
+
+
+
+def res_doc_type(corpus, tok_name, label_name, doc):
+    """
+    If `doc` is a string or a dict, performs a look up for its
+    associated integer. If `doc` is a dict, looks for its label.
+    Finally, if `doc` is an integer, stringifies `doc` for use as
+    a label. 
+    
+    Returns an integer, string pair: (<document index>, <document
+    label>).
+    """
+    if isinstance(doc, basestring):
+        
+        query = {label_name: doc}
+        
+        d = corpus.meta_int(tok_name, query)
+        
+    elif isinstance(doc, dict):
+        
+        d = corpus.meta_int(tok_name, doc)
+        
+        #TODO: Define an exception for failed queries in
+        #vsm.corpus. Use it here.
+        
+        doc = corpus.view_metadata(tok_name)[label_name][d]
+
+    else:
+
+        d, doc = doc, str(doc)
+
+    return d, doc
+                    
+            
+
+def res_term_type(corpus, term):
+    """
+    If `term` is a string, performs a look up for its associated
+    integer. Otherwise, stringifies `term`. 
+
+    Returns an integer, string pair: (<term index>, <term label>).
+    """
+    if isinstance(term, basestring):
+            
+        return corpus.terms_int[term], term
+
+    return term, str(term)
+        
+
+
+############################################################
+#                        Testing
+############################################################
 
 def test_IndexedValueArray():
 
