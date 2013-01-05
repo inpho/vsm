@@ -54,7 +54,7 @@ def similar_rows(row_index,
     
     if filter_nan:
 
-        out = out[np.isfinite(out['v'])]
+        out = out[np.isfinite(out['value'])]
 
     return out
 

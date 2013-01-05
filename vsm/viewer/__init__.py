@@ -75,20 +75,20 @@ def similar_terms(corpus, matrix, term,
                                        filter_nan=filter_nan)
 
     sim_vals = np.array([(corpus.terms[i], v) for i,v in sim_vals],
-                        dtype=[('term', corpus.terms.dtype),
-                               ('value', sim_vals.dtype['v'])])
+                        dtype=[('i', corpus.terms.dtype),
+                               ('value', sim_vals.dtype['value'])])
 
     if rem_masked:
 
         f = np.vectorize(lambda x: x is not np.ma.masked)
 
-        sim_vals = sim_vals[f(sim_vals['term'])]
+        sim_vals = sim_vals[f(sim_vals['i'])]
 
     sim_vals = sim_vals.view(TermValueArray)
 
     sim_vals.main_header = term
 
-    sim_vals.subheaders = [('Term', 'Cosine')]
+    sim_vals.subheaders = [('i', 'Cosine')]
 
     return sim_vals
 
@@ -108,7 +108,7 @@ def similar_documents(corpus, matrix, tok_name, doc_query,
 
     sim_vals = np.array([(docs[i], v) for i,v in sim_vals],
                         dtype=[('doc', docs.dtype),
-                               ('value', sim_vals.dtype['v'])])
+                               ('value', sim_vals.dtype['value'])])
 
     sim_vals = sim_vals.view(TermValueArray)
 
@@ -133,7 +133,7 @@ def mean_similar_terms(corpus, matrix, query,
         ra = similarity.similar_rows(i, matrix, norms=norms,
                                      sort=False, filter_nan=False)
 
-        return ra['v']
+        return ra['value']
 
 
 
@@ -147,29 +147,50 @@ def mean_similar_terms(corpus, matrix, query,
     
     if filter_nan:
 
-        sim_vals = sim_vals[np.isfinite(sim_vals['v'])]
+        sim_vals = sim_vals[np.isfinite(sim_vals['value'])]
 
     sim_vals = np.array([(corpus.terms[i], v) for i,v in sim_vals],
-                        dtype=[('term', corpus.terms.dtype),
-                               ('value', sim_vals.dtype['v'])])
+                        dtype=[('i', corpus.terms.dtype),
+                               ('value', sim_vals.dtype['value'])])
 
     if rem_masked:
 
         f = np.vectorize(lambda x: x is not np.ma.masked)
 
-        sim_vals = sim_vals[f(sim_vals['term'])]
+        sim_vals = sim_vals[f(sim_vals['i'])]
 
     sim_vals = sim_vals.view(TermValueArray)
 
     sim_vals.main_header = query
 
-    sim_vals.subheaders = [('Term', 'Cosine')]
+    sim_vals.subheaders = [('i', 'Cosine')]
 
     return sim_vals
 
 
 
-class TermValueArray(np.ndarray):
+def format_entry(x):
+
+    # np.void is the type of the tuples that appear in numpy
+    # structured arrays
+    if isinstance(x, np.void):
+
+        return ', '.join([format_entry(i) for i in x.tolist()]) 
+        
+    if isinstance(x, basestring):
+
+        return x
+
+    if isinstance(x, int) or isinstance(x, long):
+
+        return str(x)
+
+    # Assume it's a float then
+    return '{0:.5f}'.format(x)
+
+
+        
+class IndexedValueArray(np.ndarray):
     """
     """
     def __new__(cls, input_array, main_header=None, subheaders=None):
@@ -206,11 +227,11 @@ class TermValueArray(np.ndarray):
 
         else:
 
-            return super(TermValueArray, self).__str__()
+            return super(IndexedValueArray, self).__str__()
 
-        vsep_1col = '-' * 30 + '\n'
+        vsep_1col = '-' * 37 + '\n'
 
-        vsep_2col = '-' * 65 + '\n'
+        vsep_2col = '-' * 75 + '\n'
 
         if arr.main_header:
         
@@ -218,13 +239,13 @@ class TermValueArray(np.ndarray):
                 
                 s = vsep_1col
 
-                s += '{0:^30}\n'.format(arr.main_header)
+                s += '{0:^35}\n'.format(arr.main_header)
 
             else:
 
                 s = vsep_2col
 
-                s += '{0:^65}\n'.format(arr.main_header)
+                s += '{0:^75}\n'.format(arr.main_header)
 
         else:
 
@@ -238,7 +259,7 @@ class TermValueArray(np.ndarray):
 
                 s += vsep_2col
 
-                s += ('{0:<20}{1:<15}{2:<20}{3}\n'
+                s += ('{0:<25}{1:<15}{2:<25}{3}\n'
                       .format(arr.subheaders[i][0], 
                               arr.subheaders[i][1],
                               arr.subheaders[i+1][0], 
@@ -248,9 +269,15 @@ class TermValueArray(np.ndarray):
 
             for j in xrange(n):
 
-                s += ('{0:<20}{1:<15.5f}{2:<20}{3:.5f}\n'
-                      .format(arr[i][j][0], arr[i][j][1], 
-                              arr[i+1][j][0], arr[i+1][j][1]))
+                a0 = format_entry(arr[i][j][0])
+
+                a1 = format_entry(arr[i][j][1])
+
+                b0 = format_entry(arr[i+1][j][0])
+
+                b1 = format_entry(arr[i+1][j][1])
+
+                s += '{0:<25}{1:<15}{2:<25}{3}\n'.format(a0, a1, b0, b1)
 
         if m % 2:
 
@@ -258,7 +285,7 @@ class TermValueArray(np.ndarray):
 
                 s += vsep_1col
 
-                s += ('{0:<20}{1}\n'
+                s += ('{0:<25}{1}\n'
                       .format(arr.subheaders[m-1][0], 
                               arr.subheaders[m-1][1]))
                                       
@@ -266,15 +293,18 @@ class TermValueArray(np.ndarray):
 
             for j in xrange(n):
 
-                s += ('{0:<20}{1:<15.5f}\n'
-                      .format(arr[m-1][j][0], arr[m-1][j][1]))
+                a0 = format_entry(arr[m-1][j][0])
+
+                a1 = format_entry(arr[m-1][j][1])
+
+                s += '{0:<25}{1}\n'.format(a0, a1)
             
         return s
 
 
 
 
-def test_TermValueArray():
+def test_IndexedValueArray():
 
     terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
              'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
@@ -282,14 +312,14 @@ def test_TermValueArray():
 
     values = [np.random.random() for t in terms]
 
-    d = [('term', np.array(terms).dtype), 
+    d = [('i', np.array(terms).dtype), 
          ('value', np.array(values).dtype)]
 
     v = np.array(zip(terms, values), dtype=d)
 
     arr = np.vstack([v] * 5)
 
-    arr = arr.view(TermValueArray)
+    arr = arr.view(IndexedValueArray)
 
     arr.main_header = 'Test 2-d Array'
 
@@ -300,7 +330,7 @@ def test_TermValueArray():
 
     print
 
-    arr = v.view(TermValueArray)
+    arr = v.view(IndexedValueArray)
 
     arr.main_header = 'Test 1-d Array'
     

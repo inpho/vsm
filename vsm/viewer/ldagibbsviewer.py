@@ -41,7 +41,7 @@ class LDAGibbsViewer(object):
 
             k_array.append(t)
 
-        k_array = np.array(k_array).view(viewer.TermValueArray)
+        k_array = np.array(k_array).view(viewer.IndexedValueArray)
 
         k_array.subheaders = [('Topic ' + str(k), 'Prob') 
                               for k in top_indices]
@@ -65,7 +65,7 @@ class LDAGibbsViewer(object):
 
         t = enum_sort(t)
 
-        t = t.view(viewer.TermValueArray)
+        t = t.view(viewer.IndexedValueArray)
 
         tn = self.model.tok_name
 
@@ -80,6 +80,59 @@ class LDAGibbsViewer(object):
             return t[:n_topics]
 
         return t
+
+
+
+    def word_topics(self, word, as_strings=True):
+        """
+        Takes `word` which is either an integer or a string and
+        returns a structured array of pairs `((d, i), t)`:
+
+        d, i : int or string, int
+            Term coordinate of an occurrence of `word`; i.e, the `i`th
+            term in the `d`th document. If `as_strings` is True, then
+            `d` is assigned the document label associated with the
+            document index `d`.
+        t : int
+            Topic assigned to the `d,i`th term by the model
+        """
+        if isinstance(word, basestring):
+            
+            w = self.corpus.terms_int[word]
+
+        idx = [(self.model.W[d] == w) for d in xrange(len(self.model.W))]
+
+        Z = self.model.Z
+
+        Z_w = [((d, i), t) 
+               for d in xrange(len(Z)) 
+               for i,t in enumerate(Z[d])
+               if idx[d][i]]
+
+        if as_strings:
+
+            tn = self.model.tok_name
+
+            docs = self.corpus.view_metadata(tn)[tn + '_label']
+        
+            dt = [('i', [('doc', docs.dtype), ('pos',np.int)]), 
+                  ('value', np.int)]
+
+            Z_w = [((docs[d], i), t) for ((d, i), t) in Z_w]
+
+        else:
+
+            dt = [('i', [('doc', np.int), ('pos',np.int)]), ('value', np.int)]
+
+        Z_w = np.array(Z_w, dtype=dt)
+
+        Z_w = Z_w.view(viewer.IndexedValueArray)
+
+        Z_w.main_header = 'Term: ' + str(word)
+
+        Z_w.subheaders = [('Document, Pos', 'Top')]
+
+        return Z_w
 
 
 
@@ -145,70 +198,6 @@ class LDAGibbsViewer(object):
                                row[1][0], row[1][1]))
 
             print '-' * 70
-
-
-
-    def word_topics(self, word):
-        """
-        Takes `word` which is either an integer or a string and
-        returns a list of triples `(d, i, t)`:
-
-        d, i : int, int
-            Term coordinate of an occurrence of `word`; i.e, the `i`th
-            term in the `d`th document
-        t : int
-            Topic assigned to the `d,i`th term by the model
-        """
-        if isinstance(word, basestring):
-            
-            word = self.corpus.terms_int[word]
-
-        idx = [(self.model.W[d] == word) for d in xrange(len(self.model.W))]
-
-        Z = self.model.Z
-
-        Z_w = [(d, i, t) 
-               for d in xrange(len(Z)) 
-               for i,t in enumerate(Z[d])
-               if idx[d][i]]
-
-        return Z_w
-
-
-
-    def print_word_topics(self, word, metadata=False):
-        """
-        """
-        Z_w = self.word_topics(word)
-
-        dw = 12
-
-        if metadata:
-
-            docs = self.corpus.view_metadata('documents')
-
-            dw = max([len(d) for d in docs]) + 4
-
-        h = 'Term: ' + str(word)
-
-        print
-
-        print h
-
-        print '-' * len(h)
-
-        print '{0:<{dw}}{1:^13}{2:<5}'.format('Document', 'Rel. pos.', 
-                                              'Topic', dw=dw)
-
-        print '-' * (dw + 18)
-
-        for d, i, t in Z_w:
-            
-            if metadata:
-
-                d = docs[d]
-
-            print ' {0:<{dw}}{1:^13}{2:^5}'.format(d, i, t, dw=(dw-1))
 
 
 
