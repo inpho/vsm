@@ -1,9 +1,8 @@
 import numpy as np
 from scipy import sparse
 
-from vsm import row_norms, col_norms, enum_array, enum_sort
+from vsm import row_norms, col_norms, enum_array, enum_sort, sparse_mvdot
 
-def_submat_size = 1e5
 
 
 
@@ -12,25 +11,21 @@ def_submat_size = 1e5
 
 
 
-def similar_rows(row_index,
-                 matrix,
-                 filter_nan=False,
-                 sort=True,
-                 norms=None,
-                 submat_size=def_submat_size):
+def row_cosines(row, matrix, norms=None,
+                filter_nan=False, sort=True,
+                submat_size=def_submat_size):
     """
+    `row` must be a 2-dimensional array.
     """
     if sparse.issparse(matrix):
 
         matrix = matrix.tocsr()
 
-        nums = sparse_mvdot(matrix,
-                            matrix[row_index:row_index+1, :].T,
-                            submat_size=submat_size)
+        nums = sparse_mvdot(matrix, row.T, submat_size=submat_size)
 
     else:
         
-        nums = np.dot(matrix, matrix[row_index:row_index+1, :].T)
+        nums = np.dot(matrix, row.T)
 
         nums = np.squeeze(nums)
 
@@ -38,7 +33,9 @@ def similar_rows(row_index,
 
         norms = row_norms(matrix)
 
-    dens = norms * norms[row_index]
+    row_norm = row_norms(row)[0]
+
+    dens = norms * row_norm
 
     out = nums / dens
 
@@ -60,78 +57,6 @@ def similar_rows(row_index,
 
 
 
-def sparse_mvdot(m, v, submat_size=def_submat_size):
-    """
-    For sparse matrices. The expectation is that a dense view of the
-    entire matrix is too large. So the matrix is split into
-    submatrices (horizontal slices) which are converted to dense
-    matrices one at a time.
-    """
-
-    m = m.tocsr()
-
-    if sparse.issparse(v):
-
-        v = v.toarray()
-
-    v = v.reshape((v.size, 1))
-
-    out = np.empty((m.shape[0], 1))
-
-    if submat_size < m.shape[1]:
-
-        print 'Note: specified submatrix size is '\
-              'less than the number of columns in matrix'
-
-        m_rows = 1
-
-        k_submats = m.shape[0]
-
-    elif submat_size > m.size:
-
-        m_rows = m.shape[0]
-
-        k_submats = 1
-
-    else:
-
-        m_rows = int(submat_size / m.shape[1])
-
-        k_submats = int(m.shape[0] / m_rows)
-
-    for i in xrange(k_submats):
-
-        i *= m_rows
-
-        j = i + m_rows
-
-        submat = m[i:j, :]
-
-        out[i:j, :] = np.dot(submat.toarray(), v)
-
-    if j < m.shape[0]:
-
-        submat = m[j:, :]
-
-        out[j:, :] = np.dot(submat.toarray(), v)
-
-    return np.squeeze(out)
-
-
-
-def similar_columns(col_index,
-                    matrix,
-                    filter_nan=False,
-                    sort=True,
-                    norms=None,
-                    submat_size=def_submat_size):
-    """
-    """
-    return similar_rows(col_index, matrix.T, filter_nan=filter_nan,
-                        sort=sort, norms=norms, submat_size=submat_size)
-
-
-
 def simmat_rows(matrix, row_indices):
     """
     """
@@ -140,18 +65,6 @@ def simmat_rows(matrix, row_indices):
     sim_matrix.compute(matrix)
 
     return sim_matrix
-
-
-
-def simmat_columns(matrix, column_indices):
-    """
-    """
-    sim_matrix = SimilarityMatrix(indices=column_indices)
-
-    sim_matrix.compute(matrix.T)
-
-    return sim_matrix
-
 
 
 
@@ -186,7 +99,7 @@ class SimilarityMatrix(object):
 
         for i in xrange(data.shape[0] - 1):
 
-            results = similar_rows(0 , data, norms=norms, sort=False)
+            results = similar_rows(data[:1, :], data, norms=norms, sort=False)
 
             results = np.array([v for j,v in results])
 
@@ -198,7 +111,7 @@ class SimilarityMatrix(object):
 
         i += 1
 
-        results = similar_rows(0 , data, norms=norms, sort=False)
+        results = row_cosines(data[:1, :], data, norms=norms, sort=False)
 
         results = np.array([v for j,v in results])
 

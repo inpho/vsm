@@ -31,6 +31,8 @@ class LDAGibbsViewer(object):
 
         self._doc_norms = None
 
+        self._topic_norms = None
+
 
 
     @property
@@ -209,7 +211,49 @@ class LDAGibbsViewer(object):
         return self._doc_norms
 
 
+
+    @property
+    def topic_norms(self):
+
+        if self._topic_norms is None:
+
+            self._topic_norms = _row_norms(self.model.top_word)
+
+        return self._topic_norms
+
+
+
+    def sim_topics(self, k):
+        """
+        Computes and sorts the cosine values between a given topic `k`
+        and every topic.
+        """
+        pass
+
+
     
+    def sim_word_topic(self, word):
+        """
+        Computes and sorts the cosine values between a word `word` and
+        every topic. This word is represented in the space of topics
+        as a topic which assigns probability 1 to the word and 0 to
+        every other word.
+        """
+        pass
+
+
+
+    def sim_mean_word_topic(self, words):
+        """
+        Computes and sorts the cosine values between a list of words
+        `words` and every topic. The word list is represented in the
+        space of topics as a topic which assigns equal probability to
+        every word in list and 0 to every other word.
+        """
+        pass
+
+
+
     def similar_terms(self, term, filter_nan=True, rem_masked=True):
 
         return _similar_terms_(self.corpus,

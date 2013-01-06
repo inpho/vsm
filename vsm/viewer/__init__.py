@@ -5,8 +5,7 @@ from vsm import corpus as cps
 from vsm.util.corpustools import word_tokenize
 from vsm import model
 
-from similarity import (similar_rows, similar_columns, 
-                        simmat_rows, simmat_columns)
+from similarity import row_cosines, simmat_rows
 
 
 
@@ -54,7 +53,7 @@ def simmat_documents(corpus, matrix, tok_name, doc_list):
     indices, labels = zip([res_doc_type(corpus, tok_name, doc) 
                            for doc in doc_list])
 
-    simmat = simmat_columns(matrix, indices)
+    simmat = simmat_rows(matrix.T, indices)
 
     simmat.labels = labels
 
@@ -69,9 +68,8 @@ def similar_terms(corpus, matrix, term,
     """
     i, term = res_term_type(corpus, term)
     
-    t_arr = similar_rows(i, matrix,
-                                       norms=norms,
-                                       filter_nan=filter_nan)
+    t_arr = row_cosines(matrix[i:i+1, :], matrix, 
+                        norms=norms, filter_nan=filter_nan)
 
     t_arr = np.array([(corpus.terms[i], v) for i,v in t_arr],
                         dtype=[('i', corpus.terms.dtype),
@@ -99,8 +97,8 @@ def similar_documents(corpus, matrix, tok_name, doc,
     """
     d, label = res_doc_type(corpus, doc)
 
-    d_arr = similar_columns(d, matrix, norms=norms,
-                                          filter_nan=filter_nan)
+    d_arr = row_cosines(matrix[:, d:d+1].T, matrix.T, norms=norms,
+                        filter_nan=filter_nan)
 
     docs = corpus.view_metadata(tok_name)[doc_label_name(tok_name)]
 
@@ -125,22 +123,18 @@ def mean_similar_terms(corpus, matrix, query,
     """
     terms = word_tokenize(query)
 
-    def sim_terms(term):
+    t_arr = []
 
-        i = corpus.terms_int[term]
-    
-        ra = similar_rows(i, matrix, norms=norms,
-                                     sort=False, filter_nan=False)
+    for term in terms:
 
-        return ra['value']
+        t, term = res_term_type(term)
 
+        cosines = row_cosines(matrix[i:i+1, :], matrix, norms=norms,
+                              sort=False, filter_nan=False)['value']
+        
+        t_arr.append(cosines)
 
-
-    t_arr = [sim_terms(term) for term in terms]
-
-    t_arr = reduce(np.add, t_arr)
-    
-    t_arr = t_arr / len(terms)
+    t_arr = np.mean(t_arr, axis=0)
 
     t_arr = enum_sort(t_arr)
     
@@ -149,15 +143,15 @@ def mean_similar_terms(corpus, matrix, query,
         t_arr = t_arr[np.isfinite(t_arr['value'])]
 
     t_arr = np.array([(corpus.terms[i], v) for i,v in t_arr],
-                        dtype=[('i', corpus.terms.dtype),
-                               ('value', t_arr.dtype['value'])])
-
+                     dtype=[('i', corpus.terms.dtype),
+                            ('value', t_arr.dtype['value'])])
+    
     if rem_masked:
 
         f = np.vectorize(lambda x: x is not np.ma.masked)
-
+        
         t_arr = t_arr[f(t_arr['i'])]
-
+        
     t_arr = t_arr.view(IndexedValueArray)
 
     t_arr.main_header = query
@@ -165,6 +159,27 @@ def mean_similar_terms(corpus, matrix, query,
     t_arr.subheaders = [('Term', 'Cosine')]
 
     return t_arr
+
+
+
+def sim_topics(kw_mat, k):
+    """
+    Computes and sorts the cosine values between a given topic `k`
+    and every topic.
+    """
+    row = np.zeros((1, kw_mat.shape[0]), dtype=np.float64)
+
+    row[0, k] = 1
+
+    k_arr = row_cosines(row, matrix, norms=norms, filter_nan=filter_nan)
+
+    k_arr = k_arr.view(IndexedValueArray)
+
+    k_arr.main_header = 'Topic ' + str(k)
+
+    k_arr.subheaders = [('Topic', 'Cosine')]
+
+    return k_arr
 
 
 

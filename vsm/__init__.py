@@ -3,6 +3,11 @@ from scipy import sparse
 
 
 
+def_submat_size = 1e5
+
+
+
+
 def enum_array(a):
 
     a = np.array(list(enumerate(a)),
@@ -122,6 +127,66 @@ def naive_cconv(v, w):
         out[i] = np.dot(v, np.roll(w[::-1], i + 1))
 
     return out
+
+
+
+def sparse_mvdot(m, v, submat_size=def_submat_size):
+    """
+    For sparse matrices. The expectation is that a dense view of the
+    entire matrix is too large. So the matrix is split into
+    submatrices (horizontal slices) which are converted to dense
+    matrices one at a time.
+    """
+
+    m = m.tocsr()
+
+    if sparse.issparse(v):
+
+        v = v.toarray()
+
+    v = v.reshape((v.size, 1))
+
+    out = np.empty((m.shape[0], 1))
+
+    if submat_size < m.shape[1]:
+
+        print 'Note: specified submatrix size is '\
+              'less than the number of columns in matrix'
+
+        m_rows = 1
+
+        k_submats = m.shape[0]
+
+    elif submat_size > m.size:
+
+        m_rows = m.shape[0]
+
+        k_submats = 1
+
+    else:
+
+        m_rows = int(submat_size / m.shape[1])
+
+        k_submats = int(m.shape[0] / m_rows)
+
+    for i in xrange(k_submats):
+
+        i *= m_rows
+
+        j = i + m_rows
+
+        submat = m[i:j, :]
+
+        out[i:j, :] = np.dot(submat.toarray(), v)
+
+    if j < m.shape[0]:
+
+        submat = m[j:, :]
+
+        out[j:, :] = np.dot(submat.toarray(), v)
+
+    return np.squeeze(out)
+
 
 
 
