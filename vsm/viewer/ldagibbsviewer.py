@@ -86,17 +86,10 @@ class LDAGibbsViewer(object):
 
 
 
-    def sorted_topics(self, n_terms=None, as_strings=True, 
-                      K_filter=True, word=None):
+    def sorted_topics(self, n_terms=None, as_strings=True, word=None):
         """
 
         """
-        def apply_K_filter(w, k_indices):
-            
-            wt = self.word_topics(w)
-
-            return [i for i in k_indices if i in wt['value']]
-
         if word:
 
             w, word = self._res_term_type(word)
@@ -105,9 +98,9 @@ class LDAGibbsViewer(object):
 
             k_indices = _enum_sort(phi_w)['i']
 
-            if K_filter:
+            wt = self.word_topics(w)
 
-                k_indices = apply_K_filter(w, k_indices)
+            k_indices = [i for i in k_indices if i in wt['value']]
 
             k_arr = self.topics(n_terms=n_terms, k_indices=k_indices, 
                                 as_strings=as_strings)
