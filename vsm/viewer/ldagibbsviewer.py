@@ -1,20 +1,21 @@
 import numpy as np
 
-from vsm import (enum_sort as _enum_sort, 
-                 map_strarr as _map_strarr)
+from vsm import (enum_sort as _enum_sort_, 
+                 map_strarr as _map_strarr_)
 
-from vsm.viewer import (IndexedValueArray as _IndexedValueArray,
+from vsm.viewer import (IndexedValueArray as _IndexedValueArray_,
                         res_term_type as _res_term_type_,
                         res_doc_type as _res_doc_type_,
                         doc_label_name as _doc_label_name_,
-                        similar_terms as _similar_terms_,
-                        mean_similar_terms as _mean_similar_terms_,
                         similar_documents as _similar_documents_,
                         simmat_terms as _simmat_terms_,
-                        simmat_documents as _simmat_documents_)
+                        simmat_documents as _simmat_documents_,
+                        simmat_topics as _simmat_topics_,
+                        sim_top_top as _sim_top_top_,
+                        sim_word_avg_top as _sim_word_avg_top_,
+                        sim_word_avg_word as _sim_word_avg_word_)
 
-from vsm.viewer.similarity import (col_norms as _col_norms,
-                                   row_norms as _row_norms)
+from vsm.viewer.similarity import row_norms as _row_norms_
 
 
 
@@ -27,11 +28,11 @@ class LDAGibbsViewer(object):
 
         self.model = model
 
-        self._term_norms = None
+        self._word_norms_ = None
 
-        self._doc_norms = None
+        self._doc_norms_ = None
 
-        self._topic_norms = None
+        self._topic_norms_ = None
 
 
 
@@ -67,15 +68,15 @@ class LDAGibbsViewer(object):
 
             t = self.model.phi_t(k)
         
-            t = _enum_sort(t)        
+            t = _enum_sort_(t)        
         
             if as_strings:
 
-                t = _map_strarr(t, self.corpus.terms, k='i')
+                t = _map_strarr_(t, self.corpus.terms, k='i')
 
             k_arr.append(t)
 
-        k_arr = np.array(k_arr).view(_IndexedValueArray)
+        k_arr = np.array(k_arr).view(_IndexedValueArray_)
 
         k_arr.subheaders = [('Topic ' + str(k), 'Prob') 
                               for k in k_indices]
@@ -98,7 +99,7 @@ class LDAGibbsViewer(object):
 
             phi_w = self.model.phi_w(w)
 
-            k_indices = _enum_sort(phi_w)['i']
+            k_indices = _enum_sort_(phi_w)['i']
 
             wt = self.word_topics(w)
 
@@ -119,25 +120,24 @@ class LDAGibbsViewer(object):
         
 
 
-
     def doc_topics(self, doc, n_topics=None):
         """
         """
         d, label = self._res_doc_type(doc)
 
-        t = self.model.theta_d(d)
+        k_arr = self.model.theta_d(d)
 
-        t = _enum_sort(t).view(_IndexedValueArray)
+        k_arr = _enum_sort_(k_arr).view(_IndexedValueArray_)
 
-        t.main_header = 'Document: ' + str(label)
+        k_arr.main_header = 'Document: ' + label
 
-        t.subheaders = [('Topic', 'Prob')]
+        k_arr.subheaders = [('Topic', 'Prob')]
 
         if n_topics:
 
-            return t[:n_topics]
+            return k_arr[:n_topics]
 
-        return t
+        return k_arr
 
 
 
@@ -180,7 +180,7 @@ class LDAGibbsViewer(object):
 
             dt = [('i', [('doc', np.int), ('pos',np.int)]), ('value', np.int)]
 
-        Z_w = np.array(Z_w, dtype=dt).view(_IndexedValueArray)
+        Z_w = np.array(Z_w, dtype=dt).view(_IndexedValueArray_)
 
         Z_w.main_header = 'Word: ' + word
 
@@ -191,113 +191,115 @@ class LDAGibbsViewer(object):
 
 
     @property
-    def term_norms(self):
+    def _word_norms(self):
 
-        if self._term_norms is None:
+        if self._word_norms_ is None:
 
-            self._term_norms = _col_norms(self.model.top_word)            
+            self._word_norms_ = _row_norms_(self.model.top_word.T)            
 
-        return self._term_norms
-
-
-
-    @property
-    def doc_norms(self):
-
-        if self._doc_norms is None:
-
-            self._doc_norms = _row_norms(self.model.doc_top)
-
-        return self._doc_norms
+        return self._word_norms_
 
 
 
     @property
-    def topic_norms(self):
+    def _doc_norms(self):
 
-        if self._topic_norms is None:
+        if self._doc_norms_ is None:
 
-            self._topic_norms = _row_norms(self.model.top_word)
+            self._doc_norms_ = _row_norms_(self.model.doc_top)
 
-        return self._topic_norms
+        return self._doc_norms_
 
 
 
-    def sim_topics(self, k):
+    @property
+    def _topic_norms(self):
+
+        if self._topic_norms_ is None:
+
+            self._topic_norms_ = _row_norms_(self.model.top_word)
+
+        return self._topic_norms_
+
+
+
+    def sim_top_top(self, k, filter_nan=True):
         """
         Computes and sorts the cosine values between a given topic `k`
         and every topic.
         """
-        pass
+        return _sim_top_top_(self.model.top_word, k, norms=self._topic_norms, 
+                             filter_nan=filter_nan)
 
 
     
-    def sim_word_topic(self, word):
-        """
-        Computes and sorts the cosine values between a word `word` and
-        every topic. This word is represented in the space of topics
-        as a topic which assigns probability 1 to the word and 0 to
-        every other word.
-        """
-        pass
-
-
-
-    def sim_mean_word_topic(self, words):
+    def sim_word_avg_top(self, words, weights=None, filter_nan=True):
         """
         Computes and sorts the cosine values between a list of words
-        `words` and every topic. The word list is represented in the
-        space of topics as a topic which assigns equal probability to
-        every word in list and 0 to every other word.
+        `words` and every topic. If weights are not provided, the word
+        list is represented in the space of topics as a topic which
+        assigns equal probability to each word in `words` and 0 to
+        every other word in the corpus. Otherwise, each word in
+        `words` is assigned the provided weight.
         """
-        pass
+        return _sim_word_avg_top_(self.corpus, self.model.top_word.T, 
+                                  words, weights=weights, norms=self._topic_norms,
+                                  filter_nan=filter_nan)
 
 
 
-    def similar_terms(self, term, filter_nan=True, rem_masked=True):
-
-        return _similar_terms_(self.corpus,
-                               self.model.top_word.T,
-                               term,
-                               norms=self.term_norms,
-                               filter_nan=filter_nan,
-                               rem_masked=rem_masked)
-    
-
-
-    def mean_similar_terms(self, query, filter_nan=True, rem_masked=True):
-
-        return _mean_similar_terms_(self.corpus,
-                                    self.model.top_word.T,
-                                    query,
-                                    norms=self.term_norms,
-                                    filter_nan=filter_nan,
-                                    rem_masked=rem_masked)
+    def sim_word_word(self, word, norms=None, 
+                      filter_nan=True, as_strings=True):
+        """
+        Computes and sorts the cosine values between `word` and every
+        word.
+        """
+        return self.sim_word_avg_word([word], filter_nan=filter_nan, 
+                                      as_strings=as_strings)
 
 
 
-    def similar_documents(self, doc, filter_nan=True):
+    def sim_word_avg_word(self, words, weights=None, 
+                          filter_nan=True, as_strings=True):
+        """
+        Computes and sorts the cosine values between a list of words
+        `words` and every word. If weights are provided, the word list
+        is represented as the weighted average of the words in the
+        list. If weights are not provided, the arithmetic mean is
+        used.
+        """
+        return _sim_word_avg_word_(self.corpus, self.model.top_word.T, 
+                                   words, weights=weights, norms=self._word_norms,
+                                   filter_nan=filter_nan, as_strings=True)
+
+    def sim_doc_doc(self, doc, filter_nan=True):
 
         return _similar_documents_(self.corpus,
                                    self.model.doc_top.T,
                                    self.model.tok_name,
                                    doc,
-                                   norms=self.doc_norms,
+                                   norms=self._doc_norms,
                                    filter_nan=filter_nan)
     
 
 
-    def simmat_terms(self, term_list):
+    def simmat_words(self, word_list):
 
         return _simmat_terms_(self.corpus,
                               self.model.top_word.T,
-                              term_list)
+                              word_list)
     
 
 
-    def simmat_documents(self, docs):
+    def simmat_docs(self, docs):
 
         return _simmat_documents_(self.corpus,
                                   self.model.doc_top.T,
                                   self.model.tok_name,
                                   docs)
+
+
+
+    def simmat_topics(self, topics):
+
+        return _simmat_topics_(self.model.top_word, topics)

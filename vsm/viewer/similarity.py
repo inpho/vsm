@@ -1,7 +1,8 @@
 import numpy as np
 from scipy import sparse
 
-from vsm import row_norms, col_norms, enum_array, enum_sort, sparse_mvdot
+from vsm import (row_norms, col_norms, enum_array, enum_sort, 
+                 sparse_mvdot, def_submat_size)
 
 
 

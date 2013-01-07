@@ -1,6 +1,6 @@
 import numpy as np
 
-from vsm import enum_sort
+from vsm import enum_sort, row_normalize, map_strarr
 from vsm import corpus as cps
 from vsm.util.corpustools import word_tokenize
 from vsm import model
@@ -61,6 +61,17 @@ def simmat_documents(corpus, matrix, tok_name, doc_list):
 
 
 
+def simmat_topics(kw_mat, topics):
+    """
+    """
+    simmat = simmat_rows(kw_mat, topics)
+
+    simmat.labels = [str(k) for k in topics]
+
+    return simmat
+
+
+
 def similar_terms(corpus, matrix, term,
                   norms=None, filter_nan=True,
                   rem_masked=True):
@@ -95,12 +106,14 @@ def similar_documents(corpus, matrix, tok_name, doc,
                       norms=None, filter_nan=True):
     """
     """
-    d, label = res_doc_type(corpus, doc)
+    label_name = doc_label_name(tok_name)
+
+    d, label = res_doc_type(corpus, tok_name, label_name, doc)
 
     d_arr = row_cosines(matrix[:, d:d+1].T, matrix.T, norms=norms,
                         filter_nan=filter_nan)
 
-    docs = corpus.view_metadata(tok_name)[doc_label_name(tok_name)]
+    docs = corpus.view_metadata(tok_name)[label_name]
 
     d_arr = np.array([(docs[i], v) for i,v in d_arr],
                      dtype=[('doc', docs.dtype), 
@@ -127,9 +140,9 @@ def mean_similar_terms(corpus, matrix, query,
 
     for term in terms:
 
-        t, term = res_term_type(term)
+        t, term = res_term_type(corpus, term)
 
-        cosines = row_cosines(matrix[i:i+1, :], matrix, norms=norms,
+        cosines = row_cosines(matrix[t:t+1, :], matrix, norms=norms,
                               sort=False, filter_nan=False)['value']
         
         t_arr.append(cosines)
@@ -162,16 +175,13 @@ def mean_similar_terms(corpus, matrix, query,
 
 
 
-def sim_topics(kw_mat, k):
+def sim_top_top(kw_mat, k, norms=None, filter_nan=True):
     """
     Computes and sorts the cosine values between a given topic `k`
     and every topic.
     """
-    row = np.zeros((1, kw_mat.shape[0]), dtype=np.float64)
-
-    row[0, k] = 1
-
-    k_arr = row_cosines(row, matrix, norms=norms, filter_nan=filter_nan)
+    k_arr = row_cosines(kw_mat[k:k+1, :], kw_mat, 
+                        norms=norms, filter_nan=filter_nan)
 
     k_arr = k_arr.view(IndexedValueArray)
 
@@ -180,6 +190,82 @@ def sim_topics(kw_mat, k):
     k_arr.subheaders = [('Topic', 'Cosine')]
 
     return k_arr
+
+
+
+def sim_word_avg_top(corpus, wk_mat, words, weights=None,
+                     norms=None, filter_nan=True):
+    """
+    Computes and sorts the cosine values between a list of words
+    `words` and every topic. If weights are not provided, the word
+    list is represented in the space of topics as a topic which
+    assigns equal probability to each word in `words` and 0 to
+    every other word in the corpus. Otherwise, each word in
+    `words` is assigned the provided weight.
+    """
+    col = np.zeros((wk_mat.shape[0], 1), dtype=np.float64)
+
+    for i in xrange(len(words)):
+
+        w, word = res_term_type(corpus, words[i])
+
+        if weights:
+            
+            col[w, 0] = weights[i]
+            
+        else:
+
+            col[w, 0] = 1
+
+    k_arr = row_cosines(col.T, wk_mat.T, norms=norms, filter_nan=filter_nan)
+
+    k_arr = k_arr.view(IndexedValueArray)
+
+    k_arr.main_header = 'Words: ' + ', '.join(words)
+
+    k_arr.subheaders = [('Topic', 'Cosine')]
+
+    return k_arr
+
+
+
+def sim_word_avg_word(corpus, mat, words, weights=None, norms=None,
+                      as_strings=True, filter_nan=True):
+    """
+    Computes and sorts the cosine values between a list of words
+    `words` and every word. If weights are provided, the word list
+    is represented as the weighted average of the words in the
+    list. If weights are not provided, the arithmetic mean is
+    used.
+    """
+    # Words are expected to be rows of `mat`
+    row = np.zeros((1, mat.shape[1]), dtype=np.float64)
+
+    for i in xrange(len(words)):
+
+        w, word = res_term_type(corpus, words[i])
+
+        if weights:
+            
+            row[0, :] += mat[w, :] * weights[i]
+            
+        else:
+
+            row[0, :] += mat[w, :]
+
+    w_arr = row_cosines(row, mat, norms=norms, filter_nan=filter_nan)
+
+    if as_strings:
+        
+        w_arr = map_strarr(w_arr, corpus.terms, k='i')
+
+    w_arr = w_arr.view(IndexedValueArray)
+
+    w_arr.main_header = 'Words: ' + ', '.join(words)
+
+    w_arr.subheaders = [('Word', 'Cosine')]
+
+    return w_arr
 
 
 
