@@ -56,7 +56,7 @@ class LDAGibbsViewer(object):
 
 
 
-    def topics(self, n_terms=None, k_indices=[], as_strings=True):
+    def topics(self, print_len=10, k_indices=[], as_strings=True):
 
         if len(k_indices) == 0:
 
@@ -81,15 +81,13 @@ class LDAGibbsViewer(object):
         k_arr.subheaders = [('Topic ' + str(k), 'Prob') 
                               for k in k_indices]
 
-        if n_terms:
-
-            return k_arr[:, :n_terms]
+        k_arr.str_len = print_len
 
         return k_arr
 
 
 
-    def sorted_topics(self, n_terms=None, as_strings=True, word=None):
+    def sorted_topics(self, print_len=10, as_strings=True, word=None):
         """
 
         """
@@ -105,14 +103,14 @@ class LDAGibbsViewer(object):
 
             k_indices = [i for i in k_indices if i in wt['value']]
 
-            k_arr = self.topics(n_terms=n_terms, k_indices=k_indices, 
+            k_arr = self.topics(print_len=print_len, k_indices=k_indices, 
                                 as_strings=as_strings)
 
             k_arr.main_header = 'Sorted by Word: ' + word
 
         else:
 
-            k_arr = self.topics(n_terms=n_terms, as_strings=as_strings)
+            k_arr = self.topics(print_len=print_len, as_strings=as_strings)
 
             k_arr.main_header = 'Sorted by Topic Index'
             
@@ -120,7 +118,7 @@ class LDAGibbsViewer(object):
         
 
 
-    def doc_topics(self, doc, n_topics=None):
+    def doc_topics(self, doc, print_len=10):
         """
         """
         d, label = self._res_doc_type(doc)
@@ -133,9 +131,7 @@ class LDAGibbsViewer(object):
 
         k_arr.subheaders = [('Topic', 'Prob')]
 
-        if n_topics:
-
-            return k_arr[:n_topics]
+        k_arr.str_len = print_len
 
         return k_arr
 

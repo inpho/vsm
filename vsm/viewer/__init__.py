@@ -1,6 +1,7 @@
 import numpy as np
 
-from vsm import enum_sort, row_normalize, map_strarr
+from vsm import (enum_sort, row_normalize, map_strarr, 
+                 isfloat, isint, isstr)
 from vsm import corpus as cps
 from vsm.util.corpustools import word_tokenize
 from vsm import model
@@ -277,16 +278,11 @@ def format_entry(x):
 
         return ', '.join([format_entry(i) for i in x.tolist()]) 
         
-    if isinstance(x, basestring):
+    if isfloat(x):
 
-        return x
+        return '{0:.5f}'.format(x)
 
-    if isinstance(x, int) or isinstance(x, long):
-
-        return str(x)
-
-    # Assume it's a float then
-    return '{0:.5f}'.format(x)
+    return str(x)
 
 
         
@@ -296,6 +292,8 @@ class IndexedValueArray(np.ndarray):
     def __new__(cls, input_array, main_header=None, subheaders=None):
 
         obj = np.asarray(input_array).view(cls)
+
+        obj.str_len = None
 
         obj.main_header = main_header
 
@@ -308,6 +306,8 @@ class IndexedValueArray(np.ndarray):
     def __array_finalize__(self, obj):
 
         if obj is None: return
+
+        self.str_len = getattr(obj, 'str_len', None)
 
         self.main_header = getattr(obj, 'main_header', None)
 
@@ -351,7 +351,15 @@ class IndexedValueArray(np.ndarray):
 
             s = ''
 
-        m, n = arr.shape[0], arr.shape[1]
+        m = arr.shape[0]
+
+        if self.str_len:
+
+            n = min(arr.shape[1], self.str_len)
+
+        else:
+            
+            n = arr.shape[1]
 
         for i in xrange(0, m - m % 2, 2):
 

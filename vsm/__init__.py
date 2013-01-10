@@ -189,6 +189,24 @@ def sparse_mvdot(m, v, submat_size=def_submat_size):
 
 
 
+def isstr(x):
+
+    return isinstance(x, basestring) or isinstance(x, np.flexible)
+
+
+
+def isint(x):
+
+    return (isinstance(x, np.integer) 
+            or isinstance(x, int) or isinstance(x, long))
+
+
+
+def isfloat(x):
+
+    return (isinstance(x, np.inexact) or isinstance(x, np.float))
+
+
 
 #
 # Testing
