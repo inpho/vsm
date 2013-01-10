@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 from vsm import (enum_sort as _enum_sort, 
                  map_strarr as _map_strarr)
@@ -86,7 +87,7 @@ class LDAGibbsViewer(object):
 
 
 
-    def sorted_topics(self, n_terms=None, as_strings=True, word=None):
+    def sorted_topics(self, n_terms=None, as_strings=True, word=None, entropy=None):
 
         if word:
 
@@ -101,6 +102,23 @@ class LDAGibbsViewer(object):
 
             k_arr.main_header = 'Sorted by Word: ' + word
 
+        elif entropy:
+
+            ent = []
+
+            for i in xrange(self.model.doc_top.shape[1]):
+
+                ent.append((i, self.topic_entropy(i)))
+
+            ent.sort(key=lambda tup: tup[1])
+
+            k_indices = [tup[0] for tup in ent]
+
+            k_arr = self.topics(n_terms=n_terms, k_indices=k_indices,
+                                as_strings=as_strings)
+
+            k_arr.main_header = 'Sorted by Entropy'
+
         else:
 
             k_arr = self.topics(n_terms=n_terms, as_strings=as_strings)
@@ -109,6 +127,19 @@ class LDAGibbsViewer(object):
             
         return k_arr
         
+
+
+    def topic_entropy(self, t):
+
+        ent = 0.0
+
+        for p in self.model.theta_t(t):
+
+            ent += p * math.log(p, 2)
+
+        ent = -ent
+
+        return ent
 
 
 
