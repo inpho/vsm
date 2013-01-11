@@ -211,6 +211,14 @@ class LDAGibbs(object):
 
 
 
+    def theta_t(self, t):
+
+        th_t = self.doc_top[:,t] / self.doc_top[:,t].sum()
+
+        return th_t
+
+
+
     def phi_w(self, w):
 
         ph_w = self.top_word[:, w] / self.top_word[:, w].sum()
