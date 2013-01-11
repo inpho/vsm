@@ -119,7 +119,7 @@ class LDAGibbsViewer(object):
 
             k_indices = [tup[0] for tup in ent]
 
-            k_arr = self.topics(n_terms=n_terms, k_indices=k_indices,
+            k_arr = self.topics(print_len=print_len, k_indices=k_indices,
                                 as_strings=as_strings)
 
             k_arr.main_header = 'Sorted by Entropy'
