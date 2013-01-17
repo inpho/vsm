@@ -100,7 +100,7 @@ class SimilarityMatrix(object):
 
         for i in xrange(data.shape[0] - 1):
 
-            results = similar_rows(data[:1, :], data, norms=norms, sort=False)
+            results = row_cosines(data[:1, :], data, norms=norms, sort=False)
 
             results = np.array([v for j,v in results])
 
