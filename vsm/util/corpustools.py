@@ -767,12 +767,12 @@ def test_toy_corpus():
 
     assert toy_corpus(keats, nltk_stop=True)
 
-    assert toy_corpus(keats, mask_freq=1)
+    assert toy_corpus(keats, stop_freq=1)
 
     assert toy_corpus(keats, add_stop=['and', 'with'])
 
     assert toy_corpus(keats, nltk_stop=True,
-                      mask_freq=1, add_stop=['ay'])
+                      stop_freq=1, add_stop=['ay'])
 
     from tempfile import NamedTemporaryFile as NFT
 
