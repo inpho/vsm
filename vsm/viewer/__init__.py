@@ -6,7 +6,7 @@ from vsm import corpus as cps
 from vsm.util.corpustools import word_tokenize
 from vsm import model
 
-from similarity import row_cosines, row_cos_mat, IndexedSymmArray
+from similarity import row_cosines, row_cos_mat
 
 
 
