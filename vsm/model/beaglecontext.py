@@ -8,13 +8,23 @@ import numpy as np
 
 
 
+def realign_env_mat(corpus, env_corpus, env_matrix):
+    """
+    """
+    words = corpus.terms
+    indices = [env_corpus.terms_int[w] for w in words]
+    return env_matrix[indices]
+
+
+
 class BeagleContextSeq(object):
 
-    def __init__(self, corpus, env_matrix, tok_name='sentence'):
+    def __init__(self, corpus, env_corpus, env_matrix, 
+                 tok_name='sentence'):
         """
         """
         self.sents = corpus.view_tokens(tok_name)
-        self.env_matrix = env_matrix
+        self.env_matrix = realign_env_mat(corpus, env_corpus, env_matrix)
 
 
     def train(self):
@@ -46,16 +56,18 @@ class BeagleContextSeq(object):
 
 class BeagleContextMulti(object):
 
-    def __init__(self, corpus, env_matrix, tok_name='sentence'):
+    def __init__(self, corpus, env_corpus, env_matrix, 
+                 tok_name='sentence'):
         """
         """
         self.sents = corpus.view_tokens(tok_name)
         self.dtype = env_matrix.dtype
-        
+        env_matrix = realign_env_mat(corpus, env_corpus, env_matrix)
+
         global _shape 
         _shape = mp.Array('i', 2, lock=False)
         _shape[:] = env_matrix.shape
-
+        
         print 'Copying env matrix to shared mp array'
         global _env_matrix
         _env_matrix = mp.Array('d', env_matrix.size, lock=False)
@@ -152,12 +164,13 @@ def test_BeagleContextSeq():
     from vsm.util.corpustools import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
 
-    c = random_corpus(100000, 5000, 0, 20, tok_name='sentence')
+    ec = random_corpus(100000, 5000, 0, 20, tok_name='sentence')
+    cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,5000,100)])
 
-    e = BeagleEnvironment(c, n_cols=200)
+    e = BeagleEnvironment(ec, n_cols=200)
     e.train()
 
-    m = BeagleContextSeq(c, e.matrix)
+    m = BeagleContextSeq(cc, ec, e.matrix)
     m.train()
 
     return m.matrix
@@ -168,12 +181,13 @@ def test_BeagleContextMulti():
     from vsm.util.corpustools import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
 
-    c = random_corpus(100000, 5000, 0, 20, tok_name='sentence')
+    ec = random_corpus(100000, 5000, 0, 20, tok_name='sentence')
+    cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,5000,100)])
 
-    e = BeagleEnvironment(c, n_cols=200)
+    e = BeagleEnvironment(ec, n_cols=200)
     e.train()
 
-    m = BeagleContextMulti(c, e.matrix)
+    m = BeagleContextMulti(cc, ec, e.matrix)
     m.train(n_procs=3)
 
     return m.matrix
@@ -184,17 +198,18 @@ def test_compare():
     from vsm.util.corpustools import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
 
-    c = random_corpus(10000, 1000, 0, 20, tok_name='sentence')
+    ec = random_corpus(100000, 5000, 0, 20, tok_name='sentence')
+    cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,5000,100)])
 
-    e = BeagleEnvironment(c, n_cols=5)
+    e = BeagleEnvironment(ec, n_cols=5)
     e.train()
 
     print 'Training single processor model'
-    ms = BeagleContextSeq(c, e.matrix)
+    ms = BeagleContextSeq(cc, ec, e.matrix)
     ms.train()
 
     print 'Training multiprocessor model'
-    mm = BeagleContextMulti(c, e.matrix)
+    mm = BeagleContextMulti(cc, ec, e.matrix)
     mm.train()
 
     assert np.allclose(ms.matrix, mm.matrix)
