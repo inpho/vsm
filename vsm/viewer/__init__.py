@@ -6,7 +6,7 @@ from vsm import corpus as cps
 from vsm.util.corpustools import word_tokenize
 from vsm import model
 
-from similarity import row_cosines, simmat_rows
+from similarity import row_cosines, row_cos_mat, IndexedSymmArray
 
 
 
@@ -34,42 +34,54 @@ class Viewer(object):
 
 
 
-def simmat_terms(corpus, matrix, term_list):
+def simmat_terms(corpus, matrix, term_list, norms=None):
     """
     """
-    indices, terms = zip([res_term_type(corpus, term) 
-                          for term in term_list])
+    indices, terms = zip(*[res_term_type(corpus, term) 
+                           for term in term_list])
 
-    simmat = simmat_rows(matrix, indices)
+    indices, terms = np.array(indices), np.array(terms)
 
-    simmat.labels = terms
+    sm = row_cos_mat(indices, matrix, norms=norms, fill_tril=True)
+
+    sm = sm.view(IndexedSymmArray)
+
+    sm.labels = terms
     
-    return simmat
+    return sm
 
 
 
-def simmat_documents(corpus, matrix, tok_name, doc_list):
+def simmat_documents(corpus, matrix, tok_name, doc_list, norms=None):
     """
     """
-    indices, labels = zip([res_doc_type(corpus, tok_name, doc) 
-                           for doc in doc_list])
+    label_name = doc_label_name(tok_name)
 
-    simmat = simmat_rows(matrix.T, indices)
+    indices, labels = zip(*[res_doc_type(corpus, tok_name, label_name, doc) 
+                            for doc in doc_list])
 
-    simmat.labels = labels
+    indices, labels = np.array(indices), np.array(labels)
 
-    return simmat
+    sm = row_cos_mat(indices, matrix.T, norms=norms, fill_tril=True)
+
+    sm = sm.view(IndexedSymmArray)
+
+    sm.labels = labels
+    
+    return sm
 
 
 
-def simmat_topics(kw_mat, topics):
+def simmat_topics(kw_mat, topics, norms=None):
     """
     """
-    simmat = simmat_rows(kw_mat, topics)
+    sm = row_cos_mat(topics, kw_mat, norms=norms, fill_tril=True)
 
-    simmat.labels = [str(k) for k in topics]
+    sm = sm.view(IndexedSymmArray)
 
-    return simmat
+    sm.labels = [str(k) for k in topics]
+    
+    return sm
 
 
 
@@ -267,6 +279,28 @@ def sim_word_avg_word(corpus, mat, words, weights=None, norms=None,
     w_arr.subheaders = [('Word', 'Cosine')]
 
     return w_arr
+
+
+
+# TODO: Investigate compressed forms of symmetric matrix. Cf.
+# scipy.spatial.distance.squareform
+class IndexedSymmArray(np.ndarray):
+    """
+    """
+    def __new__(cls, input_array, labels=None):
+
+        obj = np.asarray(input_array).view(cls)
+
+        obj.labels = labels
+
+        return obj
+
+
+    def __array_finalize__(self, obj):
+
+        if obj is None: return
+
+        self.labels = getattr(obj, 'labels', None)
 
 
 

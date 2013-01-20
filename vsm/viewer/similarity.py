@@ -58,6 +58,38 @@ def row_cosines(row, matrix, norms=None,
 
 
 
+def row_cos_mat(rows, mat, norms=None, fill_tril=True):
+
+    mat = mat[rows]
+    
+    if not norms:
+
+        norms = row_norms(mat)
+
+    else:
+
+        norms[rows]
+
+    sm = np.zeros((len(rows), len(rows)), dtype=np.float64)
+
+    indices = np.triu_indices_from(sm)
+
+    f = np.vectorize(lambda i, j: (np.dot(mat[i,:], mat[j,:].T) /
+                                   (norms[i] * norms[j])))
+
+    sm[indices] = f(*indices)[:]
+
+    if fill_tril:
+
+        indices = np.tril_indices_from(sm, -1)
+
+        sm[indices] += sm.T[indices]
+
+    return sm
+
+
+
+#TODO: Deprecate
 def simmat_rows(matrix, row_indices):
     """
     """
@@ -69,7 +101,7 @@ def simmat_rows(matrix, row_indices):
 
 
 
-# TODO: Compress symmetric similarity matrix. Cf. scipy.spatial.distance.squareform
+#TODO: Deprecate
 class SimilarityMatrix(object):
 
     def __init__(self, indices=None, labels=None, matrix=None):
@@ -139,3 +171,21 @@ def test_simmat():
     out_2 = out_2.matrix
         
     assert np.allclose(out_1, out_2)
+
+
+
+def test_row_cos_mat():
+
+    m = np.random.random((10,5))
+
+    out_1 = np.zeros((10,10))
+
+    for i, j in zip(*np.triu_indices_from(out_1)):
+
+        out_1[i, j] = (np.dot(m[i], m[j])
+                       / (np.dot(m[i], m[i])**.5
+                          * np.dot(m[j], m[j])**.5))
+
+    out_2 = row_cos_mat(range(10), m, fill_tril=False)
+        
+    assert np.allclose(out_1, out_2), (out_1, out_2)
