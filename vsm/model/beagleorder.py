@@ -7,6 +7,7 @@ import cPickle as cpickle
 import numpy as np
 from numpy import dual
 
+from vsm.model import BaseModel
 from vsm import rand_pt_unit_sphere
 
 
@@ -102,7 +103,7 @@ def reduce_ngrams(fn, a, n, i, flat=True):
 
 
 
-class BeagleOrderSeq(object):
+class BeagleOrderSeq(BaseModel):
 
     def __init__(self, corpus, env_matrix, tok_name='sentence',
                  psi=None, rand_perm=None, lmda =7):
@@ -140,7 +141,7 @@ class BeagleOrderSeq(object):
 
 
 
-class BeagleOrderMulti(object):
+class BeagleOrderMulti(BaseModel):
 
     def __init__(self, corpus, env_matrix, tok_name='sentence',
                  psi=None, rand_perm=None, lmda =7):
@@ -262,6 +263,19 @@ def test_BeagleOrderSeq():
     m = BeagleOrderSeq(c, e.matrix)
     m.train()
 
+    from tempfile import NamedTemporaryFile
+    import os
+
+    try:
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        m.save(tmp.name)
+        tmp.close()
+        m1 = BeagleOrderSeq.load(tmp.name)
+        assert (m.matrix == m1.matrix).all()
+    
+    finally:
+        os.remove(tmp.name)
+
     return m.matrix
 
 
@@ -278,6 +292,19 @@ def test_BeagleOrderMulti():
 
     m = BeagleOrderMulti(c, e.matrix)
     m.train(4)
+
+    from tempfile import NamedTemporaryFile
+    import os
+
+    try:
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        m.save(tmp.name)
+        tmp.close()
+        m1 = BeagleOrderMulti.load(tmp.name)
+        assert (m.matrix == m1.matrix).all()
+    
+    finally:
+        os.remove(tmp.name)
 
     return m.matrix
 

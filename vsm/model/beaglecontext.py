@@ -6,6 +6,8 @@ import cPickle as cpickle
 
 import numpy as np
 
+from vsm.model import BaseModel
+
 
 
 def realign_env_mat(corpus, env_corpus, env_matrix):
@@ -17,7 +19,7 @@ def realign_env_mat(corpus, env_corpus, env_matrix):
 
 
 
-class BeagleContextSeq(object):
+class BeagleContextSeq(BaseModel):
 
     def __init__(self, corpus, env_corpus, env_matrix, 
                  tok_name='sentence'):
@@ -54,7 +56,7 @@ class BeagleContextSeq(object):
 
 
 
-class BeagleContextMulti(object):
+class BeagleContextMulti(BaseModel):
 
     def __init__(self, corpus, env_corpus, env_matrix, 
                  tok_name='sentence'):
@@ -173,6 +175,19 @@ def test_BeagleContextSeq():
     m = BeagleContextSeq(cc, ec, e.matrix)
     m.train()
 
+    from tempfile import NamedTemporaryFile
+    import os
+
+    try:
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        m.save(tmp.name)
+        tmp.close()
+        m1 = BeagleContextSeq.load(tmp.name)
+        assert (m.matrix == m1.matrix).all()
+    
+    finally:
+        os.remove(tmp.name)
+
     return m.matrix
 
 
@@ -189,6 +204,19 @@ def test_BeagleContextMulti():
 
     m = BeagleContextMulti(cc, ec, e.matrix)
     m.train(n_procs=3)
+
+    from tempfile import NamedTemporaryFile
+    import os
+
+    try:
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        m.save(tmp.name)
+        tmp.close()
+        m1 = BeagleContextMulti.load(tmp.name)
+        assert (m.matrix == m1.matrix).all()
+    
+    finally:
+        os.remove(tmp.name)
 
     return m.matrix
 

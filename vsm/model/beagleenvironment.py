@@ -1,10 +1,10 @@
 import numpy as np
 
 from vsm import row_normalize
+from vsm.model import BaseModel
 
 
-
-class BeagleEnvironment(object):
+class BeagleEnvironment(BaseModel):
 
     def __init__(self, corpus, n_cols=2048, dtype=np.float64):
         """
@@ -39,3 +39,16 @@ def test_BeagleEnvironment():
     norms = row_norms(m.matrix)
 
     assert np.allclose(np.ones(norms.shape[0]), norms)
+
+    from tempfile import NamedTemporaryFile
+    import os
+
+    try:
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        m.save(tmp.name)
+        tmp.close()
+        m1 = BeagleEnvironment.load(tmp.name)
+        assert (m.matrix == m1.matrix).all()
+    
+    finally:
+        os.remove(tmp.name)

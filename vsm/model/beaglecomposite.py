@@ -1,11 +1,12 @@
 import numpy as np
 
-from vsm import row_normalize
-from vsm.model.beaglecontext import realign_env_mat
+from vsm import row_normalize as _row_normalize
+from vsm.model import BaseModel
+from vsm.model.beaglecontext import realign_env_mat as _realign_env_mat
 
 
 
-class BeagleComposite(object):
+class BeagleComposite(BaseModel):
 
     def __init__(self, ctx_corp, ctx_matrix, ord_corp, ord_matrix):
         """
@@ -14,9 +15,9 @@ class BeagleComposite(object):
         corpus. The order matrix is sliced and reordered so that it
         aligns with the context matrix.
         """
-        self.ctx_matrix = row_normalize(ctx_matrix)
-        ord_matrix = realign_env_mat(ctx_corp, ord_corp, ord_matrix)
-        self.ord_matrix = row_normalize(ord_matrix)
+        self.ctx_matrix = _row_normalize(ctx_matrix)
+        ord_matrix = _realign_env_mat(ctx_corp, ord_corp, ord_matrix)
+        self.ord_matrix = _row_normalize(ord_matrix)
 
 
     def train(self, wgt=.5):
@@ -53,5 +54,18 @@ def test_BeagleComposite():
 
     m = BeagleComposite(cc, cm.matrix, ec, om.matrix)
     m.train()
+
+    from tempfile import NamedTemporaryFile
+    import os
+
+    try:
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        m.save(tmp.name)
+        tmp.close()
+        m1 = BeagleComposite.load(tmp.name)
+        assert (m.matrix == m1.matrix).all()
+    
+    finally:
+        os.remove(tmp.name)
 
     return m.matrix
