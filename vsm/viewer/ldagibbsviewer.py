@@ -166,6 +166,26 @@ class LDAGibbsViewer(object):
 
 
 
+    def topic_docs(self, t, print_len=10):
+        """
+        Takes a topic number `t` and returns a list of documents sorted
+        by the posterior probabilities of documents given the topic.
+        """
+
+        k_arr = self.model.theta_t(t)
+
+        k_arr = _enum_sort_(k_arr).view(_IndexedValueArray_)
+
+        k_arr.main_header = 'Topic: ' + t
+
+        k_arr.subheaders = [('Document', 'Prob')]
+
+        k_arr.str_len = print_len
+
+        return k_arr
+
+
+
     def word_topics(self, word, as_strings=True):
         """
         Takes `word` which is either an integer or a string and
