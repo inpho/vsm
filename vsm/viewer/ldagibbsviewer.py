@@ -165,7 +165,7 @@ class LDAGibbsViewer(object):
         return k_arr
 
 
-
+    # to do: documents should be reprented by their name but not number.
     def topic_docs(self, t, print_len=10):
         """
         Takes a topic number `t` and returns a list of documents sorted
