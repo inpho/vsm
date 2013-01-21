@@ -176,7 +176,7 @@ class LDAGibbsViewer(object):
 
         k_arr = _enum_sort_(k_arr).view(_IndexedValueArray_)
 
-        k_arr.main_header = 'Topic: ' + t
+        k_arr.main_header = 'Topic: ' + str(t)
 
         k_arr.subheaders = [('Document', 'Prob')]
 
