@@ -165,24 +165,26 @@ class LDAGibbsViewer(object):
         return k_arr
 
 
-    # to do: documents should be reprented by their name but not number.
-    def topic_docs(self, t, print_len=10):
+
+    def topic_docs(self, t, print_len=10, as_strings=True):
         """
         Takes a topic number `t` and returns a list of documents sorted
         by the posterior probabilities of documents given the topic.
         """
+        md = self.corpus.view_metadata(self.model.tok_name)
+        docs = md[self._doc_label_name]
 
-        k_arr = self.model.theta_t(t)
+        d_arr = self.model.theta_t(t)
+        d_arr = _enum_sort_(d_arr)
+        if as_strings:
+            d_arr = _map_strarr_(d_arr, docs, k='i', new_k='doc')
+        
+        d_arr = d_arr.view(_IndexedValueArray_)
+        d_arr.main_header = 'Topic: ' + str(t)
+        d_arr.subheaders = [('Document', 'Prob')]
+        d_arr.str_len = print_len
 
-        k_arr = _enum_sort_(k_arr).view(_IndexedValueArray_)
-
-        k_arr.main_header = 'Topic: ' + str(t)
-
-        k_arr.subheaders = [('Document', 'Prob')]
-
-        k_arr.str_len = print_len
-
-        return k_arr
+        return d_arr
 
 
 
