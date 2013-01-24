@@ -9,7 +9,7 @@ Hanna Wallach's `python-lda` at
 https://github.com/hannawallach/python-lda
 """
 from sys import stdout
-
+from math import log
 import numpy as np
 
 
