@@ -235,7 +235,9 @@ class LDAGibbs(object):
 
             for i, w in enumerate(doc):
 
-                log_p -= np.dot(self.theta_d(d), self.phi_w(w))
+                for t in xrange(self.K):
+                    
+                    log_p -= log(self.theta_d(d)[t] * self.phi_t(t)[w])
 
         return log_p
 
