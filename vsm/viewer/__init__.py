@@ -212,9 +212,9 @@ def sim_word_avg_top(corpus, wk_mat, words, weights=None,
     Computes and sorts the cosine values between a list of words
     `words` and every topic. If weights are not provided, the word
     list is represented in the space of topics as a topic which
-    assigns equal probability to each word in `words` and 0 to
-    every other word in the corpus. Otherwise, each word in
-    `words` is assigned the provided weight.
+    assigns equal non-zero probability to each word in `words` and 0
+    to every other word in the corpus. Otherwise, each word in `words`
+    is assigned the provided weight.
     """
     col = np.zeros((wk_mat.shape[0], 1), dtype=np.float64)
 
@@ -223,19 +223,14 @@ def sim_word_avg_top(corpus, wk_mat, words, weights=None,
         w, word = res_term_type(corpus, words[i])
 
         if weights:
-            
             col[w, 0] = weights[i]
-            
         else:
-
             col[w, 0] = 1
 
     k_arr = row_cosines(col.T, wk_mat.T, norms=norms, filter_nan=filter_nan)
 
     k_arr = k_arr.view(IndexedValueArray)
-
     k_arr.main_header = 'Words: ' + ', '.join(words)
-
     k_arr.subheaders = [('Topic', 'Cosine')]
 
     return k_arr

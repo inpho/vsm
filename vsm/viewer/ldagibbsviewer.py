@@ -14,7 +14,8 @@ from vsm.viewer import (IndexedValueArray as _IndexedValueArray_,
                         simmat_topics as _simmat_topics_,
                         sim_top_top as _sim_top_top_,
                         sim_word_avg_top as _sim_word_avg_top_,
-                        sim_word_avg_word as _sim_word_avg_word_)
+                        sim_word_avg_word as _sim_word_avg_word_,
+                        format_entry as _format_entry_)
 
 from vsm.viewer.similarity import row_norms as _row_norms_
 
@@ -24,68 +25,154 @@ class LDAGibbsViewer(object):
     """
     """
     def __init__(self, corpus, model):
-        
+        """
+        """
         self.corpus = corpus
-
         self.model = model
-
         self._word_norms_ = None
-
         self._doc_norms_ = None
-
         self._topic_norms_ = None
-
+        self._word_sums_ = None
+        self._doc_sums_ = None
+        self._topic_sums_w_ = None
+        self._topic_sums_d_ = None
 
 
     @property
     def _doc_label_name(self):
-
+        """
+        """
         return _doc_label_name_(self.model.tok_name)
 
 
+    @property
+    def _word_norms(self):
+        """
+        """
+        if self._word_norms_ is None:
+            self._word_norms_ = _row_norms_(self.model.top_word.T)            
+
+        return self._word_norms_
+
+
+    @property
+    def _doc_norms(self):
+        """
+        """
+        if self._doc_norms_ is None:
+            self._doc_norms_ = _row_norms_(self.model.doc_top)
+
+        return self._doc_norms_
+
+
+    @property
+    def _topic_norms(self):
+        """
+        """
+        if self._topic_norms_ is None:
+            self._topic_norms_ = _row_norms_(self.model.top_word)
+
+        return self._topic_norms_
+
+
+    @property
+    def _word_sums(self):
+        """
+        """
+        if self._word_sums_ is None:
+            self._word_sums_ = self.model.top_word.sum(0)            
+
+        return self._word_sums_
+
+
+    @property
+    def _doc_sums(self):
+        """
+        """
+        if self._doc_sums_ is None:
+            self._doc_sums_ = self.model.doc_top.sum(1)
+
+        return self._doc_sums_
+
+
+    @property
+    def _topic_sums_w(self):
+        """
+        """
+        if self._topic_sums_w_ is None:
+            self._topic_sums_w_ = self.model.top_word.sum(1)
+
+        return self._topic_sums_w_
+
+
+    @property
+    def _topic_sums_d(self):
+        """
+        """
+        if self._topic_sums_d_ is None:
+            self._topic_sums_d_ = self.model.doc_top.sum(0)
+
+        return self._topic_sums_d_
+
 
     def _res_doc_type(self, doc):
-
+        """
+        """
         return _res_doc_type_(self.corpus, self.model.tok_name, 
                               self._doc_label_name, doc)
 
 
-
     def _res_term_type(self, term):
-
+        """
+        """
         return _res_term_type_(self.corpus, term)
 
 
-
     def topics(self, print_len=10, k_indices=[], as_strings=True):
-
+        """
+        """
         if len(k_indices) == 0:
-
-            k_indices = xrange(self.model.top_word.shape[0])
+            k_indices = np.arange(self.model.top_word.shape[0])
         
-        k_arr = []
-
-        for k in k_indices:
-
-            t = self.model.phi_t(k)
+        k_arr = (self.model.top_word[k_indices] / 
+                 self._topic_sums_w[k_indices][:, np.newaxis])
         
-            t = _enum_sort_(t)        
-        
-            if as_strings:
+        k_arr = np.apply_along_axis(_enum_sort_, 1, k_arr)
 
-                t = _map_strarr_(t, self.corpus.terms, k='i')
-
-            k_arr.append(t)
+        if as_strings:
+            f = lambda v: _map_strarr_(v, self.corpus.terms, 
+                                       k='i', new_k='word')
+            k_arr = np.apply_along_axis(f, 1, k_arr)
 
         k_arr = np.array(k_arr).view(_IndexedValueArray_)
-
         k_arr.subheaders = [('Topic ' + str(k), 'Prob') 
                               for k in k_indices]
-
         k_arr.str_len = print_len
 
         return k_arr
 
+
+    def topic_entropies(self, print_len=10, k_indices=[], 
+                      as_strings=True):
+        """
+        """
+        if len(k_indices) == 0:
+            k_indices = np.arange(self.model.top_word.shape[0])
+        
+        theta = (self.model.doc_top[:, k_indices] / 
+                 self._topic_sums_d[k_indices][np.newaxis, :])
+
+        ent = -1 * (theta * np.log2(theta)).sum(0)
+
+        k_indices = _enum_sort_(ent)['i']
+        
+        k_arr = self.topics(print_len=print_len, k_indices=k_indices,
+                            as_strings=as_strings)
+        k_arr.main_header = 'Sorted by Entropy'
+        k_arr.subheaders = [('Topic {0} ({1:.5f})'.format(k, ent[i]), 'Prob')
+                              for i,k in enumerate(k_indices)]
+
+        return k_arr
 
 
     def sorted_topics(self, print_len=10, as_strings=True, word=None, entropy=None):
@@ -124,6 +211,8 @@ class LDAGibbsViewer(object):
 
             k_arr.main_header = 'Sorted by Entropy'
 
+            print ent
+
         else:
 
             k_arr = self.topics(print_len=print_len, as_strings=as_strings)
@@ -131,7 +220,6 @@ class LDAGibbsViewer(object):
             k_arr.main_header = 'Sorted by Topic Index'
             
         return k_arr
-        
 
 
     def topic_entropy(self, t):
@@ -145,7 +233,6 @@ class LDAGibbsViewer(object):
         ent = -ent
 
         return ent
-
 
 
     def doc_topics(self, doc, print_len=10):
@@ -237,36 +324,6 @@ class LDAGibbsViewer(object):
 
 
 
-    @property
-    def _word_norms(self):
-
-        if self._word_norms_ is None:
-
-            self._word_norms_ = _row_norms_(self.model.top_word.T)            
-
-        return self._word_norms_
-
-
-
-    @property
-    def _doc_norms(self):
-
-        if self._doc_norms_ is None:
-
-            self._doc_norms_ = _row_norms_(self.model.doc_top)
-
-        return self._doc_norms_
-
-
-
-    @property
-    def _topic_norms(self):
-
-        if self._topic_norms_ is None:
-
-            self._topic_norms_ = _row_norms_(self.model.top_word)
-
-        return self._topic_norms_
 
 
 
@@ -279,19 +336,36 @@ class LDAGibbsViewer(object):
                              filter_nan=filter_nan)
 
 
-    
-    def sim_word_avg_top(self, words, weights=None, filter_nan=True):
+    def sim_word_avg_top(self, words, weights=None, filter_nan=True,
+                         show_topics=True, print_len=10, as_strings=True):
         """
         Computes and sorts the cosine values between a list of words
         `words` and every topic. If weights are not provided, the word
         list is represented in the space of topics as a topic which
-        assigns equal probability to each word in `words` and 0 to
-        every other word in the corpus. Otherwise, each word in
+        assigns equal non-zero probability to each word in `words` and
+        0 to every other word in the corpus. Otherwise, each word in
         `words` is assigned the provided weight.
         """
-        return _sim_word_avg_top_(self.corpus, self.model.top_word.T, 
-                                  words, weights=weights, norms=self._topic_norms,
-                                  filter_nan=filter_nan)
+        indices = list(set(sum([self.word_topics(w)['value'].tolist() 
+                                for w in words], [])))
+        indices.sort()
+        wt = self.model.top_word[indices].T
+        norms = self._topic_norms[indices]
+        
+        sim = _sim_word_avg_top_(self.corpus, wt, words, weights=weights, 
+                                 norms=norms, filter_nan=filter_nan)
+
+        if show_topics:
+            k_arr = self.topics(print_len=print_len, k_indices=indices,
+                                as_strings=as_strings)
+            k_arr.main_header = 'Sorted by Word Similarity'
+            k_arr.subheaders = [('Topic {0} ({1:.5f})'.format(k, sim['value'][i]), 'Prob')
+                                for i,k in enumerate(indices)]
+
+            return k_arr
+
+        # TODO: Use print_len and as_strings parameters.
+        return sim
 
 
 
