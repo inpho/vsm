@@ -1,20 +1,21 @@
 import numpy as np
-import math
 
 from vsm import (enum_sort as _enum_sort_, 
-                 map_strarr as _map_strarr_)
+                 map_strarr as _map_strarr_,
+                 isstr as _isstr_)
 
 from vsm.viewer import (IndexedValueArray as _IndexedValueArray_,
                         res_term_type as _res_term_type_,
                         res_doc_type as _res_doc_type_,
                         doc_label_name as _doc_label_name_,
-                        similar_documents as _similar_documents_,
+                        sim_doc_doc as _sim_doc_doc_,
                         simmat_terms as _simmat_terms_,
                         simmat_documents as _simmat_documents_,
                         simmat_topics as _simmat_topics_,
                         sim_top_top as _sim_top_top_,
-                        sim_word_avg_top as _sim_word_avg_top_,
-                        sim_word_avg_word as _sim_word_avg_word_,
+                        sim_top_doc as _sim_top_doc_,
+                        sim_word_top as _sim_word_top_,
+                        sim_word_word as _sim_word_word_,
                         format_entry as _format_entry_)
 
 from vsm.viewer.similarity import row_norms as _row_norms_
@@ -133,12 +134,16 @@ class LDAGibbsViewer(object):
         """
         if len(k_indices) == 0:
             k_indices = np.arange(self.model.top_word.shape[0])
-        
-        k_arr = (self.model.top_word[k_indices] / 
-                 self._topic_sums_w[k_indices][:, np.newaxis])
-        
-        k_arr = np.apply_along_axis(_enum_sort_, 1, k_arr)
 
+        # Normalize the topic word matrix so that topics are
+        # distributions
+        phi = (self.model.top_word[k_indices] / 
+               self._topic_sums_w[k_indices][:, np.newaxis])
+        
+        # Index topics
+        k_arr = np.apply_along_axis(_enum_sort_, 1, phi)
+
+        # Label data
         if as_strings:
             f = lambda v: _map_strarr_(v, self.corpus.terms, 
                                        k='i', new_k='word')
@@ -152,257 +157,148 @@ class LDAGibbsViewer(object):
         return k_arr
 
 
-    def topic_entropies(self, print_len=10, k_indices=[], 
-                      as_strings=True):
+    def topic_entropies(self, print_len=10, k_indices=[], as_strings=True):
         """
         """
         if len(k_indices) == 0:
             k_indices = np.arange(self.model.top_word.shape[0])
         
+        # Normalize the document-topic matrix so that documents are
+        # distributions
         theta = (self.model.doc_top[:, k_indices] / 
                  self._topic_sums_d[k_indices][np.newaxis, :])
 
+        # Compute entropy values for each topic
         ent = -1 * (theta * np.log2(theta)).sum(0)
 
+        # Sort topics according to entropies
         k_indices = _enum_sort_(ent)['i']
         
+        # Retrieve topics
         k_arr = self.topics(print_len=print_len, k_indices=k_indices,
                             as_strings=as_strings)
+        
+        # Label data
         k_arr.main_header = 'Sorted by Entropy'
-        k_arr.subheaders = [('Topic {0} ({1:.5f})'.format(k, ent[i]), 'Prob')
-                              for i,k in enumerate(k_indices)]
+        k_arr.subheaders = [('Topic {0} ({1:.5f})'.format(k, ent[k]), 'Prob')
+                            for k in k_indices]
 
         return k_arr
-
-
-    def sorted_topics(self, print_len=10, as_strings=True, word=None, entropy=None):
-
-        if word:
-
-            w, word = self._res_term_type(word)
-
-            phi_w = self.model.phi_w(w)
-
-            k_indices = _enum_sort_(phi_w)['i']
-
-            wt = self.word_topics(w)
-
-            k_indices = [i for i in k_indices if i in wt['value']]
-
-            k_arr = self.topics(print_len=print_len, k_indices=k_indices, 
-                                as_strings=as_strings)
-
-            k_arr.main_header = 'Sorted by Word: ' + word
-
-        elif entropy:
-
-            ent = []
-
-            for i in xrange(self.model.doc_top.shape[1]):
-
-                ent.append((i, self.topic_entropy(i)))
-
-            ent.sort(key=lambda tup: tup[1])
-
-            k_indices = [tup[0] for tup in ent]
-
-            k_arr = self.topics(print_len=print_len, k_indices=k_indices,
-                                as_strings=as_strings)
-
-            k_arr.main_header = 'Sorted by Entropy'
-
-            print ent
-
-        else:
-
-            k_arr = self.topics(print_len=print_len, as_strings=as_strings)
-
-            k_arr.main_header = 'Sorted by Topic Index'
-            
-        return k_arr
-
-
-    def topic_entropy(self, t):
-
-        ent = 0.0
-
-        for p in self.model.theta_t(t):
-
-            ent += p * math.log(p, 2)
-
-        ent = -ent
-
-        return ent
 
 
     def doc_topics(self, doc, print_len=10):
-
+        """
+        """
         d, label = self._res_doc_type(doc)
 
-        k_arr = self.model.theta_d(d)
+        # Normalize the document-topic matrix so that documents are
+        # distributions
+        k_arr = (self.model.doc_top[d, :] / self._doc_sums[d])
 
+        # Index, sort and label data
         k_arr = _enum_sort_(k_arr).view(_IndexedValueArray_)
-
         k_arr.main_header = 'Document: ' + label
-
         k_arr.subheaders = [('Topic', 'Prob')]
-
         k_arr.str_len = print_len
 
         return k_arr
 
 
-
-    def topic_docs(self, t, print_len=10, as_strings=True):
-        """
-        Takes a topic number `t` and returns a list of documents sorted
-        by the posterior probabilities of documents given the topic.
-        """
-        md = self.corpus.view_metadata(self.model.tok_name)
-        docs = md[self._doc_label_name]
-
-        d_arr = self.model.theta_t(t)
-        d_arr = _enum_sort_(d_arr)
-        if as_strings:
-            d_arr = _map_strarr_(d_arr, docs, k='i', new_k='doc')
-        
-        d_arr = d_arr.view(_IndexedValueArray_)
-        d_arr.main_header = 'Topic: ' + str(t)
-        d_arr.subheaders = [('Document', 'Prob')]
-        d_arr.str_len = print_len
-
-        return d_arr
-
-
-
     def word_topics(self, word, as_strings=True):
         """
-        Takes `word` which is either an integer or a string and
-        returns a structured array of pairs `((d, i), t)`:
-
-        d, i : int or string, int
-            Term coordinate of an occurrence of `word`; i.e, the `i`th
-            term in the `d`th document. If `as_strings` is True, then
-            `d` is assigned the document label associated with the
-            document index `d`.
-        t : int
-            Topic assigned to the `d,i`th term by the model
         """
         w, word = self._res_term_type(word)
 
+        # Search for occurrences of a word in the corpus and return a
+        # positions and topic assignments for each found
         idx = [(self.model.W[d] == w) for d in xrange(len(self.model.W))]
-
         Z = self.model.Z
+        Z_w = [((d, i), t) for d in xrange(len(Z)) 
+               for i,t in enumerate(Z[d]) if idx[d][i]]
 
-        Z_w = [((d, i), t) 
-               for d in xrange(len(Z)) 
-               for i,t in enumerate(Z[d])
-               if idx[d][i]]
-
+        # Label data
         if as_strings:
-
             tn = self.model.tok_name
-
             docs = self.corpus.view_metadata(tn)[self._doc_label_name]
-        
             dt = [('i', [('doc', docs.dtype), ('pos',np.int)]), 
                   ('value', np.int)]
-
             Z_w = [((docs[d], i), t) for ((d, i), t) in Z_w]
 
         else:
-
             dt = [('i', [('doc', np.int), ('pos',np.int)]), ('value', np.int)]
 
         Z_w = np.array(Z_w, dtype=dt).view(_IndexedValueArray_)
-
         Z_w.main_header = 'Word: ' + word
-
         Z_w.subheaders = [('Document, Pos', 'Topic')]
 
         return Z_w
 
 
-
-
-
-
-    def sim_top_top(self, k, filter_nan=True):
+    def sim_top_top(self, topic_or_topics, weights=None, 
+                    print_len=10, filter_nan=True):
         """
-        Computes and sorts the cosine values between a given topic `k`
-        and every topic.
         """
-        return _sim_top_top_(self.model.top_word, k, norms=self._topic_norms, 
-                             filter_nan=filter_nan)
+        return _sim_top_top_(self.model.top_word, topic_or_topics, 
+                             norms=self._topic_norms, weights=weights, 
+                             print_len=print_len, filter_nan=filter_nan)
 
 
-    def sim_word_avg_top(self, words, weights=None, filter_nan=True,
-                         show_topics=True, print_len=10, as_strings=True):
+    def sim_top_doc(self, topic_or_topics, weights=[],
+                    print_len=10, as_strings=True, filter_nan=True):
         """
-        Computes and sorts the cosine values between a list of words
-        `words` and every topic. If weights are not provided, the word
-        list is represented in the space of topics as a topic which
-        assigns equal non-zero probability to each word in `words` and
-        0 to every other word in the corpus. Otherwise, each word in
-        `words` is assigned the provided weight.
         """
-        indices = list(set(sum([self.word_topics(w)['value'].tolist() 
-                                for w in words], [])))
-        indices.sort()
-        wt = self.model.top_word[indices].T
-        norms = self._topic_norms[indices]
-        
-        sim = _sim_word_avg_top_(self.corpus, wt, words, weights=weights, 
-                                 norms=norms, filter_nan=filter_nan)
+        return _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
+                             self.model.tok_name, weights=weights, 
+                             norms=self._doc_norms, print_len=print_len,
+                             as_strings=as_strings, filter_nan=filter_nan)
+
+
+    def sim_word_top(self, word_or_words, weights=[], filter_nan=True,
+                     show_topics=True, print_len=10, as_strings=True):
+        """
+        """
+        sim = _sim_word_top_(self.corpus, self.model.top_word, word_or_words,
+                             weights=weights, norms=self._topic_norms, 
+                             print_len=print_len, filter_nan=filter_nan)
 
         if show_topics:
+            if _isstr_(word_or_words):
+                word_or_words = [word_or_words]
+
+            indices = sum([self.word_topics(w)['value'].tolist() 
+                           for w in word_or_words], [])
+            indices = [i for i in xrange(sim.size) if sim[i][0] in indices]
+            sim = sim[indices]
+            indices = sim[sim.dtype.names[0]]
+
             k_arr = self.topics(print_len=print_len, k_indices=indices,
                                 as_strings=as_strings)
+
             k_arr.main_header = 'Sorted by Word Similarity'
-            k_arr.subheaders = [('Topic {0} ({1:.5f})'.format(k, sim['value'][i]), 'Prob')
-                                for i,k in enumerate(indices)]
+            k_arr.subheaders = [('Topic {0} ({1:.5f})'.format(k, v), 'Prob')
+                                for k,v in sim]
 
-            return k_arr
-
-        # TODO: Use print_len and as_strings parameters.
-        return sim
+        return k_arr
 
 
-
-    def sim_word_word(self, word, norms=None, 
-                      filter_nan=True, as_strings=True):
+    def sim_word_word(self, word_or_words, weights=None, 
+                      filter_nan=True, print_len=10, as_strings=True):
         """
-        Computes and sorts the cosine values between `word` and every
-        word.
         """
-        return self.sim_word_avg_word([word], filter_nan=filter_nan, 
-                                      as_strings=as_strings)
+        return _sim_word_word_(self.corpus, self.model.top_word.T, 
+                               word_or_words, weights=weights, 
+                               norms=self._word_norms, filter_nan=filter_nan, 
+                               print_len=print_len, as_strings=True)
 
 
-
-    def sim_word_avg_word(self, words, weights=None, 
-                          filter_nan=True, as_strings=True):
+    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True):
         """
-        Computes and sorts the cosine values between a list of words
-        `words` and every word. If weights are provided, the word list
-        is represented as the weighted average of the words in the
-        list. If weights are not provided, the arithmetic mean is
-        used.
         """
-        return _sim_word_avg_word_(self.corpus, self.model.top_word.T, 
-                                   words, weights=weights, norms=self._word_norms,
-                                   filter_nan=filter_nan, as_strings=True)
-
-    def sim_doc_doc(self, doc, filter_nan=True):
-
-        return _similar_documents_(self.corpus,
-                                   self.model.doc_top.T,
-                                   self.model.tok_name,
-                                   doc,
-                                   norms=self._doc_norms,
-                                   filter_nan=filter_nan)
+        return _sim_doc_doc_(self.corpus, self.model.doc_top.T,
+                             self.model.tok_name, doc_or_docs,
+                             norms=self._doc_norms, print_len=print_len,
+                             filter_nan=filter_nan)
     
-
 
     def simmat_words(self, word_list):
 
@@ -411,14 +307,12 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-
     def simmat_docs(self, docs):
 
         return _simmat_documents_(self.corpus,
                                   self.model.doc_top.T,
                                   self.model.tok_name,
                                   docs)
-
 
 
     def simmat_topics(self, topics):
