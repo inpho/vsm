@@ -239,9 +239,8 @@ class LDAGibbsViewer(object):
         """
         doc_prob = dict((doc, prob) for (doc, prob) in self.sim_top_doc(topics))
 
-        wt = self.word_topics('word')
         doc_list = []
-        for (doc, pos), top in wt: #self.word_topics('word'):
+        for (doc, pos), top in self.word_topics(word):
             if any(top == topics):
                 doc_list.append(((doc, doc_prob[doc]), pos))
 
