@@ -236,7 +236,11 @@ class LDAGibbsViewer(object):
 
     def doc_finder(self, word, topics):
         """
+        Finds documents and positions where `word` appears with the topic assignment(s) 
+        equal to any one of `topics`, and returns a list of documents and positions sorted
+        by the relevance of each document to `topics`
         """
+        
         doc_prob = dict((doc, prob) for (doc, prob) in self.sim_top_doc(topics))
 
         doc_list = []
@@ -246,9 +250,12 @@ class LDAGibbsViewer(object):
 
         doc_list.sort(key=lambda tup: tup[0][1], reverse=True)
 
-#        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
-#        doc_list.main_header = 'Word: ' + word + 'by Topic(s)' + topics
-#        doc_list.subheaders = [('Document, Prob', 'Pos')]
+        dt = [('i', [('doc', doc_list[0][0][0].dtype), ('prob',np.float)]), 
+                  ('pos', np.int)]
+
+        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
+        doc_list.main_header = 'Word: ' + word + 'by Topic(s)' + topics
+        doc_list.subheaders = [('Document, Prob', 'Pos')]
 
         return doc_list
 
