@@ -250,10 +250,10 @@ class LDAGibbsViewer(object):
 
         doc_list.sort(key=lambda tup: tup[0][1], reverse=True)
 
-        dt = [('i', [('doc', doc_list[0][0][0].dtype), ('prob',np.float)]), ('pos', np.int)]
-        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
-        doc_list.main_header = 'Word: ' + word + ' by Topic(s)' + str(topics)
-        doc_list.subheaders = [('Document, Prob', 'Pos')]
+#        dt = [('i', [('doc', doc_list[0][0][0].dtype), ('prob',np.float)]), ('pos', np.int)]
+#        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
+#        doc_list.main_header = 'Word: ' + word + ' by Topic(s)' + str(topics)
+#        doc_list.subheaders = [('Document, Prob', 'Pos')]
 
         return doc_list
 
