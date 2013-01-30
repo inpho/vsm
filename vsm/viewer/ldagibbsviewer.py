@@ -241,7 +241,7 @@ class LDAGibbsViewer(object):
 
         doc_list = []
         for (doc, pos), top in self.word_topics('word'):
-            if any(top == topics):
+            if top == topics:
                 doc_list.append(((doc, doc_prob[doc]), pos))
 
         doc_list.sort(key=lambda tup: tup[0][1], reverse=True)
