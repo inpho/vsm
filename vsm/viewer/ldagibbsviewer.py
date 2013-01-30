@@ -246,9 +246,9 @@ class LDAGibbsViewer(object):
 
         doc_list.sort(key=lambda tup: tup[0][1], reverse=True)
 
-        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
-        doc_list.main_header = 'Word: ' + word + 'by Topic(s)' + topics
-        doc_list.subheaders = [('Document, Prob', 'Pos')]
+#        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
+#        doc_list.main_header = 'Word: ' + word + 'by Topic(s)' + topics
+#        doc_list.subheaders = [('Document, Prob', 'Pos')]
 
         return doc_list
 
