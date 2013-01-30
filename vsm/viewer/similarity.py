@@ -19,39 +19,26 @@ def row_cosines(row, matrix, norms=None,
     `row` must be a 2-dimensional array.
     """
     if sparse.issparse(matrix):
-
         matrix = matrix.tocsr()
-
         nums = sparse_mvdot(matrix, row.T, submat_size=submat_size)
 
     else:
-        
         nums = np.dot(matrix, row.T)
-
-        nums = np.squeeze(nums)
+        nums = np.ravel(nums)
 
     if norms is None:
-
         norms = row_norms(matrix)
 
     row_norm = row_norms(row)[0]
-
     dens = norms * row_norm
-
     out = nums / dens
 
-
-
     if sort:
-        
         out = enum_sort(out)
-
     else:
-
         out = enum_array(out)
     
     if filter_nan:
-
         out = out[np.isfinite(out['value'])]
 
     return out
