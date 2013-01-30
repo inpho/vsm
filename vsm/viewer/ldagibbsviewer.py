@@ -172,7 +172,7 @@ class LDAGibbsViewer(object):
         ent = -1 * (theta * np.log2(theta)).sum(0)
 
         # Sort topics according to entropies
-        k_indices = _enum_sort_(ent)['i']
+        k_indices = _enum_sort_(ent)['i'][::-1]
         
         # Retrieve topics
         k_arr = self.topics(print_len=print_len, k_indices=k_indices,
