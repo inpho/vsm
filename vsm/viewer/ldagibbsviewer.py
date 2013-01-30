@@ -234,6 +234,26 @@ class LDAGibbsViewer(object):
         return Z_w
 
 
+    def doc_finder(self, word, topics):
+        """
+        """
+        doc_prob = dict((doc, prob) for (doc, prob) in v.sim_top_doc(topics))
+
+        doc_list = []
+        for (doc, pos), top in v.word_topics('word'):
+            if any(top == topics):
+                doc_list.append(((doc, doc_prob[doc]), pos))
+
+        doc_list.sort(key=lambda tup: tup[0][1], reverse=True)
+
+        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
+        doc_list.main_header = 'Word: ' + word + 'by Topic(s)' + topics
+        doc_list.subheaders = [('Document, Prob', 'Pos')]
+
+        return doc_list
+
+
+
     def sim_top_top(self, topic_or_topics, weights=None, 
                     print_len=10, filter_nan=True):
         """
