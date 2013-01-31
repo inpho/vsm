@@ -20,6 +20,7 @@ from vsm.viewer import (IndexedValueArray as _IndexedValueArray_,
 
 from vsm.viewer.similarity import row_norms as _row_norms_
 
+from vsm.util.htrc import *
 
 
 class LDAGibbsViewer(object):
@@ -250,6 +251,8 @@ class LDAGibbsViewer(object):
 
         doc_list.sort(key=lambda tup: tup[0][1], reverse=True)
 
+        metadata = htrc_load_metadata()
+        
 #        dt = [('i', [('doc', doc_list[0][0][0].dtype), ('prob',np.float)]), ('pos', np.int)]
 #        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
 #        doc_list.main_header = 'Word: ' + word + ' by Topic(s)' + str(topics)
