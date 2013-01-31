@@ -235,7 +235,7 @@ class LDAGibbsViewer(object):
         return Z_w
 
 
-    def doc_finder(self, word, topic_or_topics, as_strings=True):
+    def doc_finder(self, word, topics, as_strings=True):
         """
         Finds documents and positions where `word` appears with the topic assignment(s) 
         equal to any one of `topics`, and returns a list of documents and positions sorted
