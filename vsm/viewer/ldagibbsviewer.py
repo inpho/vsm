@@ -235,7 +235,7 @@ class LDAGibbsViewer(object):
         return Z_w
 
 
-    def doc_finder(self, word, topics):
+    def doc_finder(self, word, topic_or_topics, as_strings=True):
         """
         Finds documents and positions where `word` appears with the topic assignment(s) 
         equal to any one of `topics`, and returns a list of documents and positions sorted
@@ -251,7 +251,12 @@ class LDAGibbsViewer(object):
 
         doc_list.sort(key=lambda tup: tup[0][1], reverse=True)
 
-        metadata = htrc_load_metadata()
+        # labeling data
+        if as_strings:
+            metadata = htrc_load_metadata()
+            doc_list = [((htrc_get_titles(metadata, d)[0], pr), pos)
+                        for ((d, pr), pos) in doc_list] 
+        
         
 #        dt = [('i', [('doc', doc_list[0][0][0].dtype), ('prob',np.float)]), ('pos', np.int)]
 #        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
