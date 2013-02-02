@@ -41,7 +41,7 @@ def default_col_widths(dtype):
         if t.kind == 'S':
             col_widths.append(t.itemsize + 5)
         else:
-            col_widths.append(10)
+            col_widths.append(15)
     
     return col_widths
 
@@ -57,14 +57,17 @@ class LabeledColumn(np.ndarray):
     A subcolumn wraps the data found under a given field name. Each
     subcolumn has a label and a display width.
     """
-    def __new__(cls, input_array, col_header=None, subcol_headers=None, subcol_widths=None):
+    def __new__(cls, input_array, col_header=None, subcol_headers=[], subcol_widths=[]):
         """
         """
         obj = np.asarray(input_array).view(cls)
         obj.col_header = col_header
         obj.col_len = None
         obj.subcol_headers = subcol_headers
-        obj.subcol_widths = subcol_widths
+        if len(subcol_widths) == 0:
+            obj.subcol_widths = default_col_widths(input_array.dtype)
+        else:
+            obj.subcol_widths = subcol_widths
         
         return obj
 
@@ -87,9 +90,6 @@ class LabeledColumn(np.ndarray):
         else:
             col_len = self.shape[0]
 
-        if not self.subcol_widths:
-            self.subcol_widths = default_col_widths(self.dtype)
-
         col_width = sum(self.subcol_widths)
 
         line = '-' * col_width + '\n'
@@ -99,7 +99,7 @@ class LabeledColumn(np.ndarray):
                                      col_width) + '\n'
             out += line
             
-        if self.subcol_headers:
+        if len(self.subcol_headers) > 0:
             for i in xrange(len(self.subcol_headers)):
                 w = self.subcol_widths[i]
                 out += '{0:<{1}}'.format(format_(self.subcol_headers[i], w), w)
@@ -117,40 +117,42 @@ class LabeledColumn(np.ndarray):
 
 
 
-        
-
-
-
-class DataTable(np.ndarray):
+class DataTable(list):
     """
-    A subclass of nd.ndarray whose purpose is to store labels and
-    formatting information for an array of LabelColumns. It also
-    provides pretty-printing routines.
+    A subclass of list whose purpose is to store labels and
+    formatting information for a list of 1-dimensional structured
+    arrays. It also provides pretty-printing routines.
 
-    A table has a main header and a default display width. If the
-    total width of LabeledColumns exceeds this bound, the table is
-    split into a sequence of chunks which are displayed accordingly.
+    Globally, the table has a default display length for the columns
+    and a table header.
+
+    A column can have a column-specific header.
+
+    A subcolumn wraps the data found under a given field name. Each
+    subcolumn has a label and a display width.
     """
-    def __new__(cls, input_array):
+    def __init__(self, l, table_header=None):
         """
         """
-        obj = np.asarray(input_array).view(cls)
-        # obj.str_len = None
+        super(DataTable, self).__init__(l)
+        self.table_header = table_header
 
-        return obj
-
-
-    def __array_finalize__(self, obj):
+    def __str__(self):
         """
         """
-        if obj is None: return
-
-        # self.str_len = getattr(obj, 'str_len', None)
+        col_width = sum(self[0].subcol_widths)
 
 
-    # def __str__(self):
+        out = '-' * col_width + '\n'
+        if self.table_header:
+            out += '{0:^{1}}'.format(format_(self.table_header, col_width), 
+                                     col_width) + '\n'
 
-    #     pass
+        for col in self:
+            out += col.__str__()
+
+        return out
+
 
 
 class IndexedValueArray(np.ndarray):
@@ -306,10 +308,32 @@ def test_LabeledColumn():
     d = [('i', np.array(terms).dtype), 
          ('value', np.array(values).dtype)]
     v = np.array(zip(terms, values), dtype=d)
-    arr = v.view(LabeledColumn)
-#    arr.subcol_widths = [30, 20]
+    arr = LabeledColumn(v)
+    # arr.subcol_widths = [30, 20]
     arr.subcol_headers = ['Word', 'Value']
-    arr.col_header = 'Song'
+    arr.col_headers = 'Song'
     arr.col_len = 10
 
     return arr
+
+
+def test_DataTable():
+
+    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
+             'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
+             'is', 'but', 'a', 'dream']
+    values = [np.random.random() for t in terms]
+    d = [('i', np.array(terms).dtype), 
+         ('value', np.array(values).dtype)]
+    v = np.array(zip(terms, values), dtype=d)
+    v = LabeledColumn(v)
+    # v.subcol_widths = [30, 20]
+    v.subcol_headers = ['Word', 'Value']
+    v.col_len = 10
+    t = []
+    for i in xrange(5):
+        t.append(v.copy())
+        t[i].col_header = 'Iteration ' + str(i)
+    t = DataTable(t, 'Song')
+
+    return t
