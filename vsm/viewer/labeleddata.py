@@ -23,6 +23,11 @@ class LabeledColumn(np.ndarray):
     A subclass of nd.ndarray whose purpose is to store labels and
     formatting information for a 1-dimensional structured array. It
     also provides pretty-printing routines.
+
+    A column can have a header and a default display length.
+
+    A subcolumn wraps the data found under a given field name. Each
+    subcolumn has a label and a display width.
     """
     def __new__(cls, input_array):
         """
@@ -51,6 +56,10 @@ class DataTable(np.ndarray):
     A subclass of nd.ndarray whose purpose is to store labels and
     formatting information for an array of LabelColumns. It also
     provides pretty-printing routines.
+
+    A table has a main header and a default display width. If the
+    total width of LabeledColumns exceeds this bound, the table is
+    split into a sequence of chunks which are displayed accordingly.
     """
     def __new__(cls, input_array):
         """
