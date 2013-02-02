@@ -3,7 +3,6 @@ import numpy as np
 from vsm import enum_sort, map_strarr, isfloat, isint, isstr
 
 
-
 def format_entry(x):
     """
     """
@@ -18,6 +17,35 @@ def format_entry(x):
     return str(x)
 
 
+def format_(x, n):
+    """
+    """
+    if isint(x):
+        return x
+
+    if isfloat(x):
+        return '{0:.5f}'.format(x)
+
+    n = min(n, len(x))
+    return x[:n]
+
+
+def default_col_widths(dtype):
+    """
+    """
+    col_widths = []
+    
+    values =zip(*dtype.fields.values())[0]
+
+    for t in values:
+        if t.kind == 'S':
+            col_widths.append(t.itemsize + 5)
+        else:
+            col_widths.append(10)
+    
+    return col_widths
+
+
 class LabeledColumn(np.ndarray):
     """
     A subclass of nd.ndarray whose purpose is to store labels and
@@ -29,12 +57,15 @@ class LabeledColumn(np.ndarray):
     A subcolumn wraps the data found under a given field name. Each
     subcolumn has a label and a display width.
     """
-    def __new__(cls, input_array):
+    def __new__(cls, input_array, col_header=None, subcol_headers=None, subcol_widths=None):
         """
         """
         obj = np.asarray(input_array).view(cls)
-        # obj.str_len = None
-
+        obj.col_header = col_header
+        obj.col_len = None
+        obj.subcol_headers = subcol_headers
+        obj.subcol_widths = subcol_widths
+        
         return obj
 
 
@@ -43,12 +74,51 @@ class LabeledColumn(np.ndarray):
         """
         if obj is None: return
 
-        # self.str_len = getattr(obj, 'str_len', None)
+        self.col_header = getattr(obj, 'col_header', None)
+        self.col_len = getattr(obj, 'col_len', None)
+        self.subcol_headers = getattr(obj, 'subcol_headers', None)
+        self.subcol_widths = getattr(obj, 'subcol_widths', None)
 
 
-    # def __str__(self):
+    def __str__(self):
+        
+        if self.col_len:
+            col_len = min(self.shape[0], self.col_len)
+        else:
+            col_len = self.shape[0]
 
-    #     pass
+        if not self.subcol_widths:
+            self.subcol_widths = default_col_widths(self.dtype)
+
+        col_width = sum(self.subcol_widths)
+
+        line = '-' * col_width + '\n'
+        out = line
+        if self.col_header:
+            out += '{0:^{1}}'.format(format_(self.col_header, col_width), 
+                                     col_width) + '\n'
+            out += line
+            
+        if self.subcol_headers:
+            for i in xrange(len(self.subcol_headers)):
+                w = self.subcol_widths[i]
+                out += '{0:<{1}}'.format(format_(self.subcol_headers[i], w), w)
+            out += '\n'
+            out += line
+
+        for i in xrange(col_len):
+            for j in xrange(len(self.dtype)):
+                w = self.subcol_widths[j]
+                n = self.dtype.names[j]
+                out += '{0:<{1}}'.format(format_(self[n][i], w), w)
+            out += '\n'
+
+        return out
+
+
+
+        
+
 
 
 class DataTable(np.ndarray):
@@ -225,3 +295,21 @@ def test_IndexedValueArray():
     arr.main_header = 'Test 1-d Array'
 
     print arr
+
+
+def test_LabeledColumn():
+
+    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
+             'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
+             'is', 'but', 'a', 'dream']
+    values = [np.random.random() for t in terms]
+    d = [('i', np.array(terms).dtype), 
+         ('value', np.array(values).dtype)]
+    v = np.array(zip(terms, values), dtype=d)
+    arr = v.view(LabeledColumn)
+#    arr.subcol_widths = [30, 20]
+    arr.subcol_headers = ['Word', 'Value']
+    arr.col_header = 'Song'
+    arr.col_len = 10
+
+    return arr
