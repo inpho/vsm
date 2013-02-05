@@ -116,41 +116,105 @@ class LabeledColumn(np.ndarray):
         return out
 
 
+    def _repr_html_(self):
+        if self.col_len:
+            col_len = min(self.shape[0], self.col_len)
+        else:
+            col_len = self.shape[0]
 
+        if not self.subcol_widths:
+            self.subcol_widths = default_col_widths(self.dtype)
+
+        col_width = sum(self.subcol_widths)
         
+        s = '<style> table { background: white; float: left; } th {background: #E0F8F7;} </style>'
+        s += '<table style="margin: 0">'
+
+        if self.col_header:
+            s += '<tr><th style="text-align: center; background: #E0F8F7;" colspan="{0}"> {1} </th><tr>'.format(self.col_len, self.col_header)
+
+        if self.subcol_headers:
+            s += '<tr>'
+            for sch in self.subcol_headers:
+                s += '<th>{0}</th>'.format(sch)
+            s += '</tr>'
+            
+        
+        for i in xrange(col_len):
+            s += '<tr>'
+            for j in xrange(len(self.dtype)):
+                w = self.subcol_widths[j]
+                n = self.dtype.names[j]
+                s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
+            s += '</tr>'
+        
+        s += '</table>'
+ 
+        return s
 
 
 
-class DataTable(np.ndarray):
+class DataTable(list):
     """
-    A subclass of nd.ndarray whose purpose is to store labels and
-    formatting information for an array of LabelColumns. It also
-    provides pretty-printing routines.
+    A subclass of list whose purpose is to store labels and
+    formatting information for a list of 1-dimensional structured
+    arrays. It also provides pretty-printing routines.
 
-    A table has a main header and a default display width. If the
-    total width of LabeledColumns exceeds this bound, the table is
-    split into a sequence of chunks which are displayed accordingly.
+    Globally, the table has a default display length for the columns
+    and a table header.
+
+    A column can have a column-specific header.
+
+    A subcolumn wraps the data found under a given field name. Each
+    subcolumn has a label and a display width.
     """
-    def __new__(cls, input_array):
+    def __init__(self, l, table_header=None):
         """
         """
-        obj = np.asarray(input_array).view(cls)
-        # obj.str_len = None
+        super(DataTable, self).__init__(l)
+        self.table_header = table_header
 
-        return obj
-
-
-    def __array_finalize__(self, obj):
+    def __str__(self):
         """
         """
-        if obj is None: return
-
-        # self.str_len = getattr(obj, 'str_len', None)
+        col_width = sum(self[0].subcol_widths)
 
 
-    # def __str__(self):
+        out = '-' * col_width + '\n'
+        if self.table_header:
+            out += '{0:^{1}}'.format(format_(self.table_header, col_width), 
+                                     col_width) + '\n'
 
-    #     pass
+        for col in self:
+            out += col.__str__()
+
+        return out
+        
+    def _repr_html_(self):
+
+        col_width = sum(self[0].subcol_widths)
+
+        s = '<style> table {background: white;} </style>'
+        s += '<table>'
+
+        if self.table_header:
+            s += '<tr><th style="text-align: center; background: #E0F8F7;" colspan="{0}"> {1} </th><tr>'.format(col_width, self.table_header)
+      
+        s += '<tr>'
+        r = 0
+        for i, col in enumerate(self):
+            if i/3 != r:
+                s += '</tr><tr>'
+                r = i/3
+            
+            html = col._repr_html_()
+            
+            s += '<td> {} </td>'.format(html)
+        s += '</tr>'
+
+        return s
+
+
 
 
 class IndexedValueArray(np.ndarray):
@@ -313,3 +377,25 @@ def test_LabeledColumn():
     arr.col_len = 10
 
     return arr
+
+
+def test_DataTable():
+
+    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
+             'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
+             'is', 'but', 'a', 'dream']
+    values = [np.random.random() for t in terms]
+    d = [('i', np.array(terms).dtype), 
+         ('value', np.array(values).dtype)]
+    v = np.array(zip(terms, values), dtype=d)
+    v = LabeledColumn(v)
+    v.subcol_widths = [30, 20]
+    v.subcol_headers = ['Word', 'Value']
+    v.col_len = 10
+    t = []
+    for i in xrange(9):
+        t.append(v.copy())
+        t[i].col_header = 'Iteration ' + str(i)
+    t = DataTable(t, 'Song')
+
+    return t
