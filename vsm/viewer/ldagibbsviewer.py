@@ -240,6 +240,8 @@ class LDAGibbsViewer(object):
         Finds documents and positions where `word` appears with the topic assignment(s) 
         equal to any one of `topics`, and returns a list of documents and positions sorted
         by the relevance of each document to `topics`
+
+        NB: Currently this works only with htrc corpus
         """
         
         doc_prob = dict((doc, prob) for (doc, prob) in self.sim_top_doc(topics))
@@ -255,13 +257,14 @@ class LDAGibbsViewer(object):
         if as_strings:
             metadata = htrc_load_metadata()
             doc_list = [((htrc_get_titles(metadata, d)[0], pr), pos)
-                        for ((d, pr), pos) in doc_list] 
-        
-        
-#        dt = [('i', [('doc', doc_list[0][0][0].dtype), ('prob',np.float)]), ('pos', np.int)]
-#        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
-#        doc_list.main_header = 'Word: ' + word + ' by Topic(s)' + str(topics)
-#        doc_list.subheaders = [('Document, Prob', 'Pos')]
+                        for ((d, pr), pos) in doc_list]     
+            dt = [('i', [('doc', doc_list[0][0][0].dtype), ('prob',np.float)]), ('pos', np.int)]
+        else:
+            dt = [('i', [('doc', np.int), ('prob',np.float)]), ('pos', np.int)]
+            
+        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
+        doc_list.main_header = 'Word: ' + word + ' by Topic(s)' + str(topics)
+        doc_list.subheaders = [('Document, Prob', 'Pos')]
 
         return doc_list
 
