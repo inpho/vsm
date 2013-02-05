@@ -41,7 +41,7 @@ def default_col_widths(dtype):
         if t.kind == 'S':
             col_widths.append(t.itemsize + 5)
         else:
-            col_widths.append(15)
+            col_widths.append(10)
     
     return col_widths
 
@@ -57,17 +57,14 @@ class LabeledColumn(np.ndarray):
     A subcolumn wraps the data found under a given field name. Each
     subcolumn has a label and a display width.
     """
-    def __new__(cls, input_array, col_header=None, subcol_headers=[], subcol_widths=[]):
+    def __new__(cls, input_array, col_header=None, subcol_headers=None, subcol_widths=None):
         """
         """
         obj = np.asarray(input_array).view(cls)
         obj.col_header = col_header
         obj.col_len = None
         obj.subcol_headers = subcol_headers
-        if len(subcol_widths) == 0:
-            obj.subcol_widths = default_col_widths(input_array.dtype)
-        else:
-            obj.subcol_widths = subcol_widths
+        obj.subcol_widths = subcol_widths
         
         return obj
 
@@ -90,6 +87,9 @@ class LabeledColumn(np.ndarray):
         else:
             col_len = self.shape[0]
 
+        if not self.subcol_widths:
+            self.subcol_widths = default_col_widths(self.dtype)
+
         col_width = sum(self.subcol_widths)
 
         line = '-' * col_width + '\n'
@@ -99,7 +99,7 @@ class LabeledColumn(np.ndarray):
                                      col_width) + '\n'
             out += line
             
-        if len(self.subcol_headers) > 0:
+        if self.subcol_headers:
             for i in xrange(len(self.subcol_headers)):
                 w = self.subcol_widths[i]
                 out += '{0:<{1}}'.format(format_(self.subcol_headers[i], w), w)
@@ -114,6 +114,43 @@ class LabeledColumn(np.ndarray):
             out += '\n'
 
         return out
+
+
+    def _repr_html_(self):
+        if self.col_len:
+            col_len = min(self.shape[0], self.col_len)
+        else:
+            col_len = self.shape[0]
+
+        if not self.subcol_widths:
+            self.subcol_widths = default_col_widths(self.dtype)
+
+        col_width = sum(self.subcol_widths)
+        
+        s = '<style> table { background: white; float: left; } th {background: #E0F8F7;} </style>'
+        s += '<table style="margin: 0">'
+
+        if self.col_header:
+            s += '<tr><th style="text-align: center; background: #E0F8F7;" colspan="{0}"> {1} </th><tr>'.format(self.col_len, self.col_header)
+
+        if self.subcol_headers:
+            s += '<tr>'
+            for sch in self.subcol_headers:
+                s += '<th>{0}</th>'.format(sch)
+            s += '</tr>'
+            
+        
+        for i in xrange(col_len):
+            s += '<tr>'
+            for j in xrange(len(self.dtype)):
+                w = self.subcol_widths[j]
+                n = self.dtype.names[j]
+                s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
+            s += '</tr>'
+        
+        s += '</table>'
+ 
+        return s
 
 
 
@@ -152,6 +189,31 @@ class DataTable(list):
             out += col.__str__()
 
         return out
+        
+    def _repr_html_(self):
+
+        col_width = sum(self[0].subcol_widths)
+
+        s = '<style> table {background: white;} </style>'
+        s += '<table>'
+
+        if self.table_header:
+            s += '<tr><th style="text-align: center; background: #E0F8F7;" colspan="{0}"> {1} </th><tr>'.format(col_width, self.table_header)
+      
+        s += '<tr>'
+        r = 0
+        for i, col in enumerate(self):
+            if i/3 != r:
+                s += '</tr><tr>'
+                r = i/3
+            
+            html = col._repr_html_()
+            
+            s += '<td> {} </td>'.format(html)
+        s += '</tr>'
+
+        return s
+
 
 
 
@@ -308,10 +370,10 @@ def test_LabeledColumn():
     d = [('i', np.array(terms).dtype), 
          ('value', np.array(values).dtype)]
     v = np.array(zip(terms, values), dtype=d)
-    arr = LabeledColumn(v)
-    # arr.subcol_widths = [30, 20]
+    arr = v.view(LabeledColumn)
+#    arr.subcol_widths = [30, 20]
     arr.subcol_headers = ['Word', 'Value']
-    arr.col_headers = 'Song'
+    arr.col_header = 'Song'
     arr.col_len = 10
 
     return arr
@@ -327,11 +389,11 @@ def test_DataTable():
          ('value', np.array(values).dtype)]
     v = np.array(zip(terms, values), dtype=d)
     v = LabeledColumn(v)
-    # v.subcol_widths = [30, 20]
+    v.subcol_widths = [30, 20]
     v.subcol_headers = ['Word', 'Value']
     v.col_len = 10
     t = []
-    for i in xrange(5):
+    for i in xrange(9):
         t.append(v.copy())
         t[i].col_header = 'Iteration ' + str(i)
     t = DataTable(t, 'Song')
