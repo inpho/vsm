@@ -10,6 +10,16 @@ from similarity import row_cosines, row_cos_mat
 
 from labeleddata import *
 
+
+def def_label_fn(metadata):
+    """
+    """
+    names = [name for name in metadata.dtype.names if name.endswith('_label')]
+    labels = [','.join([x[n] for n in names]) for x in metadata]
+    
+    return np.array(labels)
+
+
 # TODO: Update module so that any function wrapping a similarity
 # function assumes that similarity is computed row-wise
 
@@ -84,7 +94,8 @@ def sim_word_top(corp, mat, word_or_words, weights=[],
 
 
 def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[], 
-                norms=None, print_len=10, as_strings=True, filter_nan=True):
+                norms=None, print_len=10, filter_nan=True, 
+                label_fn=def_label_fn, as_strings=True):
     """
     Takes a topic or list of topics (by integer index) and returns a
     list of documents sorted by the posterior probabilities of
@@ -109,7 +120,7 @@ def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[],
     # Label data
     if as_strings:
         md = corp.view_metadata(tok_name)
-        docs = md[doc_label_name(tok_name)]
+        docs = label_fn(md)
         d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
         
     d_arr = d_arr.view(IndexedValueArray)
@@ -120,9 +131,9 @@ def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[],
     return d_arr
 
 
-# Add as_strings parameter
 def sim_doc_doc(corp, mat, tok_name, doc_or_docs, weights=None,
-                norms=None, filter_nan=True, print_len=10, as_strings=True):
+                norms=None, filter_nan=True, print_len=10, 
+                label_fn=def_label_fn, as_strings=True):
     """
     """
     # Resolve `word_or_words`
@@ -145,7 +156,8 @@ def sim_doc_doc(corp, mat, tok_name, doc_or_docs, weights=None,
 
     # Label data
     if as_strings:
-        docs = corp.view_metadata(tok_name)[label_name]
+        md = corp.view_metadata(tok_name)
+        docs = label_fn(md)
         d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
     
     d_arr = d_arr.view(IndexedValueArray)
@@ -264,13 +276,12 @@ def doc_label_name(tok_name):
     return tok_name + '_label'
 
 
-
 def res_doc_type(corp, tok_name, label_name, doc):
     """
     If `doc` is a string or a dict, performs a look up for its
     associated integer. If `doc` is a dict, looks for its label.
     Finally, if `doc` is an integer, stringifies `doc` for use as
-    a label. 
+    a label.
     
     Returns an integer, string pair: (<document index>, <document
     label>).
