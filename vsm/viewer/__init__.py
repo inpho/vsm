@@ -15,7 +15,7 @@ def def_label_fn(metadata):
     """
     """
     names = [name for name in metadata.dtype.names if name.endswith('_label')]
-    labels = [','.join([x[n] for n in names]) for x in metadata]
+    labels = [', '.join([x[n] for n in names]) for x in metadata]
     
     return np.array(labels)
 
@@ -123,10 +123,10 @@ def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[],
         docs = label_fn(md)
         d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
         
-    d_arr = d_arr.view(IndexedValueArray)
-    d_arr.main_header = 'Topics: ' + ', '.join([str(t) for t in topics])
-    d_arr.subheaders = [('Document', 'Prob')]
-    d_arr.str_len = print_len
+    d_arr = d_arr.view(LabeledColumn)
+    d_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
+    d_arr.subcol_headers = ['Document', 'Prob']
+    d_arr.col_len = print_len
 
     return d_arr
 

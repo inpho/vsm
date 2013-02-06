@@ -229,7 +229,8 @@ def htrc_load_metadata():
     import os
     import json
 
-    filename ='/var/inphosemantics/data/fresh/htrc-1315-metadata.json'
+    filename = ('/var/inphosemantics/data/2013/htrc-anthropomorphism-86/'
+                'htrc-anthropomorphism-86-metadata.json')
 
     with open(filename) as f:
         metadata = json.load(f)
@@ -246,4 +247,16 @@ def htrc_get_titles(metadata, vol_id):
     except KeyError:
         print 'Volume ID not found:', vol_id
         raise
+
+
+def htrc_label_fn(metadata):
+    """
+    """
+    md = htrc_load_metadata()
+    titles = [htrc_get_titles(md, v) for v in metadata['book_label']]
+    files = metadata['file']
+    labels = ['{0}, {1}'.format(t,f) for (t,f) in zip(titles, files)]
+    
+    return np.array(labels)
+
 
