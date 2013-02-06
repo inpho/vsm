@@ -8,7 +8,8 @@ import enchant
 
 from corpustools import filter_by_suffix
 
-__all__ = ['proc_htrc_coll', 'htrc_load_metadata', 'htrc_get_titles']
+__all__ = ['proc_htrc_coll', 'htrc_load_metadata',
+           'htrc_get_titles', 'htrc_label_fn']
 
 
 def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
@@ -229,7 +230,7 @@ def htrc_load_metadata():
     import os
     import json
 
-    filename = ('/var/inphosemantics/data/2013/htrc-anthropomorphism-86/'
+    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-86/'
                 'htrc-anthropomorphism-86-metadata.json')
 
     with open(filename) as f:
