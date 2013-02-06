@@ -57,14 +57,15 @@ class LabeledColumn(np.ndarray):
     A subcolumn wraps the data found under a given field name. Each
     subcolumn has a label and a display width.
     """
-    def __new__(cls, input_array, col_header=None, subcol_headers=None, subcol_widths=None):
+    def __new__(cls, input_array, col_header=None, subcol_headers=None,
+                subcol_widths=None, col_len = None):
         """
         """
         obj = np.asarray(input_array).view(cls)
         obj.col_header = col_header
-        obj.col_len = None
+        obj.col_len = col_len
         obj.subcol_headers = subcol_headers
-        obj.subcol_widths = subcol_widths
+        obj._subcol_widths = subcol_widths     
         
         return obj
 
@@ -77,7 +78,22 @@ class LabeledColumn(np.ndarray):
         self.col_header = getattr(obj, 'col_header', None)
         self.col_len = getattr(obj, 'col_len', None)
         self.subcol_headers = getattr(obj, 'subcol_headers', None)
-        self.subcol_widths = getattr(obj, 'subcol_widths', None)
+        self._subcol_widths = getattr(obj, '_subcol_widths', None)
+
+
+    @property
+    def subcol_widths(self):
+        if not hasattr(self, '_subcol_widths') or not self._subcol_widths:
+            self._subcol_widths = default_col_widths(self.dtype)
+        return self._subcol_widths
+
+    @subcol_widths.setter
+    def subcol_widths(self, w):
+        self._subcol_widths = w
+
+    @property
+    def col_width(self):
+        return sum(self.subcol_widths)
 
 
     def __str__(self):
@@ -87,11 +103,7 @@ class LabeledColumn(np.ndarray):
         else:
             col_len = self.shape[0]
 
-        if not self.subcol_widths:
-            self.subcol_widths = default_col_widths(self.dtype)
-
-        col_width = sum(self.subcol_widths)
-
+        col_width = self.col_width 
         line = '-' * col_width + '\n'
         out = line
         if self.col_header:
@@ -179,7 +191,6 @@ class DataTable(list):
         """
         col_width = sum(self[0].subcol_widths)
 
-
         out = '-' * col_width + '\n'
         if self.table_header:
             out += '{0:^{1}}'.format(format_(self.table_header, col_width), 
@@ -189,7 +200,8 @@ class DataTable(list):
             out += col.__str__()
 
         return out
-        
+
+
     def _repr_html_(self):
 
         col_width = sum(self[0].subcol_widths)
