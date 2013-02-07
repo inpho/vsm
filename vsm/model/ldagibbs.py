@@ -232,12 +232,9 @@ class LDAGibbs(object):
         log_p = 0
 
         for d, doc in enumerate(self.W):
-
             for i, w in enumerate(doc):
-
-                for t in xrange(self.K):
-                    
-                    log_p -= log(self.theta_d(d)[t] * self.phi_t(t)[w])
+                z = m.Z[d][i]
+                log_p += log(self.phi_t(z)[w] * self.theta_d(d)[z])
 
         return log_p
 
