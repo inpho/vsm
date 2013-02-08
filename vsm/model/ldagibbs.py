@@ -92,6 +92,9 @@ class LDAGibbs(object):
     theta_d
         Takes a document index `d` and returns the estimated posterior
         distribution over topics for `d`
+    theta_t
+        Takes a topic index `t` and returns the estimated posterior
+        distribution over documents for `t`
     logp
         Compute the log probability of the corpus `W` given the
         estimated values of the latent variables `phi`, `theta` and
@@ -208,6 +211,14 @@ class LDAGibbs(object):
         th_d = self.doc_top[d, :] / self.doc_top[d, :].sum()
 
         return th_d
+
+
+
+    def theta_t(self, t):
+
+        th_t = self.doc_top[:,t] / self.doc_top[:,t].sum()
+
+        return th_t
 
 
 

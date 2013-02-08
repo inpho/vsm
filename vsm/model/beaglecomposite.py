@@ -1,72 +1,31 @@
 import numpy as np
 
-import vsm
-
-from vsm import model
-from vsm.model import beagleenvironment as be
-from vsm.model import beaglecontext as bc
-from vsm.model import beagleorder as bo
+from vsm import row_normalize as _row_normalize
+from vsm.model import BaseModel
+from vsm.model.beaglecontext import realign_env_mat as _realign_env_mat
 
 
 
-class BeagleComposite(model.Model):
+class BeagleComposite(BaseModel):
 
-    def train(self,
-              corpus,
-              tok_name='sentences',
-              n_columns=2048,
-              env_matrix=None,
-              ctx_matrix=None,
-              ord_matrix=None,
-              lmda=7,
-              psi=None,
-              rand_perm=None):
+    def __init__(self, ctx_corp, ctx_matrix, ord_corp, ord_matrix):
+        """
+        Assume that the context corpus is a subcorpus of the order
+        corpus and that the eventual composite corpus is the context
+        corpus. The order matrix is sliced and reordered so that it
+        aligns with the context matrix.
+        """
+        self.ctx_matrix = _row_normalize(ctx_matrix)
+        ord_matrix = _realign_env_mat(ctx_corp, ord_corp, ord_matrix)
+        self.ord_matrix = _row_normalize(ord_matrix)
 
 
-        if ctx_matrix is None or ord_matrix is None:
-
-            if env_matrix is None:
-
-                print 'Generating environment vectors'
-
-                env_model = be.BeagleEnvironment()
-
-                env_model.train(corpus, n_columns)
-
-                env_matrix = env_model.matrix[:, :]
-
-            print 'Computing context vectors'
-                
-            ctx_model = bc.BeagleContext()
-
-            ctx_model.train(corpus,
-                            tok_name=tok_name,
-                            env_matrix=env_matrix)
-
-            ctx_matrix = ctx_model.matrix[:, :]
-
-            print 'Computing order vectors'
-
-            ord_model = bo.BeagleOrder()
-
-            ord_model.train(corpus,
-                            tok_name=tok_name,
-                            env_matrix=env_matrix,
-                            lmda=lmda,
-                            psi=psi,
-                            rand_perm=rand_perm)
-
-            ord_matrix = ord_model.matrix[:, :]
-
-        print 'Normalizing and summing context and order vectors'
-
-        ctx_matrix = vsm.row_normalize(ctx_matrix)
-
-        ord_matrix = vsm.row_normalize(ord_matrix)
-        
-        self.matrix = ctx_matrix
-
-        self.matrix += ord_matrix
+    def train(self, wgt=.5):
+        """
+        `wgt` should be a value in [0,1].
+        """
+        print 'Summing context and order vectors'        
+        self.matrix = wgt * self.ctx_matrix + (1 - wgt) * self.ord_matrix
 
 
 
@@ -76,14 +35,37 @@ class BeagleComposite(model.Model):
 
 def test_BeagleComposite():
 
-    from vsm import corpus
+    from vsm.util.corpustools import random_corpus
+    from vsm.model.beagleenvironment import BeagleEnvironment
+    from vsm.model.beaglecontext import BeagleContextSeq
+    from vsm.model.beagleorder import BeagleOrderSeq
 
-    n = 256
+    ec = random_corpus(1000, 50, 0, 20, tok_name='sentence')
+    cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,50,7)])
 
-    c = corpus.random_corpus(1e5, 1e2, 1, 10, tok_name='sentences')
+    e = BeagleEnvironment(ec, n_cols=5)
+    e.train()
 
-    m = BeagleComposite()
+    cm = BeagleContextSeq(cc, ec, e.matrix)
+    cm.train()
 
-    m.train(c, n_columns=n)
+    om = BeagleOrderSeq(ec, e.matrix)
+    om.train()
 
-    return m
+    m = BeagleComposite(cc, cm.matrix, ec, om.matrix)
+    m.train()
+
+    from tempfile import NamedTemporaryFile
+    import os
+
+    try:
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        m.save(tmp.name)
+        tmp.close()
+        m1 = BeagleComposite.load(tmp.name)
+        assert (m.matrix == m1.matrix).all()
+    
+    finally:
+        os.remove(tmp.name)
+
+    return m.matrix
