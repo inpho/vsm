@@ -11,7 +11,7 @@ from vsm.corpus import Corpus
 
 __all__=['apply_stoplist', 'toy_corpus', 'file_corpus',
          'dir_corpus', 'coll_corpus', 'word_tokenize',
-         'sentence_tokenize', 'paragraph_tokenize']
+         'sentence_tokenize', 'paragraph_tokenize', 'random_corpus']
 
 
 
