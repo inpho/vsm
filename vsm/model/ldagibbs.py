@@ -211,6 +211,7 @@ class LDAGibbs(object):
 
         log_p = 0
         for d, doc in enumerate(self.W):
+
             if len(doc) > 0:
                 Z_d = self.Z[d]
                 v1 = np.log(kw[Z_d, doc])
