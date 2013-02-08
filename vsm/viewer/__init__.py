@@ -220,13 +220,10 @@ def simmat_terms(corp, matrix, term_list, norms=None):
     """
     indices, terms = zip(*[res_term_type(corp, term) 
                            for term in term_list])
-
     indices, terms = np.array(indices), np.array(terms)
 
     sm = row_cos_mat(indices, matrix, norms=norms, fill_tril=True)
-
     sm = sm.view(IndexedSymmArray)
-
     sm.labels = terms
     
     return sm
@@ -240,13 +237,10 @@ def simmat_documents(corp, matrix, tok_name, doc_list, norms=None):
 
     indices, labels = zip(*[res_doc_type(corp, tok_name, label_name, doc) 
                             for doc in doc_list])
-
     indices, labels = np.array(indices), np.array(labels)
 
     sm = row_cos_mat(indices, matrix.T, norms=norms, fill_tril=True)
-
     sm = sm.view(IndexedSymmArray)
-
     sm.labels = labels
     
     return sm
@@ -257,19 +251,16 @@ def simmat_topics(kw_mat, topics, norms=None):
     """
     """
     sm = row_cos_mat(topics, kw_mat, norms=norms, fill_tril=True)
-
     sm = sm.view(IndexedSymmArray)
-
     sm.labels = [str(k) for k in topics]
     
     return sm
 
 
 
-
-
 def doc_label_name(tok_name):
-
+    """
+    """
     return tok_name + '_label'
 
 
@@ -285,22 +276,15 @@ def res_doc_type(corp, tok_name, label_name, doc):
     label>).
     """
     if isinstance(doc, basestring):
-        
         query = {label_name: doc}
-        
         d = corp.meta_int(tok_name, query)
-        
     elif isinstance(doc, dict):
-        
         d = corp.meta_int(tok_name, doc)
         
         #TODO: Define an exception for failed queries in
         #vsm.corpus. Use it here.
-        
         doc = corp.view_metadata(tok_name)[label_name][d]
-
     else:
-
         d, doc = doc, str(doc)
 
     return d, doc
@@ -315,7 +299,6 @@ def res_term_type(corp, term):
     Returns an integer, string pair: (<term index>, <term label>).
     """
     if isinstance(term, basestring):
-            
         return corp.terms_int[term], term
 
     return term, str(term)
