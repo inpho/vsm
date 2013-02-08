@@ -20,6 +20,7 @@ from vsm.viewer import (IndexedValueArray as _IndexedValueArray_,
 
 from vsm.viewer.similarity import row_norms as _row_norms_
 
+from vsm.util.htrc import *
 
 
 class LDAGibbsViewer(object):
@@ -232,6 +233,41 @@ class LDAGibbsViewer(object):
         Z_w.subheaders = [('Document, Pos', 'Topic')]
 
         return Z_w
+
+
+    def doc_finder(self, word, topics, as_strings=True):
+        """
+        Finds documents and positions where `word` appears with the topic assignment(s) 
+        equal to any one of `topics`, and returns a list of documents and positions sorted
+        by the relevance of each document to `topics`
+
+        NB: Currently this works only with htrc corpus
+        """
+        
+        doc_prob = dict((doc, prob) for (doc, prob) in self.sim_top_doc(topics))
+
+        doc_list = []
+        for (doc, pos), top in self.word_topics(word):
+            if any(top == topics):
+                doc_list.append(((doc, doc_prob[doc]), pos))
+
+        doc_list.sort(key=lambda tup: tup[0][1], reverse=True)
+
+        # labeling data
+        if as_strings:
+            metadata = htrc_load_metadata()
+            doc_list = [((htrc_get_titles(metadata, d)[0], pr), pos)
+                        for ((d, pr), pos) in doc_list]     
+            dt = [('i', [('doc', doc_list[0][0][0].dtype), ('prob',np.float)]), ('pos', np.int)]
+        else:
+            dt = [('i', [('doc', np.int), ('prob',np.float)]), ('pos', np.int)]
+            
+        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
+        doc_list.main_header = 'Word: ' + word + ' by Topic(s)' + str(topics)
+        doc_list.subheaders = [('Document, Prob', 'Pos')]
+
+        return doc_list
+
 
 
     def sim_top_top(self, topic_or_topics, weights=None, 
