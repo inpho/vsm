@@ -211,10 +211,11 @@ class LDAGibbs(object):
 
         log_p = 0
         for d, doc in enumerate(self.W):
-            Z_d = self.Z[d]
-            v1 = np.log(kw[Z_d, doc])
-            v2 = np.log(dk[d, :][Z_d])
-            log_p += (v1 + v2).sum()
+            if len(doc) > 0:
+                Z_d = self.Z[d]
+                v1 = np.log(kw[Z_d, doc])
+                v2 = np.log(dk[d, :][Z_d])
+                log_p += (v1 + v2).sum()
 
         return log_p
 
@@ -292,7 +293,7 @@ def test_LDAGibbs():
 def test_logp_fns():
 
     from vsm.util.corpustools import random_corpus
-    c = random_corpus(100000, 5000, 10, 100)
+    c = random_corpus(10000, 500, 0, 100)
     m = LDAGibbs(c, 'random', K=20)
     m.train(itr=2)
     
