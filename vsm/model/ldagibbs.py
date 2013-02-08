@@ -95,8 +95,6 @@ class LDAGibbs(object):
                  K=100, alpha = 0.01, beta = 0.01, 
                  log_prob=True):
 
-        #TODO: Support MaskedCorpus
-
         self.tok_name = tok_name
         self.K = K
         self.alpha = alpha
@@ -205,17 +203,17 @@ class LDAGibbs(object):
 
 
     def logp(self):
-
-        kw = self.top_word.copy() / self.top_word.sum(1)[:, np.newaxis]
-        dk = self.doc_top.copy() / self.doc_top.sum(1)[:, np.newaxis]
+        """
+        """
+        log_kw = np.log(self.top_word / self.top_word.sum(1)[:, np.newaxis])
+        log_dk = np.log(self.doc_top / self.doc_top.sum(1)[:, np.newaxis])
 
         log_p = 0
         for d, doc in enumerate(self.W):
             if len(doc) > 0:
                 Z_d = self.Z[d]
-                v1 = np.log(kw[Z_d, doc])
-                v2 = np.log(dk[d, :][Z_d])
-                log_p += (v1 + v2).sum()
+                log_p += log_kw[Z_d, doc].sum()
+                log_p += log_dk[d, :][Z_d].sum()
 
         return log_p
 
@@ -293,7 +291,7 @@ def test_LDAGibbs():
 def test_logp_fns():
 
     from vsm.util.corpustools import random_corpus
-    c = random_corpus(10000, 500, 0, 100)
+    c = random_corpus(100000, 5000, 0, 100)
     m = LDAGibbs(c, 'random', K=20)
     m.train(itr=2)
     
