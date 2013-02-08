@@ -296,8 +296,8 @@ def test_logp_fns():
     m = LDAGibbs(c, 'random', K=20)
     m.train(itr=2)
     
-    logp_1 = m.logp()
-    logp_2 = m.logp_2()
+    logp_1 = m._logp()
+    logp_2 = m.logp()
 
     assert np.allclose(logp_1, logp_2), (logp_1,logp_2)
 
