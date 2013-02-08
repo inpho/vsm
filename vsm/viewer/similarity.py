@@ -1,9 +1,9 @@
 import numpy as np
 from scipy import sparse
 
-from vsm import row_norms, col_norms, enum_array, enum_sort
+from vsm import (row_norms, col_norms, enum_array, enum_sort, 
+                 sparse_mvdot, def_submat_size)
 
-def_submat_size = 1e5
 
 
 
@@ -12,126 +12,71 @@ def_submat_size = 1e5
 
 
 
-def similar_rows(row_index,
-                 matrix,
-                 filter_nan=False,
-                 sort=True,
-                 norms=None,
-                 submat_size=def_submat_size):
+def row_cosines(row, matrix, norms=None,
+                filter_nan=False, sort=True,
+                submat_size=def_submat_size):
     """
+    `row` must be a 2-dimensional array.
     """
     if sparse.issparse(matrix):
-
         matrix = matrix.tocsr()
-
-        nums = sparse_mvdot(matrix,
-                            matrix[row_index:row_index+1, :].T,
-                            submat_size=submat_size)
+        nums = sparse_mvdot(matrix, row.T, submat_size=submat_size)
 
     else:
-        
-        nums = np.dot(matrix, matrix[row_index:row_index+1, :].T)
-
-        nums = np.squeeze(nums)
+        nums = np.dot(matrix, row.T)
+        nums = np.ravel(nums)
 
     if norms is None:
-
         norms = row_norms(matrix)
 
-    dens = norms * norms[row_index]
-
+    row_norm = row_norms(row)[0]
+    dens = norms * row_norm
     out = nums / dens
 
-
-
     if sort:
-        
         out = enum_sort(out)
-
     else:
-
         out = enum_array(out)
     
     if filter_nan:
-
-        out = out[np.isfinite(out['v'])]
+        out = out[np.isfinite(out['value'])]
 
     return out
 
 
 
-def sparse_mvdot(m, v, submat_size=def_submat_size):
-    """
-    For sparse matrices. The expectation is that a dense view of the
-    entire matrix is too large. So the matrix is split into
-    submatrices (horizontal slices) which are converted to dense
-    matrices one at a time.
-    """
+def row_cos_mat(rows, mat, norms=None, fill_tril=True):
 
-    m = m.tocsr()
+    mat = mat[rows]
+    
+    if not norms:
 
-    if sparse.issparse(v):
-
-        v = v.toarray()
-
-    v = v.reshape((v.size, 1))
-
-    out = np.empty((m.shape[0], 1))
-
-    if submat_size < m.shape[1]:
-
-        print 'Note: specified submatrix size is '\
-              'less than the number of columns in matrix'
-
-        m_rows = 1
-
-        k_submats = m.shape[0]
-
-    elif submat_size > m.size:
-
-        m_rows = m.shape[0]
-
-        k_submats = 1
+        norms = row_norms(mat)
 
     else:
 
-        m_rows = int(submat_size / m.shape[1])
+        norms[rows]
 
-        k_submats = int(m.shape[0] / m_rows)
+    sm = np.zeros((len(rows), len(rows)), dtype=np.float64)
 
-    for i in xrange(k_submats):
+    indices = np.triu_indices_from(sm)
 
-        i *= m_rows
+    f = np.vectorize(lambda i, j: (np.dot(mat[i,:], mat[j,:].T) /
+                                   (norms[i] * norms[j])))
 
-        j = i + m_rows
+    sm[indices] = f(*indices)[:]
 
-        submat = m[i:j, :]
+    if fill_tril:
 
-        out[i:j, :] = np.dot(submat.toarray(), v)
+        indices = np.tril_indices_from(sm, -1)
 
-    if j < m.shape[0]:
+        sm[indices] += sm.T[indices]
 
-        submat = m[j:, :]
-
-        out[j:, :] = np.dot(submat.toarray(), v)
-
-    return np.squeeze(out)
+    return sm
 
 
 
-def similar_columns(col_index,
-                    matrix,
-                    filter_nan=False,
-                    sort=True,
-                    norms=None,
-                    submat_size=def_submat_size):
-    """
-    """
-    return similar_rows(col_index, matrix.T, filter_nan=filter_nan,
-                        sort=sort, norms=norms, submat_size=submat_size)
-
-
-
+#TODO: Deprecate
 def simmat_rows(matrix, row_indices):
     """
     """
@@ -143,19 +88,7 @@ def simmat_rows(matrix, row_indices):
 
 
 
-def simmat_columns(matrix, column_indices):
-    """
-    """
-    sim_matrix = SimilarityMatrix(indices=column_indices)
-
-    sim_matrix.compute(matrix.T)
-
-    return sim_matrix
-
-
-
-
-# TODO: Compress symmetric similarity matrix. Cf. scipy.spatial.distance.squareform
+#TODO: Deprecate
 class SimilarityMatrix(object):
 
     def __init__(self, indices=None, labels=None, matrix=None):
@@ -186,7 +119,7 @@ class SimilarityMatrix(object):
 
         for i in xrange(data.shape[0] - 1):
 
-            results = similar_rows(0 , data, norms=norms, sort=False)
+            results = row_cosines(data[:1, :], data, norms=norms, sort=False)
 
             results = np.array([v for j,v in results])
 
@@ -198,7 +131,7 @@ class SimilarityMatrix(object):
 
         i += 1
 
-        results = similar_rows(0 , data, norms=norms, sort=False)
+        results = row_cosines(data[:1, :], data, norms=norms, sort=False)
 
         results = np.array([v for j,v in results])
 
@@ -225,3 +158,21 @@ def test_simmat():
     out_2 = out_2.matrix
         
     assert np.allclose(out_1, out_2)
+
+
+
+def test_row_cos_mat():
+
+    m = np.random.random((10,5))
+
+    out_1 = np.zeros((10,10))
+
+    for i, j in zip(*np.triu_indices_from(out_1)):
+
+        out_1[i, j] = (np.dot(m[i], m[j])
+                       / (np.dot(m[i], m[i])**.5
+                          * np.dot(m[j], m[j])**.5))
+
+    out_2 = row_cos_mat(range(10), m, fill_tril=False)
+        
+    assert np.allclose(out_1, out_2), (out_1, out_2)

@@ -8,8 +8,7 @@ import enchant
 
 from corpustools import filter_by_suffix
 
-__all__ = ['proc_htrc_coll']
-
+__all__ = ['proc_htrc_coll', 'htrc_load_metadata', 'htrc_get_titles']
 
 
 def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
@@ -223,3 +222,28 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log']):
             with open(filename, 'w') as f:
 
                 f.write(page)
+
+
+def htrc_load_metadata():
+
+    import os
+    import json
+
+    filename ='/var/inphosemantics/data/fresh/htrc-1315-metadata.json'
+
+    with open(filename) as f:
+        metadata = json.load(f)
+
+    return metadata
+
+
+def htrc_get_titles(metadata, vol_id):
+
+    try:
+        md = metadata[vol_id]
+        return md[md.keys()[0]]['titles']
+
+    except KeyError:
+        print 'Volume ID not found:', vol_id
+        raise
+
