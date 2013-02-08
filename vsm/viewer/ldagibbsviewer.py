@@ -5,9 +5,12 @@ from vsm import (enum_sort as _enum_sort_,
                  isstr as _isstr_)
 
 from vsm.viewer import (IndexedValueArray as _IndexedValueArray_,
+                        LabeledColumn as _LabeledColumn_,
+                        DataTable as _DataTable_,
                         res_term_type as _res_term_type_,
                         res_doc_type as _res_doc_type_,
                         doc_label_name as _doc_label_name_,
+                        def_label_fn as _def_label_fn_,
                         sim_doc_doc as _sim_doc_doc_,
                         simmat_terms as _simmat_terms_,
                         simmat_documents as _simmat_documents_,
@@ -20,7 +23,6 @@ from vsm.viewer import (IndexedValueArray as _IndexedValueArray_,
 
 from vsm.viewer.similarity import row_norms as _row_norms_
 
-from vsm.util.htrc import *
 
 
 class LDAGibbsViewer(object):
@@ -150,12 +152,17 @@ class LDAGibbsViewer(object):
                                        k='i', new_k='word')
             k_arr = np.apply_along_axis(f, 1, k_arr)
 
-        k_arr = np.array(k_arr).view(_IndexedValueArray_)
-        k_arr.subheaders = [('Topic ' + str(k), 'Prob') 
-                              for k in k_indices]
-        k_arr.str_len = print_len
+        table = []
+        for i,k in enumerate(k_indices):
+            ch = 'Topic ' + str(k)
+            sch = ['Word', 'Prob']
+            col = _LabeledColumn_(k_arr[i], col_header=ch,
+                                  subcol_headers=sch, col_len=print_len)
+            table.append(col)
 
-        return k_arr
+        table = _DataTable_(table, 'Topics Sorted by Index')
+
+        return table
 
 
     def topic_entropies(self, print_len=10, k_indices=[], as_strings=True):
@@ -280,13 +287,15 @@ class LDAGibbsViewer(object):
 
 
     def sim_top_doc(self, topic_or_topics, weights=[],
-                    print_len=10, as_strings=True, filter_nan=True):
+                    print_len=10, as_strings=True, label_fn=_def_label_fn_, 
+                    filter_nan=True):
         """
         """
         return _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
                              self.model.tok_name, weights=weights, 
                              norms=self._doc_norms, print_len=print_len,
-                             as_strings=as_strings, filter_nan=filter_nan)
+                             as_strings=as_strings, label_fn=label_fn, 
+                             filter_nan=filter_nan)
 
 
     def sim_word_top(self, word_or_words, weights=[], filter_nan=True,
@@ -327,13 +336,15 @@ class LDAGibbsViewer(object):
                                print_len=print_len, as_strings=True)
 
 
-    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True):
+    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
+                    label_fn=_def_label_fn_, as_strings=True):
         """
         """
         return _sim_doc_doc_(self.corpus, self.model.doc_top.T,
                              self.model.tok_name, doc_or_docs,
                              norms=self._doc_norms, print_len=print_len,
-                             filter_nan=filter_nan)
+                             filter_nan=filter_nan, 
+                             label_fn=label_fn, as_strings=True)
     
 
     def simmat_words(self, word_list):

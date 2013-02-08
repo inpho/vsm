@@ -559,7 +559,7 @@ def coll_tokenize(books, book_names):
 
         print 'Tokenizing', book_label
 
-        for page in book:
+        for page, page_file in book:
         
             sents = sentence_tokenize(page)
 
@@ -572,11 +572,11 @@ def coll_tokenize(books, book_names):
                 sent_break += len(w)
             
                 sent_tokens.append((sent_break, sent_n,
-                                    page_n, book_label))
+                                    page_n, book_label, page_file))
             
                 sent_n += 1
 
-            page_tokens.append((sent_break, page_n, book_label))
+            page_tokens.append((sent_break, page_n, book_label, page_file))
 
             page_n += 1
             
@@ -592,17 +592,20 @@ def coll_tokenize(books, book_names):
 
     sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
 
+    files = [f for (a,b,c,f) in page_tokens]
+    file_dt = ('file', np.array(files, np.str_).dtype)
+
     corpus_data = dict()
 
     dtype = [idx_dt, book_label_dt]
 
     corpus_data['book'] = np.array(book_tokens, dtype=dtype)
 
-    dtype = [idx_dt, page_label_dt, book_label_dt]
+    dtype = [idx_dt, page_label_dt, book_label_dt, file_dt]
 
     corpus_data['page'] = np.array(page_tokens, dtype=dtype)
 
-    dtype = [idx_dt, sent_label_dt, page_label_dt, book_label_dt]
+    dtype = [idx_dt, sent_label_dt, page_label_dt, book_label_dt, file_dt]
 
     corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
@@ -634,12 +637,14 @@ def coll_corpus(coll_dir, ignore=['.json', '.log'],
         page_names.sort()
 
         for page_name in page_names:
-        
+
+            page_file = book_name + '/' + page_name
+            
             page_name = os.path.join(book_path, page_name)
 
             with open(page_name, mode='r') as f:
 
-                pages.append(f.read())
+                pages.append((f.read(), page_file))
 
         books.append(pages)
 

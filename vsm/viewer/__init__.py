@@ -8,6 +8,17 @@ from vsm import model
 
 from similarity import row_cosines, row_cos_mat
 
+from labeleddata import *
+
+
+def def_label_fn(metadata):
+    """
+    """
+    names = [name for name in metadata.dtype.names if name.endswith('_label')]
+    labels = [', '.join([x[n] for n in names]) for x in metadata]
+    
+    return np.array(labels)
+
 
 # TODO: Update module so that any function wrapping a similarity
 # function assumes that similarity is computed row-wise
@@ -83,7 +94,8 @@ def sim_word_top(corp, mat, word_or_words, weights=[],
 
 
 def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[], 
-                norms=None, print_len=10, as_strings=True, filter_nan=True):
+                norms=None, print_len=10, filter_nan=True, 
+                label_fn=def_label_fn, as_strings=True):
     """
     Takes a topic or list of topics (by integer index) and returns a
     list of documents sorted by the posterior probabilities of
@@ -108,20 +120,20 @@ def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[],
     # Label data
     if as_strings:
         md = corp.view_metadata(tok_name)
-        docs = md[doc_label_name(tok_name)]
+        docs = label_fn(md)
         d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
         
-    d_arr = d_arr.view(IndexedValueArray)
-    d_arr.main_header = 'Topics: ' + ', '.join([str(t) for t in topics])
-    d_arr.subheaders = [('Document', 'Prob')]
-    d_arr.str_len = print_len
+    d_arr = d_arr.view(LabeledColumn)
+    d_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
+    d_arr.subcol_headers = ['Document', 'Prob']
+    d_arr.col_len = print_len
 
     return d_arr
 
 
-# Add as_strings parameter
 def sim_doc_doc(corp, mat, tok_name, doc_or_docs, weights=None,
-                norms=None, filter_nan=True, print_len=10, as_strings=True):
+                norms=None, filter_nan=True, print_len=10, 
+                label_fn=def_label_fn, as_strings=True):
     """
     """
     # Resolve `word_or_words`
@@ -144,7 +156,8 @@ def sim_doc_doc(corp, mat, tok_name, doc_or_docs, weights=None,
 
     # Label data
     if as_strings:
-        docs = corp.view_metadata(tok_name)[label_name]
+        md = corp.view_metadata(tok_name)
+        docs = label_fn(md)
         d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
     
     d_arr = d_arr.view(IndexedValueArray)
@@ -219,13 +232,10 @@ def simmat_terms(corp, matrix, term_list, norms=None):
     """
     indices, terms = zip(*[res_term_type(corp, term) 
                            for term in term_list])
-
     indices, terms = np.array(indices), np.array(terms)
 
     sm = row_cos_mat(indices, matrix, norms=norms, fill_tril=True)
-
     sm = sm.view(IndexedSymmArray)
-
     sm.labels = terms
     
     return sm
@@ -239,13 +249,10 @@ def simmat_documents(corp, matrix, tok_name, doc_list, norms=None):
 
     indices, labels = zip(*[res_doc_type(corp, tok_name, label_name, doc) 
                             for doc in doc_list])
-
     indices, labels = np.array(indices), np.array(labels)
 
     sm = row_cos_mat(indices, matrix.T, norms=norms, fill_tril=True)
-
     sm = sm.view(IndexedSymmArray)
-
     sm.labels = labels
     
     return sm
@@ -256,181 +263,17 @@ def simmat_topics(kw_mat, topics, norms=None):
     """
     """
     sm = row_cos_mat(topics, kw_mat, norms=norms, fill_tril=True)
-
     sm = sm.view(IndexedSymmArray)
-
     sm.labels = [str(k) for k in topics]
     
     return sm
 
 
-# TODO: Investigate compressed forms of symmetric matrix. Cf.
-# scipy.spatial.distance.squareform
-class IndexedSymmArray(np.ndarray):
-    """
-    """
-    def __new__(cls, input_array, labels=None):
-
-        obj = np.asarray(input_array).view(cls)
-
-        obj.labels = labels
-
-        return obj
-
-
-    def __array_finalize__(self, obj):
-
-        if obj is None: return
-
-        self.labels = getattr(obj, 'labels', None)
-
-
-
-def format_entry(x):
-
-    # np.void is the type of the tuples that appear in numpy
-    # structured arrays
-    if isinstance(x, np.void):
-
-        return ', '.join([format_entry(i) for i in x.tolist()]) 
-        
-    if isfloat(x):
-
-        return '{0:.5f}'.format(x)
-
-    return str(x)
-
-
-        
-class IndexedValueArray(np.ndarray):
-    """
-    """
-    def __new__(cls, input_array, main_header=None, subheaders=None):
-
-        obj = np.asarray(input_array).view(cls)
-
-        obj.str_len = None
-
-        obj.main_header = main_header
-
-        obj.subheaders = subheaders
-
-        return obj
-
-
-
-    def __array_finalize__(self, obj):
-
-        if obj is None: return
-
-        self.str_len = getattr(obj, 'str_len', None)
-
-        self.main_header = getattr(obj, 'main_header', None)
-
-        self.subheaders = getattr(obj, 'subheaders', None)
-
-
-
-    def __str__(self):
-
-        if self.ndim == 1:
-
-            arr = self[np.newaxis, :]
-
-        elif self.ndim == 2:
-
-            arr = self
-
-        else:
-
-            return super(IndexedValueArray, self).__str__()
-
-        vsep_1col = '-' * 37 + '\n'
-
-        vsep_2col = '-' * 75 + '\n'
-
-        if arr.main_header:
-        
-            if arr.shape[0] == 1:
-                
-                s = vsep_1col
-
-                s += '{0:^35}\n'.format(arr.main_header)
-
-            else:
-
-                s = vsep_2col
-
-                s += '{0:^75}\n'.format(arr.main_header)
-
-        else:
-
-            s = ''
-
-        m = arr.shape[0]
-
-        if self.str_len:
-
-            n = min(arr.shape[1], self.str_len)
-
-        else:
-            
-            n = arr.shape[1]
-
-        for i in xrange(0, m - m % 2, 2):
-
-            if arr.subheaders:
-
-                s += vsep_2col
-
-                s += ('{0:<25}{1:<15}{2:<25}{3}\n'
-                      .format(arr.subheaders[i][0], 
-                              arr.subheaders[i][1],
-                              arr.subheaders[i+1][0], 
-                              arr.subheaders[i+1][1]))
-                                      
-            s += vsep_2col
-
-            for j in xrange(n):
-
-                a0 = format_entry(arr[i][j][0])
-
-                a1 = format_entry(arr[i][j][1])
-
-                b0 = format_entry(arr[i+1][j][0])
-
-                b1 = format_entry(arr[i+1][j][1])
-
-                s += '{0:<25}{1:<15}{2:<25}{3}\n'.format(a0, a1, b0, b1)
-
-        if m % 2:
-
-            if arr.subheaders:
-
-                s += vsep_1col
-
-                s += ('{0:<25}{1}\n'
-                      .format(arr.subheaders[m-1][0], 
-                              arr.subheaders[m-1][1]))
-                                      
-            s += vsep_1col
-
-            for j in xrange(n):
-
-                a0 = format_entry(arr[m-1][j][0])
-
-                a1 = format_entry(arr[m-1][j][1])
-
-                s += '{0:<25}{1}\n'.format(a0, a1)
-            
-        return s
-
-
 
 def doc_label_name(tok_name):
-
+    """
+    """
     return tok_name + '_label'
-
 
 
 def res_doc_type(corp, tok_name, label_name, doc):
@@ -438,28 +281,21 @@ def res_doc_type(corp, tok_name, label_name, doc):
     If `doc` is a string or a dict, performs a look up for its
     associated integer. If `doc` is a dict, looks for its label.
     Finally, if `doc` is an integer, stringifies `doc` for use as
-    a label. 
+    a label.
     
     Returns an integer, string pair: (<document index>, <document
     label>).
     """
     if isinstance(doc, basestring):
-        
         query = {label_name: doc}
-        
         d = corp.meta_int(tok_name, query)
-        
     elif isinstance(doc, dict):
-        
         d = corp.meta_int(tok_name, doc)
         
         #TODO: Define an exception for failed queries in
         #vsm.corpus. Use it here.
-        
         doc = corp.view_metadata(tok_name)[label_name][d]
-
     else:
-
         d, doc = doc, str(doc)
 
     return d, doc
@@ -474,7 +310,6 @@ def res_term_type(corp, term):
     Returns an integer, string pair: (<term index>, <term label>).
     """
     if isinstance(term, basestring):
-            
         return corp.terms_int[term], term
 
     return term, str(term)
@@ -500,38 +335,3 @@ class Viewer(object):
 
 
 
-############################################################
-#                        Testing
-############################################################
-
-def test_IndexedValueArray():
-
-    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
-             'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
-             'is', 'but', 'a', 'dream']
-
-    values = [np.random.random() for t in terms]
-
-    d = [('i', np.array(terms).dtype), 
-         ('value', np.array(values).dtype)]
-
-    v = np.array(zip(terms, values), dtype=d)
-
-    arr = np.vstack([v] * 5)
-
-    arr = arr.view(IndexedValueArray)
-
-    arr.main_header = 'Test 2-d Array'
-
-    arr.subheaders = [('Repetition ' + str(i), 'Random') 
-                      for i in xrange(arr.shape[0])]
-    
-    print arr
-
-    print
-
-    arr = v.view(IndexedValueArray)
-
-    arr.main_header = 'Test 1-d Array'
-    
-    print arr
