@@ -1,75 +1,94 @@
-import vsm.viewer as vw
-import similarity
+from vsm.viewer import (
+    def_label_fn as _def_label_fn_,
+    simmat_terms as _simmat_terms_,
+    simmat_documents as _simmat_documents_,
+    sim_doc_doc as _sim_doc_doc_,
+    sim_word_word as _sim_word_word_)
+
+from vsm.viewer.similarity import row_norms as _row_norms_
 
 
-class TfIdfViewer(vw.Viewer):
+
+class TfIdfViewer(object):
     """
     """
-    def __init__(self,
-                 corpus=None,
-                 matrix=None,
-                 tok_name=None):
-        
-        super(TfIdfViewer, self).__init__(corpus=corpus,
-                                          matrix=matrix,
-                                          tok_name=tok_name)
-    
-        self._term_norms = None
-        self._doc_norms = None
-        
-        
-
-    @property
-    def term_norms(self):
-
-        if self._term_norms is None:
-
-            self._term_norms = similarity.row_norms(self.matrix)
-
-        return self._term_norms
-
+    def __init__(self, corpus, model):
+        """
+        """
+        self.corpus = corpus
+        self.model = model
+        self._word_norms_ = None
+        self._doc_norms_ = None
 
 
     @property
-    def doc_norms(self):
+    def _word_norms(self):
+        """
+        """
+        if self._word_norms_ is None:
+            self._word_norms_ = _row_norms_(self.model.matrix)            
 
-        if self._doc_norms is None:
-
-            self._doc_norms = similarity.col_norms(self.matrix)            
-
-        return self._doc_norms
-
-
-
-    def similar_terms(self, term, filter_nan=True, rem_masked=True):
-
-        return vw.similar_terms(self.corpus,
-                                self.matrix,
-                                term,
-                                norms=self.term_norms,
-                                filter_nan=filter_nan,
-                                rem_masked=rem_masked)
+        return self._word_norms_
 
 
+    @property
+    def _doc_norms(self):
+        """
+        """
+        if self._doc_norms_ is None:
+            self._doc_norms_ = _row_norms_(self.model.matrix.T)
 
-    def mean_similar_terms(self, query, filter_nan=True, rem_masked=True):
-
-        return vw.mean_similar_terms(self.corpus,
-                                     self.matrix,
-                                     query,
-                                     norms=self.term_norms,
-                                     filter_nan=filter_nan,
-                                     rem_masked=rem_masked)
-
+        return self._doc_norms_
 
 
-    def simmat_terms(self, term_list):
+    def sim_word_word(self, word_or_words, weights=None, 
+                      filter_nan=True, print_len=10, as_strings=True):
+        """
+        """
+        return _sim_word_word_(self.corpus, self.model.matrix, 
+                               word_or_words, weights=weights, 
+                               norms=self._word_norms, filter_nan=filter_nan, 
+                               print_len=print_len, as_strings=True)
 
-        return vw.simmat_terms(self.corpus, self.matrix, term_list)
 
-
-
-    def simmat_documents(self, document_list):
-
-        return vw.simmat_documents(self.corpus, self.matrix, document_list)
+    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
+                    label_fn=_def_label_fn_, as_strings=True):
+        """
+        """
+        return _sim_doc_doc_(self.corpus, self.model.matrix,
+                             self.model.tok_name, doc_or_docs,
+                             norms=self._doc_norms, print_len=print_len,
+                             filter_nan=filter_nan, 
+                             label_fn=label_fn, as_strings=True)
     
+
+    def simmat_words(self, word_list):
+        """
+        """
+        return _simmat_terms_(self.corpus, self.model.matrix.tocsr(), word_list)
+
+
+    def simmat_docs(self, docs):
+        """
+        """
+        return _simmat_documents_(self.corpus, self.model.matrix,
+                                  self.model.tok_name, docs)
+
+
+
+
+def test_TfIdfViewer():
+
+    from vsm.util.corpustools import random_corpus
+    from vsm.model.tf import TfModel
+    from vsm.model.tfidf import TfIdfModel
+
+    c = random_corpus(1000, 100, 0, 20, tok_name='document', metadata=True)
+
+    tf = TfModel(c, 'document')
+    tf.train()
+
+    m = TfIdfModel(tf.matrix, 'document')
+    m.train()
+
+    return TfIdfViewer(c, m)
