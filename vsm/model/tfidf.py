@@ -16,9 +16,10 @@ from vsm.model import BaseModel
 
 class TfIdfModel(BaseModel):
 
-    def __init__(self, tf_matrix):
+    def __init__(self, tf_matrix, tok_name):
         """
         """
+        self.tok_name = tok_name
         self.matrix = tf_matrix.copy()
         self.matrix = self.matrix.tocsr()
         self.matrix = self.matrix.astype(np.float64)
@@ -27,7 +28,7 @@ class TfIdfModel(BaseModel):
     def train(self):
         """
         """
-        n_docs = np.float32(self.matrix.shape[1])
+        n_docs = np.float64(self.matrix.shape[1])
 
         # Suppress division by zero errors
         old_settings = np.seterr(divide='ignore')
@@ -60,12 +61,12 @@ def test_TfIdfModel():
     from vsm.util.corpustools import random_corpus
     from vsm.model.tf import TfModel
 
-    c = random_corpus(1000, 100, 0, 20, tok_name='document')
+    c = random_corpus(1000, 100, 0, 20, tok_name='document', metadata=True)
 
     tf = TfModel(c, 'document')
     tf.train()
 
-    m = TfIdfModel(tf.matrix)
+    m = TfIdfModel(tf.matrix, 'document')
     m.train()
 
     from tempfile import NamedTemporaryFile

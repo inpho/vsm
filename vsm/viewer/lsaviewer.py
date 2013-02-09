@@ -1,139 +1,101 @@
 import numpy as np
 
-from vsm import viewer as vw
-import similarity
+from vsm.linalg import row_norms as _row_norms_
+
+from vsm.viewer import def_label_fn as _def_label_fn_
+
+from similarity import (
+    sim_word_word as _sim_word_word_,
+    sim_doc_doc as _sim_doc_doc_,
+    simmat_terms as _simmat_terms_,
+    simmat_documents as _simmat_documents_)
 
 
 
-class LsaViewer(vw.Viewer):
+class LsaViewer(object):
     """
-
-    `svd_matrices` expects the triple of arrays (u, s, v) output by an SVD.
-
-    `matrix` stores the triple of arrays (u, s, v) output by an SVD.
-
-
     """
-    def __init__(self,
-                 corpus=None,
-                 svd_matrices=None,
-                 tok_name=None):
-        
+    def __init__(self, corpus, model):
+        """
+        """
         self.corpus = corpus
-
-        self.matrix = svd_matrices
-
-        self.tok_name = tok_name
-        
-        self._term_matrix = None
-
-        self._ev_matrix = None
-
-        self._doc_matrix = None
-
-        self._term_norms = None
-
-        self._doc_norms = None
-
+        self.model = model
+        self._word_norms_ = None
+        self._doc_norms_ = None
 
 
     @property
-    def term_matrix(self):
+    def _word_norms(self):
+        """
+        """
+        if self._word_norms_ is None:
+            self._word_norms_ = _row_norms_(self.model.term_matrix)            
 
-        if self._term_matrix is None:
-            
-            self._term_matrix = np.dot(self.matrix[0], self.ev_matrix)
-
-        return self._term_matrix
-
+        return self._word_norms_
 
 
     @property
-    def ev_matrix(self):
+    def _doc_norms(self):
+        """
+        """
+        if self._doc_norms_ is None:
+            self._doc_norms_ = _row_norms_(self.model.doc_matrix)
 
-        if self._ev_matrix is None:
-            
-            self._ev_matrix = np.diag(self.matrix[1])
+        return self._doc_norms_
 
-        return self._ev_matrix
 
+    def sim_word_word(self, word_or_words, weights=None, 
+                      filter_nan=True, print_len=10, as_strings=True):
+        """
+        """
+        return _sim_word_word_(self.corpus, self.model.term_matrix, 
+                               word_or_words, weights=weights, 
+                               norms=self._word_norms, filter_nan=filter_nan, 
+                               print_len=print_len, as_strings=True)
+
+
+    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
+                    label_fn=_def_label_fn_, as_strings=True):
+        """
+        """
+        return _sim_doc_doc_(self.corpus, self.model.doc_matrix.T,
+                             self.model.tok_name, doc_or_docs,
+                             norms=self._doc_norms, print_len=print_len,
+                             filter_nan=filter_nan, 
+                             label_fn=label_fn, as_strings=True)
     
 
-    @property
-    def doc_matrix(self):
-
-        if self._doc_matrix is None:
-            
-            self._doc_matrix = np.dot(self.matrix[2], self.ev_matrix)
-
-        return self._doc_matrix
+    def simmat_words(self, word_list):
+        """
+        """
+        return _simmat_terms_(self.corpus, self.model.term_matrix, word_list)
 
 
-
-    @property
-    def term_norms(self):
-
-        if self._term_norms is None:
-
-            self._term_norms = similarity.row_norms(self.term_matrix)            
-
-        return self._term_norms
+    def simmat_docs(self, docs):
+        """
+        """
+        return _simmat_documents_(self.corpus, self.model.doc_matrix.T,
+                                  self.model.tok_name, docs)
 
 
 
-    @property
-    def doc_norms(self):
 
-        if self._doc_norms is None:
+def test_LsaViewer():
 
-            self._doc_norms = similarity.row_norms(self.doc_matrix)            
+    from vsm.util.corpustools import random_corpus
+    from vsm.model.tf import TfModel
+    from vsm.model.tfidf import TfIdfModel
+    from vsm.model.lsa import LsaModel
 
-        return self._doc_norms
+    c = random_corpus(10000, 1000, 0, 30, tok_name='document', metadata=True)
 
+    tf = TfModel(c, 'document')
+    tf.train()
 
-    
-    def similar_terms(self, term, filter_nan=True, rem_masked=True):
+    tfidf = TfIdfModel(tf.matrix, 'document')
+    tfidf.train()
 
-        return vw.similar_terms(self.corpus,
-                                self.term_matrix,
-                                term,
-                                norms=self.term_norms,
-                                filter_nan=filter_nan,
-                                rem_masked=rem_masked)
+    m = LsaModel(tfidf.matrix, 'document')
+    m.train()
 
-
-
-    def mean_similar_terms(self, query, filter_nan=True, rem_masked=True):
-
-        return vw.mean_similar_terms(self.corpus,
-                                     self.term_matrix,
-                                     query,
-                                     norms=self.term_norms,
-                                     filter_nan=filter_nan,
-                                     rem_masked=rem_masked)
-
-
-
-    def similar_documents(self, document, filter_nan=False):
-
-        return vw.similar_documents(self.corpus,
-                                    self.doc_matrix,
-                                    document,
-                                    norms=self.doc_norms,
-                                    filter_nan=filter_nan)
-
-
-
-    def simmat_terms(self, term_list):
-
-        return vw.simmat_terms(self.corpus,
-                               self.term_matrix,
-                               term_list)
-
-
-
-    def simmat_documents(self, document_list):
-
-        return vw.simmat_documents(self.corpus,
-                                   self.doc_matrix,
-                                   document_list)
+    return LsaViewer(c, m)

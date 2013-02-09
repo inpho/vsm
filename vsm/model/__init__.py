@@ -5,11 +5,12 @@ import numpy as np
 class BaseModel(object):
     """
     """
-    def __init__(self, matrix=None):
+    def __init__(self, matrix=None, tok_name=None):
         """
         """
         self.matrix = matrix
-        
+        self.tok_name = tok_name
+
 
     def save(self, f):
         """
@@ -32,7 +33,7 @@ class BaseModel(object):
         numpy.savez
         """
         print 'Saving model to', f
-        np.savez(f, matrix=self.matrix)
+        np.savez(f, matrix=self.matrix, tok_name=np.array(self.tok_name))
 
 
     @staticmethod
@@ -62,4 +63,4 @@ class BaseModel(object):
         
         # The slice [()] is to unwrap sparse matrices, which get saved
         # in singleton object arrays
-        return BaseModel(matrix=npz['matrix'][()])
+        return BaseModel(matrix=npz['matrix'][()], tok_name=npz['tok_name'][()])

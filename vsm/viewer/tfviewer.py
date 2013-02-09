@@ -1,101 +1,125 @@
 import numpy as np
 
-import vsm.viewer as vw
-import similarity
+from vsm import (enum_sort as _enum_sort_, 
+                 map_strarr as _map_strarr_)
+
+from vsm.linalg import row_norms as _row_norms_
+
+from vsm.viewer import (
+    def_label_fn as _def_label_fn_,
+    res_term_type as _res_term_type_)
+
+from similarity import (
+    sim_word_word as _sim_word_word_,
+    sim_doc_doc as _sim_doc_doc_,
+    simmat_terms as _simmat_terms_,
+    simmat_documents as _simmat_documents_)
+
+from labeleddata import LabeledColumn as _LabeledColumn_
 
 
 
-class TfViewer(vw.Viewer):
-
-    def __init__(self,
-                 corpus=None,
-                 matrix=None,
-                 tok_name=None):
-        
-        super(TfViewer, self).__init__(corpus=corpus,
-                                       matrix=matrix,
-                                       tok_name=tok_name)
-        
-        self._term_norms = None
-        self._doc_norms = None
+class TfViewer(object):
+    """
+    """
+    def __init__(self, corpus, model):
+        """
+        """
+        self.corpus = corpus
+        self.model = model
+        self._word_norms_ = None
+        self._doc_norms_ = None
 
 
-        
     @property
-    def term_norms(self):
+    def _word_norms(self):
+        """
+        """
+        if self._word_norms_ is None:
+            self._word_norms_ = _row_norms_(self.model.matrix)            
 
-        if self._term_norms is None:
-
-            self._term_norms = similarity.row_norms(self.matrix)
-
-        return self._term_norms
-
+        return self._word_norms_
 
 
     @property
-    def doc_norms(self):
-
-        if self._doc_norms is None:
-
-            self._doc_norms = similarity.col_norms(self.matrix)            
-
-        return self._doc_norms
-
-
-
-    def similar_terms(self, term, filter_nan=True, rem_masked=True):
-
-        return vw.similar_terms(self.corpus,
-                                self.matrix,
-                                term,
-                                norms=self.term_norms,
-                                filter_nan=filter_nan,
-                                rem_masked=rem_masked)
-
-
-
-    def mean_similar_terms(self, query, filter_nan=True, rem_masked=True):
-
-        return vw.mean_similar_terms(self.corpus,
-                                     self.matrix,
-                                     query,
-                                     norms=self.term_norms,
-                                     filter_nan=filter_nan,
-                                     rem_masked=rem_masked)
-
-
-
-    def similar_documents(self, document, filter_nan=False):
-
-        return vw.similar_terms(self.corpus,
-                                self.matrix,
-                                document,
-                                norms=self.doc_norms,
-                                filter_nan=filter_nan)
-
-
-    
-    def simmat_terms(self, term_list):
-
-        return vw.simmat_terms(self.corpus, self.matrix, term_list)
-
-
-
-    def simmat_documents(self, document_list):
-
-        return vw.simmat_documents(self.corpus, self.matrix, document_list)
-
-
-    
-    def cf(self, term):
+    def _doc_norms(self):
         """
         """
-        row = self.matrix.tocsr()[term,:]
+        if self._doc_norms_ is None:
+            self._doc_norms_ = _row_norms_(self.model.matrix.T)
+
+        return self._doc_norms_
+
+
+    def sim_word_word(self, word_or_words, weights=None, 
+                      filter_nan=True, print_len=10, as_strings=True):
+        """
+        """
+        return _sim_word_word_(self.corpus, self.model.matrix, 
+                               word_or_words, weights=weights, 
+                               norms=self._word_norms, filter_nan=filter_nan, 
+                               print_len=print_len, as_strings=True)
+
+
+    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
+                    label_fn=_def_label_fn_, as_strings=True):
+        """
+        """
+        return _sim_doc_doc_(self.corpus, self.model.matrix,
+                             self.model.tok_name, doc_or_docs,
+                             norms=self._doc_norms, print_len=print_len,
+                             filter_nan=filter_nan, 
+                             label_fn=label_fn, as_strings=True)
+    
+
+    def simmat_words(self, word_list):
+        """
+        """
+        return _simmat_terms_(self.corpus, self.model.matrix, word_list)
+
+
+    def simmat_docs(self, docs):
+        """
+        """
+        return _simmat_documents_(self.corpus, self.model.matrix,
+                                  self.model.tok_name, docs)
+
+
+    def coll_freq(self, word):
+        """
+        """
+        i,w = _res_term_type_(self.corpus, word)
+        row = self.model.matrix.tocsr()[i, :].toarray()
+        return row.sum()
+
+    
+    def coll_freqs(self, print_len=20, as_strings=True):
+        """
+        """
+        freqs = self.model.matrix.tocsr().sum(1) 
+        w_arr = _enum_sort_(freqs.view(np.ndarray)[:, 0])
         
-        return row.sum(1)[0, 0]
+        # Label data
+        if as_strings:
+            w_arr = _map_strarr_(w_arr, self.corpus.terms, k='i', new_k='word')
+        ch = 'Collection Frequencies'
+        sch = ['Word', 'Counts']
+        col = _LabeledColumn_(w_arr, col_header=ch, subcol_headers=sch, 
+                              col_len=print_len)
 
-    
-    def cfs(self):
-        """
-        """
-        return np.asarray(self.matrix.tocsr().sum(1)).ravel()
+        return col
+
+
+
+
+def test_TfViewer():
+
+    from vsm.util.corpustools import random_corpus
+    from vsm.model.tf import TfModel
+
+    c = random_corpus(1000, 50, 0, 20, tok_name='document', metadata=True)
+
+    m = TfModel(c, 'document')
+    m.train()
+
+    return TfViewer(c, m)
