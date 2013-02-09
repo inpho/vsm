@@ -25,6 +25,7 @@ class BeagleContextSeq(BaseModel):
                  tok_name='sentence'):
         """
         """
+        self.tok_name = tok_name
         self.sents = corpus.view_tokens(tok_name)
         self.env_matrix = realign_env_mat(corpus, env_corpus, env_matrix)
 
@@ -62,6 +63,7 @@ class BeagleContextMulti(BaseModel):
                  tok_name='sentence'):
         """
         """
+        self.tok_name = tok_name
         self.sents = corpus.view_tokens(tok_name)
         self.dtype = env_matrix.dtype
         env_matrix = realign_env_mat(corpus, env_corpus, env_matrix)

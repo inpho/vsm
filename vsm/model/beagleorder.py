@@ -109,6 +109,7 @@ class BeagleOrderSeq(BaseModel):
                  psi=None, rand_perm=None, lmda =7):
         """
         """
+        self.tok_name = tok_name
         self.sents = corpus.view_tokens(tok_name)
         self.env_matrix = env_matrix
 
@@ -147,6 +148,7 @@ class BeagleOrderMulti(BaseModel):
                  psi=None, rand_perm=None, lmda =7):
         """
         """
+        self.tok_name = tok_name
         self.sents = corpus.view_tokens(tok_name)
         self.dtype = env_matrix.dtype
 
