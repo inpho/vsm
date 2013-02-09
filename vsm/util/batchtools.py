@@ -9,11 +9,9 @@ def LDA_trainer(m, dest_dir, prefix, batches=10, batch_size=100):
     `prefix`, the filename prefix; `n_batch `...
     """
     for i in xrange(batches):
-
         m.train(itr=batch_size)
 
         filename = '{0}-{1}.npz'.format(prefix, m.iterations)
-
         filename = os.path.join(dest_dir, filename)
 
         m.save(filename)
