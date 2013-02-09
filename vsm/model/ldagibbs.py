@@ -205,6 +205,7 @@ class LDAGibbs(object):
     def logp(self):
         """
         """
+        # This is slightly faster than distributing log over division
         log_kw = np.log(self.top_word / self.top_word.sum(1)[:, np.newaxis])
         log_dk = np.log(self.doc_top / self.doc_top.sum(1)[:, np.newaxis])
 
@@ -291,9 +292,9 @@ def test_LDAGibbs():
 def test_logp_fns():
 
     from vsm.util.corpustools import random_corpus
-    c = random_corpus(100000, 5000, 0, 100)
+    c = random_corpus(500000, 10000, 0, 100)
     m = LDAGibbs(c, 'random', K=20)
-    m.train(itr=2)
+    m.train(itr=1)
     
     logp_1 = m._logp()
     logp_2 = m.logp()
