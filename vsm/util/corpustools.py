@@ -201,7 +201,7 @@ def random_corpus(corpus_len,
         metadata_ = ['token_' + str(i) for i in xrange(len(indices))]
 
         dtype=[('idx', np.array(indices).dtype), 
-               ('short_label', np.array(metadata_).dtype)]
+               (tok_name + '_label', np.array(metadata_).dtype)]
         
         rand_tok = np.array(zip(indices, metadata_), dtype=dtype)
 
