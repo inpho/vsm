@@ -1,11 +1,14 @@
-from vsm.viewer import (
-    def_label_fn as _def_label_fn_,
-    simmat_terms as _simmat_terms_,
-    simmat_documents as _simmat_documents_,
-    sim_doc_doc as _sim_doc_doc_,
-    sim_word_word as _sim_word_word_)
+import numpy as np
 
-from vsm.viewer.similarity import row_norms as _row_norms_
+from vsm.linalg import row_norms as _row_norms_
+
+from vsm.viewer import def_label_fn as _def_label_fn_
+
+from similarity import (
+    sim_word_word as _sim_word_word_,
+    sim_doc_doc as _sim_doc_doc_,
+    simmat_terms as _simmat_terms_,
+    simmat_documents as _simmat_documents_)
 
 
 

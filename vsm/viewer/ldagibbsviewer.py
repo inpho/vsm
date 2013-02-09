@@ -1,27 +1,33 @@
 import numpy as np
 
-from vsm import (enum_sort as _enum_sort_, 
-                 map_strarr as _map_strarr_,
-                 isstr as _isstr_)
+from vsm import (
+    enum_sort as _enum_sort_, 
+    map_strarr as _map_strarr_,
+    isstr as _isstr_)
 
-from vsm.viewer import (IndexedValueArray as _IndexedValueArray_,
-                        LabeledColumn as _LabeledColumn_,
-                        DataTable as _DataTable_,
-                        res_term_type as _res_term_type_,
-                        res_doc_type as _res_doc_type_,
-                        doc_label_name as _doc_label_name_,
-                        def_label_fn as _def_label_fn_,
-                        sim_doc_doc as _sim_doc_doc_,
-                        simmat_terms as _simmat_terms_,
-                        simmat_documents as _simmat_documents_,
-                        simmat_topics as _simmat_topics_,
-                        sim_top_top as _sim_top_top_,
-                        sim_top_doc as _sim_top_doc_,
-                        sim_word_top as _sim_word_top_,
-                        sim_word_word as _sim_word_word_,
-                        format_entry as _format_entry_)
+from vsm.linalg import row_norms as _row_norms_
 
-from vsm.viewer.similarity import row_norms as _row_norms_
+from labeleddata import (
+    IndexedValueArray as _IndexedValueArray_,
+    LabeledColumn as _LabeledColumn_,
+    DataTable as _DataTable_,
+    format_entry as _format_entry_)
+
+from vsm.viewer import (
+    res_term_type as _res_term_type_,
+    res_doc_type as _res_doc_type_,
+    doc_label_name as _doc_label_name_,
+    def_label_fn as _def_label_fn_)
+
+from similarity import (
+    sim_word_word as _sim_word_word_,
+    sim_doc_doc as _sim_doc_doc_,
+    sim_top_top as _sim_top_top_,
+    sim_top_doc as _sim_top_doc_,
+    sim_word_top as _sim_word_top_,
+    simmat_terms as _simmat_terms_,
+    simmat_documents as _simmat_documents_,
+    simmat_topics as _simmat_topics_)
 
 
 

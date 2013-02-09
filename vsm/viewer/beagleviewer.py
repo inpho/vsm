@@ -1,7 +1,8 @@
-from vsm.viewer import (simmat_terms as _simmat_terms_,
-                        sim_word_word as _sim_word_word_)
+from vsm.linalg import row_norms as _row_norms_
 
-from vsm.viewer.similarity import row_norms as _row_norms_
+from similarity import (
+    sim_word_word as _sim_word_word_,
+    simmat_terms as _simmat_terms_)
 
 
 
