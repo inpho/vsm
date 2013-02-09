@@ -47,29 +47,24 @@ def row_cosines(row, matrix, norms=None,
 
 def row_cos_mat(rows, mat, norms=None, fill_tril=True):
 
-    mat = mat[rows]
-    
-    if not norms:
-
-        norms = row_norms(mat)
-
+    if sparse.issparse(mat):
+        mat = mat.tocsr()[rows].toarray()
     else:
+        mat = mat[rows]
 
+    if not norms:
+        norms = row_norms(mat)
+    else:
         norms[rows]
 
     sm = np.zeros((len(rows), len(rows)), dtype=np.float64)
-
     indices = np.triu_indices_from(sm)
-
     f = np.vectorize(lambda i, j: (np.dot(mat[i,:], mat[j,:].T) /
                                    (norms[i] * norms[j])))
-
     sm[indices] = f(*indices)[:]
 
     if fill_tril:
-
         indices = np.tril_indices_from(sm, -1)
-
         sm[indices] += sm.T[indices]
 
     return sm

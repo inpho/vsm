@@ -1,8 +1,8 @@
 import numpy as np
+from scipy.sparse import issparse
 
 from vsm import (enum_sort, row_normalize, map_strarr, 
                  isfloat, isint, isstr)
-from vsm import corpus as cps
 from vsm.util.corpustools import word_tokenize
 from vsm import model
 
@@ -40,7 +40,11 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
     # Words are expected to be rows of `mat`
 
     # Generate pseudo-word
-    word = np.average(mat[words], weights=weights, axis=0)[np.newaxis, :]
+    if issparse(mat):
+        rows = mat.tocsr()[words].toarray()
+    else:
+        rows = mat[words]
+    word = np.average(rows, weights=weights, axis=0)[np.newaxis, :]
     
     # Compute similarities
     w_arr = row_cosines(word, mat, norms=norms, filter_nan=filter_nan)
@@ -149,7 +153,11 @@ def sim_doc_doc(corp, mat, tok_name, doc_or_docs, weights=None,
     mat = mat.T
 
     # Generate pseudo-document
-    doc = np.average(mat[docs], weights=weights, axis=0)[np.newaxis, :]
+    if issparse(mat):
+        rows = mat.tocsr()[docs].toarray()
+    else:
+        rows = mat[docs]
+    doc = np.average(rows, weights=weights, axis=0)[np.newaxis, :]
 
     # Compute cosines
     d_arr = row_cosines(doc, mat, norms=norms, filter_nan=filter_nan)
@@ -197,35 +205,6 @@ def sim_top_top(mat, topic_or_topics, weights=None,
     return k_arr
 
 
-# TODO: Update module and remove this wrapper
-def similar_documents(corp, matrix, tok_name, doc,
-                      norms=None, filter_nan=True):
-
-    return sim_doc_doc(corp, matrix, tok_name, doc,
-                       norms=norms, filter_nan=filter_nan)
-
-
-# TODO: Update module and remove this wrapper
-def similar_terms(corp, matrix, term,
-                  norms=None, filter_nan=True,
-                  rem_masked=True):
-    """
-    """
-    return sim_word_word(corp, matrix, [term],
-                         norms=norms, filter_nan=True)
-
-
-# TODO: Update module and remove this wrapper
-def mean_similar_terms(corp, matrix, query,
-                       norms=None, filter_nan=True,
-                       rem_masked=True):
-    """
-    """
-    words = word_tokenize(query)
-
-    return sim_word_word(corp, matrix, words,
-                         norms=norms, filter_nan=True)
-    
 
 def simmat_terms(corp, matrix, term_list, norms=None):
     """
@@ -276,6 +255,7 @@ def doc_label_name(tok_name):
     return tok_name + '_label'
 
 
+
 def res_doc_type(corp, tok_name, label_name, doc):
     """
     If `doc` is a string or a dict, performs a look up for its
@@ -313,25 +293,3 @@ def res_term_type(corp, term):
         return corp.terms_int[term], term
 
     return term, str(term)
-        
-
-class Viewer(object):
-    """
-    """
-    def __init__(self,
-                 corpus=None,
-                 matrix=None,
-                 tok_name=None):
-
-        self.corpus = corpus
-        self.matrix = matrix
-        self.tok_name = tok_name
-
-    def load_matrix(self, filename):
-        self.matrix = model.Model.load_matrix(filename)
-
-    def load_corpus(self, filename):
-        self.corpus = cps.Corpus.load(filename)
-
-
-
