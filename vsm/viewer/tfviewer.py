@@ -72,7 +72,7 @@ class TfViewer(object):
     def simmat_words(self, word_list):
         """
         """
-        return _simmat_terms_(self.corpus, self.model.matrix.tocsr(), word_list)
+        return _simmat_terms_(self.corpus, self.model.matrix, word_list)
 
 
     def simmat_docs(self, docs):

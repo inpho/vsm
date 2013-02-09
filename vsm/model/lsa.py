@@ -6,6 +6,16 @@ from scipy.sparse import linalg as linalgs
 
 class BaseLsaModel(object):
 
+    def __init__(self, tok_name, term_matrix=None, 
+                 eigenvalues=None, doc_matrix=None):
+        """
+        """
+        self.term_matrix = term_matrix
+        self.doc_matrix = doc_matrix
+        self.eigenvalues = eigenvalues
+        self.tok_name = tok_name
+
+
     def save(self, f):
         """
         Saves model data as a numpy archive file with extension `npz`.
@@ -32,6 +42,7 @@ class BaseLsaModel(object):
         arrays_out['term_matrix'] = self.term_matrix
         arrays_out['eigenvalues'] = self.eigenvalues
         arrays_out['doc_matrix'] = self.doc_matrix
+        arrays_out['tok_name'] = self.tok_name
         np.savez(f, **arrays_out)
 
 
@@ -58,11 +69,11 @@ class BaseLsaModel(object):
         numpy.load
         """
         print 'Loading model from', f
-        m = BaseLsaModel()
         arrays_in = np.load(f)
-        m.term_matrix = arrays_in['term_matrix']
-        m.eigenvalues = arrays_in['eigenvalues']
-        m.doc_matrix = arrays_in['doc_matrix']
+        m = BaseLsaModel(term_matrix=arrays_in['term_matrix'],
+                         eigenvalues=arrays_in['eigenvalues'],
+                         doc_matrix=arrays_in['doc_matrix'],
+                         tok_name=arrays_in['tok_name'])
         return m
 
 
@@ -70,9 +81,11 @@ class BaseLsaModel(object):
 class LsaModel(BaseLsaModel):
     """
     """
-    def __init__(self, td_matrix):
+    def __init__(self, td_matrix, tok_name):
         """
         """
+        super(LsaModel, self).__init__(tok_name)
+
         td_matrix = sparse.coo_matrix(td_matrix)
         # Removing infinite values for SVD
         finite_mask = np.isfinite(td_matrix.data)
@@ -112,10 +125,10 @@ def test_LsaModel():
     tf = TfModel(c, 'document')
     tf.train()
 
-    tfidf = TfIdfModel(tf.matrix)
+    tfidf = TfIdfModel(tf.matrix, 'document')
     tfidf.train()
 
-    m = LsaModel(tfidf.matrix)
+    m = LsaModel(tfidf.matrix, 'document')
     m.train()
 
     from tempfile import NamedTemporaryFile
