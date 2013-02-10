@@ -193,10 +193,10 @@ class LDAGibbsViewer(object):
                             as_strings=as_strings)
         
         # Label data
-        k_arr.main_header = 'Sorted by Entropy'
-        k_arr.subheaders = [('Topic {0} ({1:.5f})'.format(k, ent[k]), 'Prob')
-                            for k in k_indices]
-
+        k_arr.table_header = 'Sorted by Entropy'
+        for i in xrange(k_indices.size):
+            k_arr[i].col_header += ' ({0:.5f})'.format(ent[k_indices[i]])
+ 
         return k_arr
 
 
@@ -207,13 +207,13 @@ class LDAGibbsViewer(object):
 
         # Normalize the document-topic matrix so that documents are
         # distributions
-        k_arr = (self.model.doc_top[d, :] / self._doc_sums[d])
+        k_arr = self.model.doc_top[d, :] / self._doc_sums[d]
 
         # Index, sort and label data
-        k_arr = _enum_sort_(k_arr).view(_IndexedValueArray_)
-        k_arr.main_header = 'Document: ' + label
-        k_arr.subheaders = [('Topic', 'Prob')]
-        k_arr.str_len = print_len
+        k_arr = _enum_sort_(k_arr).view(_LabeledColumn_)
+        k_arr.col_header = 'Document: ' + label
+        k_arr.subcol_headers = ['Topic', 'Prob']
+        k_arr.col_len = print_len
 
         return k_arr
 
@@ -227,23 +227,21 @@ class LDAGibbsViewer(object):
         # positions and topic assignments for each found
         idx = [(self.model.W[d] == w) for d in xrange(len(self.model.W))]
         Z = self.model.Z
-        Z_w = [((d, i), t) for d in xrange(len(Z)) 
+        Z_w = [(d, i, t) for d in xrange(len(Z)) 
                for i,t in enumerate(Z[d]) if idx[d][i]]
 
         # Label data
         if as_strings:
             tn = self.model.tok_name
             docs = self.corpus.view_metadata(tn)[self._doc_label_name]
-            dt = [('i', [('doc', docs.dtype), ('pos',np.int)]), 
-                  ('value', np.int)]
-            Z_w = [((docs[d], i), t) for ((d, i), t) in Z_w]
-
+            dt = [('doc', docs.dtype), ('pos',np.int), ('value', np.int)]
+            Z_w = [(docs[d], i, t) for (d, i, t) in Z_w]
         else:
-            dt = [('i', [('doc', np.int), ('pos',np.int)]), ('value', np.int)]
+            dt = [('i', np.int), ('pos',np.int), ('value', np.int)]
 
-        Z_w = np.array(Z_w, dtype=dt).view(_IndexedValueArray_)
-        Z_w.main_header = 'Word: ' + word
-        Z_w.subheaders = [('Document, Pos', 'Topic')]
+        Z_w = np.array(Z_w, dtype=dt).view(_LabeledColumn_)
+        Z_w.col_header = 'Word: ' + word
+        Z_w.subcol_headers = ['Document', 'Pos', 'Topic']
 
         return Z_w
 
@@ -316,20 +314,25 @@ class LDAGibbsViewer(object):
             if _isstr_(word_or_words):
                 word_or_words = [word_or_words]
 
-            indices = sum([self.word_topics(w)['value'].tolist() 
+            # Filter based on topic assignments to words (Z values) 
+            k_indices = sum([self.word_topics(w)['value'].tolist() 
                            for w in word_or_words], [])
-            indices = [i for i in xrange(sim.size) if sim[i][0] in indices]
-            sim = sim[indices]
-            indices = sim[sim.dtype.names[0]]
+            k_indices = [i for i in xrange(sim.size) if sim[i][0] in k_indices]
+            sim = sim[k_indices]
+            k_indices = sim[sim.dtype.names[0]]
 
-            k_arr = self.topics(print_len=print_len, k_indices=indices,
+            # Retrieve topics
+            k_arr = self.topics(k_indices=k_indices, print_len=print_len,
                                 as_strings=as_strings)
 
-            k_arr.main_header = 'Sorted by Word Similarity'
-            k_arr.subheaders = [('Topic {0} ({1:.5f})'.format(k, v), 'Prob')
-                                for k,v in sim]
+            # Relabel results
+            k_arr.table_header = 'Sorted by Word Similarity'
+            for i in xrange(sim.size):
+                k_arr[i].col_header += ' ({0:.5f})'.format(sim[i][1])
 
-        return k_arr
+            return k_arr
+
+        return sim
 
 
     def sim_word_word(self, word_or_words, weights=None, 

@@ -61,12 +61,12 @@ class TfViewer(object):
                                print_len=print_len, as_strings=True)
 
 
-    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
-                    label_fn=_def_label_fn_, as_strings=True):
+    def sim_doc_doc(self, doc_or_docs, weights=None, print_len=10, 
+                    filter_nan=True, label_fn=_def_label_fn_, as_strings=True):
         """
         """
         return _sim_doc_doc_(self.corpus, self.model.matrix,
-                             self.model.tok_name, doc_or_docs,
+                             self.model.tok_name, doc_or_docs, weights=weights,
                              norms=self._doc_norms, print_len=print_len,
                              filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=True)
@@ -102,13 +102,12 @@ class TfViewer(object):
         # Label data
         if as_strings:
             w_arr = _map_strarr_(w_arr, self.corpus.terms, k='i', new_k='word')
-        ch = 'Collection Frequencies'
-        sch = ['Word', 'Counts']
-        col = _LabeledColumn_(w_arr, col_header=ch, subcol_headers=sch, 
-                              col_len=print_len)
+        w_arr = w_arr.view(_LabeledColumn_)
+        w_arr.col_header = 'Collection Frequencies'
+        w_arr.subcol_headers = ['Word', 'Counts']
+        w_arr.col_len = print_len
 
-        return col
-
+        return w_arr
 
 
 

@@ -45,10 +45,10 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
     # Label data
     if as_strings:
         w_arr = map_strarr(w_arr, corp.terms, k='i', new_k='word')
-    w_arr = w_arr.view(IndexedValueArray)
-    w_arr.main_header = 'Words: ' + ', '.join(labels)
-    w_arr.subheaders = [('Word', 'Cosine')]
-    w_arr.str_len = print_len
+    w_arr = w_arr.view(LabeledColumn)
+    w_arr.col_header = 'Words: ' + ', '.join(labels)
+    w_arr.subcol_headers = ['Word', 'Cosine']
+    w_arr.col_len = print_len
 
     return w_arr
 
@@ -83,10 +83,10 @@ def sim_word_top(corp, mat, word_or_words, weights=[],
     k_arr = enum_sort(k_arr, filter_nan=filter_nan)
 
     # Label data
-    k_arr = k_arr.view(IndexedValueArray)
-    k_arr.main_header = 'Words: ' + ', '.join(labels)
-    k_arr.subheaders = [('Topic', 'Cosine')]
-    k_arr.str_len = print_len
+    k_arr = k_arr.view(LabeledColumn)
+    k_arr.col_header = 'Words: ' + ', '.join(labels)
+    k_arr.subcol_headers = ['Topic', 'Cosine']
+    k_arr.col_len = print_len
 
     return k_arr
 
@@ -121,7 +121,6 @@ def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[],
         md = corp.view_metadata(tok_name)
         docs = label_fn(md)
         d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
-        
     d_arr = d_arr.view(LabeledColumn)
     d_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
     d_arr.subcol_headers = ['Document', 'Prob']
@@ -164,13 +163,12 @@ def sim_doc_doc(corp, mat, tok_name, doc_or_docs, weights=None,
         md = corp.view_metadata(tok_name)
         docs = label_fn(md)
         d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
-    
-    d_arr = d_arr.view(IndexedValueArray)
+    d_arr = d_arr.view(LabeledColumn)
     # TODO: Finish this header
-    d_arr.main_header = 'Documents: '
-    d_arr.subheaders = [('Document', 'Cosine')]
-    d_arr.str_len = print_len
-    
+    d_arr.col_header = 'Documents: '
+    d_arr.subcol_headers = ['Document', 'Cosine']
+    d_arr.col_len = print_len
+
     return d_arr
 
 
@@ -195,10 +193,10 @@ def sim_top_top(mat, topic_or_topics, weights=None,
     k_arr = enum_sort(k_arr, filter_nan=filter_nan)
 
     # Label data
-    k_arr = k_arr.view(IndexedValueArray)
-    k_arr.main_header = 'Topics: ' + ', '.join([str(t) for t in topics])
-    k_arr.subheaders = [('Topic', 'Cosine')]
-    k_arr.str_len = print_len
+    k_arr = k_arr.view(LabeledColumn)
+    k_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
+    k_arr.subcol_headers = ['Topic', 'Cosine']
+    k_arr.col_len = print_len
 
     return k_arr
 

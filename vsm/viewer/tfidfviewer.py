@@ -52,12 +52,12 @@ class TfIdfViewer(object):
                                print_len=print_len, as_strings=True)
 
 
-    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
-                    label_fn=_def_label_fn_, as_strings=True):
+    def sim_doc_doc(self, doc_or_docs, weights=None, print_len=10, 
+                    filter_nan=True, label_fn=_def_label_fn_, as_strings=True):
         """
         """
         return _sim_doc_doc_(self.corpus, self.model.matrix,
-                             self.model.tok_name, doc_or_docs,
+                             self.model.tok_name, doc_or_docs, weights=weights,
                              norms=self._doc_norms, print_len=print_len,
                              filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=True)
