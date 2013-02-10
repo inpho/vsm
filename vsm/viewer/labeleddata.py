@@ -189,7 +189,7 @@ class DataTable(list):
     def __str__(self):
         """
         """
-        col_width = sum(self[0].subcol_widths)
+        col_width = self[0].col_width
 
         out = '-' * col_width + '\n'
         if self.table_header:
