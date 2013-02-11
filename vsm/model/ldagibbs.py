@@ -222,6 +222,7 @@ class LDAGibbs(object):
     @staticmethod
     def load(filename):
 
+        from vsm.corpus import split_corpus
         from vsm.util.corpustools import empty_corpus
 
         print 'Loading LDA-Gibbs data from', filename
@@ -235,7 +236,7 @@ class LDAGibbs(object):
         m = LDAGibbs(empty_corpus(tok_name),
                      tok_name, K=K, alpha=alpha,
                      beta=beta, log_prob=log_prob_init)
-        m.W = np.split(arrays_in['W_corpus'], arrays_in['W_indices'])[:-1]
+        m.W = split_corpus(arrays_in['W_corpus'], arrays_in['W_indices'])
         m.V = arrays_in['V'][()]
         m.iterations = arrays_in['iterations'][()]
         if log_prob_init:
@@ -252,7 +253,7 @@ class LDAGibbs(object):
     def save(self, filename):
 
         arrays_out = dict()
-        arrays_out['W_corpus'] = np.hstack(self.W)
+        arrays_out['W_corpus'] = np.array(np.hstack(self.W), dtype=np.int32)
         arrays_out['W_indices'] = np.cumsum([a.size for a in self.W])
         arrays_out['V'] = self.V
         arrays_out['iterations'] = self.iterations
