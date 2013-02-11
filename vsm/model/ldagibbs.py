@@ -241,7 +241,7 @@ class LDAGibbs(object):
         m.iterations = arrays_in['iterations'][()]
         if log_prob_init:
             m.log_prob = arrays_in['log_prob'].tolist()
-        m.Z = np.split(arrays_in['Z_corpus'], arrays_in['Z_indices'])[:-1]
+        m.Z = split_corpus(arrays_in['Z_corpus'], arrays_in['Z_indices'])
         m.doc_top = arrays_in['doc_top']
         m.top_word = arrays_in['top_word']
         m.sum_word_top = arrays_in['sum_word_top']
@@ -264,7 +264,7 @@ class LDAGibbs(object):
             arrays_out['log_prob'] = lp
         else:
             log_prob_init = False
-        arrays_out['Z_corpus'] = np.hstack(self.Z)
+        arrays_out['Z_corpus'] = np.array(np.hstack(self.Z), dtype=np.int32)
         arrays_out['Z_indices'] = np.cumsum([a.size for a in self.Z])
         arrays_out['doc_top'] = self.doc_top
         arrays_out['top_word'] = self.top_word
