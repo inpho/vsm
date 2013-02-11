@@ -170,7 +170,7 @@ def htrc_load_metadata_1315():
     import os
     import json
 
-    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-86/'
+    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-1315/'
                 'htrc-anthropomorphism-1315-metadata.json')
 
     with open(filename) as f:
