@@ -171,7 +171,7 @@ def htrc_load_metadata_1315():
     import json
 
     filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-1315/'
-                'htrc-anthropomorphism-1315-metadata.json')
+                'htrc-1315-metadata.json')
 
     with open(filename) as f:
         metadata = json.load(f)
@@ -228,17 +228,14 @@ def htrc_label_fn_1315(metadata):
     """
     md = htrc_load_metadata_1315()
 
-    files = metadata['file']
     titles = []
     for v in metadata['book_label']:
         title = unidecode(htrc_get_titles(md, v)[0])
-        if len(title) > 15:
-            title = title[:15]
+        if len(title) > 60:
+            title = title[:60]
         titles.append(title)
     
-    labels = ['{0}, {1}'.format(t,f) for (t,f) in zip(titles, files)]
-    
-    return np.array(labels)
+    return np.array(titles)
 
 
 def htrc_find_duplicates(metadata, vol_list):
