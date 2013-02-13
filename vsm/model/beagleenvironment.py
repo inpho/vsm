@@ -1,6 +1,6 @@
 import numpy as np
 
-from vsm import row_normalize
+from vsm.linalg import row_normalize
 from vsm.model import BaseModel
 
 

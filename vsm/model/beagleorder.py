@@ -8,7 +8,7 @@ import numpy as np
 from numpy import dual
 
 from vsm.model import BaseModel
-from vsm import rand_pt_unit_sphere
+from vsm.linalg import rand_pt_unit_sphere
 
 
 

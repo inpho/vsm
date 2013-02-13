@@ -1,6 +1,6 @@
 import numpy as np
 
-from vsm import row_normalize as _row_normalize
+from vsm.linalg import row_normalize as _row_normalize
 from vsm.model import BaseModel
 from vsm.model.beaglecontext import realign_env_mat as _realign_env_mat
 

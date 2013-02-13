@@ -165,7 +165,21 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log']):
                 f.write(page)
 
 
-def htrc_load_metadata():
+def htrc_load_metadata_1315():
+
+    import os
+    import json
+
+    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-1315/'
+                'htrc-1315-metadata.json')
+
+    with open(filename) as f:
+        metadata = json.load(f)
+
+    return metadata
+
+
+def htrc_load_metadata_86():
 
     import os
     import json
@@ -190,10 +204,10 @@ def htrc_get_titles(metadata, vol_id):
         raise
 
 
-def htrc_label_fn(metadata):
+def htrc_label_fn_86(metadata):
     """
     """
-    md = htrc_load_metadata()
+    md = htrc_load_metadata_86()
 
     files = metadata['file']
     titles = []
@@ -206,6 +220,22 @@ def htrc_label_fn(metadata):
     labels = ['{0}, {1}'.format(t,f) for (t,f) in zip(titles, files)]
     
     return np.array(labels)
+
+
+
+def htrc_label_fn_1315(metadata):
+    """
+    """
+    md = htrc_load_metadata_1315()
+
+    titles = []
+    for v in metadata['book_label']:
+        title = unidecode(htrc_get_titles(md, v)[0])
+        if len(title) > 60:
+            title = title[:60]
+        titles.append(title)
+    
+    return np.array(titles)
 
 
 def htrc_find_duplicates(metadata, vol_list):
