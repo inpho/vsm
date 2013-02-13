@@ -2,7 +2,7 @@ from vsm.linalg import row_norms as _row_norms_
 
 from similarity import (
     sim_word_word as _sim_word_word_,
-    simmat_terms as _simmat_terms_)
+    simmat_words as _simmat_words_)
 
 
 
@@ -39,7 +39,7 @@ class BeagleViewer(object):
 
     def simmat_words(self, word_list):
 
-        return _simmat_terms_(self.corpus,
+        return _simmat_words_(self.corpus,
                               self.model.matrix,
                               word_list)
 

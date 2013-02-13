@@ -5,7 +5,7 @@ from vsm.viewer import def_label_fn as _def_label_fn_
 from similarity import (
     sim_word_word as _sim_word_word_,
     sim_doc_doc as _sim_doc_doc_,
-    simmat_terms as _simmat_terms_,
+    simmat_words as _simmat_words_,
     simmat_documents as _simmat_documents_)
 
 
@@ -66,7 +66,7 @@ class TfIdfViewer(object):
     def simmat_words(self, word_list):
         """
         """
-        return _simmat_terms_(self.corpus, self.model.matrix, word_list)
+        return _simmat_words_(self.corpus, self.model.matrix, word_list)
 
 
     def simmat_docs(self, docs):

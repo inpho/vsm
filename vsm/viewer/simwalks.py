@@ -3,11 +3,11 @@
 
 
 
-def bf_sim_walk(sim_fn, term, go_list, global_bnd):
+def bf_sim_walk(sim_fn, word, go_list, global_bnd):
 
-    mem = { term:
+    mem = { word:
             { 'pos': 0,
-              'sim': sim_fn(term) }}
+              'sim': sim_fn(word) }}
 
     while len(mem.keys()) < global_bnd:
 
@@ -36,9 +36,9 @@ def bf_sim_walk(sim_fn, term, go_list, global_bnd):
 
 
 
-def df_sim_walk(sim_fn, term, go_list, local_bnd, global_bnd):
+def df_sim_walk(sim_fn, word, go_list, local_bnd, global_bnd):
 
-    mem = { term: True }
+    mem = { word: True }
 
     while len(mem.keys()) < global_bnd:
 

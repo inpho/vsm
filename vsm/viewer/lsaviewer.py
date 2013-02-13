@@ -7,7 +7,7 @@ from vsm.viewer import def_label_fn as _def_label_fn_
 from similarity import (
     sim_word_word as _sim_word_word_,
     sim_doc_doc as _sim_doc_doc_,
-    simmat_terms as _simmat_terms_,
+    simmat_words as _simmat_words_,
     simmat_documents as _simmat_documents_)
 
 
@@ -29,7 +29,7 @@ class LsaViewer(object):
         """
         """
         if self._word_norms_ is None:
-            self._word_norms_ = _row_norms_(self.model.term_matrix)            
+            self._word_norms_ = _row_norms_(self.model.word_matrix)            
 
         return self._word_norms_
 
@@ -48,7 +48,7 @@ class LsaViewer(object):
                       filter_nan=True, print_len=10, as_strings=True):
         """
         """
-        return _sim_word_word_(self.corpus, self.model.term_matrix, 
+        return _sim_word_word_(self.corpus, self.model.word_matrix, 
                                word_or_words, weights=weights, 
                                norms=self._word_norms, filter_nan=filter_nan, 
                                print_len=print_len, as_strings=True)
@@ -68,7 +68,7 @@ class LsaViewer(object):
     def simmat_words(self, word_list):
         """
         """
-        return _simmat_terms_(self.corpus, self.model.term_matrix, word_list)
+        return _simmat_words_(self.corpus, self.model.word_matrix, word_list)
 
 
     def simmat_docs(self, docs):
