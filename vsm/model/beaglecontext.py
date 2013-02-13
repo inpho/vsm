@@ -13,8 +13,8 @@ from vsm.model import BaseModel
 def realign_env_mat(corpus, env_corpus, env_matrix):
     """
     """
-    words = corpus.terms
-    indices = [env_corpus.terms_int[w] for w in words]
+    words = corpus.words
+    indices = [env_corpus.words_int[w] for w in words]
     return env_matrix[indices]
 
 
@@ -42,7 +42,7 @@ class BeagleContextSeq(BaseModel):
                 left_sums = np.cumsum(self.env_matrix[sent[:-1]], axis=0)
                 right_sums = np.cumsum(self.env_matrix[sent[:0:-1]], axis=0)
 
-                for i,term in enumerate(sent):
+                for i,word in enumerate(sent):
 
                     if i == 0:
                         ctx_vector = right_sums[-1]
@@ -53,7 +53,7 @@ class BeagleContextSeq(BaseModel):
                     else:
                         ctx_vector = left_sums[i - 1] + right_sums[-i - 1]
 
-                    self.matrix[term, :] += ctx_vector
+                    self.matrix[word, :] += ctx_vector
 
 
 

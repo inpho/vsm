@@ -6,11 +6,11 @@ from scipy.sparse import linalg as linalgs
 
 class BaseLsaModel(object):
 
-    def __init__(self, tok_name, term_matrix=None, 
+    def __init__(self, tok_name, word_matrix=None, 
                  eigenvalues=None, doc_matrix=None):
         """
         """
-        self.term_matrix = term_matrix
+        self.word_matrix = word_matrix
         self.doc_matrix = doc_matrix
         self.eigenvalues = eigenvalues
         self.tok_name = tok_name
@@ -19,7 +19,7 @@ class BaseLsaModel(object):
     def save(self, f):
         """
         Saves model data as a numpy archive file with extension `npz`.
-        The keys for the component matrices are `term_matrix`,
+        The keys for the component matrices are `word_matrix`,
         `eigenvalues` and `doc_matrix`.
         
         Parameters
@@ -39,7 +39,7 @@ class BaseLsaModel(object):
         """
         print 'Saving model as', f
         arrays_out = dict()
-        arrays_out['term_matrix'] = self.term_matrix
+        arrays_out['word_matrix'] = self.word_matrix
         arrays_out['eigenvalues'] = self.eigenvalues
         arrays_out['doc_matrix'] = self.doc_matrix
         arrays_out['tok_name'] = self.tok_name
@@ -51,7 +51,7 @@ class BaseLsaModel(object):
         """
         Loads LSA model data from a numpy archive file with extension
         `npz`. The expected keys for the component matrices are
-        `term_matrix`, `eigenvalues` and `doc_matrix`.
+        `word_matrix`, `eigenvalues` and `doc_matrix`.
         
         Parameters
         ----------
@@ -70,7 +70,7 @@ class BaseLsaModel(object):
         """
         print 'Loading model from', f
         arrays_in = np.load(f)
-        m = BaseLsaModel(term_matrix=arrays_in['term_matrix'],
+        m = BaseLsaModel(word_matrix=arrays_in['word_matrix'],
                          eigenvalues=arrays_in['eigenvalues'],
                          doc_matrix=arrays_in['doc_matrix'],
                          tok_name=arrays_in['tok_name'])
@@ -108,7 +108,7 @@ class LsaModel(BaseLsaModel):
 
         print 'Performing sparse SVD'
         u, s, v = linalgs.svds(self.td_matrix, k=k_factors)
-        self.term_matrix = u
+        self.word_matrix = u
         self.eigenvalues = s
         self.doc_matrix = v
 
@@ -139,7 +139,7 @@ def test_LsaModel():
         m.save(tmp.name)
         tmp.close()
         m1 = BaseLsaModel.load(tmp.name)
-        assert (m.term_matrix == m1.term_matrix).all()
+        assert (m.word_matrix == m1.word_matrix).all()
         assert (m.eigenvalues == m1.eigenvalues).all()
         assert (m.doc_matrix == m1.doc_matrix).all()
     

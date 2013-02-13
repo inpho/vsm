@@ -18,7 +18,7 @@ class TfModel(BaseModel):
         """
         """
         docs = self.corpus.view_tokens(self.tok_name)
-        shape = (self.corpus.terms.size, len(docs))
+        shape = (self.corpus.words.size, len(docs))
 
         print 'Computing term frequencies'
         data = np.ones_like(self.corpus.corpus)

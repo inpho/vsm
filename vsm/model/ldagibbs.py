@@ -46,9 +46,9 @@ class LDAGibbs(object):
     W : list of integer arrays
         List of documents, which are extracted from the input Corpus object
     V : int
-        Number of unique terms in the corpus
+        Number of unique words in the corpus
     Z : list of integer arrays
-        Topic assignments for every term coordinate in the corpus
+        Topic assignments for every word coordinate in the corpus
     iterations : int
         Number of past iterations of the update rule
     doc_top : 2-dim floating point array
@@ -58,7 +58,7 @@ class LDAGibbs(object):
         Stores the unnormalized estimated posterior distribution over
         terms for each topic in a K x V matrix
     sum_word_top : 1-dim floating point array
-        Stores the sum of terms over topics
+        Stores the sum of words over topics
 
     Methods
     -------
@@ -66,16 +66,16 @@ class LDAGibbs(object):
         Takes an optional argument `itr`, which defaults to 1000, and
         updates the model `itr` times.
     update_z
-        Takes a document index `d`, a term index `i` relative to that
-        document and a term `w` and updates the model.
+        Takes a document index `d`, a word index `i` relative to that
+        document and a word `w` and updates the model.
     z_dist
-        Takes a document index `d` and a term `w` and computes the
+        Takes a document index `d` and a word `w` and computes the
         distribution over topics for `w` in `d`
     phi_k
         Takes a topic index `t` and returns the estimated posterior
-        distribution over terms for `t`
+        distribution over words for `t`
     phi_w
-        Takes a term `w` and returns the estimated posterior
+        Takes a word `w` and returns the estimated posterior
         distribution over topics for `w`
     theta_d
         Takes a document index `d` and returns the estimated posterior
@@ -98,7 +98,7 @@ class LDAGibbs(object):
         self.alpha = alpha
         self.beta = beta
         self.W = corpus.view_tokens(tok_name)
-        self.V = corpus.terms.shape[0]
+        self.V = corpus.words.shape[0]
         self.iterations = 0
 
         if log_prob:
@@ -305,7 +305,7 @@ def test_logp_fns():
 
 def test_LDAGibbs_IO():
 
-    from vsm.corpus import random_corpus
+    from vsm.util.corpustools import random_corpus
     from tempfile import NamedTemporaryFile
     import os
     

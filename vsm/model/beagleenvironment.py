@@ -11,7 +11,7 @@ class BeagleEnvironment(BaseModel):
         """
         """
         self.tok_name = tok_name
-        self.shape = (corpus.terms.shape[0], n_cols)
+        self.shape = (corpus.words.shape[0], n_cols)
         self.dtype = dtype
 
 

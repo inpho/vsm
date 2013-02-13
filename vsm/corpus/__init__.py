@@ -40,7 +40,7 @@ class BaseCorpus(object):
     Parameters
     ----------
     corpus : array-like
-        Array, typically of strings or integers, of atomic terms (or
+        Array, typically of strings or integers, of atomic words (or
         tokens) making up the corpus.
     tok_data : list with 1-D array-like elements, optional
         Each element in `tok_data` is an array containing the indices
@@ -51,7 +51,7 @@ class BaseCorpus(object):
         is a token boundary and the second element is metadata
         associated with that token preceding that boundary. For
         example, (250, 'dogs') might indicate that the 'article' token
-        ending at the 250th term of the corpus is named 'dogs'.
+        ending at the 250th word of the corpus is named 'dogs'.
         Default is `None`.
     tok_names : array-like, optional
         Each element in `tok_names` is a name of a tokenization in
@@ -65,9 +65,9 @@ class BaseCorpus(object):
     corpus : 1-D array
         Stores the value of the `corpus` parameter after it has been
         cast to a array of data-type `dtype` (if provided).
-    terms : 1-D array
-        The indexed set of atomic terms appearing in `corpus`.
-        Computed on initialization by `_extract_terms`.
+    words : 1-D array
+        The indexed set of atomic words appearing in `corpus`.
+        Computed on initialization by `_extract_words`.
     tok_names: 1-D array-like
 
     tok_data: list of 1-D array-like
@@ -93,7 +93,7 @@ class BaseCorpus(object):
     array(['the', 'dog', 'chased', 'the', 'cat', 'the', 'cat',
            'ran', 'away'], dtype='|S6')
            
-    >>> c.terms
+    >>> c.words
     array(['ran', 'away', 'chased', 'dog', 'cat', 'the'],
           dtype='|S6')
 
@@ -116,7 +116,7 @@ class BaseCorpus(object):
         self.corpus = np.asarray(corpus, dtype=dtype)
         self.dtype = self.corpus.dtype
 
-        self._extract_terms()
+        self._extract_words()
 
         self.tok_data = []
         for t in tok_data:
@@ -253,9 +253,9 @@ class BaseCorpus(object):
 
 
     
-    def _extract_terms(self):
+    def _extract_words(self):
         """
-        Produces an indexed set of terms from a corpus.
+        Produces an indexed set of words from a corpus.
         
         Parameters
         ----------
@@ -276,10 +276,10 @@ class BaseCorpus(object):
         # Benchmarked by Peter Bengtsson
         # (http://www.peterbe.com/plog/uniqifiers-benchmark)
         
-        term_set = set()
-        term_list = [term for term in self.corpus
-                     if term not in term_set and not term_set.add(term)]
-        self.terms = np.array(term_list, dtype=self.corpus.dtype)
+        word_set = set()
+        word_list = [word for word in self.corpus
+                     if word not in word_set and not word_set.add(word)]
+        self.words = np.array(word_list, dtype=self.corpus.dtype)
 
 
 
@@ -292,7 +292,7 @@ class Corpus(BaseCorpus):
 
     A Corpus object contains an integer representation of the text and
     maps to permit conversion between integer and string
-    representations of a given term.
+    representations of a given word.
 
     As a BaseCorpus object, it includes a dictionary of tokenizations
     of the corpus and a method for viewing (without copying) these
@@ -303,7 +303,7 @@ class Corpus(BaseCorpus):
     ----------
     corpus : array-like
         A string array representing the corpus as a sequence of atomic
-        terms.
+        words.
     tok_data : list-like with 1-D integer array-like elements, optional
         Each element in `tok_data` is an array containing the indices
         marking the token boundaries. An element in `tok_data` is
@@ -313,7 +313,7 @@ class Corpus(BaseCorpus):
         is a token boundary and the second element is metadata
         associated with that token preceding that boundary. For
         example, (250, 'dogs') might indicate that the 'article' token
-        ending at the 250th term of the corpus is named 'dogs'.
+        ending at the 250th word of the corpus is named 'dogs'.
         Default is `None`.
     tok_names : array-like, optional
         Each element in `tok_names` is a name of a tokenization in
@@ -324,12 +324,12 @@ class Corpus(BaseCorpus):
     corpus : 1-D 32-bit integer array
         corpus is the integer representation of the input string
         array-like value value of the corpus parameter
-    terms : 1-D string array
+    words : 1-D string array
         The indexed set of strings occurring in corpus. It is a
         string-typed array.
-    terms_int : 1-D 32-bit integer array
-        A dictionary whose keys are `terms` and whose values are their
-        corresponding integers (i.e., indices in `terms`).
+    words_int : 1-D 32-bit integer array
+        A dictionary whose keys are `words` and whose values are their
+        corresponding integers (i.e., indices in `words`).
     tok : dict with 1-D numpy arrays as values
         The tokenization dictionary. Stems of key names are given by
         `tok_names`. A key name whose value is the array of indices
@@ -342,10 +342,10 @@ class Corpus(BaseCorpus):
     view_tokens
         Takes a name of tokenization and returns a view of the corpus
         tokenized accordingly. The optional parameter `strings` takes
-        a boolean value: True to view string representations of terms;
-        False to view integer representations of terms. Default is
+        a boolean value: True to view string representations of words;
+        False to view integer representations of words. Default is
         `False`.
-    extract_terms
+    extract_words
         Static method. Takes an array-like object and returns an
         indexed set of the elements in the object as a 1-D numpy
         array.
@@ -353,7 +353,7 @@ class Corpus(BaseCorpus):
         Returns a copy of itself but with `corpus`, `tokens`, and
         `tokens_meta` set to None. Occasionally, the only information
         needed from the Corpus object is the mapping between string
-        and integer representations of terms; this provides a smaller
+        and integer representations of words; this provides a smaller
         version of the corpus object for such situations.
     save
         Takes a filename and saves the data contained in a Corpus
@@ -378,11 +378,11 @@ class Corpus(BaseCorpus):
     >>> c.corpus
     array([0, 3, 0, 2, 0, 1], dtype=int32)
     
-    >>> c.terms
+    >>> c.words
     array(['I', 'conquered', 'saw', 'came'],
           dtype='|S9')
 
-    >>> c.terms_int['saw']
+    >>> c.words_int['saw']
     2
 
     >>> c.view_tokens('sentences')
@@ -410,21 +410,21 @@ class Corpus(BaseCorpus):
                                      tok_data=tok_data,
                                      dtype=np.str_)
 
-        self.__set_terms_int()
+        self.__set_words_int()
 
         # Integer encoding of a string-type corpus
         self.dtype = np.int32
-        self.corpus = np.asarray([self.terms_int[term]
-                                  for term in self.corpus],
+        self.corpus = np.asarray([self.words_int[word]
+                                  for word in self.corpus],
                                  dtype=self.dtype)
 
 
 
-    def __set_terms_int(self):
+    def __set_words_int(self):
         """
-        Mapping of terms to their integer representations.
+        Mapping of words to their integer representations.
         """
-        self.terms_int = dict((t,i) for i,t in enumerate(self.terms))
+        self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
 
     def view_tokens(self, name, as_strings=False):
@@ -436,7 +436,7 @@ class Corpus(BaseCorpus):
         name : string-like
            The name of a tokenization.
         strings : Boolean, optional
-            If True, string representations of terms are returned.
+            If True, string representations of words are returned.
             Otherwise, integer representations are returned. Default
             is `False`.
 
@@ -454,7 +454,7 @@ class Corpus(BaseCorpus):
         if as_strings:
             token_list_ = []
             for token in token_list:
-                token = self.terms[token]
+                token = self.words[token]
                 token_list_.append(token)
 
             return token_list_
@@ -490,7 +490,7 @@ class Corpus(BaseCorpus):
 
         c = Corpus([])
         c.corpus = arrays_in['corpus']
-        c.terms = arrays_in['terms']
+        c.words = arrays_in['words']
         c.tok_names = arrays_in['tok_names'].tolist()
 
         c.tok_data = list()
@@ -498,7 +498,7 @@ class Corpus(BaseCorpus):
             t = arrays_in['tok_data_' + n]
             c.tok_data.append(t)
 
-        c.__set_terms_int()
+        c.__set_words_int()
 
         return c
 
@@ -526,7 +526,7 @@ class Corpus(BaseCorpus):
         print 'Saving corpus as', file
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
-        arrays_out['terms'] = self.terms
+        arrays_out['words'] = self.words
         arrays_out['tok_names'] = np.asarray(self.tok_names)
 
         for i,t in enumerate(self.tok_data):
@@ -538,27 +538,27 @@ class Corpus(BaseCorpus):
 
     def apply_stoplist(self, stoplist=[], freq=0):
         """
-        Takes a Corpus object and returns a copy of it with terms in the
-        stoplist removed and with terms of frequency <= `freq1` removed.
+        Takes a Corpus object and returns a copy of it with words in the
+        stoplist removed and with words of frequency <= `freq1` removed.
         """
         if freq:
             #TODO: Use the TF model instead
 
             print 'Computing collection frequencies'
-            cfs = np.zeros_like(self.terms, dtype=self.corpus.dtype)
+            cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
     
-            for term in self.corpus:
-                cfs[term] += 1
+            for word in self.corpus:
+                cfs[word] += 1
 
-            print 'Selecting terms of frequency <=', freq
+            print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
             stop = set(freq_stop)
         else:
             stop = set()
 
         for t in stoplist:
-            if t in self.terms:
-                stop.add(self.terms_int[t])
+            if t in self.words:
+                stop.add(self.words_int[t])
 
         if not stop:
             print 'Stop list is empty.'
@@ -569,7 +569,7 @@ class Corpus(BaseCorpus):
         corpus = self.corpus[f(self.corpus)]
 
         print 'Rebuilding corpus'
-        corpus = [self.terms[i] for i in corpus]
+        corpus = [self.words[i] for i in corpus]
         tok_data = []
         for i in xrange(len(self.tok_data)):
             print 'Recomputing token breaks:', self.tok_names[i]
@@ -605,8 +605,8 @@ def test_file():
         c_reloaded = c.load(tmp.name)
 
         assert (c.corpus == c_reloaded.corpus).all()
-        assert (c.terms == c_reloaded.terms).all()
-        assert c.terms_int == c_reloaded.terms_int
+        assert (c.words == c_reloaded.words).all()
+        assert c.words_int == c_reloaded.words_int
         assert c.tok_names == c_reloaded.tok_names
         for i in xrange(len(c.tok_data)):
             assert (c.tok_data[i] == c_reloaded.tok_data[i]).all()

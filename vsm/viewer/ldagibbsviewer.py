@@ -14,7 +14,7 @@ from labeleddata import (
     format_entry as _format_entry_)
 
 from vsm.viewer import (
-    res_term_type as _res_term_type_,
+    res_word_type as _res_word_type_,
     res_doc_type as _res_doc_type_,
     doc_label_name as _doc_label_name_,
     def_label_fn as _def_label_fn_)
@@ -132,10 +132,10 @@ class LDAGibbsViewer(object):
                               self._doc_label_name, doc)
 
 
-    def _res_term_type(self, term):
+    def _res_word_type(self, word):
         """
         """
-        return _res_term_type_(self.corpus, term)
+        return _res_word_type_(self.corpus, word)
 
 
     def topics(self, print_len=10, k_indices=[], as_strings=True):
@@ -154,7 +154,7 @@ class LDAGibbsViewer(object):
 
         # Label data
         if as_strings:
-            f = lambda v: _map_strarr_(v, self.corpus.terms, 
+            f = lambda v: _map_strarr_(v, self.corpus.words, 
                                        k='i', new_k='word')
             k_arr = np.apply_along_axis(f, 1, k_arr)
 
@@ -221,7 +221,7 @@ class LDAGibbsViewer(object):
     def word_topics(self, word, as_strings=True):
         """
         """
-        w, word = self._res_term_type(word)
+        w, word = self._res_word_type(word)
 
         # Search for occurrences of a word in the corpus and return a
         # positions and topic assignments for each found

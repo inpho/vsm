@@ -6,7 +6,7 @@ from vsm import enum_sort, map_strarr, isstr, isint
 from vsm.linalg import row_cosines, row_cos_mat
 
 from vsm.viewer import (
-    res_term_type, res_doc_type, def_label_fn, doc_label_name)
+    res_word_type, res_doc_type, def_label_fn, doc_label_name)
 
 from labeleddata import (
     LabeledColumn, IndexedValueArray, IndexedSymmArray)
@@ -26,7 +26,7 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
     # Resolve `word_or_words`
     if isstr(word_or_words):
         word_or_words = [word_or_words]
-    words, labels = zip(*[res_term_type(corp, w) for w in word_or_words])
+    words, labels = zip(*[res_word_type(corp, w) for w in word_or_words])
     words, labels = list(words), list(labels)
 
     # Words are expected to be rows of `mat`
@@ -44,7 +44,7 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
 
     # Label data
     if as_strings:
-        w_arr = map_strarr(w_arr, corp.terms, k='i', new_k='word')
+        w_arr = map_strarr(w_arr, corp.words, k='i', new_k='word')
     w_arr = w_arr.view(LabeledColumn)
     w_arr.col_header = 'Words: ' + ', '.join(labels)
     w_arr.subcol_headers = ['Word', 'Cosine']
@@ -66,7 +66,7 @@ def sim_word_top(corp, mat, word_or_words, weights=[],
     # Resolve `word_or_words`
     if isstr(word_or_words):
         word_or_words = [word_or_words]
-    words, labels = zip(*[res_term_type(corp, w) for w in word_or_words])
+    words, labels = zip(*[res_word_type(corp, w) for w in word_or_words])
     words, labels = list(words), list(labels)
 
     # Topics are assumed to be rows
@@ -202,16 +202,16 @@ def sim_top_top(mat, topic_or_topics, weights=None,
 
 
 
-def simmat_terms(corp, matrix, term_list, norms=None):
+def simmat_terms(corp, matrix, word_list, norms=None):
     """
     """
-    indices, terms = zip(*[res_term_type(corp, term) 
-                           for term in term_list])
-    indices, terms = np.array(indices), np.array(terms)
+    indices, words = zip(*[res_word_type(corp, word) 
+                           for word in word_list])
+    indices, words = np.array(indices), np.array(words)
 
     sm = row_cos_mat(indices, matrix, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)
-    sm.labels = terms
+    sm.labels = words
     
     return sm
 

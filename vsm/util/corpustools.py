@@ -136,7 +136,7 @@ def empty_corpus(tok_name):
 
 
 def random_corpus(corpus_len,
-                  n_terms,
+                  n_words,
                   min_token_len,
                   max_token_len,
                   tok_name='random',
@@ -144,7 +144,7 @@ def random_corpus(corpus_len,
     """
     Generate a random integer corpus.
     """
-    corpus = np.random.randint(n_terms, size=corpus_len)
+    corpus = np.random.randint(n_words, size=corpus_len)
 
     indices = []
     i = np.random.randint(min_token_len, max_token_len)
@@ -201,7 +201,7 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         If `True` then the corpus object is masked using the NLTK
         English stop words. Default is `False`.
     stop_freq : int
-        The upper bound for a term to be masked on the basis of its
+        The upper bound for a word to be masked on the basis of its
         collection frequency. Default is 0.
     add_stop : array-like
         A list of stop words. Default is `None`.
@@ -394,7 +394,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
         If `True` then the corpus object is masked using the NLTK
         English stop words. Default is `False`.
     stop_freq : int
-        The upper bound for a term to be masked on the basis of its
+        The upper bound for a word to be masked on the basis of its
         collection frequency. Default is 0.
     add_stop : array-like
         A list of stop words. Default is `None`.
