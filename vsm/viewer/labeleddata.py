@@ -97,6 +97,8 @@ class LabeledColumn(np.ndarray):
 
     @property
     def col_len(self):
+	if not self._col_len:
+	    return self.shape[0]
 	return min(self.shape[0], self._col_len)
 
     @col_len.setter
@@ -133,17 +135,17 @@ class LabeledColumn(np.ndarray):
     def _repr_html_(self):
         """
 	""" 
-	s = '<style> th {text-align: center; background: #E0F8F7; } </style>'
-        s += '<table style="margin: 0">'
+        s = '<table style="margin: 0">'
 
         if self.col_header:
-            s += '<tr><th style="text-align: center;" colspan="{0}"> {1}\
-		 </th></tr>'.format(len(self.subcol_widths), self.col_header)
+            s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
+		="{0}">{1}</th></tr>'.format(len(self.subcol_widths), self.col_header)
 
         if self.subcol_headers:
             s += '<tr>'
             for sch in self.subcol_headers:
-                s += '<th style="text-align: center;">{0}</th>'.format(sch)
+                s += '<th style="text-align: center; background: #EFF2FB; ">{0}\
+			</th>'.format(sch)
             s += '</tr>'
         
         for i in xrange(self.col_len):
@@ -200,48 +202,68 @@ class DataTable(list):
     def _repr_html_(self):
 	"""
 	"""        
-	s = '<style> th {text-align: center; background: #E0F8F7; } </style>'
-	s += '<table>'
+	s = '<table>'
 
 	col_in_row = 3
 
         if self.table_header:
-            s += '<tr><th style="text-align: center;" colspan="{0}"> {1} </th>\
-		</tr>'.format(col_in_row * len(self[0].subcol_headers), self.table_header)
+            s += '<tr><th style="text-align: center; background: #A9D0F5;\
+		fontsize: 14px;" colspan="{0}"> {1} </th></tr>'.format(col_in_row
+			 * len(self[0].subcol_headers), self.table_header)
      
 	start = 0
 
         while start < len(self):
 	    end = start + col_in_row
+	    group = self[start:end]	    
 
 	    s += '<tr>'
-	    for lc in self[start:end]:
-	        
+	    for lc in group:
+		
 		if lc.col_header:
-	            s += '<th style="text-align: center;" colspan="{0}"> {1}\
-			</th>'.format(len(lc.subcol_headers), lc.col_header)
-	    s += '</tr>'
+	            s += '<th style="text-align: center; background: #CEE3F6;"\
+		 colspan="{0}">{1}</th>'.format(len(lc.subcol_headers), lc.col_header)
+
+		if end > len(self) and start > 0:
+		    for i in xrange(end - len(self)):
+			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
+		 	colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
+					' ' * self[0].col_width)
+    	    s += '</tr>'
 
 	    s += '<tr>'
-	    for lc in self[start:end]:
+	    for lc in group:
         	
 		if lc.subcol_headers:
             	    
             	    for sch in lc.subcol_headers:
-                	s += '<th style="text-align: center;">{0}</th>'.format(sch)
+                	s += '<th style="text-align: center; background: #EFF2FB;">\
+				{0}</th>'.format(sch)
+
+		if end > len(self) and start > 0:
+		    for i in xrange(end - len(self)):
+			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
+		 colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
+						' ' * self[0].col_width)
             s += '</tr>'
             
 	    for i in xrange(self[0].col_len):
+
 	        s += '<tr>'
-		for lc in self[start:end]:
+		for lc in group:
             	   
             	    for j in xrange(len(lc.dtype)):
                         n = lc.dtype.names[j]
 	                s += '<td>{}</td>'.format(lc[n][i])
+		
+		    if end > len(self) and start > 0:
+		        for i in xrange(end - len(self)):
+			    s += '<td style="border-color: #EFF2FB; background: #EFF2FB;"\
+				colspan="{0}"> {1} </th>'.format(len(lc.subcol_headers),
+							 ' ' * self[0].col_width)
                 s += '</tr>'	
 	    
 	    start = end
-
         s += '</table>'
 
         return s
