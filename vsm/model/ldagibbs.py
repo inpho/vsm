@@ -57,8 +57,6 @@ class LDAGibbs(object):
     top_word : 2-dim floating point array
         Stores the unnormalized estimated posterior distribution over
         terms for each topic in a K x V matrix
-    sum_doc_top : 1-dim floating point array
-        Stores the sum of documents over topics
     sum_word_top : 1-dim floating point array
         Stores the sum of terms over topics
 
