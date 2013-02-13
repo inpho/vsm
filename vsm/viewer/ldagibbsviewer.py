@@ -25,7 +25,7 @@ from similarity import (
     sim_top_top as _sim_top_top_,
     sim_top_doc as _sim_top_doc_,
     sim_word_top as _sim_word_top_,
-    simmat_terms as _simmat_terms_,
+    simmat_words as _simmat_words_,
     simmat_documents as _simmat_documents_,
     simmat_topics as _simmat_topics_)
 
@@ -358,7 +358,7 @@ class LDAGibbsViewer(object):
 
     def simmat_words(self, word_list):
 
-        return _simmat_terms_(self.corpus,
+        return _simmat_words_(self.corpus,
                               self.model.top_word.T,
                               word_list)
     

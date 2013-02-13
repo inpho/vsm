@@ -202,7 +202,7 @@ def sim_top_top(mat, topic_or_topics, weights=None,
 
 
 
-def simmat_terms(corp, matrix, word_list, norms=None):
+def simmat_words(corp, matrix, word_list, norms=None):
     """
     """
     indices, words = zip(*[res_word_type(corp, word) 
