@@ -28,7 +28,7 @@ class BeagleEnvironment(BaseModel):
 def test_BeagleEnvironment():
 
     from vsm.util.corpustools import random_corpus
-    from vsm import row_norms
+    from vsm.linalg import row_norms
 
     c = random_corpus(1000, 100, 0, 20)
 
