@@ -209,6 +209,7 @@ class LDAGibbs(object):
 
         log_p = 0
         for d, doc in enumerate(self.W):
+
             if len(doc) > 0:
                 Z_d = self.Z[d]
                 log_p += log_kw[Z_d, doc].sum()
