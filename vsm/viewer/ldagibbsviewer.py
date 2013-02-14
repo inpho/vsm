@@ -374,3 +374,21 @@ class LDAGibbsViewer(object):
     def simmat_topics(self, topics):
 
         return _simmat_topics_(self.model.top_word, topics)
+
+
+
+    def logp_plot(self, range=[], step=100):
+
+        if not(range):
+            range = [0, len(self.model.log_prob)]
+
+        x = []
+        logp = []
+        for i, lp in self.model.log_prob[range[0]:range[1]:step]:
+            x.append(i)
+                logp.append(lp)
+
+        plt.plot(x,logp, marker="o")
+        plt.xlim(min(x)-5, max(x)+5)
+        plt.title('log probability / iteration')
+        plt.show()
