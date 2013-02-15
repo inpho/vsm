@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from vsm import (
     enum_sort as _enum_sort_, 
@@ -377,8 +378,13 @@ class LDAGibbsViewer(object):
 
 
 
-    def logp_plot(self, range=[], step=1):
+    def logp_plot(self, range=[], step=1, show=True, grid=True):
+        """
+        Returns a plot of log probabilities for `range=[start, end]` by `step` 
+        as a matplotlib.pyplot object. If `show=True` the plot is also drawn. 
+        """
 
+        # If range is not specified, include the whole chain.
         if not(range):
             range = [0, len(self.model.log_prob)]
 
@@ -389,6 +395,11 @@ class LDAGibbsViewer(object):
             logp.append(lp)
 
         plt.plot(x,logp)
-        plt.xlim(min(x)-5, max(x)+5)
+        plt.xlim(min(x), max(x))
+        plt.grid(grid)
         plt.title('log probability / iteration')
-        plt.show()
+
+        if show:
+            plt.show()
+
+        return plt
