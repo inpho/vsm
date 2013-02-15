@@ -110,7 +110,7 @@ class BeagleOrderSeq(BaseModel):
         """
         """
         self.tok_name = tok_name
-        self.sents = corpus.view_tokens(tok_name)
+        self.sents = corpus.view_context(tok_name)
         self.env_matrix = env_matrix
 
         self.b_conv = mk_b_conv(env_matrix.shape[1], rand_perm)
@@ -149,7 +149,7 @@ class BeagleOrderMulti(BaseModel):
         """
         """
         self.tok_name = tok_name
-        self.sents = corpus.view_tokens(tok_name)
+        self.sents = corpus.view_context(tok_name)
         self.dtype = env_matrix.dtype
 
         global _shape 

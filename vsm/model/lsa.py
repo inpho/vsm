@@ -6,14 +6,14 @@ from scipy.sparse import linalg as linalgs
 
 class BaseLsaModel(object):
 
-    def __init__(self, tok_name, word_matrix=None, 
+    def __init__(self, context_type, word_matrix=None, 
                  eigenvalues=None, doc_matrix=None):
         """
         """
         self.word_matrix = word_matrix
         self.doc_matrix = doc_matrix
         self.eigenvalues = eigenvalues
-        self.tok_name = tok_name
+        self.context_type = context_type
 
 
     def save(self, f):
@@ -42,7 +42,7 @@ class BaseLsaModel(object):
         arrays_out['word_matrix'] = self.word_matrix
         arrays_out['eigenvalues'] = self.eigenvalues
         arrays_out['doc_matrix'] = self.doc_matrix
-        arrays_out['tok_name'] = self.tok_name
+        arrays_out['context_type'] = self.context_type
         np.savez(f, **arrays_out)
 
 
@@ -73,7 +73,7 @@ class BaseLsaModel(object):
         m = BaseLsaModel(word_matrix=arrays_in['word_matrix'],
                          eigenvalues=arrays_in['eigenvalues'],
                          doc_matrix=arrays_in['doc_matrix'],
-                         tok_name=arrays_in['tok_name'])
+                         context_type=arrays_in['context_type'])
         return m
 
 
@@ -81,10 +81,10 @@ class BaseLsaModel(object):
 class LsaModel(BaseLsaModel):
     """
     """
-    def __init__(self, td_matrix, tok_name):
+    def __init__(self, td_matrix, context_type):
         """
         """
-        super(LsaModel, self).__init__(tok_name)
+        super(LsaModel, self).__init__(context_type)
 
         td_matrix = sparse.coo_matrix(td_matrix)
         # Removing infinite values for SVD
@@ -120,7 +120,7 @@ def test_LsaModel():
     from vsm.model.tf import TfModel
     from vsm.model.tfidf import TfIdfModel
 
-    c = random_corpus(10000, 1000, 0, 30, tok_name='document')
+    c = random_corpus(10000, 1000, 0, 30, context_type='document')
 
     tf = TfModel(c, 'document')
     tf.train()

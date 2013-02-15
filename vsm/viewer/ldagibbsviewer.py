@@ -52,7 +52,7 @@ class LDAGibbsViewer(object):
     def _doc_label_name(self):
         """
         """
-        return _doc_label_name_(self.model.tok_name)
+        return _doc_label_name_(self.model.context_type)
 
 
     @property
@@ -128,7 +128,7 @@ class LDAGibbsViewer(object):
     def _res_doc_type(self, doc):
         """
         """
-        return _res_doc_type_(self.corpus, self.model.tok_name, 
+        return _res_doc_type_(self.corpus, self.model.context_type, 
                               self._doc_label_name, doc)
 
 
@@ -232,7 +232,7 @@ class LDAGibbsViewer(object):
 
         # Label data
         if as_strings:
-            tn = self.model.tok_name
+            tn = self.model.context_type
             docs = self.corpus.view_metadata(tn)[self._doc_label_name]
             dt = [('doc', docs.dtype), ('pos',np.int), ('value', np.int)]
             Z_w = [(docs[d], i, t) for (d, i, t) in Z_w]
@@ -296,7 +296,7 @@ class LDAGibbsViewer(object):
         """
         """
         return _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
-                             self.model.tok_name, weights=weights, 
+                             self.model.context_type, weights=weights, 
                              norms=self._doc_norms, print_len=print_len,
                              as_strings=as_strings, label_fn=label_fn, 
                              filter_nan=filter_nan)
@@ -350,7 +350,7 @@ class LDAGibbsViewer(object):
         """
         """
         return _sim_doc_doc_(self.corpus, self.model.doc_top.T,
-                             self.model.tok_name, doc_or_docs,
+                             self.model.context_type, doc_or_docs,
                              norms=self._doc_norms, print_len=print_len,
                              filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=True)
@@ -367,7 +367,7 @@ class LDAGibbsViewer(object):
 
         return _simmat_documents_(self.corpus,
                                   self.model.doc_top.T,
-                                  self.model.tok_name,
+                                  self.model.context_type,
                                   docs)
 
 

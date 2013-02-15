@@ -53,7 +53,7 @@ def test_BeagleViewer():
     from vsm.model.beagleorder import BeagleOrderSeq
     from vsm.model.beaglecomposite import BeagleComposite
 
-    ec = random_corpus(1000, 50, 0, 20, tok_name='sentence')
+    ec = random_corpus(1000, 50, 0, 20, context_type='sentence')
     cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,50,7)])
 
     e = BeagleEnvironment(ec, n_cols=5)

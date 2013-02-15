@@ -59,7 +59,7 @@ class LsaViewer(object):
         """
         """
         return _sim_doc_doc_(self.corpus, self.model.doc_matrix.T,
-                             self.model.tok_name, doc_or_docs, weights=weights,
+                             self.model.context_type, doc_or_docs, weights=weights,
                              norms=self._doc_norms, print_len=print_len,
                              filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=True)
@@ -75,7 +75,7 @@ class LsaViewer(object):
         """
         """
         return _simmat_documents_(self.corpus, self.model.doc_matrix.T,
-                                  self.model.tok_name, docs)
+                                  self.model.context_type, docs)
 
 
 
@@ -87,7 +87,7 @@ def test_LsaViewer():
     from vsm.model.tfidf import TfIdfModel
     from vsm.model.lsa import LsaModel
 
-    c = random_corpus(10000, 1000, 0, 30, tok_name='document', metadata=True)
+    c = random_corpus(10000, 1000, 0, 30, context_type='document', metadata=True)
 
     tf = TfModel(c, 'document')
     tf.train()
