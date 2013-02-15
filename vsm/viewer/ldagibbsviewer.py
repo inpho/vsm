@@ -377,7 +377,7 @@ class LDAGibbsViewer(object):
 
 
 
-    def logp_plot(self, range=[], step=100):
+    def logp_plot(self, range=[], step=1):
 
         if not(range):
             range = [0, len(self.model.log_prob)]
@@ -386,9 +386,9 @@ class LDAGibbsViewer(object):
         logp = []
         for i, lp in self.model.log_prob[range[0]:range[1]:step]:
             x.append(i)
-                logp.append(lp)
+            logp.append(lp)
 
-        plt.plot(x,logp, marker="o")
+        plt.plot(x,logp)
         plt.xlim(min(x)-5, max(x)+5)
         plt.title('log probability / iteration')
         plt.show()
