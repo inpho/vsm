@@ -54,7 +54,7 @@ class BaseCorpus(object):
         ending at the 250th word of the corpus is named 'dogs'.
         Default is `None`.
     context_types : array-like, optional
-        Each element in `context_types` is a name of a tokenization in
+        Each element in `context_types` is a type of a tokenization in
         `context_data`.
     dtype : data-type, optional
         The data-type used to interpret the corpus. If omitted, the
@@ -75,7 +75,7 @@ class BaseCorpus(object):
     Methods
     -------
     view_context
-        Takes a name of tokenization and returns a view of the corpus
+        Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly.
     view_metadata
 
@@ -178,15 +178,15 @@ class BaseCorpus(object):
 
 
 
-    def view_metadata(self, name):
+    def view_metadata(self, ctx_type):
         """
         Displays the metadata corresponding to a tokenization of the
         corpus.
 
         Parameters
         ----------
-        name : string-like
-            The name of a tokenization.
+        ctx_type : string-like
+            The type of a tokenization.
 
         Returns
         -------
@@ -196,14 +196,14 @@ class BaseCorpus(object):
         --------
         BaseCorpus
         """
-        i = self.context_types.index(name)
+        i = self.context_types.index(ctx_type)
         return self.context_data[i]
 
 
-    def meta_int(self, context_type, query):
+    def meta_int(self, ctx_type, query):
         """
         """
-        tok = self.view_metadata(context_type)
+        tok = self.view_metadata(ctx_type)
 
         ind_set = np.ones(tok.size, dtype=bool)
         for k,v in query.iteritems():
@@ -220,21 +220,21 @@ class BaseCorpus(object):
         return ind_set.nonzero()[0][0]
 
 
-    def get_metadatum(self, context_type, query, field):
+    def get_metadatum(self, ctx_type, query, field):
         """
         """
-        i = self.meta_int(context_type, query)
-        return self.view_metadata(context_type)[i][field]
+        i = self.meta_int(ctx_type, query)
+        return self.view_metadata(ctx_type)[i][field]
 
 
-    def view_context(self, name):
+    def view_context(self, ctx_type):
         """
         Displays a tokenization of the corpus.
 
         Parameters
         ----------
-        name : string-like
-           The name of a tokenization.
+        ctx_type : string-like
+           The type of a tokenization.
 
         Returns
         -------
@@ -246,7 +246,7 @@ class BaseCorpus(object):
         numpy.split
 
         """
-        i = self.context_types.index(name)
+        i = self.context_types.index(ctx_type)
         indices = self.context_data[i]['idx']
         
         return split_corpus(self.corpus, indices)
@@ -332,15 +332,15 @@ class Corpus(BaseCorpus):
         corresponding integers (i.e., indices in `words`).
     tok : dict with 1-D numpy arrays as values
         The tokenization dictionary. Stems of key names are given by
-        `context_types`. A key name whose value is the array of indices
-        for a tokenization has the suffix '_indices'. A key name whose
+        `context_types`. A key context_type whose value is the array of indices
+        for a tokenization has the suffix '_indices'. A key context_type whose
         value is the metadata array for a tokenization has the suffix
         '_metadata'.
         
     Methods
     -------
     view_context
-        Takes a name of tokenization and returns a view of the corpus
+        Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly. The optional parameter `strings` takes
         a boolean value: True to view string representations of words;
         False to view integer representations of words. Default is
@@ -427,14 +427,14 @@ class Corpus(BaseCorpus):
         self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
 
-    def view_context(self, name, as_strings=False):
+    def view_context(self, ctx_type, as_strings=False):
         """
         Displays a tokenization of the corpus.
 
         Parameters
         ----------
-        name : string-like
-           The name of a tokenization.
+        ctx_type : string-like
+           The type of a tokenization.
         strings : Boolean, optional
             If True, string representations of words are returned.
             Otherwise, integer representations are returned. Default
@@ -449,7 +449,7 @@ class Corpus(BaseCorpus):
         Corpus
         BaseCorpus
         """
-        token_list = super(Corpus, self).view_context(name)
+        token_list = super(Corpus, self).view_context(ctx_type)
 
         if as_strings:
             token_list_ = []
