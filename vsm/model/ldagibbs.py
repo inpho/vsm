@@ -14,7 +14,7 @@ def smpl_cat(d):
 
 def smpl_cat2(d_sum):
     r = np.random.random() * d_sum[-1]
-    return searchsorted(d_sum, r)
+    return np.searchsorted(d_sum, r)
 
 
 
@@ -160,14 +160,15 @@ class LDAGibbs(object):
         sum_word_top_inv = 1. / self.sum_word_top
         dist = (self.doc_top[d, :] *
                 self.top_word[:, w] * sum_word_top_inv)
-        dist_sum = cumsum(dist)
+        dist_sum = np.cumsum(dist)
         return dist_sum
 
 
 
     def update_z(self, d, i, w):
         
-        z = smpl_cat(self.z_dist(d, w))
+#        z = smpl_cat(self.z_dist(d, w))
+        z = smpl_cat2(self.z_dist2(d, w))
         self.doc_top[d, z] += 1
         self.top_word[z, w] += 1
         self.sum_word_top[z] += 1
@@ -307,14 +308,9 @@ def test_LDAGibbs():
 def test_dist_z():
 
     from vsm.util.corpustools import random_corpus
-    c = random_corpus(1000, 50, 6, 100)
-    m = LDAGibbs(c, 'random', K=10)
+    c = random_corpus(500000, 10000, 0, 100)
+    m = LDAGibbs(c, 'random', K=20)
     m.train(itr=1)
-
-    z1 = m.z_dist1(m,1,1)
-    z2 = m.z_dist1(m,1,1)
-
-    assert np.allclose(z1, z2)
 
     return m
 
