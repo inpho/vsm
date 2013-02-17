@@ -12,6 +12,11 @@ def smpl_cat(d):
     return np.random.multinomial(1, d).argmax()
 
 
+def smpl_cat2(d_sum):
+    r = np.random.random() * d_sum[-1]
+    return searchsorted(d_sum, r)
+
+
 
 class LDAGibbs(object):
     """
@@ -150,6 +155,16 @@ class LDAGibbs(object):
         return dist * nc
 
 
+    def z_dist2(self, d, w):
+
+        sum_word_top_inv = 1. / self.sum_word_top
+        dist = (self.doc_top[d, :] *
+                self.top_word[:, w] * sum_word_top_inv)
+        dist_sum = cumsum(dist)
+        return dist_sum
+
+
+
     def update_z(self, d, i, w):
         
         z = smpl_cat(self.z_dist(d, w))
@@ -276,7 +291,6 @@ class LDAGibbs(object):
 
         print 'Saving LDA-Gibbs model to', filename
         np.savez(filename, **arrays_out)
-
         
 
 def test_LDAGibbs():
@@ -288,6 +302,23 @@ def test_LDAGibbs():
 
     return m
 
+
+
+def test_dist_z():
+
+    from vsm.util.corpustools import random_corpus
+    c = random_corpus(1000, 50, 6, 100)
+    m = LDAGibbs(c, 'random', K=10)
+    m.train(itr=1)
+
+    z1 = m.z_dist1(m,1,1)
+    z2 = m.z_dist1(m,1,1)
+
+    assert np.allclose(z1, z2)
+
+    return m
+
+    
 
 def test_logp_fns():
 
