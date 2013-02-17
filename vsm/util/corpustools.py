@@ -548,10 +548,10 @@ def test_dir_tokenize():
 
 def test_coll_tokenize():
 
-    books = [['foo foo foo.\n\nfoo foo',
-              'Foo bar.  Foo bar.'], 
-             ['',
-              'foo.\n\nfoo']]
+    books = [[('foo foo foo.\n\nfoo foo', '1'),
+              ('Foo bar.  Foo bar.', '2')], 
+             [('','3'),
+              ('foo.\n\nfoo', '4')]]
 
     book_names = [str(i) for i in xrange(len(books))]
     words, context_data = coll_tokenize(books, book_names)
@@ -572,7 +572,10 @@ def test_coll_tokenize():
             ['0', '0', '1', '1', '2', '3', '3']).all()
     assert (context_data['sentence']['book_label'] == 
             ['0', '0', '0', '0', '1', '1', '1']).all()
-    
+    assert (context_data['page']['file'] ==
+		['1','2','3','4']).all()
+    assert (context_data['sentence']['file'] ==
+		['1','1','2','2','3','4','4']).all() 
 
 
 def test_toy_corpus():

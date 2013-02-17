@@ -1,5 +1,7 @@
 import numpy as np
 
+from vsm.viewer import def_label_fn, doc_label_name
+
 #TODO: Documentation update.
 
 
@@ -462,10 +464,33 @@ class Corpus(BaseCorpus):
         return token_list
 
 
+    def search_context(self, word, ctx_type, label_fn=def_label_fn, as_strings=False):
+	"""
+	"""
+	token_list = super(Corpus, self).view_context(ctx_type)
+
+	word = self.words_int[word]
+	idx_list = [(i, np.where(token_list[i]==word)) for i in xrange(len(token_list))]
+	word_idx = [i[0] for i in idx_list if len(i[1][0]) > 0]
+	
+	ctx_list = [token_list[i] for i in word_idx]
+	
+        if as_strings:
+            ctx_list_ = []
+            for token in ctx_list:
+                token = self.words[token]
+                ctx_list_.append(token)
+
+            return ctx_list_
+
+        return ctx_list
+	
+	
+
     @staticmethod
     def load(file):
-        """
-        Loads data into a Corpus object that has been stored using
+	"""
+	Loads data into a Corpus object that has been stored using
         `save`.
         
         Parameters
