@@ -14,14 +14,14 @@ def def_label_fn(metadata):
 
 
 
-def doc_label_name(tok_name):
+def doc_label_name(context_type):
     """
     """
-    return tok_name + '_label'
+    return context_type + '_label'
 
 
 
-def res_doc_type(corp, tok_name, label_name, doc):
+def res_doc_type(corp, context_type, label_name, doc):
     """
     If `doc` is a string or a dict, performs a look up for its
     associated integer. If `doc` is a dict, looks for its label.
@@ -33,13 +33,13 @@ def res_doc_type(corp, tok_name, label_name, doc):
     """
     if isstr(doc):
         query = {label_name: doc}
-        d = corp.meta_int(tok_name, query)
+        d = corp.meta_int(context_type, query)
     elif isinstance(doc, dict):
-        d = corp.meta_int(tok_name, doc)
+        d = corp.meta_int(context_type, doc)
         
         #TODO: Define an exception for failed queries in
         #vsm.corpus. Use it here.
-        doc = corp.view_metadata(tok_name)[label_name][d]
+        doc = corp.view_metadata(context_type)[label_name][d]
     else:
         d, doc = doc, str(doc)
 
@@ -47,14 +47,14 @@ def res_doc_type(corp, tok_name, label_name, doc):
                     
             
 
-def res_term_type(corp, term):
+def res_word_type(corp, word):
     """
-    If `term` is a string, performs a look up for its associated
-    integer. Otherwise, stringifies `term`. 
+    If `word` is a string, performs a look up for its associated
+    integer. Otherwise, stringifies `word`. 
 
-    Returns an integer, string pair: (<term index>, <term label>).
+    Returns an integer, string pair: (<word index>, <word label>).
     """
-    if isstr(term):
-        return corp.terms_int[term], term
+    if isstr(word):
+        return corp.words_int[word], word
 
-    return term, str(term)
+    return word, str(word)

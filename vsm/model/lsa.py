@@ -6,20 +6,20 @@ from scipy.sparse import linalg as linalgs
 
 class BaseLsaModel(object):
 
-    def __init__(self, tok_name, term_matrix=None, 
+    def __init__(self, context_type, word_matrix=None, 
                  eigenvalues=None, doc_matrix=None):
         """
         """
-        self.term_matrix = term_matrix
+        self.word_matrix = word_matrix
         self.doc_matrix = doc_matrix
         self.eigenvalues = eigenvalues
-        self.tok_name = tok_name
+        self.context_type = context_type
 
 
     def save(self, f):
         """
         Saves model data as a numpy archive file with extension `npz`.
-        The keys for the component matrices are `term_matrix`,
+        The keys for the component matrices are `word_matrix`,
         `eigenvalues` and `doc_matrix`.
         
         Parameters
@@ -39,10 +39,10 @@ class BaseLsaModel(object):
         """
         print 'Saving model as', f
         arrays_out = dict()
-        arrays_out['term_matrix'] = self.term_matrix
+        arrays_out['word_matrix'] = self.word_matrix
         arrays_out['eigenvalues'] = self.eigenvalues
         arrays_out['doc_matrix'] = self.doc_matrix
-        arrays_out['tok_name'] = self.tok_name
+        arrays_out['context_type'] = self.context_type
         np.savez(f, **arrays_out)
 
 
@@ -51,7 +51,7 @@ class BaseLsaModel(object):
         """
         Loads LSA model data from a numpy archive file with extension
         `npz`. The expected keys for the component matrices are
-        `term_matrix`, `eigenvalues` and `doc_matrix`.
+        `word_matrix`, `eigenvalues` and `doc_matrix`.
         
         Parameters
         ----------
@@ -70,10 +70,10 @@ class BaseLsaModel(object):
         """
         print 'Loading model from', f
         arrays_in = np.load(f)
-        m = BaseLsaModel(term_matrix=arrays_in['term_matrix'],
+        m = BaseLsaModel(word_matrix=arrays_in['word_matrix'],
                          eigenvalues=arrays_in['eigenvalues'],
                          doc_matrix=arrays_in['doc_matrix'],
-                         tok_name=arrays_in['tok_name'])
+                         context_type=arrays_in['context_type'])
         return m
 
 
@@ -81,10 +81,10 @@ class BaseLsaModel(object):
 class LsaModel(BaseLsaModel):
     """
     """
-    def __init__(self, td_matrix, tok_name):
+    def __init__(self, td_matrix, context_type):
         """
         """
-        super(LsaModel, self).__init__(tok_name)
+        super(LsaModel, self).__init__(context_type)
 
         td_matrix = sparse.coo_matrix(td_matrix)
         # Removing infinite values for SVD
@@ -108,7 +108,7 @@ class LsaModel(BaseLsaModel):
 
         print 'Performing sparse SVD'
         u, s, v = linalgs.svds(self.td_matrix, k=k_factors)
-        self.term_matrix = u
+        self.word_matrix = u
         self.eigenvalues = s
         self.doc_matrix = v
 
@@ -120,7 +120,7 @@ def test_LsaModel():
     from vsm.model.tf import TfModel
     from vsm.model.tfidf import TfIdfModel
 
-    c = random_corpus(10000, 1000, 0, 30, tok_name='document')
+    c = random_corpus(10000, 1000, 0, 30, context_type='document')
 
     tf = TfModel(c, 'document')
     tf.train()
@@ -139,7 +139,7 @@ def test_LsaModel():
         m.save(tmp.name)
         tmp.close()
         m1 = BaseLsaModel.load(tmp.name)
-        assert (m.term_matrix == m1.term_matrix).all()
+        assert (m.word_matrix == m1.word_matrix).all()
         assert (m.eigenvalues == m1.eigenvalues).all()
         assert (m.doc_matrix == m1.doc_matrix).all()
     

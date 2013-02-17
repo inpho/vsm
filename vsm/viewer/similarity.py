@@ -6,7 +6,7 @@ from vsm import enum_sort, map_strarr, isstr, isint
 from vsm.linalg import row_cosines, row_cos_mat
 
 from vsm.viewer import (
-    res_term_type, res_doc_type, def_label_fn, doc_label_name)
+    res_word_type, res_doc_type, def_label_fn, doc_label_name)
 
 from labeleddata import (
     LabeledColumn, IndexedValueArray, IndexedSymmArray)
@@ -26,7 +26,7 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
     # Resolve `word_or_words`
     if isstr(word_or_words):
         word_or_words = [word_or_words]
-    words, labels = zip(*[res_term_type(corp, w) for w in word_or_words])
+    words, labels = zip(*[res_word_type(corp, w) for w in word_or_words])
     words, labels = list(words), list(labels)
 
     # Words are expected to be rows of `mat`
@@ -44,7 +44,7 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
 
     # Label data
     if as_strings:
-        w_arr = map_strarr(w_arr, corp.terms, k='i', new_k='word')
+        w_arr = map_strarr(w_arr, corp.words, k='i', new_k='word')
     w_arr = w_arr.view(LabeledColumn)
     w_arr.col_header = 'Words: ' + ', '.join(labels)
     w_arr.subcol_headers = ['Word', 'Cosine']
@@ -66,7 +66,7 @@ def sim_word_top(corp, mat, word_or_words, weights=[],
     # Resolve `word_or_words`
     if isstr(word_or_words):
         word_or_words = [word_or_words]
-    words, labels = zip(*[res_term_type(corp, w) for w in word_or_words])
+    words, labels = zip(*[res_word_type(corp, w) for w in word_or_words])
     words, labels = list(words), list(labels)
 
     # Topics are assumed to be rows
@@ -91,7 +91,7 @@ def sim_word_top(corp, mat, word_or_words, weights=[],
     return k_arr
 
 
-def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[], 
+def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[], 
                 norms=None, print_len=10, filter_nan=True, 
                 label_fn=def_label_fn, as_strings=True):
     """
@@ -118,7 +118,7 @@ def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[],
 
     # Label data
     if as_strings:
-        md = corp.view_metadata(tok_name)
+        md = corp.view_metadata(context_type)
         docs = label_fn(md)
         d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
     d_arr = d_arr.view(LabeledColumn)
@@ -130,18 +130,18 @@ def sim_top_doc(corp, mat, topic_or_topics, tok_name, weights=[],
 
 
 
-def sim_doc_doc(corp, mat, tok_name, doc_or_docs, weights=None,
+def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
                 norms=None, filter_nan=True, print_len=10, 
                 label_fn=def_label_fn, as_strings=True):
     """
     """
     # Resolve `word_or_words`
-    label_name = doc_label_name(tok_name)    
+    label_name = doc_label_name(context_type)    
     if (isstr(doc_or_docs) or isint(doc_or_docs) 
         or isinstance(doc_or_docs, dict)):
-        docs = [res_doc_type(corp, tok_name, label_name, doc_or_docs)[0]]
+        docs = [res_doc_type(corp, context_type, label_name, doc_or_docs)[0]]
     else:
-        docs = [res_doc_type(corp, tok_name, label_name, d)[0] 
+        docs = [res_doc_type(corp, context_type, label_name, d)[0] 
                 for d in doc_or_docs]
 
     # Assume documents are columns, so transpose
@@ -160,7 +160,7 @@ def sim_doc_doc(corp, mat, tok_name, doc_or_docs, weights=None,
 
     # Label data
     if as_strings:
-        md = corp.view_metadata(tok_name)
+        md = corp.view_metadata(context_type)
         docs = label_fn(md)
         d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
     d_arr = d_arr.view(LabeledColumn)
@@ -202,27 +202,27 @@ def sim_top_top(mat, topic_or_topics, weights=None,
 
 
 
-def simmat_terms(corp, matrix, term_list, norms=None):
+def simmat_words(corp, matrix, word_list, norms=None):
     """
     """
-    indices, terms = zip(*[res_term_type(corp, term) 
-                           for term in term_list])
-    indices, terms = np.array(indices), np.array(terms)
+    indices, words = zip(*[res_word_type(corp, word) 
+                           for word in word_list])
+    indices, words = np.array(indices), np.array(words)
 
     sm = row_cos_mat(indices, matrix, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)
-    sm.labels = terms
+    sm.labels = words
     
     return sm
 
 
 
-def simmat_documents(corp, matrix, tok_name, doc_list, norms=None):
+def simmat_documents(corp, matrix, context_type, doc_list, norms=None):
     """
     """
-    label_name = doc_label_name(tok_name)
+    label_name = doc_label_name(context_type)
 
-    indices, labels = zip(*[res_doc_type(corp, tok_name, label_name, doc) 
+    indices, labels = zip(*[res_doc_type(corp, context_type, label_name, doc) 
                             for doc in doc_list])
     indices, labels = np.array(indices), np.array(labels)
 

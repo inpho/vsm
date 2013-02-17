@@ -15,7 +15,7 @@ from labeleddata import (
     format_entry as _format_entry_)
 
 from vsm.viewer import (
-    res_term_type as _res_term_type_,
+    res_word_type as _res_word_type_,
     res_doc_type as _res_doc_type_,
     doc_label_name as _doc_label_name_,
     def_label_fn as _def_label_fn_)
@@ -26,7 +26,7 @@ from similarity import (
     sim_top_top as _sim_top_top_,
     sim_top_doc as _sim_top_doc_,
     sim_word_top as _sim_word_top_,
-    simmat_terms as _simmat_terms_,
+    simmat_words as _simmat_words_,
     simmat_documents as _simmat_documents_,
     simmat_topics as _simmat_topics_)
 
@@ -53,7 +53,7 @@ class LDAGibbsViewer(object):
     def _doc_label_name(self):
         """
         """
-        return _doc_label_name_(self.model.tok_name)
+        return _doc_label_name_(self.model.context_type)
 
 
     @property
@@ -129,14 +129,14 @@ class LDAGibbsViewer(object):
     def _res_doc_type(self, doc):
         """
         """
-        return _res_doc_type_(self.corpus, self.model.tok_name, 
+        return _res_doc_type_(self.corpus, self.model.context_type, 
                               self._doc_label_name, doc)
 
 
-    def _res_term_type(self, term):
+    def _res_word_type(self, word):
         """
         """
-        return _res_term_type_(self.corpus, term)
+        return _res_word_type_(self.corpus, word)
 
 
     def topics(self, print_len=10, k_indices=[], as_strings=True):
@@ -155,7 +155,7 @@ class LDAGibbsViewer(object):
 
         # Label data
         if as_strings:
-            f = lambda v: _map_strarr_(v, self.corpus.terms, 
+            f = lambda v: _map_strarr_(v, self.corpus.words, 
                                        k='i', new_k='word')
             k_arr = np.apply_along_axis(f, 1, k_arr)
 
@@ -222,7 +222,7 @@ class LDAGibbsViewer(object):
     def word_topics(self, word, as_strings=True):
         """
         """
-        w, word = self._res_term_type(word)
+        w, word = self._res_word_type(word)
 
         # Search for occurrences of a word in the corpus and return a
         # positions and topic assignments for each found
@@ -233,7 +233,7 @@ class LDAGibbsViewer(object):
 
         # Label data
         if as_strings:
-            tn = self.model.tok_name
+            tn = self.model.context_type
             docs = self.corpus.view_metadata(tn)[self._doc_label_name]
             dt = [('doc', docs.dtype), ('pos',np.int), ('value', np.int)]
             Z_w = [(docs[d], i, t) for (d, i, t) in Z_w]
@@ -297,7 +297,7 @@ class LDAGibbsViewer(object):
         """
         """
         return _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
-                             self.model.tok_name, weights=weights, 
+                             self.model.context_type, weights=weights, 
                              norms=self._doc_norms, print_len=print_len,
                              as_strings=as_strings, label_fn=label_fn, 
                              filter_nan=filter_nan)
@@ -351,7 +351,7 @@ class LDAGibbsViewer(object):
         """
         """
         return _sim_doc_doc_(self.corpus, self.model.doc_top.T,
-                             self.model.tok_name, doc_or_docs,
+                             self.model.context_type, doc_or_docs,
                              norms=self._doc_norms, print_len=print_len,
                              filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=True)
@@ -359,7 +359,7 @@ class LDAGibbsViewer(object):
 
     def simmat_words(self, word_list):
 
-        return _simmat_terms_(self.corpus,
+        return _simmat_words_(self.corpus,
                               self.model.top_word.T,
                               word_list)
     
@@ -368,7 +368,7 @@ class LDAGibbsViewer(object):
 
         return _simmat_documents_(self.corpus,
                                   self.model.doc_top.T,
-                                  self.model.tok_name,
+                                  self.model.context_type,
                                   docs)
 
 

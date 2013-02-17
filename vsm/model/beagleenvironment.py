@@ -7,11 +7,11 @@ from vsm.model import BaseModel
 class BeagleEnvironment(BaseModel):
 
     def __init__(self, corpus, n_cols=2048, dtype=np.float64, 
-                 tok_name='sentence'):
+                 context_type='sentence'):
         """
         """
-        self.tok_name = tok_name
-        self.shape = (corpus.terms.shape[0], n_cols)
+        self.context_type = context_type
+        self.shape = (corpus.words.shape[0], n_cols)
         self.dtype = dtype
 
 

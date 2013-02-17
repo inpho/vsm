@@ -389,15 +389,15 @@ class IndexedSymmArray(np.ndarray):
 
 def test_IndexedValueArray():
 
-    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
+    words = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
              'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
              'is', 'but', 'a', 'dream']
 
-    values = [np.random.random() for t in terms]
+    values = [np.random.random() for t in words]
 
-    d = [('i', np.array(terms).dtype), 
+    d = [('i', np.array(words).dtype), 
          ('value', np.array(values).dtype)]
-    v = np.array(zip(terms, values), dtype=d)
+    v = np.array(zip(words, values), dtype=d)
 
     arr = np.vstack([v] * 5)
     arr = arr.view(IndexedValueArray)
@@ -416,13 +416,13 @@ def test_IndexedValueArray():
 
 def test_LabeledColumn():
 
-    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
+    words = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
              'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
              'is', 'but', 'a', 'dream']
-    values = [np.random.random() for t in terms]
-    d = [('i', np.array(terms).dtype), 
+    values = [np.random.random() for t in words]
+    d = [('i', np.array(words).dtype), 
          ('value', np.array(values).dtype)]
-    v = np.array(zip(terms, values), dtype=d)
+    v = np.array(zip(words, values), dtype=d)
     arr = v.view(LabeledColumn)
 #    arr.subcol_widths = [30, 20]
     arr.subcol_headers = ['Word', 'Value']
@@ -434,13 +434,13 @@ def test_LabeledColumn():
 
 def test_DataTable():
 
-    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
+    words = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
              'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
              'is', 'but', 'a', 'dream']
-    values = [np.random.random() for t in terms]
-    d = [('i', np.array(terms).dtype), 
+    values = [np.random.random() for t in words]
+    d = [('i', np.array(words).dtype), 
          ('value', np.array(values).dtype)]
-    v = np.array(zip(terms, values), dtype=d)
+    v = np.array(zip(words, values), dtype=d)
     v = LabeledColumn(v)
     v.subcol_widths = [30, 20]
     v.subcol_headers = ['Word', 'Value']

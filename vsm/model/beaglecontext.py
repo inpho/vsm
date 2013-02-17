@@ -13,8 +13,8 @@ from vsm.model import BaseModel
 def realign_env_mat(corpus, env_corpus, env_matrix):
     """
     """
-    words = corpus.terms
-    indices = [env_corpus.terms_int[w] for w in words]
+    words = corpus.words
+    indices = [env_corpus.words_int[w] for w in words]
     return env_matrix[indices]
 
 
@@ -22,11 +22,11 @@ def realign_env_mat(corpus, env_corpus, env_matrix):
 class BeagleContextSeq(BaseModel):
 
     def __init__(self, corpus, env_corpus, env_matrix, 
-                 tok_name='sentence'):
+                context_type='sentence'):
         """
         """
-        self.tok_name = tok_name
-        self.sents = corpus.view_tokens(tok_name)
+        self.context_type = context_type
+        self.sents = corpus.view_context(context_type)
         self.env_matrix = realign_env_mat(corpus, env_corpus, env_matrix)
 
 
@@ -42,7 +42,7 @@ class BeagleContextSeq(BaseModel):
                 left_sums = np.cumsum(self.env_matrix[sent[:-1]], axis=0)
                 right_sums = np.cumsum(self.env_matrix[sent[:0:-1]], axis=0)
 
-                for i,term in enumerate(sent):
+                for i,word in enumerate(sent):
 
                     if i == 0:
                         ctx_vector = right_sums[-1]
@@ -53,18 +53,18 @@ class BeagleContextSeq(BaseModel):
                     else:
                         ctx_vector = left_sums[i - 1] + right_sums[-i - 1]
 
-                    self.matrix[term, :] += ctx_vector
+                    self.matrix[word, :] += ctx_vector
 
 
 
 class BeagleContextMulti(BaseModel):
 
     def __init__(self, corpus, env_corpus, env_matrix, 
-                 tok_name='sentence'):
+                 context_type='sentence'):
         """
         """
-        self.tok_name = tok_name
-        self.sents = corpus.view_tokens(tok_name)
+        self.context_type = context_type
+        self.sents = corpus.view_context(context_type)
         self.dtype = env_matrix.dtype
         env_matrix = realign_env_mat(corpus, env_corpus, env_matrix)
 
@@ -168,7 +168,7 @@ def test_BeagleContextSeq():
     from vsm.util.corpustools import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
 
-    ec = random_corpus(100000, 5000, 0, 20, tok_name='sentence')
+    ec = random_corpus(100000, 5000, 0, 20, context_type='sentence')
     cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,5000,100)])
 
     e = BeagleEnvironment(ec, n_cols=200)
@@ -198,7 +198,7 @@ def test_BeagleContextMulti():
     from vsm.util.corpustools import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
 
-    ec = random_corpus(100000, 5000, 0, 20, tok_name='sentence')
+    ec = random_corpus(100000, 5000, 0, 20, context_type='sentence')
     cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,5000,100)])
 
     e = BeagleEnvironment(ec, n_cols=200)
@@ -228,7 +228,7 @@ def test_compare():
     from vsm.util.corpustools import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
 
-    ec = random_corpus(100000, 5000, 0, 20, tok_name='sentence')
+    ec = random_corpus(100000, 5000, 0, 20, context_type='sentence')
     cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,5000,100)])
 
     e = BeagleEnvironment(ec, n_cols=5)

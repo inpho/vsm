@@ -40,22 +40,22 @@ class BaseCorpus(object):
     Parameters
     ----------
     corpus : array-like
-        Array, typically of strings or integers, of atomic terms (or
+        Array, typically of strings or integers, of atomic words (or
         tokens) making up the corpus.
-    tok_data : list with 1-D array-like elements, optional
-        Each element in `tok_data` is an array containing the indices
-        marking the token boundaries. An element in `tok_data` is
+    context_data : list with 1-D array-like elements, optional
+        Each element in `context_data` is an array containing the indices
+        marking the context boundaries. An element in `context_data` is
         intended for use as a value for the `indices_or_sections`
-        parameter in `numpy.split`. Elements of `tok_data` may also be
+        parameter in `numpy.split`. Elements of `context_data` may also be
         1-D arrays whose elements are pairs, where the first element
-        is a token boundary and the second element is metadata
-        associated with that token preceding that boundary. For
-        example, (250, 'dogs') might indicate that the 'article' token
-        ending at the 250th term of the corpus is named 'dogs'.
+        is a context boundary and the second element is metadata
+        associated with that context preceding that boundary. For
+        example, (250, 'dogs') might indicate that the 'article' context
+        ending at the 250th word of the corpus is named 'dogs'.
         Default is `None`.
-    tok_names : array-like, optional
-        Each element in `tok_names` is a name of a tokenization in
-        `tok_data`.
+    context_types : array-like, optional
+        Each element in `context_types` is a type of a tokenization in
+        `context_data`.
     dtype : data-type, optional
         The data-type used to interpret the corpus. If omitted, the
         data-type is determined by `numpy.asarray`. Default is `None`.
@@ -64,18 +64,18 @@ class BaseCorpus(object):
     ----------
     corpus : 1-D array
         Stores the value of the `corpus` parameter after it has been
-        cast to a array of data-type `dtype` (if provided).
-    terms : 1-D array
-        The indexed set of atomic terms appearing in `corpus`.
-        Computed on initialization by `_extract_terms`.
-    tok_names: 1-D array-like
+        cast to an array of data-type `dtype` (if provided).
+    words : 1-D array
+        The indexed set of atomic words appearing in `corpus`.
+        Computed on initialization by `_extract_words`.
+    context_types: 1-D array-like
 
-    tok_data: list of 1-D array-like
+    context_data: list of 1-D array-like
 
     Methods
     -------
-    view_tokens
-        Takes a name of tokenization and returns a view of the corpus
+    view_context
+        Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly.
     view_metadata
 
@@ -84,20 +84,20 @@ class BaseCorpus(object):
 
     >>> corpus = ['the', 'dog', 'chased', 'the', 'cat',
                   'the', 'cat', 'ran', 'away']
-    >>> tok_names = ['sentences']
-    >>> tok_data = [[(5, 'transitive'), (9, 'intransitive')]]
+    >>> context_types = ['sentences']
+    >>> context_data = [[(5, 'transitive'), (9, 'intransitive')]]
 
     >>> from vsm.corpus import BaseCorpus
-    >>> c = BaseCorpus(corpus, tok_names=tok_names, tok_data=tok_data)
+    >>> c = BaseCorpus(corpus, context_types=context_types, context_data=context_data)
     >>> c.corpus
     array(['the', 'dog', 'chased', 'the', 'cat', 'the', 'cat',
            'ran', 'away'], dtype='|S6')
            
-    >>> c.terms
+    >>> c.words
     array(['ran', 'away', 'chased', 'dog', 'cat', 'the'],
           dtype='|S6')
 
-    >>> c.view_tokens('sentences')
+    >>> c.view_context('sentences')
     [array(['the', 'dog', 'chased', 'the', 'cat'],
           dtype='|S6'),
      array(['the', 'cat', 'ran', 'away'],
@@ -110,32 +110,32 @@ class BaseCorpus(object):
     def __init__(self,
                  corpus,
                  dtype=None,
-                 tok_names=[],
-                 tok_data=[]):
+                 context_types=[],
+                 context_data=[]):
 
         self.corpus = np.asarray(corpus, dtype=dtype)
         self.dtype = self.corpus.dtype
 
-        self._extract_terms()
+        self._extract_words()
 
-        self.tok_data = []
-        for t in tok_data:
+        self.context_data = []
+        for t in context_data:
             if self._validate_indices(t['idx']):
-                self.tok_data.append(t)
+                self.context_data.append(t)
 
-        self._gen_tok_names(tok_names)
+        self._gen_context_types(context_types)
 
 
-    def _gen_tok_names(self, tok_names):
+    def _gen_context_types(self, context_types):
         """
-        Missing token names are filled in with 'tok_' + an index.
+        Missing context types are filled in with 'tok_' + an index.
         """
-        if self.tok_data:
-            a = len(tok_names) if tok_names else 0
-            for i in xrange(a, len(self.tok_data)):
-                tok_names.append('tok_' + str(i))
+        if self.context_data:
+            a = len(context_types) if context_types else 0
+            for i in xrange(a, len(self.context_data)):
+                context_types.append('tok_' + str(i))
 
-        self.tok_names = tok_names
+        self.context_types = context_types
 
 
     def _validate_indices(self, indices):
@@ -178,15 +178,15 @@ class BaseCorpus(object):
 
 
 
-    def view_metadata(self, name):
+    def view_metadata(self, ctx_type):
         """
         Displays the metadata corresponding to a tokenization of the
         corpus.
 
         Parameters
         ----------
-        name : string-like
-            The name of a tokenization.
+        ctx_type : string-like
+            The type of a tokenization.
 
         Returns
         -------
@@ -196,14 +196,14 @@ class BaseCorpus(object):
         --------
         BaseCorpus
         """
-        i = self.tok_names.index(name)
-        return self.tok_data[i]
+        i = self.context_types.index(ctx_type)
+        return self.context_data[i]
 
 
-    def meta_int(self, tok_name, query):
+    def meta_int(self, ctx_type, query):
         """
         """
-        tok = self.view_metadata(tok_name)
+        tok = self.view_metadata(ctx_type)
 
         ind_set = np.ones(tok.size, dtype=bool)
         for k,v in query.iteritems():
@@ -220,21 +220,21 @@ class BaseCorpus(object):
         return ind_set.nonzero()[0][0]
 
 
-    def get_metadatum(self, tok_name, query, field):
+    def get_metadatum(self, ctx_type, query, field):
         """
         """
-        i = self.meta_int(tok_name, query)
-        return self.view_metadata(tok_name)[i][field]
+        i = self.meta_int(ctx_type, query)
+        return self.view_metadata(ctx_type)[i][field]
 
 
-    def view_tokens(self, name):
+    def view_context(self, ctx_type):
         """
         Displays a tokenization of the corpus.
 
         Parameters
         ----------
-        name : string-like
-           The name of a tokenization.
+        ctx_type : string-like
+           The type of a tokenization.
 
         Returns
         -------
@@ -246,16 +246,16 @@ class BaseCorpus(object):
         numpy.split
 
         """
-        i = self.tok_names.index(name)
-        indices = self.tok_data[i]['idx']
+        i = self.context_types.index(ctx_type)
+        indices = self.context_data[i]['idx']
         
         return split_corpus(self.corpus, indices)
 
 
     
-    def _extract_terms(self):
+    def _extract_words(self):
         """
-        Produces an indexed set of terms from a corpus.
+        Produces an indexed set of words from a corpus.
         
         Parameters
         ----------
@@ -276,10 +276,10 @@ class BaseCorpus(object):
         # Benchmarked by Peter Bengtsson
         # (http://www.peterbe.com/plog/uniqifiers-benchmark)
         
-        term_set = set()
-        term_list = [term for term in self.corpus
-                     if term not in term_set and not term_set.add(term)]
-        self.terms = np.array(term_list, dtype=self.corpus.dtype)
+        word_set = set()
+        word_list = [word for word in self.corpus
+                     if word not in word_set and not word_set.add(word)]
+        self.words = np.array(word_list, dtype=self.corpus.dtype)
 
 
 
@@ -292,7 +292,7 @@ class Corpus(BaseCorpus):
 
     A Corpus object contains an integer representation of the text and
     maps to permit conversion between integer and string
-    representations of a given term.
+    representations of a given word.
 
     As a BaseCorpus object, it includes a dictionary of tokenizations
     of the corpus and a method for viewing (without copying) these
@@ -303,49 +303,49 @@ class Corpus(BaseCorpus):
     ----------
     corpus : array-like
         A string array representing the corpus as a sequence of atomic
-        terms.
-    tok_data : list-like with 1-D integer array-like elements, optional
-        Each element in `tok_data` is an array containing the indices
-        marking the token boundaries. An element in `tok_data` is
+        words.
+    context_data : list-like with 1-D integer array-like elements, optional
+        Each element in `context_data` is an array containing the indices
+        marking the token boundaries. An element in `context_data` is
         intended for use as a value for the `indices_or_sections`
-        parameter in `numpy.split`. Elements of `tok_data` may also be
+        parameter in `numpy.split`. Elements of `context_data` may also be
         1-D arrays whose elements are pairs, where the first element
-        is a token boundary and the second element is metadata
-        associated with that token preceding that boundary. For
-        example, (250, 'dogs') might indicate that the 'article' token
-        ending at the 250th term of the corpus is named 'dogs'.
+        is a context boundary and the second element is metadata
+        associated with that context preceding that boundary. For
+        example, (250, 'dogs') might indicate that the 'article' context
+        ending at the 250th word of the corpus is named 'dogs'.
         Default is `None`.
-    tok_names : array-like, optional
-        Each element in `tok_names` is a name of a tokenization in
-        `tok_data`.
+    context_types : array-like, optional
+        Each element in `context_types` is a type of a context in
+        `context_data`.
 
     Attributes
     ----------
     corpus : 1-D 32-bit integer array
         corpus is the integer representation of the input string
         array-like value value of the corpus parameter
-    terms : 1-D string array
+    words : 1-D string array
         The indexed set of strings occurring in corpus. It is a
         string-typed array.
-    terms_int : 1-D 32-bit integer array
-        A dictionary whose keys are `terms` and whose values are their
-        corresponding integers (i.e., indices in `terms`).
+    words_int : 1-D 32-bit integer array
+        A dictionary whose keys are `words` and whose values are their
+        corresponding integers (i.e., indices in `words`).
     tok : dict with 1-D numpy arrays as values
         The tokenization dictionary. Stems of key names are given by
-        `tok_names`. A key name whose value is the array of indices
-        for a tokenization has the suffix '_indices'. A key name whose
+        `context_types`. A key context_type whose value is the array of indices
+        for a tokenization has the suffix '_indices'. A key context_type whose
         value is the metadata array for a tokenization has the suffix
         '_metadata'.
         
     Methods
     -------
-    view_tokens
-        Takes a name of tokenization and returns a view of the corpus
+    view_context
+        Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly. The optional parameter `strings` takes
-        a boolean value: True to view string representations of terms;
-        False to view integer representations of terms. Default is
+        a boolean value: True to view string representations of words;
+        False to view integer representations of words. Default is
         `False`.
-    extract_terms
+    extract_words
         Static method. Takes an array-like object and returns an
         indexed set of the elements in the object as a 1-D numpy
         array.
@@ -353,7 +353,7 @@ class Corpus(BaseCorpus):
         Returns a copy of itself but with `corpus`, `tokens`, and
         `tokens_meta` set to None. Occasionally, the only information
         needed from the Corpus object is the mapping between string
-        and integer representations of terms; this provides a smaller
+        and integer representations of words; this provides a smaller
         version of the corpus object for such situations.
     save
         Takes a filename and saves the data contained in a Corpus
@@ -370,26 +370,26 @@ class Corpus(BaseCorpus):
     --------
 
     >>> text = ['I', 'came', 'I', 'saw', 'I', 'conquered']
-    >>> tok_names = ['sentences']
-    >>> tok_data = [[(2, 'Veni'), (4, 'Vidi'), (6, 'Vici')]]
+    >>> context_types = ['sentences']
+    >>> context_data = [[(2, 'Veni'), (4, 'Vidi'), (6, 'Vici')]]
 
     >>> from vsm.corpus import Corpus
-    >>> c = Corpus(text, tok_names=tok_names, tok_data=tok_data)
+    >>> c = Corpus(text, context_types=context_types, context_data=context_data)
     >>> c.corpus
     array([0, 3, 0, 2, 0, 1], dtype=int32)
     
-    >>> c.terms
+    >>> c.words
     array(['I', 'conquered', 'saw', 'came'],
           dtype='|S9')
 
-    >>> c.terms_int['saw']
+    >>> c.words_int['saw']
     2
 
-    >>> c.view_tokens('sentences')
+    >>> c.view_context('sentences')
     [array([0, 3], dtype=int32), array([0, 2], dtype=int32),
      array([0, 1], dtype=int32)]
 
-    >>> c.view_tokens('sentences', strings=True)
+    >>> c.view_context('sentences', strings=True)
     [array(['I', 'came'],
           dtype='|S4'), array(['I', 'saw'],
           dtype='|S3'), array(['I', 'conquered'],
@@ -402,41 +402,41 @@ class Corpus(BaseCorpus):
     
     def __init__(self,
                  corpus,
-                 tok_names=[],
-                 tok_data=[]):
+                 context_types=[],
+                 context_data=[]):
 
         super(Corpus, self).__init__(corpus,
-                                     tok_names=tok_names,
-                                     tok_data=tok_data,
+                                     context_types=context_types,
+                                     context_data=context_data,
                                      dtype=np.str_)
 
-        self.__set_terms_int()
+        self.__set_words_int()
 
         # Integer encoding of a string-type corpus
         self.dtype = np.int32
-        self.corpus = np.asarray([self.terms_int[term]
-                                  for term in self.corpus],
+        self.corpus = np.asarray([self.words_int[word]
+                                  for word in self.corpus],
                                  dtype=self.dtype)
 
 
 
-    def __set_terms_int(self):
+    def __set_words_int(self):
         """
-        Mapping of terms to their integer representations.
+        Mapping of words to their integer representations.
         """
-        self.terms_int = dict((t,i) for i,t in enumerate(self.terms))
+        self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
 
-    def view_tokens(self, name, as_strings=False):
+    def view_context(self, ctx_type, as_strings=False):
         """
         Displays a tokenization of the corpus.
 
         Parameters
         ----------
-        name : string-like
-           The name of a tokenization.
+        ctx_type : string-like
+           The type of a tokenization.
         strings : Boolean, optional
-            If True, string representations of terms are returned.
+            If True, string representations of words are returned.
             Otherwise, integer representations are returned. Default
             is `False`.
 
@@ -449,12 +449,12 @@ class Corpus(BaseCorpus):
         Corpus
         BaseCorpus
         """
-        token_list = super(Corpus, self).view_tokens(name)
+        token_list = super(Corpus, self).view_context(ctx_type)
 
         if as_strings:
             token_list_ = []
             for token in token_list:
-                token = self.terms[token]
+                token = self.words[token]
                 token_list_.append(token)
 
             return token_list_
@@ -490,15 +490,15 @@ class Corpus(BaseCorpus):
 
         c = Corpus([])
         c.corpus = arrays_in['corpus']
-        c.terms = arrays_in['terms']
-        c.tok_names = arrays_in['tok_names'].tolist()
+        c.words = arrays_in['words']
+        c.context_types = arrays_in['context_types'].tolist()
 
-        c.tok_data = list()
-        for n in c.tok_names:
-            t = arrays_in['tok_data_' + n]
-            c.tok_data.append(t)
+        c.context_data = list()
+        for n in c.context_types:
+            t = arrays_in['context_data_' + n]
+            c.context_data.append(t)
 
-        c.__set_terms_int()
+        c.__set_words_int()
 
         return c
 
@@ -526,11 +526,11 @@ class Corpus(BaseCorpus):
         print 'Saving corpus as', file
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
-        arrays_out['terms'] = self.terms
-        arrays_out['tok_names'] = np.asarray(self.tok_names)
+        arrays_out['words'] = self.words
+        arrays_out['context_types'] = np.asarray(self.context_types)
 
-        for i,t in enumerate(self.tok_data):
-            key = 'tok_data_' + self.tok_names[i]
+        for i,t in enumerate(self.context_data):
+            key = 'context_data_' + self.context_types[i]
             arrays_out[key] = t
 
         np.savez(file, **arrays_out)
@@ -538,27 +538,27 @@ class Corpus(BaseCorpus):
 
     def apply_stoplist(self, stoplist=[], freq=0):
         """
-        Takes a Corpus object and returns a copy of it with terms in the
-        stoplist removed and with terms of frequency <= `freq1` removed.
+        Takes a Corpus object and returns a copy of it with words in the
+        stoplist removed and with words of frequency <= `freq1` removed.
         """
         if freq:
             #TODO: Use the TF model instead
 
             print 'Computing collection frequencies'
-            cfs = np.zeros_like(self.terms, dtype=self.corpus.dtype)
+            cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
     
-            for term in self.corpus:
-                cfs[term] += 1
+            for word in self.corpus:
+                cfs[word] += 1
 
-            print 'Selecting terms of frequency <=', freq
+            print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
             stop = set(freq_stop)
         else:
             stop = set()
 
         for t in stoplist:
-            if t in self.terms:
-                stop.add(self.terms_int[t])
+            if t in self.words:
+                stop.add(self.words_int[t])
 
         if not stop:
             print 'Stop list is empty.'
@@ -569,17 +569,17 @@ class Corpus(BaseCorpus):
         corpus = self.corpus[f(self.corpus)]
 
         print 'Rebuilding corpus'
-        corpus = [self.terms[i] for i in corpus]
-        tok_data = []
-        for i in xrange(len(self.tok_data)):
-            print 'Recomputing token breaks:', self.tok_names[i]
-            tokens = self.view_tokens(self.tok_names[i])
+        corpus = [self.words[i] for i in corpus]
+        context_data = []
+        for i in xrange(len(self.context_data)):
+            print 'Recomputing token breaks:', self.context_types[i]
+            tokens = self.view_context(self.context_types[i])
             spans = [t[f(t)].size for t in tokens]
-            tok = self.tok_data[i].copy()
+            tok = self.context_data[i].copy()
             tok['idx'] = np.cumsum(spans)
-            tok_data.append(tok)
+            context_data.append(tok)
 
-        return Corpus(corpus, tok_data=tok_data, tok_names=self.tok_names)
+        return Corpus(corpus, context_data=context_data, context_types=self.context_types)
 
 
 
@@ -593,7 +593,7 @@ def test_file():
 
     from vsm.util.corpustools import random_corpus
 
-    c = random_corpus(10000, 500, 1, 20, tok_name='foo', metadata=True)
+    c = random_corpus(10000, 500, 1, 20, context_type='foo', metadata=True)
 
     from tempfile import NamedTemporaryFile
     import os
@@ -605,11 +605,11 @@ def test_file():
         c_reloaded = c.load(tmp.name)
 
         assert (c.corpus == c_reloaded.corpus).all()
-        assert (c.terms == c_reloaded.terms).all()
-        assert c.terms_int == c_reloaded.terms_int
-        assert c.tok_names == c_reloaded.tok_names
-        for i in xrange(len(c.tok_data)):
-            assert (c.tok_data[i] == c_reloaded.tok_data[i]).all()
+        assert (c.words == c_reloaded.words).all()
+        assert c.words_int == c_reloaded.words_int
+        assert c.context_types == c_reloaded.context_types
+        for i in xrange(len(c.context_data)):
+            assert (c.context_data[i] == c_reloaded.context_data[i]).all()
     
     finally:
         os.remove(tmp.name)
