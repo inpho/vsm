@@ -157,9 +157,8 @@ class LDAGibbs(object):
 
     def z_dist(self, d, w):
 
-#        sum_word_top_inv = 1. / self.sum_word_top
-        dist = (self.doc_top[d, :] * self.top_word[:, w])
-#        dist = (self.doc_top[d, :] * self.top_word[:, w]  * sum_word_top_inv)
+        sum_word_top_inv = 1. / self.sum_word_top
+        dist = (self.doc_top[d, :] * self.top_word[:, w]  * sum_word_top_inv)
         dist_sum = np.cumsum(dist)
         return dist_sum
 
