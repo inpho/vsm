@@ -4,7 +4,7 @@ import numpy as np
 
 
 
-def smpl_cat(d):
+def _smpl_cat(d):
     """
     Takes an array of probabilities d and returns a sample from the
     categorical distribution parameterized by d.
@@ -12,7 +12,7 @@ def smpl_cat(d):
     return np.random.multinomial(1, d).argmax()
 
 
-def smpl_cat2(d_sum):
+def smpl_cat(d_sum):
     r = np.random.random() * d_sum[-1]
     return np.searchsorted(d_sum, r)
 
@@ -146,7 +146,7 @@ class LDAGibbs(object):
             stdout.write('\n')
 
 
-    def z_dist(self, d, w):
+    def _z_dist(self, d, w):
 
         sum_word_top_inv = 1. / self.sum_word_top
         dist = (self.doc_top[d, :] *
@@ -155,11 +155,11 @@ class LDAGibbs(object):
         return dist * nc
 
 
-    def z_dist2(self, d, w):
+    def z_dist(self, d, w):
 
-        sum_word_top_inv = 1. / self.sum_word_top
-        dist = (self.doc_top[d, :] *
-                self.top_word[:, w] * sum_word_top_inv)
+#        sum_word_top_inv = 1. / self.sum_word_top
+        dist = (self.doc_top[d, :] * self.top_word[:, w])
+#        dist = (self.doc_top[d, :] * self.top_word[:, w]  * sum_word_top_inv)
         dist_sum = np.cumsum(dist)
         return dist_sum
 
@@ -167,8 +167,8 @@ class LDAGibbs(object):
 
     def update_z(self, d, i, w):
         
-#        z = smpl_cat(self.z_dist(d, w))
-        z = smpl_cat2(self.z_dist2(d, w))
+#        z = _smpl_cat(self.z_dist(d, w))
+        z = smpl_cat(self.z_dist(d, w))
         self.doc_top[d, z] += 1
         self.top_word[z, w] += 1
         self.sum_word_top[z] += 1
