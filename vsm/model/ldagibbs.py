@@ -6,15 +6,20 @@ import numpy as np
 
 def _smpl_cat(d):
     """
+    Old version of smpl_cat. For testing.
     Takes an array of probabilities d and returns a sample from the
     categorical distribution parameterized by d.
     """
     return np.random.multinomial(1, d).argmax()
 
 
-def smpl_cat(d_sum):
-    r = np.random.random() * d_sum[-1]
-    return np.searchsorted(d_sum, r)
+def smpl_cat(d_cum):
+    """
+    Takes an array of cumurative probability distribution d and returns 
+    a sample from the categorical distribution parameterized by d.
+    """    
+    r = np.random.random() * d_cum[-1]
+    return np.searchsorted(d_cum, r)
 
 
 
@@ -147,6 +152,9 @@ class LDAGibbs(object):
 
 
     def _z_dist(self, d, w):
+        """
+        Old version of z_dist (returns non cumurative distribution). For testing. 
+        """
 
         sum_word_top_inv = 1. / self.sum_word_top
         dist = (self.doc_top[d, :] *
@@ -159,14 +167,13 @@ class LDAGibbs(object):
 
         sum_word_top_inv = 1. / self.sum_word_top
         dist = (self.doc_top[d, :] * self.top_word[:, w]  * sum_word_top_inv)
-        dist_sum = np.cumsum(dist)
-        return dist_sum
+        dist_cum = np.cumsum(dist)
+        return dist_cum
 
 
 
     def update_z(self, d, i, w):
         
-#        z = _smpl_cat(self.z_dist(d, w))
         z = smpl_cat(self.z_dist(d, w))
         self.doc_top[d, z] += 1
         self.top_word[z, w] += 1
