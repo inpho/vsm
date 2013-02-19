@@ -462,28 +462,6 @@ class Corpus(BaseCorpus):
             return token_list_
 
         return token_list
-
-
-    def search_context(self, word, ctx_type, label_fn=def_label_fn, as_strings=False):
-	"""
-	"""
-	token_list = super(Corpus, self).view_context(ctx_type)
-
-	word = self.words_int[word]
-	idx_list = [(i, np.where(token_list[i]==word)) for i in xrange(len(token_list))]
-	word_idx = [i[0] for i in idx_list if len(i[1][0]) > 0]
-	
-	ctx_list = [token_list[i] for i in word_idx]
-	
-        if as_strings:
-            ctx_list_ = []
-            for token in ctx_list:
-                token = self.words[token]
-                ctx_list_.append(token)
-
-            return ctx_list_
-
-        return ctx_list
 	
 	
 
@@ -515,12 +493,12 @@ class Corpus(BaseCorpus):
 
         c = Corpus([])
         c.corpus = arrays_in['corpus']
-        c.words = arrays_in['words']
-        c.context_types = arrays_in['context_types'].tolist()
+        c.words = arrays_in['terms']
+        c.context_types = arrays_in['tok_names'].tolist()
 
         c.context_data = list()
         for n in c.context_types:
-            t = arrays_in['context_data_' + n]
+            t = arrays_in['tok_data_' + n]
             c.context_data.append(t)
 
         c.__set_words_int()
@@ -552,7 +530,7 @@ class Corpus(BaseCorpus):
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
         arrays_out['words'] = self.words
-        arrays_out['context_types'] = np.asarray(self.context_types)
+        arrays_out['tok_names'] = np.asarray(self.context_types)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]
