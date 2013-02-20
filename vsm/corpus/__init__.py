@@ -493,12 +493,12 @@ class Corpus(BaseCorpus):
 
         c = Corpus([])
         c.corpus = arrays_in['corpus']
-        c.words = arrays_in['terms']
-        c.context_types = arrays_in['tok_names'].tolist()
+        c.words = arrays_in['words']
+        c.context_types = arrays_in['context_types'].tolist()
 
         c.context_data = list()
         for n in c.context_types:
-            t = arrays_in['tok_data_' + n]
+            t = arrays_in['context_data_' + n]
             c.context_data.append(t)
 
         c.__set_words_int()
@@ -530,7 +530,7 @@ class Corpus(BaseCorpus):
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
         arrays_out['words'] = self.words
-        arrays_out['tok_names'] = np.asarray(self.context_types)
+        arrays_out['context_types'] = np.asarray(self.context_types)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]

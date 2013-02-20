@@ -10,15 +10,16 @@ def change_names(fname):
     l = np.load(fname)
     
     words = l['terms']
-    cd_sent = l['tok_data_sentence']
-    cd_art = l['tok_data_article']
-    cd_para = l['tok_data_paragraph']
     ctx_types = l['tok_names']
     corpus = l['corpus'] 
 
-    np.savez(fname, words=words, context_data_sentence=cd_sent,
-	context_data_article=cd_art, context_data_paragraph=cd_para,
-	context_types=ctx_types, corpus=corpus)
+    store = {}
+    for t in ctx_types:
+	name = l['tok_data_' + t]
+	store['context_data_' + t] = name
+
+    np.savez(fname, words=words, context_types=ctx_types, 
+		corpus=corpus, **store)
 
 if __name__=="__main__": 
     parser = argparse.ArgumentParser()
