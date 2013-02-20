@@ -40,7 +40,7 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
     
     # Compute similarities
     w_arr = row_cosines(word, mat, norms=norms)
-    w_arr = enum_sort(w_arr, filter_nan=True)
+    w_arr = enum_sort(w_arr, filter_nan=filter_nan)
 
     # Label data
     if as_strings:
