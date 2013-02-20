@@ -9,7 +9,6 @@ from vsm import (
 from vsm.linalg import row_norms as _row_norms_
 
 from labeleddata import (
-    IndexedValueArray as _IndexedValueArray_,
     LabeledColumn as _LabeledColumn_,
     DataTable as _DataTable_,
     format_entry as _format_entry_)
@@ -17,6 +16,7 @@ from labeleddata import (
 from vsm.viewer import (
     res_word_type as _res_word_type_,
     res_doc_type as _res_doc_type_,
+    res_top_type as _res_top_type_,
     doc_label_name as _doc_label_name_,
     def_label_fn as _def_label_fn_)
 
@@ -247,41 +247,6 @@ class LDAGibbsViewer(object):
         return Z_w
 
 
-    def doc_finder(self, word, topics, as_strings=True):
-        """
-        Finds documents and positions where `word` appears with the topic assignment(s) 
-        equal to any one of `topics`, and returns a list of documents and positions sorted
-        by the relevance of each document to `topics`
-
-        NB: Currently this works only with htrc corpus
-        """
-        
-        doc_prob = dict((doc, prob) for (doc, prob) in self.sim_top_doc(topics))
-
-        doc_list = []
-        for (doc, pos), top in self.word_topics(word):
-            if any(top == topics):
-                doc_list.append(((doc, doc_prob[doc]), pos))
-
-        doc_list.sort(key=lambda tup: tup[0][1], reverse=True)
-
-        # labeling data
-        if as_strings:
-            metadata = htrc_load_metadata()
-            doc_list = [((htrc_get_titles(metadata, d)[0], pr), pos)
-                        for ((d, pr), pos) in doc_list]     
-            dt = [('i', [('doc', doc_list[0][0][0].dtype), ('prob',np.float)]), ('pos', np.int)]
-        else:
-            dt = [('i', [('doc', np.int), ('prob',np.float)]), ('pos', np.int)]
-            
-        doc_list = np.array(doc_list, dtype=dt).view(_IndexedValueArray_)
-        doc_list.main_header = 'Word: ' + word + ' by Topic(s)' + str(topics)
-        doc_list.subheaders = [('Document, Prob', 'Pos')]
-
-        return doc_list
-
-
-
     def sim_top_top(self, topic_or_topics, weights=None, 
                     print_len=10, filter_nan=True):
         """
@@ -291,16 +256,34 @@ class LDAGibbsViewer(object):
                              print_len=print_len, filter_nan=filter_nan)
 
 
-    def sim_top_doc(self, topic_or_topics, weights=[],
+    def sim_top_doc(self, topic_or_topics, weights=[], filter_words=[],
                     print_len=10, as_strings=True, label_fn=_def_label_fn_, 
                     filter_nan=True):
         """
         """
-        return _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
-                             self.model.context_type, weights=weights, 
-                             norms=self._doc_norms, print_len=print_len,
-                             as_strings=as_strings, label_fn=label_fn, 
-                             filter_nan=filter_nan)
+        d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
+                              self.model.context_type, weights=weights, 
+                              norms=self._doc_norms, print_len=print_len,
+                              as_strings=False, label_fn=label_fn, 
+                              filter_nan=filter_nan)
+        
+        topics = _res_top_type_(topic_or_topics)
+
+        if len(filter_words) > 0:
+            white = set()
+            for w in filter_words:
+                l = self.word_topics(w, as_strings=False)
+                d = l['i'][np.in1d(l['value'], topics)]
+                white.update(d)
+            
+            d_arr = d_arr[(np.in1d(d_arr['i'], white))]
+
+        if as_strings:
+            md = self.corpus.view_metadata(self.model.context_type)
+            docs = label_fn(md)
+            d_arr = _map_strarr_(d_arr, docs, k='i', new_k='doc')
+
+        return d_arr
 
 
     def sim_word_top(self, word_or_words, weights=[], filter_nan=True,

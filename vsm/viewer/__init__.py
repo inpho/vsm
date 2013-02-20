@@ -1,6 +1,6 @@
 import numpy as np
 
-from vsm import isstr
+from vsm import isstr, isint
 
 
 
@@ -58,3 +58,12 @@ def res_word_type(corp, word):
         return corp.words_int[word], word
 
     return word, str(word)
+
+
+def res_top_type(topic_or_topics):
+    """
+    """
+    if isint(topic_or_topics):
+        topic_or_topics = [topic_or_topics]
+
+    return topic_or_topics

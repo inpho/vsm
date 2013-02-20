@@ -6,10 +6,9 @@ from vsm import enum_sort, map_strarr, isstr, isint
 from vsm.linalg import row_cosines, row_cos_mat
 
 from vsm.viewer import (
-    res_word_type, res_doc_type, def_label_fn, doc_label_name)
+    res_word_type, res_doc_type, res_top_type, def_label_fn, doc_label_name)
 
-from labeleddata import (
-    LabeledColumn, IndexedValueArray, IndexedSymmArray)
+from labeleddata import LabeledColumn, IndexedSymmArray
 
 
 # TODO: Update module so that any function wrapping a similarity
@@ -99,9 +98,7 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
     list of documents sorted by the posterior probabilities of
     documents given the topic.
     """
-    if isint(topic_or_topics):
-        topic_or_topics = [topic_or_topics]
-    topics = topic_or_topics
+    topics = res_top_type(topic_or_topics)
             
     # Assume documents are rows
 
@@ -178,10 +175,7 @@ def sim_top_top(mat, topic_or_topics, weights=None,
     Computes and sorts the cosine values between a given topic `k`
     and every topic.
     """
-    # Resolve `topic_or_topics`
-    if isint(topic_or_topics):
-        topic_or_topics = [topic_or_topics]
-    topics = topic_or_topics
+    topics = res_top_type(topic_or_topics)
 
     # Assuming topics are rows
 
