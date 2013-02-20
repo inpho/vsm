@@ -254,7 +254,7 @@ class DataTable(list):
             	   
             	    for j in xrange(len(lc.dtype)):
                         n = lc.dtype.names[j]
-	                s += '<td>{}</td>'.format(lc[n][i])
+	                s += '<td>{0}</td>'.format(lc[n][i])
 		
 		    if end > len(self) and start > 0:
 		        for i in xrange(end - len(self)):
