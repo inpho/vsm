@@ -4,6 +4,7 @@ import numpy as np
 
 
 
+
 def smpl_cat(d_cum):
     """
     Takes an array of cumurative probability distribution d and returns 
@@ -296,6 +297,7 @@ def test_dist_z():
     from vsm.util.corpustools import random_corpus
     c = random_corpus(500000, 10000, 0, 100)
     m = LDAGibbs(c, 'random', K=20)
+    np.random.seed(0)
     m.train(itr=1)
 
     return m
