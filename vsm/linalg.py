@@ -118,7 +118,10 @@ def row_cosines(row, matrix, norms=None):
 
     row_norm = row_norms(row)[0]
     dens = norms * row_norm
+
+    old = np.seterr(divide='ignore') # Suppress division by zero errors
     out = nums / dens
+    np.seterr(**old) # Restore error settings
 
     return out
 

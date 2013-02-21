@@ -9,7 +9,7 @@ from vsm.model.beaglecontext import realign_env_mat as _realign_env_mat
 class BeagleComposite(BaseModel):
 
     def __init__(self, ctx_corp, ctx_matrix, 
-                 ord_corp, ord_matrix, tok_name='sentence'):
+                 ord_corp, ord_matrix, context_type='sentence'):
         """
         Assume that the context corpus is a subcorpus of the order
         corpus and that the eventual composite corpus is the context
@@ -19,7 +19,7 @@ class BeagleComposite(BaseModel):
         self.ctx_matrix = _row_normalize(ctx_matrix)
         ord_matrix = _realign_env_mat(ctx_corp, ord_corp, ord_matrix)
         self.ord_matrix = _row_normalize(ord_matrix)
-        self.tok_name = tok_name
+        self.context_type = context_type
 
 
     def train(self, wgt=.5):
@@ -42,7 +42,7 @@ def test_BeagleComposite():
     from vsm.model.beaglecontext import BeagleContextSeq
     from vsm.model.beagleorder import BeagleOrderSeq
 
-    ec = random_corpus(1000, 50, 0, 20, tok_name='sentence')
+    ec = random_corpus(1000, 50, 0, 20, context_type='sentence')
     cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,50,7)])
 
     e = BeagleEnvironment(ec, n_cols=5)

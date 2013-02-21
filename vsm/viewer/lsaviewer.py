@@ -7,7 +7,7 @@ from vsm.viewer import def_label_fn as _def_label_fn_
 from similarity import (
     sim_word_word as _sim_word_word_,
     sim_doc_doc as _sim_doc_doc_,
-    simmat_terms as _simmat_terms_,
+    simmat_words as _simmat_words_,
     simmat_documents as _simmat_documents_)
 
 
@@ -29,7 +29,7 @@ class LsaViewer(object):
         """
         """
         if self._word_norms_ is None:
-            self._word_norms_ = _row_norms_(self.model.term_matrix)            
+            self._word_norms_ = _row_norms_(self.model.word_matrix)            
 
         return self._word_norms_
 
@@ -48,7 +48,7 @@ class LsaViewer(object):
                       filter_nan=True, print_len=10, as_strings=True):
         """
         """
-        return _sim_word_word_(self.corpus, self.model.term_matrix, 
+        return _sim_word_word_(self.corpus, self.model.word_matrix, 
                                word_or_words, weights=weights, 
                                norms=self._word_norms, filter_nan=filter_nan, 
                                print_len=print_len, as_strings=True)
@@ -59,7 +59,7 @@ class LsaViewer(object):
         """
         """
         return _sim_doc_doc_(self.corpus, self.model.doc_matrix.T,
-                             self.model.tok_name, doc_or_docs, weights=weights,
+                             self.model.context_type, doc_or_docs, weights=weights,
                              norms=self._doc_norms, print_len=print_len,
                              filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=True)
@@ -68,14 +68,14 @@ class LsaViewer(object):
     def simmat_words(self, word_list):
         """
         """
-        return _simmat_terms_(self.corpus, self.model.term_matrix, word_list)
+        return _simmat_words_(self.corpus, self.model.word_matrix, word_list)
 
 
     def simmat_docs(self, docs):
         """
         """
         return _simmat_documents_(self.corpus, self.model.doc_matrix.T,
-                                  self.model.tok_name, docs)
+                                  self.model.context_type, docs)
 
 
 
@@ -87,7 +87,7 @@ def test_LsaViewer():
     from vsm.model.tfidf import TfIdfModel
     from vsm.model.lsa import LsaModel
 
-    c = random_corpus(10000, 1000, 0, 30, tok_name='document', metadata=True)
+    c = random_corpus(10000, 1000, 0, 30, context_type='document', metadata=True)
 
     tf = TfModel(c, 'document')
     tf.train()

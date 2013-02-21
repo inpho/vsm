@@ -7,18 +7,18 @@ from vsm.model import BaseModel
 class TfModel(BaseModel):
     """
     """
-    def __init__(self, corpus, tok_name):
+    def __init__(self, corpus, context_type):
         """
         """
         self.corpus = corpus
-        self.tok_name = tok_name
+        self.context_type = context_type
 
 
     def train(self):
         """
         """
-        docs = self.corpus.view_tokens(self.tok_name)
-        shape = (self.corpus.terms.size, len(docs))
+        docs = self.corpus.view_context(self.context_type)
+        shape = (self.corpus.words.size, len(docs))
 
         print 'Computing term frequencies'
         data = np.ones_like(self.corpus.corpus)
@@ -41,7 +41,7 @@ def test_TfModel():
 
     from vsm.util.corpustools import random_corpus
 
-    c = random_corpus(10000, 100, 0, 100, tok_name='document')
+    c = random_corpus(10000, 100, 0, 100, context_type='document')
 
     m = TfModel(c, 'document')
     m.train()

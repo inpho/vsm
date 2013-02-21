@@ -5,7 +5,7 @@ from vsm.viewer import def_label_fn as _def_label_fn_
 from similarity import (
     sim_word_word as _sim_word_word_,
     sim_doc_doc as _sim_doc_doc_,
-    simmat_terms as _simmat_terms_,
+    simmat_words as _simmat_words_,
     simmat_documents as _simmat_documents_)
 
 
@@ -57,7 +57,7 @@ class TfIdfViewer(object):
         """
         """
         return _sim_doc_doc_(self.corpus, self.model.matrix,
-                             self.model.tok_name, doc_or_docs, weights=weights,
+                             self.model.context_type, doc_or_docs, weights=weights,
                              norms=self._doc_norms, print_len=print_len,
                              filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=True)
@@ -66,14 +66,14 @@ class TfIdfViewer(object):
     def simmat_words(self, word_list):
         """
         """
-        return _simmat_terms_(self.corpus, self.model.matrix, word_list)
+        return _simmat_words_(self.corpus, self.model.matrix, word_list)
 
 
     def simmat_docs(self, docs):
         """
         """
         return _simmat_documents_(self.corpus, self.model.matrix,
-                                  self.model.tok_name, docs)
+                                  self.model.context_type, docs)
 
 
 
@@ -84,7 +84,7 @@ def test_TfIdfViewer():
     from vsm.model.tf import TfModel
     from vsm.model.tfidf import TfIdfModel
 
-    c = random_corpus(1000, 100, 0, 20, tok_name='document', metadata=True)
+    c = random_corpus(1000, 100, 0, 20, context_type='document', metadata=True)
 
     tf = TfModel(c, 'document')
     tf.train()

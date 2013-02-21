@@ -16,10 +16,10 @@ from vsm.model import BaseModel
 
 class TfIdfModel(BaseModel):
 
-    def __init__(self, tf_matrix, tok_name):
+    def __init__(self, tf_matrix, context_type):
         """
         """
-        self.tok_name = tok_name
+        self.context_type = context_type
         self.matrix = tf_matrix.copy()
         self.matrix = self.matrix.tocsr()
         self.matrix = self.matrix.astype(np.float64)
@@ -61,7 +61,7 @@ def test_TfIdfModel():
     from vsm.util.corpustools import random_corpus
     from vsm.model.tf import TfModel
 
-    c = random_corpus(1000, 100, 0, 20, tok_name='document', metadata=True)
+    c = random_corpus(1000, 100, 0, 20, context_type='document', metadata=True)
 
     tf = TfModel(c, 'document')
     tf.train()

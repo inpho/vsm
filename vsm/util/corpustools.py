@@ -126,25 +126,25 @@ def paragraph_tokenize(text):
 
 
 
-def empty_corpus(tok_name):
+def empty_corpus(context_type):
     """
     """
     return Corpus([],
-                  tok_data=[np.array([], dtype=[('idx', np.int)])],
-                  tok_names=[tok_name])
+                  context_data=[np.array([], dtype=[('idx', np.int)])],
+                  context_types=[context_type])
 
 
 
 def random_corpus(corpus_len,
-                  n_terms,
+                  n_words,
                   min_token_len,
                   max_token_len,
-                  tok_name='random',
+                  context_type='random',
                   metadata=False):
     """
     Generate a random integer corpus.
     """
-    corpus = np.random.randint(n_terms, size=corpus_len)
+    corpus = np.random.randint(n_words, size=corpus_len)
 
     indices = []
     i = np.random.randint(min_token_len, max_token_len)
@@ -156,13 +156,13 @@ def random_corpus(corpus_len,
     if metadata:
         metadata_ = ['token_' + str(i) for i in xrange(len(indices))]
         dtype=[('idx', np.array(indices).dtype), 
-               (tok_name + '_label', np.array(metadata_).dtype)]
+               (context_type + '_label', np.array(metadata_).dtype)]
         rand_tok = np.array(zip(indices, metadata_), dtype=dtype)
     else:
         rand_tok = np.array([(i,) for i in indices], 
                             dtype=[('idx', np.array(indices).dtype)])
 
-    return Corpus(corpus, tok_names=[tok_name], tok_data=[rand_tok])
+    return Corpus(corpus, context_types=[context_type], context_data=[rand_tok])
 
 
 
@@ -201,7 +201,7 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         If `True` then the corpus object is masked using the NLTK
         English stop words. Default is `False`.
     stop_freq : int
-        The upper bound for a term to be masked on the basis of its
+        The upper bound for a word to be masked on the basis of its
         collection frequency. Default is 0.
     add_stop : array-like
         A list of stop words. Default is `None`.
@@ -239,7 +239,7 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         dtype = [('idx', np.array(tok).dtype)]
         tok = np.array([(i,) for i in tok], dtype=dtype)
     
-    c = Corpus(corpus, tok_data=[tok], tok_names=['document'])
+    c = Corpus(corpus, context_data=[tok], context_types=['document'])
     c = apply_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
 
@@ -293,7 +293,7 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     words, tok = file_tokenize(text)
     names, data = zip(*tok.items())
     
-    c = Corpus(words, tok_data=data, tok_names=names)
+    c = Corpus(words, context_data=data, context_types=names)
     c = apply_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
 
@@ -394,7 +394,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
         If `True` then the corpus object is masked using the NLTK
         English stop words. Default is `False`.
     stop_freq : int
-        The upper bound for a term to be masked on the basis of its
+        The upper bound for a word to be masked on the basis of its
         collection frequency. Default is 0.
     add_stop : array-like
         A list of stop words. Default is `None`.
@@ -419,7 +419,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
                               paragraphs=paragraphs)
     names, data = zip(*tok.items())
     
-    c = Corpus(words, tok_data=data, tok_names=names)
+    c = Corpus(words, context_data=data, context_types=names)
     c = apply_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
 
@@ -498,7 +498,7 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
     words, tok = coll_tokenize(books, book_names)
     names, data = zip(*tok.items())
     
-    c = Corpus(words, tok_data=data, tok_names=names)
+    c = Corpus(words, context_data=data, context_types=names)
     c = apply_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
 
@@ -522,57 +522,60 @@ def test_dir_tokenize():
              'foo\n\nfoo']
 
     labels = [str(i) for i in xrange(len(chunks))]
-    words, tok_data = dir_tokenize(chunks, labels)
+    words, context_data = dir_tokenize(chunks, labels)
 
     assert len(words) == 11
-    assert len(tok_data['article']) == 4
-    assert len(tok_data['paragraph']) == 6
-    assert len(tok_data['sentence']) == 7
+    assert len(context_data['article']) == 4
+    assert len(context_data['paragraph']) == 6
+    assert len(context_data['sentence']) == 7
     
-    assert (tok_data['article']['idx'] == [5, 9, 9, 11]).all()
-    assert (tok_data['article']['article_label'] == ['0', '1', '2', '3']).all()
-    assert (tok_data['paragraph']['idx'] == [3, 5, 9, 9, 10, 11]).all()
-    assert (tok_data['paragraph']['article_label'] == 
+    assert (context_data['article']['idx'] == [5, 9, 9, 11]).all()
+    assert (context_data['article']['article_label'] == ['0', '1', '2', '3']).all()
+    assert (context_data['paragraph']['idx'] == [3, 5, 9, 9, 10, 11]).all()
+    assert (context_data['paragraph']['article_label'] == 
             ['0', '0', '1', '2', '3', '3']).all()
-    assert (tok_data['paragraph']['par_label'] == 
+    assert (context_data['paragraph']['par_label'] == 
             ['0', '1', '2', '3', '4', '5']).all()
-    assert (tok_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
-    assert (tok_data['sentence']['article_label'] == 
+    assert (context_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
+    assert (context_data['sentence']['article_label'] == 
             ['0', '0', '1', '1', '2', '3', '3']).all()
-    assert (tok_data['sentence']['par_label'] == 
+    assert (context_data['sentence']['par_label'] == 
             ['0', '1', '2', '2', '3', '4', '5']).all()
-    assert (tok_data['sentence']['sent_label'] == 
+    assert (context_data['sentence']['sent_label'] == 
             ['0', '1', '2', '3', '4', '5', '6']).all()
 
 
 
 def test_coll_tokenize():
 
-    books = [['foo foo foo.\n\nfoo foo',
-              'Foo bar.  Foo bar.'], 
-             ['',
-              'foo.\n\nfoo']]
+    books = [[('foo foo foo.\n\nfoo foo', '1'),
+              ('Foo bar.  Foo bar.', '2')], 
+             [('','3'),
+              ('foo.\n\nfoo', '4')]]
 
     book_names = [str(i) for i in xrange(len(books))]
-    words, tok_data = coll_tokenize(books, book_names)
+    words, context_data = coll_tokenize(books, book_names)
 
     assert len(words) == 11
-    assert len(tok_data['book']) == 2
-    assert len(tok_data['page']) == 4
-    assert len(tok_data['sentence']) == 7
-    assert (tok_data['book']['idx'] == [9, 11]).all()
-    assert (tok_data['book']['book_label'] == ['0', '1']).all()
-    assert (tok_data['page']['idx'] == [5, 9, 9, 11]).all()
-    assert (tok_data['page']['page_label'] == ['0', '1', '2', '3']).all()
-    assert (tok_data['page']['book_label'] == ['0', '0', '1', '1']).all()
-    assert (tok_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
-    assert (tok_data['sentence']['sent_label'] == 
+    assert len(context_data['book']) == 2
+    assert len(context_data['page']) == 4
+    assert len(context_data['sentence']) == 7
+    assert (context_data['book']['idx'] == [9, 11]).all()
+    assert (context_data['book']['book_label'] == ['0', '1']).all()
+    assert (context_data['page']['idx'] == [5, 9, 9, 11]).all()
+    assert (context_data['page']['page_label'] == ['0', '1', '2', '3']).all()
+    assert (context_data['page']['book_label'] == ['0', '0', '1', '1']).all()
+    assert (context_data['sentence']['idx'] == [3, 5, 7, 9, 9, 10, 11]).all()
+    assert (context_data['sentence']['sent_label'] == 
             ['0', '1', '2', '3', '4', '5', '6']).all()
-    assert (tok_data['sentence']['page_label'] == 
+    assert (context_data['sentence']['page_label'] == 
             ['0', '0', '1', '1', '2', '3', '3']).all()
-    assert (tok_data['sentence']['book_label'] == 
+    assert (context_data['sentence']['book_label'] == 
             ['0', '0', '0', '0', '1', '1', '1']).all()
-    
+    assert (context_data['page']['file'] ==
+		['1','2','3','4']).all()
+    assert (context_data['sentence']['file'] ==
+		['1','1','2','2','3','4','4']).all() 
 
 
 def test_toy_corpus():

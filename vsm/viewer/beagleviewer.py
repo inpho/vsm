@@ -2,7 +2,7 @@ from vsm.linalg import row_norms as _row_norms_
 
 from similarity import (
     sim_word_word as _sim_word_word_,
-    simmat_terms as _simmat_terms_)
+    simmat_words as _simmat_words_)
 
 
 
@@ -39,7 +39,7 @@ class BeagleViewer(object):
 
     def simmat_words(self, word_list):
 
-        return _simmat_terms_(self.corpus,
+        return _simmat_words_(self.corpus,
                               self.model.matrix,
                               word_list)
 
@@ -53,7 +53,7 @@ def test_BeagleViewer():
     from vsm.model.beagleorder import BeagleOrderSeq
     from vsm.model.beaglecomposite import BeagleComposite
 
-    ec = random_corpus(1000, 50, 0, 20, tok_name='sentence')
+    ec = random_corpus(1000, 50, 0, 20, context_type='sentence')
     cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,50,7)])
 
     e = BeagleEnvironment(ec, n_cols=5)

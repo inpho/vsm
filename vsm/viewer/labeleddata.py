@@ -218,21 +218,21 @@ class DataTable(list):
 	    group = self[start:end]	    
 
 	    s += '<tr>'
-	    for lc in group:
+	    for i, lc in enumerate(group):
 		
 		if lc.col_header:
 	            s += '<th style="text-align: center; background: #CEE3F6;"\
 		 colspan="{0}">{1}</th>'.format(len(lc.subcol_headers), lc.col_header)
 
-		if end > len(self) and start > 0:
-		    for i in xrange(end - len(self)):
+		if (i + start) >= len(self):
+		    for j in xrange(end - len(self)):
 			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
 		 	colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
 					' ' * self[0].col_width)
     	    s += '</tr>'
 
 	    s += '<tr>'
-	    for lc in group:
+	    for i, lc in enumerate(group):
         	
 		if lc.subcol_headers:
             	    
@@ -240,8 +240,8 @@ class DataTable(list):
                 	s += '<th style="text-align: center; background: #EFF2FB;">\
 				{0}</th>'.format(sch)
 
-		if end > len(self) and start > 0:
-		    for i in xrange(end - len(self)):
+		if (i + start) >= len(self):
+		    for j in xrange(end - len(self)):
 			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
 		 colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
 						' ' * self[0].col_width)
@@ -250,14 +250,14 @@ class DataTable(list):
 	    for i in xrange(self[0].col_len):
 
 	        s += '<tr>'
-		for lc in group:
+		for j, lc in enumerate(group):
             	   
-            	    for j in xrange(len(lc.dtype)):
-                        n = lc.dtype.names[j]
-	                s += '<td>{}</td>'.format(lc[n][i])
+            	    for k in xrange(len(lc.dtype)):
+                        n = lc.dtype.names[k]
+	                s += '<td>{0}</td>'.format(lc[n][i])
 		
-		    if end > len(self) and start > 0:
-		        for i in xrange(end - len(self)):
+		    if (j + start) >= len(self):
+		        for e in xrange(end - len(self)):
 			    s += '<td style="border-color: #EFF2FB; background: #EFF2FB;"\
 				colspan="{0}"> {1} </th>'.format(len(lc.subcol_headers),
 							 ' ' * self[0].col_width)
@@ -266,99 +266,6 @@ class DataTable(list):
 	    start = end
         s += '</table>'
 
-        return s
-
-
-
-class IndexedValueArray(np.ndarray):
-    """
-    """
-    def __new__(cls, input_array, main_header=None, subheaders=None):
-        """
-        """
-        obj = np.asarray(input_array).view(cls)
-        obj.str_len = None
-        obj.main_header = main_header
-        obj.subheaders = subheaders
-
-        return obj
-
-
-    def __array_finalize__(self, obj):
-        """
-        """
-        if obj is None: return
-
-        self.str_len = getattr(obj, 'str_len', None)
-        self.main_header = getattr(obj, 'main_header', None)
-        self.subheaders = getattr(obj, 'subheaders', None)
-
-
-    def __str__(self):
-        """
-        """
-        if self.ndim == 1:
-            arr = self[np.newaxis, :]
-
-        elif self.ndim == 2:
-            arr = self
-
-        else:
-            return super(IndexedValueArray, self).__str__()
-
-        vsep_1col = '-' * 37 + '\n'
-        vsep_2col = '-' * 75 + '\n'
-
-        if arr.main_header:
-            if arr.shape[0] == 1:
-                s = vsep_1col
-                s += '{0:^35}\n'.format(arr.main_header)
-            else:
-                s = vsep_2col
-                s += '{0:^75}\n'.format(arr.main_header)
-        else:
-            s = ''
-
-        m = arr.shape[0]
-
-        if self.str_len:
-            n = min(arr.shape[1], self.str_len)
-        else:
-            n = arr.shape[1]
-
-        for i in xrange(0, m - m % 2, 2):
-            if arr.subheaders:
-                s += vsep_2col
-                s += ('{0:<25}{1:<15}{2:<25}{3}\n'
-                      .format(arr.subheaders[i][0], 
-                              arr.subheaders[i][1],
-                              arr.subheaders[i+1][0], 
-                              arr.subheaders[i+1][1]))
-                                      
-            s += vsep_2col
-
-            for j in xrange(n):
-                a0 = format_entry(arr[i][j][0])
-                a1 = format_entry(arr[i][j][1])
-                b0 = format_entry(arr[i+1][j][0])
-                b1 = format_entry(arr[i+1][j][1])
-
-                s += '{0:<25}{1:<15}{2:<25}{3}\n'.format(a0, a1, b0, b1)
-
-        if m % 2:
-            if arr.subheaders:
-                s += vsep_1col
-                s += ('{0:<25}{1}\n'
-                      .format(arr.subheaders[m-1][0], 
-                              arr.subheaders[m-1][1]))
-                                      
-            s += vsep_1col
-
-            for j in xrange(n):
-                a0 = format_entry(arr[m-1][j][0])
-                a1 = format_entry(arr[m-1][j][1])
-                s += '{0:<25}{1}\n'.format(a0, a1)
-            
         return s
 
 
@@ -387,42 +294,15 @@ class IndexedSymmArray(np.ndarray):
 #                        Testing
 ############################################################
 
-def test_IndexedValueArray():
-
-    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
-             'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
-             'is', 'but', 'a', 'dream']
-
-    values = [np.random.random() for t in terms]
-
-    d = [('i', np.array(terms).dtype), 
-         ('value', np.array(values).dtype)]
-    v = np.array(zip(terms, values), dtype=d)
-
-    arr = np.vstack([v] * 5)
-    arr = arr.view(IndexedValueArray)
-    arr.main_header = 'Test 2-d Array'
-    arr.subheaders = [('Repetition ' + str(i), 'Random') 
-                      for i in xrange(arr.shape[0])]
-
-    print arr
-    print
-
-    arr = v.view(IndexedValueArray)
-    arr.main_header = 'Test 1-d Array'
-
-    print arr
-
-
 def test_LabeledColumn():
 
-    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
+    words = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
              'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
              'is', 'but', 'a', 'dream']
-    values = [np.random.random() for t in terms]
-    d = [('i', np.array(terms).dtype), 
+    values = [np.random.random() for t in words]
+    d = [('i', np.array(words).dtype), 
          ('value', np.array(values).dtype)]
-    v = np.array(zip(terms, values), dtype=d)
+    v = np.array(zip(words, values), dtype=d)
     arr = v.view(LabeledColumn)
 #    arr.subcol_widths = [30, 20]
     arr.subcol_headers = ['Word', 'Value']
@@ -434,19 +314,19 @@ def test_LabeledColumn():
 
 def test_DataTable():
 
-    terms = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
+    words = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
              'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
              'is', 'but', 'a', 'dream']
-    values = [np.random.random() for t in terms]
-    d = [('i', np.array(terms).dtype), 
+    values = [np.random.random() for t in words]
+    d = [('i', np.array(words).dtype), 
          ('value', np.array(values).dtype)]
-    v = np.array(zip(terms, values), dtype=d)
+    v = np.array(zip(words, values), dtype=d)
     v = LabeledColumn(v)
     v.subcol_widths = [30, 20]
     v.subcol_headers = ['Word', 'Value']
     v.col_len = 10
     t = []
-    for i in xrange(7):
+    for i in xrange(5):
         t.append(v.copy())
         t[i].col_header = 'Iteration ' + str(i)
     t = DataTable(t, 'Song')
