@@ -17,7 +17,7 @@ class TfModel(BaseModel):
     def train(self):
         """
         """
-        docs = self.corpus.view_context(self.context_type)
+        docs = self.corpus.view_contexts(self.context_type)
         shape = (self.corpus.words.size, len(docs))
 
         print 'Computing term frequencies'

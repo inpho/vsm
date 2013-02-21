@@ -26,7 +26,7 @@ class BeagleContextSeq(BaseModel):
         """
         """
         self.context_type = context_type
-        self.sents = corpus.view_context(context_type)
+        self.sents = corpus.view_contexts(context_type)
         self.env_matrix = realign_env_mat(corpus, env_corpus, env_matrix)
 
 
@@ -64,7 +64,7 @@ class BeagleContextMulti(BaseModel):
         """
         """
         self.context_type = context_type
-        self.sents = corpus.view_context(context_type)
+        self.sents = corpus.view_contexts(context_type)
         self.dtype = env_matrix.dtype
         env_matrix = realign_env_mat(corpus, env_corpus, env_matrix)
 

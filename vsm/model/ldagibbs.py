@@ -97,7 +97,7 @@ class LDAGibbs(object):
         self.K = K
         self.alpha = alpha
         self.beta = beta
-        self.W = corpus.view_context(context_type)
+        self.W = corpus.view_contexts(context_type)
         self.V = corpus.words.shape[0]
         self.iterations = 0
 

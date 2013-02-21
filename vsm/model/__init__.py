@@ -63,4 +63,4 @@ class BaseModel(object):
         
         # The slice [()] is to unwrap sparse matrices, which get saved
         # in singleton object arrays
-        return BaseModel(matrix=npz['matrix'][()], context_type=npz['tok_name'][()])
+        return BaseModel(matrix=npz['matrix'][()], context_type=npz['context_type'][()])
