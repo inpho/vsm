@@ -4,15 +4,6 @@ import numpy as np
 
 
 
-def _smpl_cat(d):
-    """
-    Old version of smpl_cat. For testing.
-    Takes an array of probabilities d and returns a sample from the
-    categorical distribution parameterized by d.
-    """
-    return np.random.multinomial(1, d).argmax()
-
-
 def smpl_cat(d_cum):
     """
     Takes an array of cumurative probability distribution d and returns 
@@ -150,17 +141,6 @@ class LDAGibbs(object):
         if verbose:
             stdout.write('\n')
 
-
-    def _z_dist(self, d, w):
-        """
-        Old version of z_dist (returns non cumurative distribution). For testing. 
-        """
-
-        sum_word_top_inv = 1. / self.sum_word_top
-        dist = (self.doc_top[d, :] *
-                self.top_word[:, w] * sum_word_top_inv)
-        nc = 1. / dist.sum()
-        return dist * nc
 
 
     def z_dist(self, d, w):
