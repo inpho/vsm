@@ -226,7 +226,7 @@ class DataTable(list):
 	            s += '<th style="text-align: center; background: #CEE3F6;"\
 		 colspan="{0}">{1}</th>'.format(len(lc.subcol_headers), lc.col_header)
 
-		if end > n_arr and m and i == len(group)-1:
+		if end > n_arr and m and i == len(group)-1 and start > 0:
 		    for j in xrange(end - n_arr):
 			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
 		 	colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
@@ -242,7 +242,7 @@ class DataTable(list):
                 	s += '<th style="text-align: center; background: #EFF2FB;">\
 				{0}</th>'.format(sch)
 
-		if end > n_arr and m and i == len(group)-1:
+		if end > n_arr and m and i == len(group)-1 and start > 0:
 		    for j in xrange(end - n_arr):
 			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
 		 colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
@@ -258,7 +258,7 @@ class DataTable(list):
                         n = lc.dtype.names[j]
 	                s += '<td>{0}</td>'.format(lc[n][i])
 		
-		    if end > n_arr and m and k == len(group)-1:
+		    if end > n_arr and m and k == len(group)-1 and start > 0:
 		        for e in xrange(end - n_arr):
 			    s += '<td style="border-color: #EFF2FB; background: #EFF2FB;"\
 				colspan="{0}"> {1} </th>'.format(len(lc.subcol_headers),
