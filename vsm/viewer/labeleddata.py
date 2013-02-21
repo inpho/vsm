@@ -212,27 +212,29 @@ class DataTable(list):
 			 * len(self[0].subcol_headers), self.table_header)
      
 	start = 0
+	n_arr = len(self)
+	m = n_arr % col_in_row
 
-        while start < len(self):
+        while start < n_arr:
 	    end = start + col_in_row
 	    group = self[start:end]	    
-
+	    
 	    s += '<tr>'
-	    for lc in group:
-		
+	    for i, lc in enumerate(group):
+	
 		if lc.col_header:
 	            s += '<th style="text-align: center; background: #CEE3F6;"\
 		 colspan="{0}">{1}</th>'.format(len(lc.subcol_headers), lc.col_header)
 
-		if end > len(self) and start > 0:
-		    for i in xrange(end - len(self)):
+		if end > n_arr and m and i == len(group)-1:
+		    for j in xrange(end - n_arr):
 			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
 		 	colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
 					' ' * self[0].col_width)
     	    s += '</tr>'
 
 	    s += '<tr>'
-	    for lc in group:
+	    for i, lc in enumerate(group):
         	
 		if lc.subcol_headers:
             	    
@@ -240,8 +242,8 @@ class DataTable(list):
                 	s += '<th style="text-align: center; background: #EFF2FB;">\
 				{0}</th>'.format(sch)
 
-		if end > len(self) and start > 0:
-		    for i in xrange(end - len(self)):
+		if end > n_arr and m and i == len(group)-1:
+		    for j in xrange(end - n_arr):
 			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
 		 colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
 						' ' * self[0].col_width)
@@ -250,14 +252,14 @@ class DataTable(list):
 	    for i in xrange(self[0].col_len):
 
 	        s += '<tr>'
-		for lc in group:
+		for k, lc in enumerate(group):
             	   
             	    for j in xrange(len(lc.dtype)):
                         n = lc.dtype.names[j]
 	                s += '<td>{0}</td>'.format(lc[n][i])
 		
-		    if end > len(self) and start > 0:
-		        for i in xrange(end - len(self)):
+		    if end > n_arr and m and k == len(group)-1:
+		        for e in xrange(end - n_arr):
 			    s += '<td style="border-color: #EFF2FB; background: #EFF2FB;"\
 				colspan="{0}"> {1} </th>'.format(len(lc.subcol_headers),
 							 ' ' * self[0].col_width)
@@ -326,7 +328,7 @@ def test_DataTable():
     v.subcol_headers = ['Word', 'Value']
     v.col_len = 10
     t = []
-    for i in xrange(7):
+    for i in xrange(5):
         t.append(v.copy())
         t[i].col_header = 'Iteration ' + str(i)
     t = DataTable(t, 'Song')
