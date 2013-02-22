@@ -255,8 +255,9 @@ class DataTable(list):
 		for k, lc in enumerate(group):
             	   
             	    for j in xrange(len(lc.dtype)):
+			w = lc.subcol_widths[j]
                         n = lc.dtype.names[j]
-	                s += '<td>{0}</td>'.format(lc[n][i])
+	                s += '<td>{0}</td>'.format(format_(lc[n][i], w))
 		
 		    if end > n_arr and m and k == len(group)-1 and start > 0:
 		        for e in xrange(end - n_arr):
