@@ -146,7 +146,7 @@ class LDAGibbsViewer(object):
         Parameters
         ----------
         print_len : int
-            Number of words shown for each topic. If this is k, k top probability words 
+            Number of words shown for each topic. If this is i, i top probability words 
             are shown for each topic. Default is 10.
         k_indices : list of integers
             Order of topics. For example, if k_indices = [3, 0, 2], the 4th, 1st and 3rd topics 
@@ -191,7 +191,7 @@ class LDAGibbsViewer(object):
         return table
 
 
-    def topic_entropies(self, print_len=10, k_indices=[], as_strings=True):
+    def topic_entropies(self, print_len=10, as_strings=True):
         """
         Returns a list of topics sorted according to the entropy of each topic.
         The entropy of topic k is calculated by summing P(d|k) * log(P(d|k) over 
@@ -201,20 +201,17 @@ class LDAGibbsViewer(object):
         Parameters
         ----------
         print_len : int
-            Number of words shown for each topic. If this is k, k top probability words 
+            Number of words shown for each topic. If this is i, i top probability words 
             are shown for each topic. Default is 10.
         as_string : boolean
             ?
         
         Returns
         ----------
-        table : a DataTable object.
+        k_arr : a DataTable object.
             ?
 
         """
-        if len(k_indices) == 0:
-            k_indices = np.arange(self.model.top_word.shape[0])
-        
         # Normalize the document-topic matrix so that documents are
         # distributions
         theta = (self.model.doc_top[:, k_indices] / 
@@ -240,6 +237,21 @@ class LDAGibbsViewer(object):
 
     def doc_topics(self, doc, print_len=10):
         """
+        Returns distribution P(K|D=d) over topics K for document d. 
+        
+        Parameters
+        ----------
+        doc : int or string
+             Specifies the document whose distribution over topics is returned.
+             It can either be the ID number (integer) or the name (string) of the document.
+        print_len : int
+            Number of topics to be listed. If this is i, i top probability topics are shown.
+            Default is 10.
+        
+        Returns
+        ----------
+        k_arr : ?
+        
         """
         d, label = self._res_doc_type(doc)
 
@@ -258,6 +270,22 @@ class LDAGibbsViewer(object):
 
     def word_topics(self, word, as_strings=True):
         """
+        Searches for every occurance of `word` in the entire corpus and returns 
+        a list each row of which contains the name or ID number of document, 
+        the relative position in the document, and the assined topic number 
+        for each occurance of `word`.
+        
+        Parameters
+        ----------
+        word : string 
+            The word for which the search is performed.  
+        as_strings : boolean 
+            If true, returns document names rather than ID numbers. Default is True.
+
+        Returns
+        ----------
+        Z_w : 
+             
         """
         w, word = self._res_word_type(word)
 
@@ -400,8 +428,31 @@ class LDAGibbsViewer(object):
 
     def logp_plot(self, range=[], step=1, show=True, grid=True):
         """
-        Returns a plot of log probabilities for `range=[start, end]` by `step` 
-        as a matplotlib.pyplot object. If `show=True` the plot is also drawn. 
+        Returns a plot of log probabilities for the specified range of the MCMC chain
+        used to fit a topic model by `LDAGibbs`.
+        The function requires matplotlib package. 
+
+        Parameters
+        ----------
+        range : list of integer
+            Specifies the range of the MCMC chain whose log probabilites are to be plotted.
+            For example, range = [0, 999] plots log probabilities from the 1st to the 1000th 
+            iterations. The length of the list must be exactly two, and the first element must be
+            smaller than the second which can not exceed the total length of the MCMC chain.
+            Default produces the plot for the entire chain.
+        step : int
+            Steps by which points are plotted. Default is 1.
+        show : boolean
+            If it is True, the function actually draws the plot in addition to returning 
+            a plot object. Default is True.
+        grid : boolean
+            Draw a grid. Default is True. 
+        
+        Returns
+        ----------
+        plt : a matplotlib.pyplot object
+            Contains the log probability plot. 
+
         """
         import matplotlib.pyplot as plt
 
