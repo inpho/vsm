@@ -140,6 +140,26 @@ class LDAGibbsViewer(object):
 
     def topics(self, print_len=10, k_indices=[], as_strings=True):
         """
+        Returns a list of topics estimated by `LDAGibbs` sampler. 
+        Each topic is represented by a set of words and the corresponding probabilities.
+        
+        Parameters
+        ----------
+        print_len : int
+            Number of words shown for each topic. If this is k, k top probability words 
+            are shown for each topic. Default is 10.
+        k_indices : list of integers
+            Order of topics. For example, if k_indices = [3, 0, 2], the 4th, 1st and 3rd topics 
+            are printed in this order. Default is ascending from 0 to K-1, where K is the 
+            number of topics.
+        as_string : boolean
+            ?
+        
+        Returns
+        ----------
+        table : a DataTable object.
+            ?
+
         """
         if len(k_indices) == 0:
             k_indices = np.arange(self.model.top_word.shape[0])
@@ -173,6 +193,29 @@ class LDAGibbsViewer(object):
 
     def topic_entropies(self, print_len=10, k_indices=[], as_strings=True):
         """
+        Returns a list of topics sorted according to the entropy of each topic.
+        A topic entropy 
+
+        is 
+        Each topic is represented by a set of words and the corresponding probabilities.
+        
+        Parameters
+        ----------
+        print_len : int
+            Number of words shown for each topic. If this is k, k top probability words 
+            are shown for each topic. Default is 10.
+        k_indices : list of integers
+            Order of topics. For example, if k_indices = [3, 0, 2], the 4th, 1st and 3rd topics 
+            are printed in this order. Default is ascending from 0 to K-1, where K is the 
+            number of topics.
+        as_string : boolean
+            ?
+        
+        Returns
+        ----------
+        table : a DataTable object.
+            ?
+
         """
         if len(k_indices) == 0:
             k_indices = np.arange(self.model.top_word.shape[0])
