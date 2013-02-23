@@ -105,12 +105,12 @@ def reduce_ngrams(fn, a, n, i, flat=True):
 
 class BeagleOrderSeq(BaseModel):
 
-    def __init__(self, corpus, env_matrix, tok_name='sentence',
+    def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):
         """
         """
-        self.tok_name = tok_name
-        self.sents = corpus.view_context(tok_name)
+        self.context_type = context_type
+        self.sents = corpus.view_contexts(context_type)
         self.env_matrix = env_matrix
 
         self.b_conv = mk_b_conv(env_matrix.shape[1], rand_perm)
@@ -144,12 +144,12 @@ class BeagleOrderSeq(BaseModel):
 
 class BeagleOrderMulti(BaseModel):
 
-    def __init__(self, corpus, env_matrix, tok_name='sentence',
+    def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):
         """
         """
-        self.tok_name = tok_name
-        self.sents = corpus.view_context(tok_name)
+        self.context_type = context_type
+        self.sents = corpus.view_contexts(context_type)
         self.dtype = env_matrix.dtype
 
         global _shape 
@@ -257,7 +257,7 @@ def test_BeagleOrderSeq():
     from vsm.util.corpustools import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
 
-    c = random_corpus(1000, 50, 0, 20, tok_name='sentence')
+    c = random_corpus(1000, 50, 0, 20, context_type='sentence')
 
     e = BeagleEnvironment(c, n_cols=100)
     e.train()
@@ -287,7 +287,7 @@ def test_BeagleOrderMulti():
     from vsm.util.corpustools import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
 
-    c = random_corpus(1000, 50, 0, 20, tok_name='sentence')
+    c = random_corpus(1000, 50, 0, 20, context_type='sentence')
 
     e = BeagleEnvironment(c, n_cols=100)
     e.train()
@@ -317,7 +317,7 @@ def test_compare():
     from vsm.util.corpustools import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
 
-    c = random_corpus(1000, 100, 0, 20, tok_name='sentence')
+    c = random_corpus(1000, 100, 0, 20, context_type='sentence')
 
     e = BeagleEnvironment(c, n_cols=5)
     e.train()

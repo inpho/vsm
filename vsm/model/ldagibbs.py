@@ -4,12 +4,14 @@ import numpy as np
 
 
 
-def smpl_cat(d):
+
+def smpl_cat(d_cum):
     """
-    Takes an array of probabilities d and returns a sample from the
-    categorical distribution parameterized by d.
-    """
-    return np.random.multinomial(1, d).argmax()
+    Takes an array of cumurative probability distribution d and returns 
+    a sample from the categorical distribution parameterized by d.
+    """    
+    r = np.random.random() * d_cum[-1]
+    return np.searchsorted(d_cum, r)
 
 
 
@@ -97,7 +99,7 @@ class LDAGibbs(object):
         self.K = K
         self.alpha = alpha
         self.beta = beta
-        self.W = corpus.view_context(context_type)
+        self.W = corpus.view_contexts(context_type)
         self.V = corpus.words.shape[0]
         self.iterations = 0
 
@@ -141,13 +143,15 @@ class LDAGibbs(object):
             stdout.write('\n')
 
 
+
+
     def z_dist(self, d, w):
 
         sum_word_top_inv = 1. / self.sum_word_top
-        dist = (self.doc_top[d, :] *
-                self.top_word[:, w] * sum_word_top_inv)
-        nc = 1. / dist.sum()
-        return dist * nc
+        dist = (self.doc_top[d, :] * self.top_word[:, w]  * sum_word_top_inv)
+        dist_cum = np.cumsum(dist)
+        return dist_cum
+
 
 
     def update_z(self, d, i, w):
@@ -276,7 +280,6 @@ class LDAGibbs(object):
 
         print 'Saving LDA-Gibbs model to', filename
         np.savez(filename, **arrays_out)
-
         
 
 def test_LDAGibbs():
@@ -288,6 +291,19 @@ def test_LDAGibbs():
 
     return m
 
+
+
+def test_dist_z():
+
+    from vsm.util.corpustools import random_corpus
+    c = random_corpus(500000, 10000, 0, 100)
+    m = LDAGibbs(c, 'random', K=20)
+    np.random.seed(0)
+    m.train(itr=1)
+
+    return m
+
+    
 
 def test_logp_fns():
 

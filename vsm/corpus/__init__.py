@@ -99,7 +99,7 @@ class BaseCorpus(object):
     array(['ran', 'away', 'chased', 'dog', 'cat', 'the'],
           dtype='|S6')
 
-    >>> c.view_context('sentences')
+    >>> c.view_contexts('sentences')
     [array(['the', 'dog', 'chased', 'the', 'cat'],
           dtype='|S6'),
      array(['the', 'cat', 'ran', 'away'],
@@ -229,7 +229,7 @@ class BaseCorpus(object):
         return self.view_metadata(ctx_type)[i][field]
 
 
-    def view_context(self, ctx_type):
+    def view_contexts(self, ctx_type):
         """
         Displays a tokenization of the corpus.
 
@@ -387,11 +387,11 @@ class Corpus(BaseCorpus):
     >>> c.words_int['saw']
     2
 
-    >>> c.view_context('sentences')
+    >>> c.view_contexts('sentences')
     [array([0, 3], dtype=int32), array([0, 2], dtype=int32),
      array([0, 1], dtype=int32)]
 
-    >>> c.view_context('sentences', strings=True)
+    >>> c.view_contexts('sentences', strings=True)
     [array(['I', 'came'],
           dtype='|S4'), array(['I', 'saw'],
           dtype='|S3'), array(['I', 'conquered'],
@@ -429,7 +429,7 @@ class Corpus(BaseCorpus):
         self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
 
-    def view_context(self, ctx_type, as_strings=False):
+    def view_contexts(self, ctx_type, as_strings=False):
         """
         Displays a tokenization of the corpus.
 
@@ -451,7 +451,7 @@ class Corpus(BaseCorpus):
         Corpus
         BaseCorpus
         """
-        token_list = super(Corpus, self).view_context(ctx_type)
+        token_list = super(Corpus, self).view_contexts(ctx_type)
 
         if as_strings:
             token_list_ = []
@@ -576,7 +576,7 @@ class Corpus(BaseCorpus):
         context_data = []
         for i in xrange(len(self.context_data)):
             print 'Recomputing token breaks:', self.context_types[i]
-            tokens = self.view_context(self.context_types[i])
+            tokens = self.view_contexts(self.context_types[i])
             spans = [t[f(t)].size for t in tokens]
             tok = self.context_data[i].copy()
             tok['idx'] = np.cumsum(spans)
