@@ -36,6 +36,9 @@ class TfModel(BaseModel):
 
     Methods
     -------
+    train
+        Counts word-type occurrences per context and stores the
+        results in `self.matrix`
     save
         Takes a filename or file object and saves `self.matrix` and
         `self.context_type` in an npz archive.
@@ -50,15 +53,11 @@ class TfModel(BaseModel):
     scipy.sparse.coo_matrix
     """
     def __init__(self, corpus, context_type):
-        """
-        """
         self.corpus = corpus
         self.context_type = context_type
 
 
     def train(self):
-        """
-        """
         docs = self.corpus.view_contexts(self.context_type)
         shape = (self.corpus.words.size, len(docs))
 
