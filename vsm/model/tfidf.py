@@ -5,17 +5,75 @@ from vsm.model import BaseModel
 
 
 
-# A term may occur in every document. Then the idf of that term will be
-# 0; so the tfidf will also be zero.
-
-# A term may occur in no documents at all. This typically happens only
-# when that term has been masked. In that case the idf of that term is
-# undefined (division by zero). So also the tfidf of that term will be
-# undefined.
-
-
 class TfIdfModel(BaseModel):
+    """
+    Transforms a term-frequency model into a term-frequency
+    inverse-document-frequency model.
 
+    A TF-IDF model is term frequency model whose rows, corresponding
+    to word types, are scaled by IDF values. The idea is that a word
+    type which occurs in most of the contexts (i.e., documents) does
+    less to distinguish the contexts semantically than does a word
+    type which occurs in few of the contexts. The document frequency
+    is the number of documents in which a word occurs divided by the
+    number of documents. The IDF is the log of the inverse of the
+    document frequency.
+
+    As with a term-frequency model, word types correspond to matrix
+    rows and contexts correspond to matrix columns.
+
+    The data structure is a sparse float matrix.
+
+    Parameters
+    ----------
+    tf_matrix : scipy.sparse matrix
+        A matrix containing the term-frequency data.
+    context_type : string 
+        A string specifying the type of context over which the model
+        trainer is applied.
+
+    Attributes
+    ----------
+    corpus : Corpus
+        A Corpus object containing the training data
+    context_type : string
+        A string specifying the type of context over which the model
+        trainer is applied.
+    matrix : scipy.sparse.coo_matrix
+        A sparse matrix in 'coordinate' format that contains the
+        frequency counts.
+
+    Methods
+    -------
+    train
+        Computes the IDF values for the input term-frequency matrix,
+        scales the rows by these values and stores the results in
+        `self.matrix`
+    save
+        Takes a filename or file object and saves `self.matrix` and
+        `self.context_type` in an npz archive.
+    load
+        Takes a filename or file object and loads it as an npz archive
+        into a BaseModel object.
+
+    See Also
+    --------
+    tf.TfModel
+    BaseModel
+    scipy.sparse.coo_matrix
+
+
+    Notes
+    -----
+
+    A zero in the matrix might arise in two ways: (1) the word type
+    occurs in every document, in which case the IDF value is 0; (2)
+    the word type occurs in no document at all, in which case the IDF
+    value is actually undefined.
+
+    TODO: Add a parameter to the training to allow for NANs to appear
+    in case 2.
+    """
     def __init__(self, tf_matrix, context_type):
         """
         """
