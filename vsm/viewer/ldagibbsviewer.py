@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 from vsm import (
     enum_sort as _enum_sort_, 
@@ -366,6 +365,7 @@ class LDAGibbsViewer(object):
         Returns a plot of log probabilities for `range=[start, end]` by `step` 
         as a matplotlib.pyplot object. If `show=True` the plot is also drawn. 
         """
+        import matplotlib.pyplot as plt
 
         # If range is not specified, include the whole chain.
         if not(range):
