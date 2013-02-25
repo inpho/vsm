@@ -2,17 +2,23 @@ import numpy as np
 
 
 
-def enum_array(a):
+def enum_array(a, indices=None, field_name='i'):
     """
     """
-    a1 = np.array(np.arange(a.size))
-    return zip_arr(a1, a, field_names=['i', 'value'])    
+    a1 = np.arange(a.size)
+
+    if indices == None:
+    	return zip_arr(a1, a, field_names=[field_name, 'value'])    
+	
+    else:
+	return zip_arr(indices, a, field_names=[field_name, 'value'])
+
    
 
-def enum_sort(a, filter_nan=False):
+def enum_sort(a, indices=None, field_name='i', filter_nan=False):
     """
     """
-    a = enum_array(a)
+    a = enum_array(a, indices, field_name)
     a.sort(order='value')
     a = a[::-1]
 
