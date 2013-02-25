@@ -380,7 +380,7 @@ class Corpus(BaseCorpus):
         
     Methods
     -------
-    view_context
+    view_contexts
         Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly. The optional parameter `strings` takes
         a boolean value: True to view string representations of words;
@@ -477,7 +477,7 @@ class Corpus(BaseCorpus):
         ----------
         ctx_type : string-like
            The type of a tokenization.
-        strings : Boolean, optional
+        as_strings : Boolean, optional
             If True, string representations of words are returned.
             Otherwise, integer representations are returned. Default
             is `False`.
