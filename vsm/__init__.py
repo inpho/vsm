@@ -5,9 +5,9 @@ import numpy as np
 def enum_array(a):
     """
     """
-    return np.array(list(enumerate(a)),
-                    dtype=[('i', np.int32),('value', a.dtype)])
-
+    a1 = np.array(np.arange(a.size))
+    return zip_arr(a1, a, field_names=['i', 'value'])    
+   
 
 def enum_sort(a, filter_nan=False):
     """
@@ -20,6 +20,21 @@ def enum_sort(a, filter_nan=False):
         a = a[np.isfinite(a['value'])]
         
     return a
+
+
+def zip_arr(arr_1, arr_2, field_names=['arr_1','arr_2']):
+    """
+    Takes two arrays and returns a zipped structured array.
+    """
+    if field_names:
+        dt = [(field_names[0], arr_1.dtype), (field_names[1], arr_2.dtype)]
+
+    new_arr = np.empty_like(arr_1, dtype=dt)
+
+    new_arr[new_arr.dtype.names[0]][:] = arr_1[:]
+    new_arr[new_arr.dtype.names[1]][:] = arr_2[:]
+    
+    return new_arr
 
 
 def map_strarr(arr, m, k, new_k=None):
