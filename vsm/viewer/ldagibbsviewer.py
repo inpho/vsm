@@ -33,6 +33,15 @@ from similarity import (
 
 class LDAGibbsViewer(object):
     """
+    A class for viewing a topic model estimated by `LDAGibbs`
+
+    Parameters
+    ----------
+    corpus : Corpus
+        Source of observed data
+    model : LDAGibbs object
+        A topic modeled fitted by `LDAGibbs`
+
     """
     def __init__(self, corpus, model):
         """
@@ -153,7 +162,8 @@ class LDAGibbsViewer(object):
             are printed in this order. Default is ascending from 0 to K-1, where K is the 
             number of topics.
         as_string : boolean
-            ?
+            If true, each topic displays words rather than its ID numbers. Default is True.
+
         
         Returns
         ----------
@@ -204,7 +214,7 @@ class LDAGibbsViewer(object):
             Number of words shown for each topic. If this is i, i top probability words 
             are shown for each topic. Default is 10.
         as_string : boolean
-            ?
+            If true, each topic displays words rather than its ID numbers. Default is True.
         
         Returns
         ----------
@@ -284,8 +294,12 @@ class LDAGibbsViewer(object):
 
         Returns
         ----------
-        Z_w : 
-             
+        Z_w : a LabeledColumn Object
+            A structured array consisting of three columns. Each column is a list of:
+            (1) name/ID of document containing `word`
+            (2) relative position of `word` in the document
+            (3) Topic number assigned to the token.
+
         """
         w, word = self._res_word_type(word)
 
