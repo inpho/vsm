@@ -39,11 +39,13 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
     
     # Compute similarities
     w_arr = row_cosines(word, mat, norms=norms)
-    w_arr = enum_sort(w_arr, filter_nan=filter_nan)
+
+    if as_strings:
+        w_arr = enum_sort(w_arr, indices=corp.words, field_name='word')
+    else:
+    	w_arr = enum_sort(w_arr, filter_nan=filter_nan)
 
     # Label data
-    if as_strings:
-        w_arr = map_strarr(w_arr, corp.words, k='i', new_k='word')
     w_arr = w_arr.view(LabeledColumn)
     w_arr.col_header = 'Words: ' + ', '.join(labels)
     w_arr.subcol_headers = ['Word', 'Cosine']
@@ -111,13 +113,15 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
 
     # Compute similarites
     d_arr = row_cosines(doc, mat, norms=norms)
-    d_arr = enum_sort(d_arr, filter_nan=filter_nan)
 
     # Label data
     if as_strings:
         md = corp.view_metadata(context_type)
         docs = label_fn(md)
-        d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
+        d_arr = enum_sort(d_arr, indices=docs, field_name='doc')
+    else:
+	d_arr = enum_sort(d_arr, filter_nan=filter_nan)
+
     d_arr = d_arr.view(LabeledColumn)
     d_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
     d_arr.subcol_headers = ['Document', 'Prob']
@@ -153,13 +157,15 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
 
     # Compute cosines
     d_arr = row_cosines(doc, mat, norms=norms)
-    d_arr = enum_sort(d_arr, filter_nan=filter_nan)
 
     # Label data
     if as_strings:
         md = corp.view_metadata(context_type)
         docs = label_fn(md)
-        d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
+        d_arr = enum_sort(d_arr, indices=docs, field_name='doc')
+    else:
+        d_arr = enum_sort(d_arr, filter_nan=filter_nan)
+
     d_arr = d_arr.view(LabeledColumn)
     # TODO: Finish this header
     d_arr.col_header = 'Documents: '
