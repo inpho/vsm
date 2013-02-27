@@ -368,6 +368,48 @@ class LDAGibbsViewer(object):
     def sim_word_top(self, word_or_words, weights=[], filter_nan=True,
                      show_topics=True, print_len=10, as_strings=True):
         """
+        A wrapper of `sim_word_top` in similarity.py. 
+
+        Intuitively, the function sorts topics according to their 
+        "relevance" to the query `word_or_words`.
+        
+        Technically, it creates a pseudo-topic consisting of `word_or_words`
+        and computes the cosine values between that pseudo-topic and every
+        topic in the simplex defined by the probability distribution of words
+        conditional on topics. 
+        
+        If weights are not provided, the word list
+        is represented in the space of topics as a topic which assigns
+        equal non-zero probability to each word in `words` and 0 to every
+        other word in the corpus. Otherwise, each word in `words` is
+        assigned the provided weight.
+        
+        Parameters
+        ----------
+        word_or_words : string or list of string
+            Query word(s) to which cosine values are calculated
+        weights : list of floating point
+            Specify weights for each query word in `word_or_words`. 
+            Default uses equal weights.
+        filter_nan : boolean
+            ?
+        show_topics : boolean
+            If true, topics are represented by their number and 
+            distribution over words. Otherwise, only topic numbers
+            are shown. Default is true.            
+        print_len : int
+            Number of words printed by pretty-pringing function
+            Default is 10.
+        as_strings : boolean
+            If false, words of each topic are represented by 
+            their ID number. Default is true.
+
+        Returns
+        ----------
+        k_arr : a LabeledColumn object
+            A structured array of topics sorted by their cosines values 
+            with the query word(s).
+
         """
         sim = _sim_word_top_(self.corpus, self.model.top_word, word_or_words,
                              weights=weights, norms=self._topic_norms, 
@@ -427,6 +469,12 @@ class LDAGibbsViewer(object):
             Default is 10.
         filter_nan : boolean
             ?
+
+        Returns
+        ----------
+        w_arr : a LabeledColumn object
+            A 2-dim array containing words and their cosine values to 
+            `word_or_words`. 
 
         """
         return _sim_word_word_(self.corpus, self.model.top_word.T, 
