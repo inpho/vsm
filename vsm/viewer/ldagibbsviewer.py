@@ -401,6 +401,33 @@ class LDAGibbsViewer(object):
     def sim_word_word(self, word_or_words, weights=None, 
                       filter_nan=True, print_len=10, as_strings=True):
         """
+        A wrapper of `sim_word_word` in similarity.py.
+        
+        Computes and sorts the cosine values between a word or list of
+        words and every word based on the topic distributions.
+        Hence a pair of words (w1, w2) is similar according to this 
+        function if P(w1|k) ~= P(w2|k) for every topic k. 
+        
+        If weights are provided, the word list is represented as the 
+        weighted average of the words in the list. If weights are not 
+        provided, the arithmetic mean is used.
+
+        Parameters
+        ----------
+        word_or_words : string or list of string
+            Query word(s) to which cosine values are calculated
+        weights : list of floating point
+            Specify weights for each query word in `word_or_words`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        as_strings : boolean
+            If true, returns a list of words rather than IDs. 
+            Default is true.
+        print_len : int
+            Number of words printed by pretty-pringing function
+            Default is 10.
+        filter_nan : boolean
+            ?
+
         """
         return _sim_word_word_(self.corpus, self.model.top_word.T, 
                                word_or_words, weights=weights, 
