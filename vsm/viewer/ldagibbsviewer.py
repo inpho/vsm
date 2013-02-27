@@ -405,7 +405,7 @@ class LDAGibbsViewer(object):
         return _sim_word_word_(self.corpus, self.model.top_word.T, 
                                word_or_words, weights=weights, 
                                norms=self._word_norms, filter_nan=filter_nan, 
-                               print_len=print_len, as_strings=True)
+                               print_len=print_len, as_strings=as_strings)
 
 
     def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
@@ -416,7 +416,7 @@ class LDAGibbsViewer(object):
                              self.model.context_type, doc_or_docs,
                              norms=self._doc_norms, print_len=print_len,
                              filter_nan=filter_nan, 
-                             label_fn=label_fn, as_strings=True)
+                             label_fn=label_fn, as_strings=as_strings)
     
 
     def simmat_words(self, word_list):
