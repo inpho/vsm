@@ -168,7 +168,7 @@ class LDAGibbsViewer(object):
         Returns
         ----------
         table : a DataTable object.
-            ?
+            A structured array of topics.
 
         """
         if len(k_indices) == 0:
@@ -219,7 +219,7 @@ class LDAGibbsViewer(object):
         Returns
         ----------
         k_arr : a DataTable object.
-            ?
+            A structured array of topics sorted by entropy.
 
         """
         # Normalize the document-topic matrix so that documents are
@@ -248,7 +248,7 @@ class LDAGibbsViewer(object):
     def doc_topics(self, doc, print_len=10):
         """
         Returns distribution P(K|D=d) over topics K for document d. 
-        
+
         Parameters
         ----------
         doc : int or string
@@ -260,8 +260,10 @@ class LDAGibbsViewer(object):
         
         Returns
         ----------
-        k_arr : ?
-        
+        k_arr : a LabeledColumn object
+            An array of topics (represented by their number) and the corresponding 
+            probabilities.
+
         """
         d, label = self._res_doc_type(doc)
 
