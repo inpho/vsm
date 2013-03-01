@@ -1,9 +1,9 @@
 import numpy as np
 
 
-def enum_matrix1(arr, axis=0, indices=None, field_name='i'):
+def enum_matrix1(arr, axis=0, indices=[], field_name='i'):
 
-    if not indices:
+    if len(indices) = 0:
         indices = np.arange(arr.shape[0])
     dt = [(field_name, indices.dtype), ('value', arr.dtype)]
     mt = np.empty(shape=arr.shape, dtype=dt)
@@ -20,9 +20,9 @@ def enum_matrix1(arr, axis=0, indices=None, field_name='i'):
     return mt
 
 
-def enum_matrix2(arr, axis=0, indices=None, field_name='i'):
+def enum_matrix2(arr, axis=0, indices=[], field_name='i'):
 
-    if not indices:
+    if len(indices) = 0:
         indices = np.arange(arr.shape[0])
     dt = [(field_name, indices.dtype), ('value', arr.dtype)]
     mt = np.empty(shape=arr.shape, dtype=dt)
