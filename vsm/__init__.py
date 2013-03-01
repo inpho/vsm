@@ -1,22 +1,89 @@
 import numpy as np
 
 
+def enum_matrix1(arr, axis=0, indices=None, field_name='i'):
+
+    if not indices:
+        indices = np.arange(arr.shape[0])
+    dt = [(field_name, indices.dtype), ('value', arr.dtype)]
+    mt = np.empty(shape=arr.shape, dtype=dt)
+
+    mt['value'][:, :] = arr[:, :]
+
+    for i in xrange(arr.shape[1]):
+        mt[field_name][:, i] = indices[:]
+
+    for i in xrange(mt.shape[1]):
+        mt[:, i].sort(order='value')
+        mt[:, i] = mt[:, i][::-1]
+
+    return mt
+
+
+def enum_matrix2(arr, axis=0, indices=None, field_name='i'):
+
+    if not indices:
+        indices = np.arange(arr.shape[0])
+    dt = [(field_name, indices.dtype), ('value', arr.dtype)]
+    mt = np.empty(shape=arr.shape, dtype=dt)
+
+    if len(arr.shape) > 1:   
+	for i in xrange(arr.shape[1]):
+	    idx = np.argsort(mt['value'][:, i])
+	    mt[field_name][:, i] = idx[:]
+            mt['value'][:, i] = arr[:, i][idx]
+
+    else:
+	idx = np.argsort(arr)
+	mt[field_name][:] = idx[:]
+	mt['value'][:] = arr[idx]
+
+    return mt
+
+
+def argsort(v, field_name='i'):
+    indices = np.argsort(v)
+    dt = [(field_name, indices.dtype), ('value', v.dtype)]
+
+    new_arr = np.empty(shape=v.shape, dtype=dt)
+    new_arr[new_arr.dtype.names[0]][:] = indices[:]
+    new_arr[new_arr.dtype.names[1]][:] = v[indices]
+
+    return new_arr   
+    
+def enum_sort2(arr, indices=None, field_name='i', filter_nan=False):
+    """
+    new : argsort -> new array  time: (int, 0.03) (str, 0.08)
+    """
+    idx = np.argsort(arr)
+    dt = [(field_name, idx.dtype), ('value', arr.dtype)]
+
+    new_arr = np.empty(shape=arr.shape, dtype=dt)
+    new_arr[new_arr.dtype.names[0]][:] = idx[:]
+    new_arr[new_arr.dtype.names[1]][:] = arr[idx]
+
+    if filter_nan:
+        new_arr = new_arr[np.isfinite(new_arr['value'])]
+        
+    return new_arr
+
+
 
 def enum_array(a, indices=None, field_name='i'):
     """
+    inefficient
     """
     a1 = np.arange(a.size)
 
     if indices == None:
     	return zip_arr(a1, a, field_names=[field_name, 'value'])    
-	
     else:
 	return zip_arr(indices, a, field_names=[field_name, 'value'])
 
-   
 
 def enum_sort(a, indices=None, field_name='i', filter_nan=False):
     """
+    old : enum_array -> sort   time: (int, 0.45) (str, 0.40)
     """
     a = enum_array(a, indices, field_name)
     a.sort(order='value')
