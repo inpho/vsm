@@ -9,7 +9,7 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     """
     if len(indices) == 0:
         indices = np.arange(arr.shape[1])
-	ind = np.array([indices.copy() for i in xrange(arr.shape[0])])
+    ind = np.array([indices.copy() for i in xrange(arr.shape[0])])
     dt = [(field_name, indices.dtype), ('value', arr.dtype)]
     mt = zip_arr(ind, arr, field_names=[field_name, 'value'])
 
