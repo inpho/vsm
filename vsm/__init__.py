@@ -36,16 +36,21 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
 
 
     
-def enum_sort(arr, indices=None, field_name='i', filter_nan=False):
+def enum_sort(arr, indices=[], field_name='i', filter_nan=False):
     """
     Takes a 1-dimensional array and returns a sorted structured array.
     """
     idx = np.argsort(arr)
-    dt = [(field_name, idx.dtype), ('value', arr.dtype)]
+    if len(indices) == 0:
+	indices = np.arange(arr.shape[0])
+    else:
+	indices = np.array(indices)
+	
+    dt = [(field_name, indices.dtype), ('value', arr.dtype)]
 
     new_arr = np.empty(shape=arr.shape, dtype=dt)
-    new_arr[new_arr.dtype.names[0]] = idx
-    new_arr[new_arr.dtype.names[1]] = arr[idx]
+    new_arr[field_name] = indices[idx]
+    new_arr['value'] = arr[idx]
 
     if filter_nan:
         new_arr = new_arr[np.isfinite(new_arr['value'])]
