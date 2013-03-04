@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from vsm import (
+    enum_matrix as _enum_matrix_,
     enum_sort as _enum_sort_, 
     map_strarr as _map_strarr_,
     isstr as _isstr_)
@@ -151,14 +152,17 @@ class LDAGibbsViewer(object):
                self._topic_sums_w[k_indices][:, np.newaxis])
         
         # Index topics
-        k_arr = np.apply_along_axis(_enum_sort_, 1, phi)
+	# k_arr = np.apply_along_axis(_enum_sort_, 1, phi)
 
         # Label data
         if as_strings:
+	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
+				 field_name='word')
+	    """
             f = lambda v: _map_strarr_(v, self.corpus.words, 
                                        k='i', new_k='word')
             k_arr = np.apply_along_axis(f, 1, k_arr)
-
+	    """
         table = []
         for i,k in enumerate(k_indices):
             ch = 'Topic ' + str(k)
