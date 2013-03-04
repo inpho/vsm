@@ -8,21 +8,22 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     structured array with indices.
     """
     if len(indices) == 0:
-        indices = np.arange(arr.shape[0]*arr.shape[1]).reshape(arr.shape)
+        indices = np.arange(arr.shape[1])
+	ind = np.array([indices.copy() for i in xrange(arr.shape[0])])
     dt = [(field_name, indices.dtype), ('value', arr.dtype)]
-    mt = zip_arr(indices, arr, field_names=[field_name, 'value'])
+    mt = zip_arr(ind, arr, field_names=[field_name, 'value'])
 
     if len(arr.shape) > 1:  
 	if axis:
 	    for i in xrange(arr.shape[axis]):
 	        idx = np.argsort(mt['value'][:,i])
-	        mt[field_name][:,i] = indices[:,i][idx]
+	        mt[field_name][:,i] = ind[:,i][idx]
                 mt['value'][:,i] = arr[:,i][idx]
 	        mt[:,i] = mt[:,i][::-1]	
 	else: 
             for i in xrange(arr.shape[axis]):
 	        idx = np.argsort(mt['value'][i])
-	        mt[field_name][i] = indices[i][idx]
+	        mt[field_name][i] = ind[i][idx]
                 mt['value'][i] = arr[i][idx]
 	        mt[i,:] = mt[i,:][::-1]
 
@@ -37,13 +38,14 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     
 def enum_sort(arr, indices=None, field_name='i', filter_nan=False):
     """
+    Takes a 1-dimensional array and returns a sorted structured array.
     """
     idx = np.argsort(arr)
     dt = [(field_name, idx.dtype), ('value', arr.dtype)]
 
     new_arr = np.empty(shape=arr.shape, dtype=dt)
-    new_arr[new_arr.dtype.names[0]][:] = idx[:]
-    new_arr[new_arr.dtype.names[1]][:] = arr[idx]
+    new_arr[new_arr.dtype.names[0]] = idx
+    new_arr[new_arr.dtype.names[1]] = arr[idx]
 
     if filter_nan:
         new_arr = new_arr[np.isfinite(new_arr['value'])]
