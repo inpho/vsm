@@ -77,6 +77,16 @@ class TfModel(BaseModel):
                                         dtype=np.int32)
 
 
+def combine_models(model_1, model_2):
+    """Takes two models. Chooses which model is bigger and clones it to a third
+    model. It then iterates over the second model adding values that already
+    exists into the third model and creating new entries for those that
+    didn't already exist"""
+    size_1 = sparse.model_1.get_shape()
+    size_2 = sparse.model_2.get_shape()
+
+
+
 
 def test_TfModel():
 
