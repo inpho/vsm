@@ -1,8 +1,7 @@
 import numpy as np
 
-from vsm.viewer import def_label_fn, doc_label_name
+from vsm.viewer import doc_label_name
 
-#TODO: Documentation update.
 
 
 
@@ -27,8 +26,6 @@ def split_corpus(arr, indices):
 
 class BaseCorpus(object):
     """
-    **This documentation is out-of-date.**
-    
     A BaseCorpus object stores a corpus along with its tokenizations
     (e.g., as sentences, paragraphs or documents).
 
@@ -76,10 +73,18 @@ class BaseCorpus(object):
 
     Methods
     -------
-    view_context
+    meta_int
+	Takes a type of tokenization and a query and 
+	returns the index of the metadata found in the query.
+    get_metadatum
+	Takes a type of tokenization and a query and returns 
+	the metadatum corresponding to the query and the field.
+    view_contexts
         Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly.
     view_metadata
+	Takes a type of tokenization and returns a view of the metadata
+	of the tokenization.
 
     Examples
     --------
@@ -87,7 +92,8 @@ class BaseCorpus(object):
     >>> corpus = ['the', 'dog', 'chased', 'the', 'cat',
                   'the', 'cat', 'ran', 'away']
     >>> context_types = ['sentences']
-    >>> context_data = [[(5, 'transitive'), (9, 'intransitive')]]
+    >>> context_data = [np.array([(5, 'transitive'), (9, 'intransitive')],
+                        dtype=[('idx', '<i8'), ('sent_label', '|S16')])]
 
     >>> from vsm.corpus import BaseCorpus
     >>> c = BaseCorpus(corpus, context_types=context_types, context_data=context_data)
@@ -99,13 +105,19 @@ class BaseCorpus(object):
     array(['ran', 'away', 'chased', 'dog', 'cat', 'the'],
           dtype='|S6')
 
-    >>> c.view_context('sentences')
+    >>> c.meta_int('sentences',{'sent_label': 'intransitive'}, 'sent_label')
+    1
+
+    >>> b.get_metadatum('sentences', {'sent_label': 'intransitive'}, 'sent_label') 
+    'intransitive'
+
+    >>> c.view_contexts('sentences')
     [array(['the', 'dog', 'chased', 'the', 'cat'],
           dtype='|S6'),
      array(['the', 'cat', 'ran', 'away'],
           dtype='|S6')]
 
-    >>> c.view_metadata('sentences')[0]
+    >>> c.view_metadata('sentences')[0]['sent_label']
     'transitive'
 
     """
@@ -130,12 +142,12 @@ class BaseCorpus(object):
 
     def _gen_context_types(self, context_types):
         """
-        Missing context types are filled in with 'tok_' + an index.
+        Missing context types are filled in with 'ctx_' + an index.
         """
         if self.context_data:
             a = len(context_types) if context_types else 0
             for i in xrange(a, len(self.context_data)):
-                context_types.append('tok_' + str(i))
+                context_types.append('ctx_' + str(i))
 
         self.context_types = context_types
 
@@ -165,7 +177,7 @@ class BaseCorpus(object):
         for i, j in enumerate(indices):
             if i < len(indices) - 1 and j > indices[i + 1]:
                 msg = 'malsorted tokenization:'\
-                      ' tok ' + str(j) + ' and ' + str(indices[i + 1])
+                      ' ctx ' + str(j) + ' and ' + str(indices[i + 1])
 
                 raise Exception(msg)
                     
@@ -204,8 +216,25 @@ class BaseCorpus(object):
 
     def meta_int(self, ctx_type, query):
         """
+	Returns the index of the metadata found in the query.
+
+	Parameters
+        ----------
+        ctx_type : string-like
+            The type of a tokenization.
+	query: dictionary-like
+	    Dictionary with a key, value being a field, label in metadata.
+
+        Returns
+        -------
+        The index of the metadata found in the query.
+
+        See Also
+        --------
+        BaseCorpus
         """
-        tok = self.view_metadata(ctx_type)
+
+	tok = self.view_metadata(ctx_type)
 
         ind_set = np.ones(tok.size, dtype=bool)
         for k,v in query.iteritems():
@@ -224,12 +253,30 @@ class BaseCorpus(object):
 
     def get_metadatum(self, ctx_type, query, field):
         """
+	Returns the metadatum corresponding to the query and the field.
+
+	Parameters
+        ----------
+        ctx_type : string-like
+            The type of a tokenization.
+	query : dictionary-like
+	    Dictionary with a key, value being a field, label in metadata.
+	field : string
+	    Field of the metadata
+
+        Returns
+        -------
+        The metadatum corresponding to the query and the field.
+
+        See Also
+        --------
+        BaseCorpus
         """
         i = self.meta_int(ctx_type, query)
         return self.view_metadata(ctx_type)[i][field]
 
 
-    def view_context(self, ctx_type):
+    def view_contexts(self, ctx_type):
         """
         Displays a tokenization of the corpus.
 
@@ -287,14 +334,12 @@ class BaseCorpus(object):
 
 class Corpus(BaseCorpus):
     """
-    **This documentation is out-of-date.**
-    
     The goal of the Corpus class is to provide an efficient
     representation of a textual corpus.
 
     A Corpus object contains an integer representation of the text and
     maps to permit conversion between integer and string
-    representations of a given word.
+    epresentations of a given word.
 
     As a BaseCorpus object, it includes a dictionary of tokenizations
     of the corpus and a method for viewing (without copying) these
@@ -329,40 +374,27 @@ class Corpus(BaseCorpus):
     words : 1-D string array
         The indexed set of strings occurring in corpus. It is a
         string-typed array.
-    words_int : 1-D 32-bit integer array
+    words_int : 1-D 32-bit integer dictionary
         A dictionary whose keys are `words` and whose values are their
         corresponding integers (i.e., indices in `words`).
-    tok : dict with 1-D numpy arrays as values
-        The tokenization dictionary. Stems of key names are given by
-        `context_types`. A key context_type whose value is the array of indices
-        for a tokenization has the suffix '_indices'. A key context_type whose
-        value is the metadata array for a tokenization has the suffix
-        '_metadata'.
         
     Methods
     -------
-    view_context
+    view_contexts
         Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly. The optional parameter `strings` takes
         a boolean value: True to view string representations of words;
         False to view integer representations of words. Default is
         `False`.
-    extract_words
-        Static method. Takes an array-like object and returns an
-        indexed set of the elements in the object as a 1-D numpy
-        array.
-    gen_lexicon
-        Returns a copy of itself but with `corpus`, `tokens`, and
-        `tokens_meta` set to None. Occasionally, the only information
-        needed from the Corpus object is the mapping between string
-        and integer representations of words; this provides a smaller
-        version of the corpus object for such situations.
     save
         Takes a filename and saves the data contained in a Corpus
         object to a `npy` file using `numpy.savez`.
     load
         Static method. Takes a filename, loads the file data into a
-        Corpus object and returns the object
+        Corpus object and returns the object.
+    apply_stoplist
+	Takes a list of stopwords and returns a copy of the corpus
+	with the stopwords removed.
     
     See Also
     --------
@@ -373,33 +405,41 @@ class Corpus(BaseCorpus):
 
     >>> text = ['I', 'came', 'I', 'saw', 'I', 'conquered']
     >>> context_types = ['sentences']
-    >>> context_data = [[(2, 'Veni'), (4, 'Vidi'), (6, 'Vici')]]
+    >>> context_data = [np.array([(2, 'Veni'), (4, 'Vidi'), (6, 'Vici')],
+                            dtype=[('idx', '<i8'), ('sent_label', '|S6')])]
 
     >>> from vsm.corpus import Corpus
     >>> c = Corpus(text, context_types=context_types, context_data=context_data)
     >>> c.corpus
-    array([0, 3, 0, 2, 0, 1], dtype=int32)
+    array([0, 1, 0, 2, 0, 3], dtype=int32)
     
     >>> c.words
-    array(['I', 'conquered', 'saw', 'came'],
+    array(['I', 'came', 'saw', 'conquered'],
           dtype='|S9')
 
     >>> c.words_int['saw']
     2
 
-    >>> c.view_context('sentences')
+    >>> c.view_contexts('sentences')
     [array([0, 3], dtype=int32), array([0, 2], dtype=int32),
      array([0, 1], dtype=int32)]
 
-    >>> c.view_context('sentences', strings=True)
-    [array(['I', 'came'],
-          dtype='|S4'), array(['I', 'saw'],
-          dtype='|S3'), array(['I', 'conquered'],
-          dtype='|S9')]
+    >>> c.view_contexts('sentences', as_strings=True)
+	[array(['I', 'came'], 
+	      dtype='|S9'),
+	 array(['I', 'saw'], 
+	      dtype='|S9'),
+	 array(['I', 'conquered'], 
+	      dtype='|S9')]
 
-    >>> c.view_metadata('sentences')[1]
+    >>> c.view_metadata('sentences')[1]['sent_label']
     'Vidi'
     
+    >>> c = c.apply_stoplist(['saw'])
+    >>> c.words
+    array(['I', 'came', 'conquered'], 
+      dtype='|S9')
+
     """
     
     def __init__(self,
@@ -429,7 +469,7 @@ class Corpus(BaseCorpus):
         self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
 
-    def view_context(self, ctx_type, as_strings=False):
+    def view_contexts(self, ctx_type, as_strings=False):
         """
         Displays a tokenization of the corpus.
 
@@ -437,7 +477,7 @@ class Corpus(BaseCorpus):
         ----------
         ctx_type : string-like
            The type of a tokenization.
-        strings : Boolean, optional
+        as_strings : Boolean, optional
             If True, string representations of words are returned.
             Otherwise, integer representations are returned. Default
             is `False`.
@@ -451,7 +491,7 @@ class Corpus(BaseCorpus):
         Corpus
         BaseCorpus
         """
-        token_list = super(Corpus, self).view_context(ctx_type)
+        token_list = super(Corpus, self).view_contexts(ctx_type)
 
         if as_strings:
             token_list_ = []
@@ -526,7 +566,8 @@ class Corpus(BaseCorpus):
         Corpus.load
         numpy.savez
         """
-        print 'Saving corpus as', file
+	
+	print 'Saving corpus as', file
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
         arrays_out['words'] = self.words
@@ -540,11 +581,29 @@ class Corpus(BaseCorpus):
 
 
     def apply_stoplist(self, stoplist=[], freq=0):
-        """
+        """ 
         Takes a Corpus object and returns a copy of it with words in the
-        stoplist removed and with words of frequency <= `freq1` removed.
+        stoplist removed and with words of frequency <= `freq` removed.
+
+        Parameters
+        ----------
+	stoplist : list
+	    The list of words to be removed.
+	freq : integer, optional
+	    A threshold where words of frequency <= 'freq' are removed. 
+	    Default is 0.
+            
+        Returns
+        -------
+	Copy of corpus with words in the stoplist and words of frequnecy
+	<= 'freq' removed.
+
+        See Also
+        --------
+        Corpus
         """
-        if freq:
+        
+	if freq:
             #TODO: Use the TF model instead
 
             print 'Computing collection frequencies'
@@ -576,7 +635,7 @@ class Corpus(BaseCorpus):
         context_data = []
         for i in xrange(len(self.context_data)):
             print 'Recomputing token breaks:', self.context_types[i]
-            tokens = self.view_context(self.context_types[i])
+            tokens = self.view_contexts(self.context_types[i])
             spans = [t[f(t)].size for t in tokens]
             tok = self.context_data[i].copy()
             tok['idx'] = np.cumsum(spans)
