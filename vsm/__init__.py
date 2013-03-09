@@ -2,6 +2,63 @@ import numpy as np
 
 
 
+def enum_matrix(arr, axis=0, indices=[], field_name='i'):
+    """
+    Takes a 1-dimensional or 2-dimensional array and returns a sorted
+    structured array with indices.
+    """
+    if len(indices) == 0:
+        indices = np.arange(arr.shape[1])
+    ind = np.array([indices.copy() for i in xrange(arr.shape[0])])
+    dt = [(field_name, indices.dtype), ('value', arr.dtype)]
+    mt = zip_arr(ind, arr, field_names=[field_name, 'value'])
+
+    if len(arr.shape) > 1:  
+	if axis:
+	    for i in xrange(arr.shape[axis]):
+	        idx = np.argsort(mt['value'][:,i])
+	        mt[field_name][:,i] = ind[:,i][idx]
+                mt['value'][:,i] = arr[:,i][idx]
+	        mt[:,i] = mt[:,i][::-1]	
+	else: 
+            for i in xrange(arr.shape[axis]):
+	        idx = np.argsort(mt['value'][i])
+	        mt[field_name][i] = ind[i][idx]
+                mt['value'][i] = arr[i][idx]
+	        mt[i,:] = mt[i,:][::-1]
+
+    else:
+	idx = np.argsort(arr)
+	mt[field_name][:] = idx[:]
+	mt['value'][:] = arr[idx]
+
+    return mt
+
+
+    
+def enum_sort(arr, indices=[], field_name='i', filter_nan=False):
+    """
+    Takes a 1-dimensional array and returns a sorted structured array.
+    """
+    idx = np.argsort(arr)
+    if len(indices) == 0:
+	indices = np.arange(arr.shape[0])
+    else:
+	indices = np.array(indices)
+	
+    dt = [(field_name, indices.dtype), ('value', arr.dtype)]
+
+    new_arr = np.empty(shape=arr.shape, dtype=dt)
+    new_arr[field_name] = indices[idx]
+    new_arr['value'] = arr[idx]
+
+    if filter_nan:
+        new_arr = new_arr[np.isfinite(new_arr['value'])]
+        
+    return new_arr[::-1]
+
+
+
 def enum_array(a, indices=None, field_name='i'):
     """
     """
@@ -9,23 +66,9 @@ def enum_array(a, indices=None, field_name='i'):
 
     if indices == None:
     	return zip_arr(a1, a, field_names=[field_name, 'value'])    
-	
     else:
 	return zip_arr(indices, a, field_names=[field_name, 'value'])
 
-   
-
-def enum_sort(a, indices=None, field_name='i', filter_nan=False):
-    """
-    """
-    a = enum_array(a, indices, field_name)
-    a.sort(order='value')
-    a = a[::-1]
-
-    if filter_nan:
-        a = a[np.isfinite(a['value'])]
-        
-    return a
 
 
 def zip_arr(arr_1, arr_2, field_names=['arr_1','arr_2']):

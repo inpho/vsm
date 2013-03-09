@@ -1,8 +1,9 @@
 import numpy as np
 
 from vsm import (
-    enum_sort as _enum_sort_, 
     map_strarr as _map_strarr_,
+    enum_matrix as _enum_matrix_,
+    enum_sort as _enum_sort_, 
     isstr as _isstr_)
 
 from vsm.linalg import row_norms as _row_norms_
@@ -179,15 +180,11 @@ class LDAGibbsViewer(object):
         phi = (self.model.top_word[k_indices] / 
                self._topic_sums_w[k_indices][:, np.newaxis])
         
-        # Index topics
-        k_arr = np.apply_along_axis(_enum_sort_, 1, phi)
-
         # Label data
         if as_strings:
-            f = lambda v: _map_strarr_(v, self.corpus.words, 
-                                       k='i', new_k='word')
-            k_arr = np.apply_along_axis(f, 1, k_arr)
-
+	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
+				 field_name='word')
+	
         table = []
         for i,k in enumerate(k_indices):
             ch = 'Topic ' + str(k)
@@ -348,7 +345,7 @@ class LDAGibbsViewer(object):
                               as_strings=False, label_fn=label_fn, 
                               filter_nan=filter_nan)
         
-        topics = _res_top_type_(topic_or_topics)
+	topics = _res_top_type_(topic_or_topics)
 
         if len(filter_words) > 0:
             white = set()
@@ -364,7 +361,7 @@ class LDAGibbsViewer(object):
             docs = label_fn(md)
             d_arr = _map_strarr_(d_arr, docs, k='i', new_k='doc')
 
-        return d_arr
+    	return d_arr
 
 
     def sim_word_top(self, word_or_words, weights=[], filter_nan=True,

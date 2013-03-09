@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.sparse import issparse
 
-from vsm import enum_sort, map_strarr, isstr, isint
+from vsm import enum_matrix, enum_sort, map_strarr, isstr, isint
 
 from vsm.linalg import row_cosines, row_cos_mat
 
@@ -64,7 +64,8 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
     w_arr = row_cosines(word, mat, norms=norms)
 
     if as_strings:
-        w_arr = enum_sort(w_arr, indices=corp.words, field_name='word')
+        w_arr = enum_sort(w_arr, indices=corp.words, field_name='word',
+			filter_nan=filter_nan)
     else:
     	w_arr = enum_sort(w_arr, filter_nan=filter_nan)
 
