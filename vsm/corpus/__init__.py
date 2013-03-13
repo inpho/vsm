@@ -469,7 +469,7 @@ class Corpus(BaseCorpus):
         self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
 
-    def view_contexts(self, ctx_type, as_strings=False):
+    def view_contexts(self, ctx_type, as_strings=False, as_slices=False):
         """
         Displays a tokenization of the corpus.
 
@@ -481,6 +481,10 @@ class Corpus(BaseCorpus):
             If True, string representations of words are returned.
             Otherwise, integer representations are returned. Default
             is `False`.
+	as_slices : Boolean, optional
+            If True, a list of slices corresponding to 'ctx_type' is 
+	    returned. Otherwise, integer representations are returned.
+	    Default is `False`.
 
         Returns
         -------
@@ -492,7 +496,7 @@ class Corpus(BaseCorpus):
         BaseCorpus
         """
         token_list = super(Corpus, self).view_contexts(ctx_type)
-
+	 
         if as_strings:
             token_list_ = []
             for token in token_list:
@@ -500,6 +504,16 @@ class Corpus(BaseCorpus):
                 token_list_.append(token)
 
             return token_list_
+
+	if as_slices:
+	    meta_list = super(Corpus, self).view_metadata(ctx_type)
+	    indices = meta_list['idx'] 
+
+	    slices = []
+	    slices.append(slice(0, indices[0]))
+	    for i in xrange(len(indices) - 1):
+		slices.append(slice(indices[i], indices[i+1]))
+	    return slices	    
 
         return token_list
 	
