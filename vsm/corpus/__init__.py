@@ -125,7 +125,8 @@ class BaseCorpus(object):
                  corpus,
                  dtype=None,
                  context_types=[],
-                 context_data=[]):
+                 context_data=[],
+		 remove_empty=True):
 
         self.corpus = np.asarray(corpus, dtype=dtype)
         self.dtype = self.corpus.dtype
@@ -138,6 +139,9 @@ class BaseCorpus(object):
                 self.context_data.append(t)
 
         self._gen_context_types(context_types)
+
+	if remove_empty:
+	    self.remove_empty()
 
 
     def _gen_context_types(self, context_types):
@@ -190,6 +194,20 @@ class BaseCorpus(object):
 
         return True
 
+
+    def remove_empty(self):
+	"""
+	Removes empty tokenizations.
+	"""	
+	for j, t in enumerate(self.context_types):
+	    token_list = super(Corpus, self).view_contexts(t)
+
+ 	    indices = []
+	    for i, ctx in enumerate(token_list):
+	    	if len(ctx) < 1:
+		    indices.append(i)
+
+	    self.context_data[j] = np.delete(self.context_data[j], indices)	
 
 
     def view_metadata(self, ctx_type):
@@ -573,6 +591,7 @@ class Corpus(BaseCorpus):
         c.__set_words_int()
 
         return c
+
 
 
     def save(self, file):
