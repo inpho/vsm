@@ -291,159 +291,162 @@ class LdaCgsMulti(object):
 
         self.context_type = context_type
         self.contexts = corpus.view_contexts(context_type, as_slices=True)
-        self.contexts = [(i, self.contexts[i]) 
-                         for i in xrange(len(self.contexts))]
-
-        global _n_contexts
-        _n_contexts = mp.Value('i', lock=False)
-        _n_contexts = len(self.contexts)
 
         # Priors stored in shared arrays; set defaults if need be
         global _top_prior
-        _top_prior = mp.Array('d', _m_words, lock=False)
+        _top_prior = mp.Array('f', _m_words, lock=False)
         if len(top_prior) > 0:
             _top_prior[:] = top_prior
         else:
+            # Default is a flat prior of .01
             _top_prior[:] = np.ones(_m_words, dtype=np.float) * .01
 
         global _top_prior_sum
-        _top_prior_sum = mp.Value('d', lock=False)
+        _top_prior_sum = mp.Value('f', lock=False)
         _top_prior_sum = np.array(_top_prior[:]).sum()
 
         global _ctx_prior
-        _ctx_prior = mp.Array('d', _K, lock=False)
+        _ctx_prior = mp.Array('f', _K, lock=False)
         if len(top_prior) > 0:
             _ctx_prior[:] = ctx_prior
         else:
+            # Default is a flat prior of .01
             _ctx_prior[:] = np.ones(_K, dtype=np.float) * .01
 
-        # Posteriors stored in shared arrays
-        global _Z
-        _Z = mp.Array('l', len(_corpus), lock=False)
-        
+        # Topic posterior stored in shared array        
         global _word_top
-        _word_top = mp.Array('l', _m_words*_K, lock=False)
+        _word_top = mp.Array('i', _m_words*_K, lock=False)
 
-        global _top_ctx
-        _top_ctx = mp.Array('l', _K*_n_contexts, lock=False)
-
-        global _z_dist_norms
-        _z_dist_norms = mp.Array('d', _K, lock=False)
-        _z_dist_norms[:] = 1. / (np.ones(_K) * _top_prior_sum)
+        global _top_norms
+        _top_norms = mp.Array('f', _K, lock=False)
+        _top_norms[:] = 1. / (np.ones(_K) * _top_prior_sum)
 
         self.iterations = 0
-        update.init = True
+        update.train = False
 
         if log_prob:
+            update.logp = True
             self.log_prob = []
 
         
-    def logp(self):
-        """
-        """
-        word_top = (np.array(_word_top[:]).reshape(_m_words, _K) 
-                    + np.array(_top_prior[:])[:, np.newaxis])
-        top_ctx = (np.array(_top_ctx[:]).reshape(_K, _n_contexts) 
-                   + np.array(_ctx_prior[:])[:, np.newaxis])
-        log_wk = np.log(word_top / word_top.sum(0)[np.newaxis, :])
-        log_kc = np.log(top_ctx / top_ctx.sum(0)[np.newaxis, :])
-
-        log_p = 0
-        for c,s in self.contexts:
-            if (s.stop - s.start) > 0:
-                Z_d = _Z[s]
-                log_p += log_wk[_corpus[s], Z_d].sum()
-                log_p += log_kc[Z_d][:, c].sum()
-
-        return log_p
-
-
     def train(self, itr=500, verbose=True, n_proc=2):
 
-        ctx_chunks = np.array_split(self.contexts, n_proc-1)
-        if len(ctx_chunks) != n_proc:
-            ctx_chunks = np.array_split(self.contexts, n_proc)
+        if n_proc == 1:
+            ctx = [self.contexts]
+        else:
+            ctx = np.array_split(self.contexts, n_proc-1)
+            if len(ctx) != n_proc:
+                ctx = np.array_split(self.contexts, n_proc)
 
+        n_ctx = [(c[-1].stop - c[0].start) for c in ctx]
+        Z = [np.zeros(n, dtype=np.int) for n in n_ctx]
+        top_ctx = [np.zeros((_K, n), dtype=np.int) for n in n_ctx]
+
+        p=mp.Pool(n_proc)
 
         for t in xrange(self.iterations, self.iterations + itr):
-
-            if hasattr(self, 'log_prob'):
-                self.log_prob.append((t, self.logp()))
-
+        
             if verbose:
-                stdout.write('\rIteration %d: mapping' % t)
+                stdout.write('\rIteration %d: mapping  ' % t)
                 stdout.flush()
+
+            data = zip(ctx, n_ctx, Z, top_ctx)
 
             # For debugging
-            # results = map(update, ctx_chunks)
-            
-            # results will be a list of triples (Z, word_top, top_ctx)
-            p = mp.Pool(n_proc)
-            results = p.map(update, ctx_chunks)
-            p.close()
+            # results = map(update, data)
+
+            results = p.map(update, data)
 
             if verbose:
-                stdout.write('\rIteration %d: reducing' % t)
+                stdout.write('\rIteration %d: reducing ' % t)
                 stdout.flush()
 
-            for i in xrange(n_proc):
-                span = slice(ctx_chunks[i][0][1].start, ctx_chunks[i][-1][1].stop)
-                Z, word_top, top_ctx = results[i]
-                _Z[span] = Z[span]
-                _word_top[:] = _word_top[:] + word_top
-                _top_ctx[:] = _top_ctx[:] + top_ctx
+            ctx, n_ctx, Z, top_ctx, word_top, log_p = zip(*results)
 
-            top_counts = np.array(_word_top[:]).reshape(_m_words, _K).sum(axis=0)
-            _z_dist_norms[:] = 1. / (top_counts + _top_prior_sum)
+            _word_top_ = (np.frombuffer(_word_top, dtype=np.int32)
+                          + np.sum(word_top, axis=0))
+            _top_norms_ = 1. / (_word_top_.reshape(_m_words, _K).sum(axis=0)
+                                + _top_prior_sum)
 
-            update.init = False
+            _word_top[:] = _word_top_
+            _top_norms[:] = _top_norms_
+            del _word_top_, _top_norms_
+
+            update.train = True
+
+            if hasattr(self, 'log_prob'):
+                if verbose:
+                    stdout.write('\rIteration %d: log_prob=' % t)
+                    stdout.flush()
+
+                lp = np.sum(log_p)
+                self.log_prob.append((t, lp))
+                if verbose:
+                    stdout.write('%f' % lp)
+                    stdout.flush()
+                    stdout.write('\n')
+                    
+        p.close()
 
         if verbose:
             stdout.write('\n')
 
-        # TODO: For viewer alone. Update viewer and remove or update these.
-        self.top_word = (np.array(_word_top[:]).reshape(_m_words, _K) 
-                         + np.array(_top_prior[:])[:, np.newaxis]).T
-        self.doc_top = (np.array(_top_ctx[:]).reshape(_K, _n_contexts) 
-                        + np.array(_ctx_prior[:])[:, np.newaxis]).T
-        self.W = [np.array(_corpus[ctx], dtype=np.int) for i,ctx in self.contexts]
-        self.Z = [np.array(_Z[ctx], dtype=np.int) for i,ctx in self.contexts]
+        Z = np.hstack(Z)
+        top_ctx = np.hstack(top_ctx)
+        word_top = np.frombuffer(_word_top, dtype=np.int32).reshape(_m_words,_K)
 
+        # TODO: For legacy viewer only. Update viewer and remove or update these.
+        _top_prior_ = np.frombuffer(_top_prior, dtype=np.float32)[:, np.newaxis]
+        _ctx_prior_ = np.frombuffer(_ctx_prior, dtype=np.float32)[:, np.newaxis]
+        self.top_word = (word_top + _top_prior_).T
+        self.doc_top = (top_ctx + _ctx_prior_).T
+        self.W = [np.array(_corpus[ctx], dtype=np.int) for ctx in self.contexts]
+        self.Z = [Z[ctx] for ctx in self.contexts]
+        
 
-def update(contexts):
+def update((ctx, n_ctx, Z, top_ctx)):
     """
     For multiprocessing
     """
-    Z = np.zeros(len(_Z), dtype=np.int32)
-    word_top = np.zeros(len(_word_top), dtype=np.int32).reshape(_m_words, _K)
-    top_ctx = np.zeros(len(_top_ctx), dtype=np.int32).reshape(_K, _n_contexts)
+    _top_prior_ = np.frombuffer(_top_prior, dtype=np.float32)[:, np.newaxis]
+    _word_top_ = np.frombuffer(_word_top, dtype=np.float32)
+    _word_top_ = _word_top_.reshape(_m_words, _K)
+    _word_top_ = _word_top_ + _top_prior_ 
+    word_top = np.zeros_like(_word_top_, dtype=np.int32)
+    
+    _ctx_prior_ = np.frombuffer(_ctx_prior, dtype=np.float32)[:, np.newaxis]
+    _top_ctx_ = top_ctx + _ctx_prior_
 
-    if update.init:
-        a = 0
-    else:
-        a = 1
+    _top_norms_ = np.array(np.frombuffer(_top_norms, dtype=np.float32),
+                           dtype=np.float64)
 
-    for i in xrange(len(contexts)):
-        c,s = contexts[i]
-        for j in xrange(*s.indices(s.stop)):
-            k = _Z[j]
-            w = _corpus[j]
+    if update.logp:
+        log_p = 0
+        log_wk = np.log(_word_top_ * _top_norms_[np.newaxis, :])
+        log_kc = np.log(_top_ctx_ / _top_ctx_.sum(0)[np.newaxis, :])
 
-            word_top[w, k] -= a
-            top_ctx[k, c] -= a
+    for i in xrange(len(ctx)):
+        c = _corpus[ctx[i]]
+        offset = ctx[i].start - ctx[0].start
+        for j in xrange(len(c)):
+            w,k = c[j],Z[offset+j]
 
-            dist = np.array(_z_dist_norms[:])
-            for l in xrange(_K):
-                dist[l] *= (_word_top[w*_K + l] + _top_prior[w]) 
-                dist[l] *= (_top_ctx[l*_n_contexts + c] + _ctx_prior[l])
+            if update.logp:
+                log_p += log_wk[w, k] + log_kc[k, i]
+
+            if update.train:
+                word_top[w, k] -= 1
+                top_ctx[k, i] -= 1
+
+            dist = _top_norms_ * _word_top_[w,:] * _top_ctx_[:,i]
             dist_cum = np.cumsum(dist)
             k = smpl_cat(dist_cum)
 
             word_top[w, k] += 1
-            top_ctx[k, c] += 1
-            Z[j] = k
+            top_ctx[k, i] += 1
+            Z[offset+j] = k
 
-    return (Z, word_top.ravel(), top_ctx.ravel())
+    return (ctx, n_ctx, Z, top_ctx, word_top.ravel(), log_p)
 
 
 
@@ -455,9 +458,9 @@ def update(contexts):
 def test_LDAGibbs():
 
     from vsm.util.corpustools import random_corpus
-    c = random_corpus(100000, 1000, 100, 1000)
-    m = LDAGibbs(c, 'random', K=50)
-    m.train(itr=5, verbose=False)
+    c = random_corpus(1000000, 10000, 100, 1000)
+    m = LDAGibbs(c, 'random', K=50, log_prob=True)
+    m.train(itr=4)
 
     return m
 
@@ -465,9 +468,9 @@ def test_LDAGibbs():
 def test_LdaCgsMulti():
 
     from vsm.util.corpustools import random_corpus
-    c = random_corpus(100000, 1000, 100, 1000)
-    m = LdaCgsMulti(c, 'random', K=50)
-    m.train(itr=5, n_proc=4, verbose=False)
+    c = random_corpus(1000000, 10000, 100, 1000)
+    m = LdaCgsMulti(c, 'random', K=50, log_prob=True)
+    m.train(itr=5, n_proc=20)
 
     return m
 
