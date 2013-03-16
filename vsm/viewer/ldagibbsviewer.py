@@ -148,6 +148,18 @@ class LDAGibbsViewer(object):
         return _res_word_type_(self.corpus, word)
 
 
+    def _empty_docs(self):
+        """
+        Returns indices of empty documents
+        """
+        indices = []
+        for i, doc in enumerate(self.model.W):
+            if len(doc) < 1:
+                indices.append(i)
+
+        return indices
+
+
     def topics(self, print_len=10, k_indices=[], as_strings=True):
         """
         Returns a list of topics estimated by `LDAGibbs` sampler. 
@@ -483,9 +495,12 @@ class LDAGibbsViewer(object):
 
 
     def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
-                    label_fn=_def_label_fn_, as_strings=True):
+                    filter_empty=True, label_fn=_def_label_fn_, as_strings=True):
         """
         """
+        if filter_empty:
+            doc_or_docs = [d for d in doc_or_docs if d not in self._empty_docs()]
+
         return _sim_doc_doc_(self.corpus, self.model.doc_top.T,
                              self.model.context_type, doc_or_docs,
                              norms=self._doc_norms, print_len=print_len,
