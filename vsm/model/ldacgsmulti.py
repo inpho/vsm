@@ -159,9 +159,9 @@ class LdaCgsMulti(object):
         ctx_prior = arrays_in['ctx_prior']
         top_prior = arrays_in['top_prior']
 
-        m = LDAGibbs(empty_corpus(context_type),
-                     context_type, K=K, ctx_prior=ctx_prior,
-                     top_prior=top_prior)
+        m = LdaCgsMulti(empty_corpus(context_type),
+                        context_type, K=K, ctx_prior=ctx_prior,
+                        top_prior=top_prior)
         m.contexts = arrays_in['contexts']
         m.W = [arrays_in['corpus'][ctx] for ctx in m.contexts]
         m.iterations = arrays_in['iterations'][()]
@@ -239,9 +239,36 @@ def test_LdaCgsMulti():
 
     from vsm.util.corpustools import random_corpus
     c = random_corpus(100, 5, 4, 20)
-    m = LdaCgsMulti(c, 'random', K=3, log_prob=True)
+    m = LdaCgsMulti(c, 'random', K=3)
     m.train(itr=5, n_proc=1)
 
     return m
 
 
+def test_LdaCgsMulti_IO():
+
+    from vsm.util.corpustools import random_corpus
+    from tempfile import NamedTemporaryFile
+    import os
+    
+    c = random_corpus(1000, 50, 6, 100)
+    tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+    try:
+        m0 = LdaCgsMulti(c, 'random', K=10)
+        m0.train(itr=20)
+        m0.save(tmp.name)
+        m1 = LdaCgsMulti.load(tmp.name)
+        assert m0.context_type == m1.context_type
+        assert m0.ctx_prior == m1.ctx_prior
+        assert m0.top_prior == m1.top_prior
+        assert m0.log_prob == m1.log_prob
+        for i in xrange(max(len(m0.W), len(m1.W))):
+            assert m0.W[i].all() == m1.W[i].all()
+        assert m0.iterations == m1.iterations
+        for i in xrange(max(len(m0.Z), len(m1.Z))):
+            assert m0.Z[i].all() == m1.Z[i].all()
+        assert m0.doc_top.all() == m1.doc_top.all()
+        assert m0.top_word.all() == m1.top_word.all()
+    finally:
+        os.remove(tmp.name)
+    
