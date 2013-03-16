@@ -499,7 +499,7 @@ class LDAGibbsViewer(object):
                     filter_empty=True, label_fn=_def_label_fn_, as_strings=True):
         """
         """
-        if isint(doc_or_docs):
+        if _isint_(doc_or_docs):
             doc_or_docs = [doc_or_docs]
         if filter_empty:
             doc_or_docs = [d for d in doc_or_docs if d not in self._empty_docs()]
