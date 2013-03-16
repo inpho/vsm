@@ -199,10 +199,10 @@ def update((ctx_sbls, Z, top_ctx)):
     """
     np.random.seed()
     
-    gbl_word_top = np.frombuffer(_word_top,
-                                 dtype=np.float64).reshape(_m_words.value, _K.value)
+    gbl_word_top = np.frombuffer(_word_top, dtype=np.float64).copy()
+    gbl_word_top = gbl_word_top.reshape(_m_words.value, _K.value)
     loc_word_top = np.zeros_like(gbl_word_top)
-    top_norms = np.frombuffer(_top_norms, dtype=np.float64)
+    top_norms = np.frombuffer(_top_norms, dtype=np.float64).copy()
 
     log_p = 0
     log_wk = np.log(gbl_word_top * top_norms[np.newaxis, :])
@@ -219,7 +219,7 @@ def update((ctx_sbls, Z, top_ctx)):
             if _train.value:
                 loc_word_top[w, k] -= 1
                 gbl_word_top[w, k] -= 1
-                top_norms[k] = 1. / gbl_word_top[w, :].sum()
+                top_norms[k] = 1. / gbl_word_top[:, k].sum()
                 top_ctx[k, i] -= 1
 
             dist = top_norms * gbl_word_top[w,:] * top_ctx[:,i]
@@ -229,7 +229,7 @@ def update((ctx_sbls, Z, top_ctx)):
 
             loc_word_top[w, k] += 1
             gbl_word_top[w, k] += 1
-            top_norms[k] = 1. / gbl_word_top[w, :].sum()
+            top_norms[k] = 1. / gbl_word_top[:, k].sum()
             top_ctx[k, i] += 1
             Z[offset+j] = k
 
