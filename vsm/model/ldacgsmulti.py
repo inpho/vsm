@@ -102,9 +102,9 @@ class LdaCgsMulti(object):
             data = zip(ctx_ls, Z_ls, top_ctx_ls)
 
             # For debugging
-            # results = map(update, data)
+            results = map(update, data)
 
-            results = p.map(update, data)
+            # results = p.map(update, data)
 
             if verbose:
                 stdout.write('\rIteration %d: reducing ' % t)
@@ -197,6 +197,8 @@ def update((ctx_sbls, Z, top_ctx)):
     """
     For LdaCgsMulti
     """
+    np.random.seed()
+    
     gbl_word_top = np.frombuffer(_word_top,
                                  dtype=np.float64).reshape(_m_words.value, _K.value)
     loc_word_top = np.zeros_like(gbl_word_top)
@@ -222,7 +224,8 @@ def update((ctx_sbls, Z, top_ctx)):
 
             dist = top_norms * gbl_word_top[w,:] * top_ctx[:,i]
             dist_cum = np.cumsum(dist)
-            k = smpl_cat(dist_cum)
+            r = np.random.random() * dist_cum[-1]
+            k = np.searchsorted(dist_cum, r)
 
             loc_word_top[w, k] += 1
             gbl_word_top[w, k] += 1
