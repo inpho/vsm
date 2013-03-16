@@ -523,7 +523,7 @@ class LDAGibbsViewer(object):
     def simmat_docs(self, docs, filter_empty=True):
 
         if filter_empty:
-            doc_or_docs = [d for d in doc_or_docs if d not in self._empty_docs()]
+            docs = [d for d in docs if d not in self._empty_docs()]
 
         # To do: error handling when doc_or_docs is empty
 
