@@ -15,8 +15,7 @@ class LdaCgsMulti(object):
         # The width of the word by topic matrix and the height of the
         # topic by context matrix
         global _K
-        _K = mp.Value('i', lock=False)
-        _K = K
+        _K = mp.Value('i', K, lock=False)
 
         # Store corpus as shared array.
         global _corpus
@@ -25,8 +24,7 @@ class LdaCgsMulti(object):
 
         # The height of the word by topic matrix
         global _m_words
-        _m_words = mp.Value('i', lock=False)
-        _m_words = corpus.words.size
+        _m_words = mp.Value('i', corpus.words.size, lock=False)
 
         # Chunks of contexts are the primary data over which we'll map
         # the update rule
@@ -40,31 +38,32 @@ class LdaCgsMulti(object):
             self.top_prior = top_prior
         else:
             # Default is a flat prior of .01
-            self.top_prior = np.ones((_m_words,1), dtype=np.float64) * .01
+            self.top_prior = np.ones((_m_words.value,1), dtype=np.float64) * .01
 
         if len(ctx_prior) > 0:
             self.ctx_prior = ctx_prior
         else:
             # Default is a flat prior of .01
-            self.ctx_prior = np.ones((_K,1), dtype=np.float64) * .01
+            self.ctx_prior = np.ones((_K.value,1), dtype=np.float64) * .01
 
         # Topic posterior stored in shared array, initialized to zero        
         global _word_top
-        _word_top = mp.Array('d', _m_words*_K, lock=False)
-        _word_top[:] = (np.zeros((_m_words, _K), np.float64)
+        _word_top = mp.Array('d', _m_words.value*_K.value, lock=False)
+        _word_top[:] = (np.zeros((_m_words.value, _K.value), np.float64)
                         + self.top_prior).reshape(-1,)
 
         # Topic norms stored in a shared array, initialized to the
         # sums over the topic priors
         global _top_norms
-        _top_norms = mp.Array('d', _K, lock=False)
-        _top_norms[:] = 1. / (np.ones(_K, dtype=np.float64)
+        _top_norms = mp.Array('d', _K.value, lock=False)
+        _top_norms[:] = 1. / (np.ones(_K.value, dtype=np.float64)
                               * self.top_prior.sum())
 
         self.iterations = 0
 
         # The 0-th iteration is an initialization step, not a training step
-        update.train = False
+        global _train
+        _train = mp.Value('b', 0, lock=False)
 
         # Store log probability computations
         self.log_prob = []
@@ -88,7 +87,7 @@ class LdaCgsMulti(object):
         spans = [(c[-1].stop - c[0].start) for c in ctx_ls]
         if self.iterations == 0:
             Z_ls = [np.zeros(n, dtype=np.int) for n in spans]
-            top_ctx_ls = [(np.zeros((_K, len(c)), dtype=np.float64)
+            top_ctx_ls = [(np.zeros((_K.value, len(c)), dtype=np.float64)
                            + self.ctx_prior) for c in ctx_ls]
         else:
             raise Exception('Training continuations not yet implemented.')
@@ -117,12 +116,12 @@ class LdaCgsMulti(object):
             # Reduce word by topic matrices and store in global shared array
             word_top = (np.frombuffer(_word_top, dtype=np.float64)
                         + np.sum(word_top_ls, axis=0))
-            top_norms = 1. / (word_top.reshape(_m_words, _K).sum(axis=0))
+            top_norms = 1. / (word_top.reshape(_m_words.value, _K.value).sum(axis=0))
             _word_top[:] = word_top
             _top_norms[:] = top_norms
             del word_top, top_norms
 
-            update.train = True
+            _train.value = 1
 
             lp = np.sum(logp_ls)
             self.log_prob.append((t, lp))
@@ -138,7 +137,7 @@ class LdaCgsMulti(object):
         Z = np.hstack(Z_ls)
         top_ctx = np.hstack(top_ctx_ls)
         word_top = np.frombuffer(_word_top,
-                                 dtype=np.float64).reshape(_m_words,_K)
+                                 dtype=np.float64).reshape(_m_words.value,_K.value)
 
         # TODO: For legacy viewer only. Update viewer and remove or update these.
         self.top_word = word_top.T
@@ -184,7 +183,7 @@ class LdaCgsMulti(object):
         arrays_out['doc_top'] = self.doc_top
         arrays_out['top_word'] = self.top_word
         arrays_out['context_type'] = self.context_type
-        arrays_out['K'] = _K
+        arrays_out['K'] = _K.value
         arrays_out['ctx_prior'] = self.ctx_prior
         arrays_out['top_prior'] = self.top_prior
         arrays_out['top_norms'] = np.frombuffer(_top_norms, np.float64)
@@ -199,7 +198,7 @@ def update((ctx_sbls, Z, top_ctx)):
     For LdaCgsMulti
     """
     gbl_word_top = np.frombuffer(_word_top,
-                                 dtype=np.float64).reshape(_m_words, _K)
+                                 dtype=np.float64).reshape(_m_words.value, _K.value)
     loc_word_top = np.zeros_like(gbl_word_top)
     top_norms = np.frombuffer(_top_norms, dtype=np.float64)
 
@@ -215,8 +214,10 @@ def update((ctx_sbls, Z, top_ctx)):
 
             log_p += log_wk[w, k] + log_kc[k, i]
 
-            if update.train:
+            if _train.value:
                 loc_word_top[w, k] -= 1
+                gbl_word_top[w, k] -= 1
+                top_norms[k] = 1. / gbl_word_top[w, :].sum()
                 top_ctx[k, i] -= 1
 
             dist = top_norms * gbl_word_top[w,:] * top_ctx[:,i]
@@ -224,6 +225,8 @@ def update((ctx_sbls, Z, top_ctx)):
             k = smpl_cat(dist_cum)
 
             loc_word_top[w, k] += 1
+            gbl_word_top[w, k] += 1
+            top_norms[k] = 1. / gbl_word_top[w, :].sum()
             top_ctx[k, i] += 1
             Z[offset+j] = k
 
