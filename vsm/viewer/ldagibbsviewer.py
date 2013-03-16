@@ -4,7 +4,8 @@ from vsm import (
     map_strarr as _map_strarr_,
     enum_matrix as _enum_matrix_,
     enum_sort as _enum_sort_, 
-    isstr as _isstr_)
+    isstr as _isstr_,
+    isint as _isint_)
 
 from vsm.linalg import row_norms as _row_norms_
 
@@ -498,8 +499,12 @@ class LDAGibbsViewer(object):
                     filter_empty=True, label_fn=_def_label_fn_, as_strings=True):
         """
         """
+        if isint(doc_or_docs):
+            doc_or_docs = [doc_or_docs]
         if filter_empty:
             doc_or_docs = [d for d in doc_or_docs if d not in self._empty_docs()]
+
+        # To do: error handling when doc_or_docs is empty
 
         return _sim_doc_doc_(self.corpus, self.model.doc_top.T,
                              self.model.context_type, doc_or_docs,
@@ -515,7 +520,12 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-    def simmat_docs(self, docs):
+    def simmat_docs(self, docs, filter_empty=True):
+
+        if filter_empty:
+            doc_or_docs = [d for d in doc_or_docs if d not in self._empty_docs()]
+
+        # To do: error handling when doc_or_docs is empty
 
         return _simmat_documents_(self.corpus,
                                   self.model.doc_top.T,
