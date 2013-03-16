@@ -323,6 +323,9 @@ class BaseCorpus(object):
 	if as_slices:
 	    meta_list = self.view_metadata(ctx_type)
 	    indices = meta_list['idx'] 
+	    
+	    if len(indices) == 0:
+		return [slice(0, 0)]
 
 	    slices = []
 	    slices.append(slice(0, indices[0]))
@@ -540,6 +543,9 @@ class Corpus(BaseCorpus):
 	if as_slices:
 	    meta_list = super(Corpus, self).view_metadata(ctx_type)
 	    indices = meta_list['idx'] 
+
+	    if len(indices) == 0:
+		return [slice(0, 0)]
 
 	    slices = []
 	    slices.append(slice(0, indices[0]))
