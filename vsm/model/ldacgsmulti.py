@@ -197,11 +197,11 @@ def update((ctx_sbls, Z, top_ctx)):
     """
     For LdaCgsMulti
     """
-    np.random.seed()
-    
+    np.random.seed()    
+
     gbl_word_top = np.frombuffer(_word_top, dtype=np.float64).copy()
     gbl_word_top = gbl_word_top.reshape(_m_words.value, _K.value)
-    loc_word_top = np.zeros_like(gbl_word_top)
+    loc_word_top = gbl_word_top.copy()
     top_norms = np.frombuffer(_top_norms, dtype=np.float64).copy()
 
     log_p = 0
@@ -218,20 +218,20 @@ def update((ctx_sbls, Z, top_ctx)):
 
             if _train.value:
                 loc_word_top[w, k] -= 1
-                gbl_word_top[w, k] -= 1
-                top_norms[k] = 1. / gbl_word_top[:, k].sum()
+                top_norms[k] *= 1. / (top_norms[k] + 1) 
                 top_ctx[k, i] -= 1
 
-            dist = top_norms * gbl_word_top[w,:] * top_ctx[:,i]
+            dist = top_norms * loc_word_top[w,:] * top_ctx[:,i]
             dist_cum = np.cumsum(dist)
             r = np.random.random() * dist_cum[-1]
             k = np.searchsorted(dist_cum, r)
 
             loc_word_top[w, k] += 1
-            gbl_word_top[w, k] += 1
-            top_norms[k] = 1. / gbl_word_top[:, k].sum()
+            top_norms[k] *= 1. / (top_norms[k] + 1) 
             top_ctx[k, i] += 1
             Z[offset+j] = k
+
+    loc_word_top -= gbl_word_top
 
     return (ctx_sbls, Z, top_ctx, loc_word_top.reshape(-1,), log_p)
 
