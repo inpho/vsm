@@ -200,13 +200,12 @@ class BaseCorpus(object):
 	Removes empty tokenizations.
 	"""	
 	for j, t in enumerate(self.context_types):
-	    token_list = super(Corpus, self).view_contexts(t)
+	    token_list = self.view_contexts(t)
 
  	    indices = []
 	    for i, ctx in enumerate(token_list):
 	    	if len(ctx) < 1:
 		    indices.append(i)
-
 	    self.context_data[j] = np.delete(self.context_data[j], indices)	
 
 
@@ -480,7 +479,8 @@ class Corpus(BaseCorpus):
     def __init__(self,
                  corpus,
                  context_types=[],
-                 context_data=[]):
+                 context_data=[],
+		 remove_empty=True):
 
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
@@ -494,6 +494,9 @@ class Corpus(BaseCorpus):
         self.corpus = np.asarray([self.words_int[word]
                                   for word in self.corpus],
                                  dtype=self.dtype)
+
+	if remove_empty:
+	    super(Corpus, self).remove_empty()
 
 
 
