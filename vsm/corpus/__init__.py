@@ -125,7 +125,8 @@ class BaseCorpus(object):
                  corpus,
                  dtype=None,
                  context_types=[],
-                 context_data=[]):
+                 context_data=[],
+		 remove_empty=True):
 
         self.corpus = np.asarray(corpus, dtype=dtype)
         self.dtype = self.corpus.dtype
@@ -138,6 +139,9 @@ class BaseCorpus(object):
                 self.context_data.append(t)
 
         self._gen_context_types(context_types)
+
+	if remove_empty:
+	    self.remove_empty()
 
 
     def _gen_context_types(self, context_types):
@@ -190,6 +194,20 @@ class BaseCorpus(object):
 
         return True
 
+
+    def remove_empty(self):
+	"""
+	Removes empty tokenizations.
+	"""	
+	for j, t in enumerate(self.context_types):
+	    token_list = super(Corpus, self).view_contexts(t)
+
+ 	    indices = []
+	    for i, ctx in enumerate(token_list):
+	    	if len(ctx) < 1:
+		    indices.append(i)
+
+	    self.context_data[j] = np.delete(self.context_data[j], indices)	
 
 
     def view_metadata(self, ctx_type):
@@ -276,7 +294,7 @@ class BaseCorpus(object):
         return self.view_metadata(ctx_type)[i][field]
 
 
-    def view_contexts(self, ctx_type):
+    def view_contexts(self, ctx_type, as_slices=False):
         """
         Displays a tokenization of the corpus.
 
@@ -284,6 +302,10 @@ class BaseCorpus(object):
         ----------
         ctx_type : string-like
            The type of a tokenization.
+	as_slices : Boolean, optional
+            If True, a list of slices corresponding to 'ctx_type' is 
+	    returned. Otherwise, integer representations are returned.
+	    Default is `False`.
 
         Returns
         -------
@@ -297,7 +319,20 @@ class BaseCorpus(object):
         """
         i = self.context_types.index(ctx_type)
         indices = self.context_data[i]['idx']
-        
+
+	if as_slices:
+	    meta_list = self.view_metadata(ctx_type)
+	    indices = meta_list['idx'] 
+	    
+	    if len(indices) == 0:
+		return [slice(0, 0)]
+
+	    slices = []
+	    slices.append(slice(0, indices[0]))
+	    for i in xrange(len(indices) - 1):
+		slices.append(slice(indices[i], indices[i+1]))
+	    return slices	    
+       
         return split_corpus(self.corpus, indices)
 
 
@@ -509,10 +544,14 @@ class Corpus(BaseCorpus):
 	    meta_list = super(Corpus, self).view_metadata(ctx_type)
 	    indices = meta_list['idx'] 
 
+	    if len(indices) == 0:
+		return [slice(0, 0)]
+
 	    slices = []
 	    slices.append(slice(0, indices[0]))
 	    for i in xrange(len(indices) - 1):
 		slices.append(slice(indices[i], indices[i+1]))
+
 	    return slices	    
 
         return token_list
@@ -558,6 +597,7 @@ class Corpus(BaseCorpus):
         c.__set_words_int()
 
         return c
+
 
 
     def save(self, file):
