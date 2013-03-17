@@ -224,7 +224,7 @@ def update((ctx_sbls, Z, top_ctx)):
 
             if _train.value:
                 loc_word_top[w, k] -= 1
-                top_norms[k] *= 1. / (top_norms[k] + 1) 
+                top_norms[k] *= 1. / (top_norms[k] - 1) 
                 top_ctx[k, i] -= 1
 
             dist = top_norms * loc_word_top[w,:] * top_ctx[:,i]
