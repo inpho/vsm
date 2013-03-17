@@ -104,9 +104,9 @@ class LdaCgsMulti(object):
             data = zip(ctx_ls, Z_ls, top_ctx_ls)
 
             # For debugging
-            results = map(update, data)
+            # results = map(update, data)
 
-            # results = p.map(update, data)
+            results = p.map(update, data)
 
             if verbose:
                 stdout.write('\rIteration %d: reducing ' % t)
