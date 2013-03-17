@@ -48,20 +48,17 @@ class LdaCgsMulti(object):
             # Default is a flat prior of .01
             self.ctx_prior = np.ones((_K.value,1), dtype=np.float64) * .01
 
-        # Topic posterior stored in shared array, initialized to zero        
-        global _word_top
-        _word_top = mp.Array('d', _m_words.value*_K.value, lock=False)
-        _word_top[:] = (np.zeros((_m_words.value, _K.value), np.float64)
-                        + self.top_prior).reshape(-1,)
-
+        # Topic posterior stored in shared array, initialized to zero
+        LdaCgsMulti._init_word_top((np.zeros((_m_words.value, _K.value),
+                                             dtype=np.float64)
+                                    + self.top_prior).reshape(-1,))
+        
         # Topic norms stored in a shared array, initialized to the
         # sums over the topic priors
-        global _top_norms
-        _top_norms = mp.Array('d', _K.value, lock=False)
-        _top_norms[:] = 1. / (np.ones(_K.value, dtype=np.float64)
-                              * self.top_prior.sum())
+        LdaCgsMulti._init_top_norms(1. / (np.ones(_K.value, dtype=np.float64)
+                                          * self.top_prior.sum()))
 
-        self.iterations = 0
+        self.iteration = 0
 
         # The 0-th iteration is an initialization step, not a training step
         global _train
@@ -70,11 +67,27 @@ class LdaCgsMulti(object):
         # Store log probability computations
         self.log_prob = []
 
-        
+
+    @staticmethod
+    def _init_word_top(a):
+        global _word_top
+        _word_top = mp.Array('d', _m_words.value*_K.value, lock=False)
+        _word_top[:] = a
+
+    @staticmethod
+    def _init_top_norms(a):
+        global _top_norms
+        _top_norms = mp.Array('d', _K.value, lock=False)
+        _top_norms[:] = a
+
+
     def train(self, itr=500, verbose=True, n_proc=2):
-
-        #TODO: Enable training continuations
-
+        """
+        Note
+        ----
+        Training sessions can be continued only if the previous
+        training session of completed.
+        """
         # Split contexts into an `n_proc`-length list of lists of
         # contexts
         if n_proc == 1:
@@ -86,19 +99,27 @@ class LdaCgsMulti(object):
 
         # Initialize arrays for storing Z and context posteriors for
         # each process
-        spans = [(c[-1].stop - c[0].start) for c in ctx_ls]
-        if self.iterations == 0:
-            Z_ls = [np.zeros(n, dtype=np.int) for n in spans]
-            top_ctx_ls = [(np.zeros((_K.value, len(c)), dtype=np.float64)
-                           + self.ctx_prior) for c in ctx_ls]
-        else:
-            raise Exception('Training continuations not yet implemented.')
+        if self.iteration == 0:
+            self._Z = np.zeros(len(_corpus), dtype=np.int)
+            self.top_ctx = (np.zeros((_K.value, len(self.contexts)),
+                                     dtype=np.float64)
+                            + self.ctx_prior)
+        ctx_ls_flat = [slice(c[0].start, c[-1].stop) for c in ctx_ls]
+        Z_ls = [self._Z[s] for s in ctx_ls_flat]
+        ctx_sbls_spans = np.cumsum([len(ctx_sbls) for ctx_sbls in ctx_ls][:-1])
+        top_ctx_ls = np.split(self.top_ctx, ctx_sbls_spans, axis=1)
+
+        # Clean
+        del self._Z, self.top_ctx
+        if hasattr(self, 'word_top'):
+            del self.word_top
 
         p=mp.Pool(n_proc)
 
-        for t in xrange(self.iterations, self.iterations + itr):        
+        itr += self.iteration
+        while self.iteration < itr:
             if verbose:
-                stdout.write('\rIteration %d: mapping  ' % t)
+                stdout.write('\rIteration %d: mapping  ' % self.iteration)
                 stdout.flush()
 
             data = zip(ctx_ls, Z_ls, top_ctx_ls)
@@ -109,7 +130,7 @@ class LdaCgsMulti(object):
             results = p.map(update, data)
 
             if verbose:
-                stdout.write('\rIteration %d: reducing ' % t)
+                stdout.write('\rIteration %d: reducing ' % self.iteration)
                 stdout.flush()
 
             # Unzip results
@@ -126,32 +147,49 @@ class LdaCgsMulti(object):
             _train.value = 1
 
             lp = np.sum(logp_ls)
-            self.log_prob.append((t, lp))
+            self.log_prob.append((self.iteration, lp))
 
             if verbose:
-                stdout.write('\rIteration %d: log_prob=' % t)
+                stdout.write('\rIteration %d: log_prob=' % self.iteration)
                 stdout.flush()
                 print '%f' % lp
 
+            self.iteration += 1
+                        
         p.close()
  
         # Final reduction includes assembling the Z and the context posteriors
-        Z = np.hstack(Z_ls)
-        top_ctx = np.hstack(top_ctx_ls)
-        word_top = np.frombuffer(_word_top,
-                                 dtype=np.float64).reshape(_m_words.value,_K.value)
-
-        # TODO: For legacy viewer only. Update viewer and remove or update these.
-        self.top_word = word_top.T
-        self.doc_top = top_ctx.T
-        self.W = [np.array(_corpus[ctx], dtype=np.int) for ctx in self.contexts]
-        self.Z = [Z[ctx] for ctx in self.contexts]
+        self._Z = np.hstack(Z_ls)
+        self.top_ctx = np.hstack(top_ctx_ls)
+        self.word_top = np.frombuffer(_word_top, dtype=np.float64)
+        self.word_top = self.word_top.reshape(_m_words.value,_K.value)
 
 
+    @property
+    def W(self):
+        # For viewer until it gets updated
+        return [np.array(_corpus[ctx], dtype=np.int) for ctx in self.contexts]
+    
+    @property
+    def Z(self):
+        # For viewer until it gets updated
+        return [self._Z[ctx] for ctx in self.contexts]
+
+    @property
+    def doc_top(self):
+        # For viewer until it gets updated
+        return self.top_ctx.T
+
+    @property
+    def top_word(self):
+        # For viewer until it gets updated
+        return self.word_top.T
+    
+    
     @staticmethod
     def load(filename):
 
-        from vsm.util.corpustools import empty_corpus
+        from vsm.corpus import BaseCorpus
 
         print 'Loading LdaCgsMulti data from', filename
         arrays_in = np.load(filename)
@@ -159,20 +197,23 @@ class LdaCgsMulti(object):
         K = arrays_in['K'][()]
         ctx_prior = arrays_in['ctx_prior']
         top_prior = arrays_in['top_prior']
-        e = empty_corpus(context_type)
-        # hack
-        e.words = np.empty(arrays_in['m_words'], np.int16)
 
-        m = LdaCgsMulti(e, context_type, K=K, ctx_prior=ctx_prior,
-                        top_prior=top_prior)
+        c = BaseCorpus(arrays_in['corpus'],
+                       context_types=[context_type],
+                       context_data=[np.array([], dtype=[('idx', np.int)])],
+                       remove_empty=False)
+        m = LdaCgsMulti(c, context_type, K=K,
+                        ctx_prior=ctx_prior, top_prior=top_prior)
         m.contexts = arrays_in['contexts']
-        m.W = [arrays_in['corpus'][ctx] for ctx in m.contexts]
-        m.iterations = arrays_in['iterations'][()]
+        m.iteration = arrays_in['iteration'][()]
         m.log_prob = arrays_in['log_prob'].tolist()
-        m.Z = [arrays_in['Z'][ctx] for ctx in m.contexts]
-        m.doc_top = arrays_in['doc_top']
-        m.top_word = arrays_in['top_word']
+        m._Z = arrays_in['Z']
+        m.top_ctx = arrays_in['top_ctx']
+        m.word_top = arrays_in['word_top']
 
+        LdaCgsMulti._init_word_top(m.word_top.reshape(-1,))
+        LdaCgsMulti._init_top_norms(arrays_in['top_norms'])
+        
         return m
 
     
@@ -180,12 +221,12 @@ class LdaCgsMulti(object):
 
         arrays_out = dict()
         arrays_out['corpus'] = np.frombuffer(_corpus, np.int32)
-        arrays_out['iterations'] = self.iterations
+        arrays_out['iteration'] = self.iteration
         dt = dtype=[('i', np.int), ('v', np.float)]
         arrays_out['log_prob'] = np.array(self.log_prob, dtype=dt)
-        arrays_out['Z'] = np.array(np.hstack(self.Z), dtype=np.int32)
-        arrays_out['doc_top'] = self.doc_top
-        arrays_out['top_word'] = self.top_word
+        arrays_out['Z'] = self._Z
+        arrays_out['top_ctx'] = self.top_ctx
+        arrays_out['word_top'] = self.word_top
         arrays_out['context_type'] = self.context_type
         arrays_out['contexts'] = np.array(self.contexts)
         arrays_out['K'] = _K.value
@@ -252,7 +293,7 @@ def test_LdaCgsMulti():
     from vsm.util.corpustools import random_corpus
     c = random_corpus(100, 5, 4, 20)
     m = LdaCgsMulti(c, 'random', K=3)
-    m.train(itr=5, n_proc=1)
+    m.train(itr=5, n_proc=2)
 
     return m
 
@@ -268,19 +309,57 @@ def test_LdaCgsMulti_IO():
     try:
         m0 = LdaCgsMulti(c, 'random', K=10)
         m0.train(itr=20)
+        c0 = np.frombuffer(_corpus, np.int32).copy()
+        K0 = _K.value
+        m_words0 = _m_words.value
+        word_top0 = np.frombuffer(_word_top, np.float64).copy()
+        top_norms0 = np.frombuffer(_top_norms, np.float64).copy()
         m0.save(tmp.name)
         m1 = LdaCgsMulti.load(tmp.name)
+        c1 = np.frombuffer(_corpus, np.int32).copy()
+        K1 = _K.value
+        m_words1 = _m_words.value
+        word_top1 = np.frombuffer(_word_top, np.float64).copy()
+        top_norms1 = np.frombuffer(_top_norms, np.float64).copy()
         assert m0.context_type == m1.context_type
         assert (m0.ctx_prior == m1.ctx_prior).all()
         assert (m0.top_prior == m1.top_prior).all()
         assert m0.log_prob == m1.log_prob
         for i in xrange(max(len(m0.W), len(m1.W))):
             assert m0.W[i].all() == m1.W[i].all()
-        assert m0.iterations == m1.iterations
-        for i in xrange(max(len(m0.Z), len(m1.Z))):
-            assert m0.Z[i].all() == m1.Z[i].all()
-        assert m0.doc_top.all() == m1.doc_top.all()
-        assert m0.top_word.all() == m1.top_word.all()
+        assert m0.iteration == m1.iteration
+        assert (m0._Z == m1._Z).all()
+        assert m0.top_ctx.all() == m1.top_ctx.all()
+        assert m0.word_top.all() == m1.word_top.all()
+        assert (c0==c1).all()
+        assert K0==K1
+        assert m_words0==m_words1
+        assert (word_top0==word_top1).all()
+        assert (top_norms0==top_norms1).all(), (top_norms0, top_norms1)
     finally:
         os.remove(tmp.name)
     
+
+def test_continuation():
+    """
+    Note
+    ----
+    Disable reseeding in `update` before running this test and use
+    sequential mapping
+    """
+    from vsm.util.corpustools import random_corpus
+    c = random_corpus(100, 5, 4, 20)
+    
+    m0 = LdaCgsMulti(c, 'random', K=3)
+    np.random.seed(0)
+    m0.train(itr=5, n_proc=2)
+    m0.train(itr=5, n_proc=2)
+
+    m1 = LdaCgsMulti(c, 'random', K=3)
+    np.random.seed(0)
+    m1.train(itr=10, n_proc=2)
+
+    assert (m0.word_top==m1.word_top).all()
+    assert (m0._Z==m1._Z).all()
+    assert (m0.top_ctx==m1.top_ctx).all()
+    assert m0.log_prob == m1.log_prob
