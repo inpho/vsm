@@ -35,13 +35,15 @@ class LdaCgsMulti(object):
 
         # Topic and context priors; set defaults if need be
         if len(top_prior) > 0:
-            self.top_prior = top_prior
+            self.top_prior = np.array(top_prior, dtype=np.float64)
+            self.top_prior = self.top_prior.reshape(_m_words.value,1)
         else:
             # Default is a flat prior of .01
             self.top_prior = np.ones((_m_words.value,1), dtype=np.float64) * .01
 
         if len(ctx_prior) > 0:
-            self.ctx_prior = ctx_prior
+            self.ctx_prior = np.array(ctx_prior,
+                                      dtype=np.float64).reshape(_K.value,1)
         else:
             # Default is a flat prior of .01
             self.ctx_prior = np.ones((_K.value,1), dtype=np.float64) * .01
@@ -157,9 +159,11 @@ class LdaCgsMulti(object):
         K = arrays_in['K'][()]
         ctx_prior = arrays_in['ctx_prior']
         top_prior = arrays_in['top_prior']
+        e = empty_corpus(context_type)
+        # hack
+        e.words = np.empty(arrays_in['m_words'], np.int16)
 
-        m = LdaCgsMulti(empty_corpus(context_type),
-                        context_type, K=K, ctx_prior=ctx_prior,
+        m = LdaCgsMulti(e, context_type, K=K, ctx_prior=ctx_prior,
                         top_prior=top_prior)
         m.contexts = arrays_in['contexts']
         m.W = [arrays_in['corpus'][ctx] for ctx in m.contexts]
@@ -183,7 +187,9 @@ class LdaCgsMulti(object):
         arrays_out['doc_top'] = self.doc_top
         arrays_out['top_word'] = self.top_word
         arrays_out['context_type'] = self.context_type
+        arrays_out['contexts'] = np.array(self.contexts)
         arrays_out['K'] = _K.value
+        arrays_out['m_words'] = _m_words.value
         arrays_out['ctx_prior'] = self.ctx_prior
         arrays_out['top_prior'] = self.top_prior
         arrays_out['top_norms'] = np.frombuffer(_top_norms, np.float64)
@@ -265,8 +271,8 @@ def test_LdaCgsMulti_IO():
         m0.save(tmp.name)
         m1 = LdaCgsMulti.load(tmp.name)
         assert m0.context_type == m1.context_type
-        assert m0.ctx_prior == m1.ctx_prior
-        assert m0.top_prior == m1.top_prior
+        assert (m0.ctx_prior == m1.ctx_prior).all()
+        assert (m0.top_prior == m1.top_prior).all()
         assert m0.log_prob == m1.log_prob
         for i in xrange(max(len(m0.W), len(m1.W))):
             assert m0.W[i].all() == m1.W[i].all()
