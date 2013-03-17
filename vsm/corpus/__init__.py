@@ -485,7 +485,8 @@ class Corpus(BaseCorpus):
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
                                      context_data=context_data,
-                                     dtype=np.str_)
+                                     dtype=np.str_,
+				     remove_empty=True)
 
         self.__set_words_int()
 
@@ -494,9 +495,6 @@ class Corpus(BaseCorpus):
         self.corpus = np.asarray([self.words_int[word]
                                   for word in self.corpus],
                                  dtype=self.dtype)
-
-	if remove_empty:
-	    super(Corpus, self).remove_empty()
 
 
 
