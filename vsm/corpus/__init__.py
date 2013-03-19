@@ -194,7 +194,7 @@ class BaseCorpus(object):
 
         return True
 
-
+    
     def remove_empty(self):
 	"""
 	Removes empty tokenizations.
@@ -202,11 +202,8 @@ class BaseCorpus(object):
 	for j, t in enumerate(self.context_types):
 	    token_list = self.view_contexts(t)
 
- 	    indices = []
-	    for i, ctx in enumerate(token_list):
-	    	if len(ctx) < 1:
-		    indices.append(i)
-	    self.context_data[j] = np.delete(self.context_data[j], indices)	
+	    indices = [ctx.size != 0 for ctx in token_list]
+	    self.context_data[j] = self.context_data[j][indices]
 
 
     def view_metadata(self, ctx_type):
