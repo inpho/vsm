@@ -84,6 +84,9 @@ def combine_models(model_1, model_2):
     didn't already exist"""
     size_1 = sparse.model_1.get_shape()
     size_2 = sparse.model_2.get_shape()
+    model_3 = model_1
+    for i,j,v in zip(model_2.row, model_2.col, model_3.data):
+        print "row = %d, column = %d, value = %s" % (i,j,v)
 
 
 
