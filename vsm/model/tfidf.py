@@ -111,33 +111,3 @@ class TfIdfModel(BaseModel):
         
         # Restore default handling of floating-point errors
         np.seterr(**old_settings)
-
-
-
-def test_TfIdfModel():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.model.tf import TfModel
-
-    c = random_corpus(1000, 100, 0, 20, context_type='document', metadata=True)
-
-    tf = TfModel(c, 'document')
-    tf.train()
-
-    m = TfIdfModel(tf.matrix, 'document')
-    m.train()
-
-    from tempfile import NamedTemporaryFile
-    import os
-
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        m.save(tmp.name)
-        tmp.close()
-        m1 = TfIdfModel.load(tmp.name)
-        assert (m.matrix.todense() == m1.matrix.todense()).all()
-    
-    finally:
-        os.remove(tmp.name)
-
-    return m.matrix
