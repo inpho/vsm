@@ -333,8 +333,11 @@ class DataTable(list):
         super(DataTable, self).__init__(l)
         self.table_header = table_header
 
+
     def __getslice__(self, i, j):
-	return DataTable(list.__getslice__(self, i, j))
+	return DataTable(list.__getslice__(self, i, j), 
+					table_header=self.table_header)
+
 
     def __str__(self):
         """
