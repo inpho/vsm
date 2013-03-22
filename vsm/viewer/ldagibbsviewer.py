@@ -563,3 +563,52 @@ class LDAGibbsViewer(object):
             plt.show()
 
         return plt
+
+    
+
+    def doc_plot(self, doc=None, top=None, thres=100, trim=10): 
+        # TODO: specify method
+        # TODO: Threshold must be given by prob.
+        """
+        Take a document or topic as a query and plots those documents similar/relevant to the query
+        """
+        from sklearn import manifold
+
+        if doc:
+            simdocs = [d, s for 
+            labels, size = zip(*self.sim_doc_doc(doc)[:thres])
+            size = [s*150 for s in size] 
+        if top:
+            labels, size = zip(*self.sim_top_doc(top)[:thres])
+            size = [s*150 for s in size] 
+
+        # similarity matrix
+        simmat = self.simmat_docs(labels)
+        distance = np.ones_like(simmat) - simmat
+        imap = manifold.Isomap(n_components=2, n_neighbors=5)
+        pos  = imap.fit(distance).embedding_
+
+        # trim labels
+        if trim:
+            labels = [lab[:trim] for lab in labels]
+        
+        self.basic_plot(pos,labels, size)
+
+        return None
+
+    def basic_plot(self, pos, labels, size=None):
+
+        import matplotlib.pyplot as plt
+
+        fig = plt.figure(figsize=(10, 10), dpi=80)
+        plt.scatter(pos[:, 0], pos[:, 1], size)
+
+        ax_ = fig.add_subplot(111)
+
+        ax_.set_xlim(np.min(pos[:, 0]) - .1, np.max(pos[:, 0]) + .1)
+        ax_.set_ylim(np.min(pos[:, 1]) - .1, np.max(pos[:, 1]) + .1)
+
+        for label, x, y in zip(labels, pos[:, 0], pos[:, 1]):
+            plt.annotate(label, xy = (x, y), xytext = (-2, 2), textcoords='offset points')
+
+        return plt.show()
