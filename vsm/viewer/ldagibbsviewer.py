@@ -566,35 +566,60 @@ class LDAGibbsViewer(object):
 
     
 
-    def doc_plot(self, doc=None, top=None, thres=100, trim=10): 
-        # TODO: specify method
-        # TODO: Threshold must be given by prob.
+    def doc_isomap(self, doc=None, top=None, thres=0.4, n_neighbors=5, scale=True, trim=20): 
         """
         Take a document or topic as a query and plots those documents similar/relevant to the query
+
+        Parameters
+        ----------
+        doc : string or int
+            Test
+        top : string or int
+        
+        thres : float
+            if <1, interpret as prob. Otherwise, number of points.
+        n_neighbors : int
+        scale : boolean
+        trim : int
+
+        Returns
+        ----------
+
         """
         from sklearn import manifold
 
+        # create a list to be plotted from document or topic
         if doc:
-            simdocs = [d, s for 
-            labels, size = zip(*self.sim_doc_doc(doc)[:thres])
-            size = [s*150 for s in size] 
-        if top:
-            labels, size = zip(*self.sim_top_doc(top)[:thres])
-            size = [s*150 for s in size] 
+            doclist = self.sim_doc_doc(doc)
+        else:
+            doclist = self.sim_top_doc(top)
 
-        # similarity matrix
+        # cut down the list by the threshold
+        if thres < 1:
+            labels, size = zip(*[(d,s) for (d,s) in doclist if s > thres])
+        else:
+            labels, size = zip(*doclist[:thres])
+
+        # calculate coordinates
         simmat = self.simmat_docs(labels)
         distance = np.ones_like(simmat) - simmat
-        imap = manifold.Isomap(n_components=2, n_neighbors=5)
+        imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 
-        # trim labels
+        # set graphic parameteres
+        # - scale point size
+        if scale:
+            size = [s**2*150 for s in size] 
+        else:
+            size = np.ones_like(size) * 50
+        # - trim labels
         if trim:
             labels = [lab[:trim] for lab in labels]
         
-        self.basic_plot(pos,labels, size)
+        return self.basic_plot(pos,labels, size)
 
-        return None
+
+
 
     def basic_plot(self, pos, labels, size=None):
 
