@@ -202,7 +202,7 @@ class BaseCorpus(object):
 	for j, t in enumerate(self.context_types):
 	    token_list = self.view_contexts(t)
 
-	    indices = [ctx.size != 0 for ctx in token_list]
+	    indices = np.array([ctx.size != 0 for ctx in token_list], dtype=np.bool)
 	    self.context_data[j] = self.context_data[j][indices]
 
 
