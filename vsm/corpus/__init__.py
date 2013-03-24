@@ -543,7 +543,7 @@ class Corpus(BaseCorpus):
 	    indices = meta_list['idx'] 
 
 	    if len(indices) == 0:
-		return [slice(0, 0)]
+		return []
 
 	    slices = []
 	    slices.append(slice(0, indices[0]))
