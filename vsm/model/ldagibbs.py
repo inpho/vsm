@@ -144,7 +144,6 @@ class LDAGibbs(object):
 
 
 
-
     def z_dist(self, d, w):
 
         sum_word_top_inv = 1. / self.sum_word_top

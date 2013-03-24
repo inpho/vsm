@@ -374,7 +374,6 @@ class DataTable(list):
 	    
 	    s += '<tr>'
 	    for i, lc in enumerate(group):
-	
 		if lc.col_header:
 	            s += '<th style="text-align: center; background: #CEE3F6;"\
 		 colspan="{0}">{1}</th>'.format(len(lc.subcol_headers), lc.col_header)
