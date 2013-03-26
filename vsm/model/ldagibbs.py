@@ -1,5 +1,4 @@
 from sys import stdout
-from math import log
 import numpy as np
 
 
@@ -143,14 +142,12 @@ class LDAGibbs(object):
             stdout.write('\n')
 
 
-
     def z_dist(self, d, w):
 
         sum_word_top_inv = 1. / self.sum_word_top
         dist = (self.doc_top[d, :] * self.top_word[:, w]  * sum_word_top_inv)
         dist_cum = np.cumsum(dist)
         return dist_cum
-
 
 
     def update_z(self, d, i, w):
@@ -163,37 +160,27 @@ class LDAGibbs(object):
 
 
     def theta_d(self, d):
-
-        th_d = self.doc_top[d, :] / self.doc_top[d, :].sum()
-
-        return th_d
+        return self.doc_top[d, :] / self.doc_top[d, :].sum()
 
 
     def theta_k(self, k):
-
-        th_k = self.doc_top[:, k] / self.doc_top[:, k].sum()
-
-        return th_k
+        return self.doc_top[:, k] / self.doc_top[:, k].sum()
 
 
     def phi_w(self, w):
-
-        ph_w = self.top_word[:, w] / self.top_word[:, w].sum()
-
-        return ph_w
+        return self.top_word[:, w] / self.top_word[:, w].sum()
 
 
     def phi_k(self, k):
-
-        ph_k = self.top_word[k, :] / self.sum_word_top[k]
-
-        return ph_k
+        return self.top_word[k, :] / self.sum_word_top[k]
 
 
     def _logp(self):
         """
         For testing
         """
+        from math import log
+
         log_p = 0
         for d, doc in enumerate(self.W):
             for i, w in enumerate(doc):
@@ -250,7 +237,6 @@ class LDAGibbs(object):
 
         return m
 
-
     
     def save(self, filename):
 
@@ -281,15 +267,19 @@ class LDAGibbs(object):
         np.savez(filename, **arrays_out)
         
 
+
+#################################################################
+#                            Tests
+#################################################################
+
 def test_LDAGibbs():
 
     from vsm.util.corpustools import random_corpus
-    c = random_corpus(1000, 50, 6, 100)
-    m = LDAGibbs(c, 'random', K=10)
-    m.train(itr=20)
+    c = random_corpus(1000000, 10000, 100, 1000)
+    m = LDAGibbs(c, 'random', K=50, log_prob=True)
+    m.train(itr=4)
 
     return m
-
 
 
 def test_dist_z():
