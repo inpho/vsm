@@ -514,6 +514,36 @@ class LDAGibbsViewer(object):
 
 
 
+    def topic_clusters(self, method='kmeans', n_clusters=None):
+        """
+        Clusters topics
+        To do: make it general to deal with documents.
+        """
+        # Default number of clusters = # topics / 10
+        if not n_clusters:
+            n_clusters = int(round(self.model.K/10))
+
+        # Obtain similarity matrix
+            simmat = self.simmat_topics(range(self.model.K))
+
+        if method == 'affinity':
+            from sklearn.cluster import AffinityPropagation
+            af = AffinityPropagation(affinity='precomputed').fit(simmat)
+            labels = af.labels_
+        elif method == 'spectral':
+            from sklearn.cluster import spectral_clustering
+            labels = spectral_clustering(simmat, n_clusters=n_clusters)
+        else:
+            from sklearn.cluster import KMeans
+            km = KMeans(n_clusters=n_clusters, init='k-means++', max_iter=100, n_init=1,verbose=1)
+            km.fit(simmat)
+            labels = list(km.labels_)
+        
+        clusters = [[i for i,lab in enumerate(labels) if lab == x] for x in set(labels)]
+
+        return clusters
+
+
     def logp_plot(self, range=[], step=1, show=True, grid=True):
         """
         Returns a plot of log probabilities for the specified range of 
