@@ -514,10 +514,34 @@ class LDAGibbsViewer(object):
 
 
 
-    def topic_clusters(self, method='kmeans', n_clusters=None):
+    def topic_clusters(self, method='kmeans', n_clusters=None, by_cluster=True):
         """
-        Clusters topics
-        To do: make it general to deal with documents.
+        Clusters topics by a spceificed clustering algorithm. 
+        Currently it supports K-means, Spectral Clustering and Affinity
+        Propagation algorithms. K-means and spectral clustering cluster
+        topics into a specified number of clusters, whereas affinity
+        propagation does not requires the fixed cluster number. 
+
+        To do: make it general to deal with documents?
+
+        Parameters
+        ----------
+        method : strings
+            Spceifies the algorithm used for clustring. It can be either
+            'kmeans', 'affinity' or 'spectral'. Default is 'kmeans'.
+        n_clusters : int
+            Number of clusters used as the parameter for K-means or
+            spectral clustering algorithms. Default is K/10 where K is
+            the number of topics in the model.
+        by_cluster : boolean
+            If True, returns a list of clusters. Otherwise a list that
+            indicates cluster numbers for each topic is returned.
+            Default is true.
+
+        Returns
+        ----------
+        labels : list or list of lists
+            A list of clusters or list of cluster numbers.
         """
         # Default number of clusters = # topics / 10
         if not n_clusters:
@@ -539,9 +563,10 @@ class LDAGibbsViewer(object):
             km.fit(simmat)
             labels = list(km.labels_)
         
-        clusters = [[i for i,lab in enumerate(labels) if lab == x] for x in set(labels)]
+        if by_cluster:
+            labels = [[i for i,lab in enumerate(labels) if lab == x] for x in set(labels)]
 
-        return clusters
+        return labels
 
 
     def logp_plot(self, range=[], step=1, show=True, grid=True):
