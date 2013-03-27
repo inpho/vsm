@@ -648,7 +648,7 @@ class LDAGibbsViewer(object):
         """
         from sklearn import manifold
 
-        # create a list to be plotted
+        # create a list to be plotted / we don't need this anymore?
         if not topics:
             topics = range(self.model.K)
 
