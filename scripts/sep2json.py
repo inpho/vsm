@@ -36,12 +36,12 @@ if __name__ == "__main__":
     # These intermediary structures will hold the raw csv data for processing
     nodeIDs = dict()
     rawLinks = []
-    rawNodes = []
 
     # These will hold our final node and link objects
     nodes = []
     links = []
 
+    # Create our nodes
     with open(csvNodes) as nodesFile:
         reader = csv.reader(nodesFile, delimiter=",", quotechar="\"")
 
@@ -56,11 +56,13 @@ if __name__ == "__main__":
             nodes.append(process_node(params))
             nID += 1
 
+    # Load the edges into rawLinks
     with open(csvEdges) as edgesFile:
         reader = csv.reader(edgesFile,delimiter=",", quotechar="\"")
         for line in reader:
             rawLinks.append(line)
 
+    # Convert the node names in rawLinks into node IDs and create our edges
     for edge in rawLinks:
         params = []
         for node in edge:
