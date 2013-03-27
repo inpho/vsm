@@ -482,11 +482,14 @@ class LDAGibbsViewer(object):
                                print_len=print_len, as_strings=as_strings)
 
 
-    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
+    def sim_doc_doc(self, doc_or_docs, topics=None, print_len=10, filter_nan=True,
                     label_fn=_def_label_fn_, as_strings=True):
         """
         """
-        return _sim_doc_doc_(self.corpus, self.model.doc_top.T,
+        if not topics:
+            topics = range(self.model.K)
+
+        return _sim_doc_doc_(self.corpus, self.model.doc_top[:,topics].T,
                              self.model.context_type, doc_or_docs,
                              norms=self._doc_norms, print_len=print_len,
                              filter_nan=filter_nan, 
@@ -500,7 +503,7 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-    def simmat_docs(self, docs=None):
+    def simmat_docs(self, docs=None, topics=None):
         """
         Calculates the similarity matrix for a given list of documents.
 
@@ -517,8 +520,11 @@ class LDAGibbsViewer(object):
         if not docs:
             docs = range(len(self.model.W))
 
+        if not topics:
+            topics = range(self.model.K)
+
         return _simmat_documents_(self.corpus,
-                                  self.model.doc_top.T,
+                                  self.model.doc_top[:,topics].T,
                                   self.model.context_type,
                                   docs)
 
@@ -599,7 +605,7 @@ class LDAGibbsViewer(object):
 
     
 
-    def doc_isomap(self, doc=None, top=None, thres=0.4, n_neighbors=5, 
+    def doc_isomap(self, doc=None, top=None, dim=None, thres=0.4, n_neighbors=5, 
                    scale=True, trim=20): 
         """
         Takes document `doc` or topic `top` and plots an isomap for 
@@ -643,7 +649,7 @@ class LDAGibbsViewer(object):
 
         # create a list to be plotted from document or topic
         if doc:
-            doclist = self.sim_doc_doc(doc)
+            doclist = self.sim_doc_doc(doc, topics=dim)
         else:
             doclist = self.sim_top_doc(top)
 
@@ -653,8 +659,9 @@ class LDAGibbsViewer(object):
         else:
             labels, size = zip(*doclist[:int(ceil(thres))])
 
+
         # calculate coordinates
-        simmat = self.simmat_docs(labels)
+        simmat = self.simmat_docs(labels, topics=dim)
         distance = np.ones_like(simmat) - simmat
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
