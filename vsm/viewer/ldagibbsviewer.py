@@ -500,7 +500,22 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-    def simmat_docs(self, docs):
+    def simmat_docs(self, docs=None):
+        """
+        Calculates the similarity matrix for a given list of documents.
+
+        Parameters
+        ----------
+        docs : list
+            A list of documents whose similarity matrix is to be computed.
+            Default is all the documents in the model.
+
+        Returns
+        ----------
+        simmat_documents object
+        """
+        if not docs:
+            docs = range(len(self.model.W))
 
         return _simmat_documents_(self.corpus,
                                   self.model.doc_top.T,
@@ -508,7 +523,23 @@ class LDAGibbsViewer(object):
                                   docs)
 
 
-    def simmat_topics(self, topics):
+    def simmat_topics(self, topics=None):
+        """
+        Calculates the similarity matrix for a given list of topics.
+
+        Parameters
+        ----------
+        topics : list
+            A list of topics whose similarity matrix is to be computed.
+            Default is all the topics in the model.
+
+        Returns
+        ----------
+        simmat_topicss object
+        """
+
+        if not topics:
+            topics = range(self.model.K)
 
         return _simmat_topics_(self.model.top_word, topics)
 
