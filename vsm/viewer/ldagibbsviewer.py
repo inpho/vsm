@@ -738,21 +738,33 @@ class LDAGibbsViewer(object):
 
 
 
-    def basic_plot(self, pos, labels, size=40):
-        """
-        Basic place holder plotting function. For test only.
-        """
+    def basic_plot(self, arr, labels, size=[]):
+        """	
+    	Basic plot funtcion that takes a 2-dimensional array, list of labels,
+    	and list of marker size. Returns plots in the graph.
+    	"""
         import matplotlib.pyplot as plt
 
-        fig = plt.figure(figsize=(10, 10), dpi=80)
-        plt.scatter(pos[:, 0], pos[:, 1], size)
+    	n = arr.shape[0]
+    	X = arr[:,0]
+    	Y = arr[:,1]
+    
+    	if len(size) == 0:
+            size = [40 for i in xrange(n)]
+        
+    	fig = plt.figure(figsize=(10,10))
+    	ax = plt.subplot(111)
 
-        ax_ = fig.add_subplot(111)
+    	plt.scatter(X, Y, size)
 
-        ax_.set_xlim(np.min(pos[:, 0]) - .1, np.max(pos[:, 0]) + .1)
-        ax_.set_ylim(np.min(pos[:, 1]) - .1, np.max(pos[:, 1]) + .1)
+    	ax.set_xlim(np.min(X) - .1, np.max(X) + .1)
+    	ax.set_ylim(np.min(Y) - .1, np.max(Y) + .1)
+	ax.set_xticks([])
+	ax.set_yticks([])
 
-        for label, x, y in zip(labels, pos[:, 0], pos[:, 1]):
-            plt.annotate(label, xy = (x, y), xytext = (-2, 2), textcoords='offset points')
+    	for label, x, y in zip(labels, X, Y):
+            plt.annotate(label, xy = (x, y), xytext=(-2, 3), 
+			textcoords='offset points', fontsize=10)
 
-        return plt.show()
+    	plt.show()
+
