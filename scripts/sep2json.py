@@ -28,44 +28,39 @@ def process_link(linkParams):
     return link
 
 if __name__ == "__main__":
-    csvFile = sys.argv[-1]
+    # Load the list of nodes and the list of edges
+    csvNodes = "nodes.csv"
+    csvEdges = "edges.csv"
 
 
     # These intermediary structures will hold the raw csv data for processing
-    nodeSet = set()
     nodeIDs = dict()
     rawLinks = []
+    rawNodes = []
 
     # These will hold our final node and link objects
     nodes = []
     links = []
 
-    with open(csvFile) as f:
-        reader = csv.reader(f,delimiter=",", quotechar="\"")
+    with open(csvNodes) as nodesFile:
+        reader = csv.reader(nodesFile, delimiter=",", quotechar="\"")
+
+        nID = 0
         for line in reader:
+            params = []
+
+            nodeIDs[line[0]] = nID
+            params.append(nID)
             for word in line:
-                # Add nodes to nodeSet to remove duplicates 
-                nodeSet.add(word)
+                params.append(word)
+            nodes.append(process_node(params))
+            nID += 1
+
+    with open(csvEdges) as edgesFile:
+        reader = csv.reader(edgesFile,delimiter=",", quotechar="\"")
+        for line in reader:
             rawLinks.append(line)
 
-    # Create our actual nodes
-    nID = 0
-    for node in nodeSet:
-        params = []
-
-        # Add nodes and nIDs to nodeIDs for easy association
-        nodeIDs[node] = nID
-
-        # Temporary static groupID
-        groupID = 1
-        params.append(nID)
-        params.append(node)
-        params.append(groupID)
-        nodes.append(process_node(params))
-
-        nID += 1
-
-    # Replace explicit names in links with node ids and process
     for edge in rawLinks:
         params = []
         for node in edge:
