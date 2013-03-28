@@ -551,6 +551,62 @@ class LDAGibbsViewer(object):
 
 
 
+    def topic_clusters(self, method='kmeans', n_clusters=None, by_cluster=True):
+        """
+        Clusters topics by a spceificed clustering algorithm. 
+        Currently it supports K-means, Spectral Clustering and Affinity
+        Propagation algorithms. K-means and spectral clustering cluster
+        topics into a given number of clusters, whereas affinity
+        propagation does not requires the fixed cluster number. 
+
+        To do: make it general to deal with documents?
+
+        Parameters
+        ----------
+        method : strings
+            Spceifies the algorithm used for clustring. Currently it 
+            supports 'kmeans', 'affinity' or 'spectral'. Default is 
+            'kmeans'.
+        n_clusters : int
+            Number of clusters used as the parameter for K-means or
+            spectral clustering algorithms. Default is K/10 where K is
+            the number of topics in the model.
+        by_cluster : boolean
+            If True, returns a list of clusters. Otherwise a list that
+            indicates cluster numbers for each topic is returned.
+            Default is true.
+
+        Returns
+        ----------
+        labels : list or list of lists
+            A list of clusters or list of cluster numbers.
+        """
+        # Default number of clusters = # topics / 10
+        if not n_clusters:
+            n_clusters = int(round(self.model.K/10))
+
+        # Obtain similarity matrix
+            simmat = self.simmat_topics(range(self.model.K))
+
+        if method == 'affinity':
+            from sklearn.cluster import AffinityPropagation
+            af = AffinityPropagation(affinity='precomputed').fit(simmat)
+            labels = af.labels_
+        elif method == 'spectral':
+            from sklearn.cluster import spectral_clustering
+            labels = spectral_clustering(simmat, n_clusters=n_clusters)
+        else:
+            from sklearn.cluster import KMeans
+            km = KMeans(n_clusters=n_clusters, init='k-means++', max_iter=100, n_init=1,verbose=1)
+            km.fit(simmat)
+            labels = list(km.labels_)
+        
+        if by_cluster:
+            labels = [[i for i,lab in enumerate(labels) if lab == x] for x in set(labels)]
+
+        return labels
+
+
     def logp_plot(self, range=[], step=1, show=True, grid=True):
         """
         Returns a plot of log probabilities for the specified range of 
@@ -602,6 +658,46 @@ class LDAGibbsViewer(object):
             plt.show()
 
         return plt
+
+
+    def top_isomap(self, topics=None, n_neighbors=5): 
+        """
+        Plots an isomap of topics estimated LDA gibbs sampler.
+        For isomap, see:
+        Tenenbaum, J.B., De Silva, V., & Langford, J.C. Science 290(5500)
+
+        Parameters
+        ----------
+        topics : list
+            A topic or a list of topics used as a query. Default plots all
+            topics in the model.
+        cluster : boolean (under construction)
+            If True, the function clusters topics beforehand and asigns 
+            different colors for different clusters.
+        n_neighbors : int
+            Used by isomap to determine the number of neighbors for each point.
+            Large neighbor size tends to produce a denser map. Default is 5.
+
+        Returns
+        ----------
+        Basic plot.
+
+        """
+        from sklearn import manifold
+
+        # create a list to be plotted / we don't need this anymore?
+        if not topics:
+            topics = range(self.model.K)
+
+        # clustering (to be implemented) 
+
+        # calculate coordinates
+        simmat = self.simmat_topics(topics)
+        distance = np.ones_like(simmat) - simmat
+        imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
+        pos  = imap.fit(distance).embedding_
+
+        return self.basic_plot(pos,topics)
 
     
 
@@ -680,11 +776,10 @@ class LDAGibbsViewer(object):
 
 
 
-    def basic_plot(self, pos, labels, size=None):
+    def basic_plot(self, pos, labels, size=40):
         """
         Basic place holder plotting function. For test only.
         """
-
         import matplotlib.pyplot as plt
 
         fig = plt.figure(figsize=(10, 10), dpi=80)
