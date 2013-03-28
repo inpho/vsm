@@ -653,6 +653,7 @@ class LDAGibbsViewer(object):
             topics = range(self.model.K)
 
         # clustering (to be implemented) 
+	clusters = self.topic_clusters(by_cluster=False)
 
         # calculate coordinates
         simmat = self.simmat_topics(topics)
@@ -660,7 +661,7 @@ class LDAGibbsViewer(object):
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 
-        return self.basic_plot(pos,topics)
+        return self.plot_clusters(pos, clusters, topics)
 
     
 
@@ -734,14 +735,30 @@ class LDAGibbsViewer(object):
         if trim:
             labels = [lab[:trim] for lab in labels]
         
-        return self.basic_plot(pos,labels, size)
+        return self.plot_basic(pos,labels, size)
 
 
 
-    def basic_plot(self, arr, labels, size=[]):
+    def plot_basic(self, arr, labels, size=[]):
         """	
-    	Basic plot funtcion that takes a 2-dimensional array, list of labels,
+    	Basic plot funtcion takes a 2-dimensional array, list of labels,
     	and list of marker size. Returns plots in the graph.
+
+        Parameters
+        ----------
+        arr : 2-dimensional array
+            Array has x, y coordinates to be plotted on a 2-dimensional space.
+        labels : list
+	    List of labels to be displayed in the graph. 
+        size : list, optional
+            List of markersize for points where markersize can note the importance
+	    of the point. If not given, 'size' is a list of fixed markersize, 40. 
+	    Default is an empty list.
+
+        Returns
+        ----------
+        plt : maplotlit.pyplot object
+            A graph with scatter plots from 'arr'.
     	"""
         import matplotlib.pyplot as plt
 
@@ -756,6 +773,86 @@ class LDAGibbsViewer(object):
     	ax = plt.subplot(111)
 
     	plt.scatter(X, Y, size)
+
+    	ax.set_xlim(np.min(X) - .1, np.max(X) + .1)
+    	ax.set_ylim(np.min(Y) - .1, np.max(Y) + .1)
+	ax.set_xticks([])
+	ax.set_yticks([])
+
+    	for label, x, y in zip(labels, X, Y):
+            plt.annotate(label, xy = (x, y), xytext=(-2, 3), 
+			textcoords='offset points', fontsize=10)
+
+    	plt.show()
+
+
+    def gen_colors(self, clusters):
+	"""
+	Takes 'clusters' and creates a list of colors so a cluster has a color.
+
+	Parameters
+	----------
+	clusters : list
+	    A flat list of integers where an integer represents which cluster
+	    the information belongs to.
+
+	Returns
+	----------
+	colorm : list
+	    A list of colors obtained from matplotlib colormap cm.hsv. 
+	    The length of 'colorm' is the same as the number of distinct clusters.
+	"""
+	import matplotlib.cm as cm
+	
+	n = len(set(clusters))
+	colorm = [cm.hsv(i * 1.0 /n, 1) for i in xrange(n)]
+	return colorm
+	
+	
+    def plot_clusters(self, arr, clusters, labels, size=[]):
+        """	
+    	Takes 2-dimensional array(simmat), list of clusters, list of labels,
+    	and list of marker size. 'clusters' should be a flat list which can be
+	obtained from topic_clusters(by_cluster=False).
+	Plots each clusters in different colors.
+
+        Parameters
+        ----------
+        arr : 2-dimensional array
+            Array has x, y coordinates to be plotted on a 2-dimensional space.
+	clusters : list
+	    A flat list of integers where an integer represents which cluster
+	    the information belongs to.
+        labels : list
+	    List of labels to be displayed in the graph. 
+        size : list, optional
+            List of markersize for points where markersize can note the importance
+	    of the point. If not given, 'size' is a list of fixed markersize, 40. 
+	    Default is an empty list.
+
+        Returns
+        ----------
+        plt : maplotlit.pyplot object
+            A graph with scatter plots from 'arr'.
+
+	"""
+        import matplotlib.pyplot as plt
+
+    	n = arr.shape[0]
+    	X = arr[:,0]
+    	Y = arr[:,1]
+	
+	colors = self.gen_colors(clusters)
+	colors = [colors[i] for i in clusters]
+
+    	if len(size) == 0:
+            size = [40 for i in xrange(n)]
+        
+    	fig = plt.figure(figsize=(10,10))
+    	ax = plt.subplot(111)
+
+	for i in xrange(n):
+	    plt.scatter(X[i], Y[i], size, color=colors[i])
 
     	ax.set_xlim(np.min(X) - .1, np.max(X) + .1)
     	ax.set_ylim(np.min(Y) - .1, np.max(Y) + .1)
