@@ -520,7 +520,7 @@ class LDAGibbsViewer(object):
         Currently it supports K-means, Spectral Clustering and Affinity
         Propagation algorithms. K-means and spectral clustering cluster
         topics into a given number of clusters, whereas affinity
-        propagation does not requires the fixed cluster number. 
+        propagation does not require the fixed cluster number. 
 
         To do: make it general to deal with documents?
 
@@ -549,7 +549,7 @@ class LDAGibbsViewer(object):
             n_clusters = int(round(self.model.K/10))
 
         # Obtain similarity matrix
-            simmat = self.simmat_topics(range(self.model.K))
+        simmat = self.simmat_topics(range(self.model.K))
 
         if method == 'affinity':
             from sklearn.cluster import AffinityPropagation

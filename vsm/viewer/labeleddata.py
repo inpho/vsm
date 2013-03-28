@@ -149,7 +149,7 @@ class LabeledColumn(np.ndarray):
 
     """
     def __new__(cls, input_array, col_header=None, subcol_headers=None,
-                subcol_widths=None, col_len = None):
+                subcol_widths=None, col_len=None):
         """
         """
         obj = np.asarray(input_array).view(cls)
