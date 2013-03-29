@@ -721,7 +721,7 @@ class LDAGibbsViewer(object):
             topics = range(self.model.K)
 
         # clustering (to be implemented) 
-	clusters = self.topic_clusters(by_cluster=False)
+	clusters = self.cluster_topics(by_cluster=False)
 
         # calculate coordinates
         simmat = self.simmat_topics(topics)
@@ -885,7 +885,7 @@ class LDAGibbsViewer(object):
         """	
     	Takes 2-dimensional array(simmat), list of clusters, list of labels,
     	and list of marker size. 'clusters' should be a flat list which can be
-	obtained from topic_clusters(by_cluster=False).
+	obtained from cluster_topics(by_cluster=False).
 	Plots each clusters in different colors.
 
         Parameters
