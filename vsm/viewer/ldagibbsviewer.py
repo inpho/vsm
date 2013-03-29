@@ -482,7 +482,7 @@ class LDAGibbsViewer(object):
                                print_len=print_len, as_strings=as_strings)
 
 
-    def sim_doc_doc(self, doc_or_docs, topics=None, print_len=10, filter_nan=True,
+    def sim_doc_doc(self, doc_or_docs, k_indices=[], print_len=10, filter_nan=True,
                     label_fn=_def_label_fn_, as_strings=True):
         """
         Computes and sorts the cosine(similarity) values between a document 
@@ -492,7 +492,7 @@ class LDAGibbsViewer(object):
         ----------
         doc_or_documents : string/integer or list of string/integer
             Query document(s) to which cosine values are calculated
-        topics : list of integers
+        k_indices : list of integers
             A list of topics based on which similarity value is computed.
             Default is all the topics in the model.            
         as_strings : boolean
@@ -510,14 +510,15 @@ class LDAGibbsViewer(object):
             A 2-dim array containing documents and their cosine values to 
             `doc_or_docs`. 
         """
+        
+        if len(k_indices) == 0:
+            mat = self.model.doc_top.T
+        else:
+            mat = self.model.doc_top[:,k_indices].T
 
-        if not topics:
-            topics = range(self.model.K)
-
-        return _sim_doc_doc_(self.corpus, self.model.doc_top[:,topics].T,
-                             self.model.context_type, doc_or_docs,
-                             norms=self._doc_norms, print_len=print_len,
-                             filter_nan=filter_nan, 
+        return _sim_doc_doc_(self.corpus, mat, self.model.context_type, 
+                             doc_or_docs, norms=self._doc_norms, 
+                             print_len=print_len, filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=as_strings)
     
 
@@ -528,7 +529,7 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-    def simmat_docs(self, docs=None, topics=None):
+    def simmat_docs(self, docs=[], k_indices=[]):
         """
         Calculates the similarity matrix for a given list of documents.
 
@@ -537,7 +538,7 @@ class LDAGibbsViewer(object):
         docs : list
             A list of documents whose similarity matrix is to be computed.
             Default is all the documents in the model.
-        topics : list
+        k_indices : list
             A list of topics based on which similarity matrix is computed.
             Default is all the topics in the model.
 
@@ -545,14 +546,16 @@ class LDAGibbsViewer(object):
         ----------
         simmat_documents object
         """
-        if not docs:
+
+        if len(docs) == 0:
             docs = range(len(self.model.W))
 
-        if not topics:
-            topics = range(self.model.K)
+        if len(k_indices) == 0:
+            mat = self.model.doc_top.T
+        else:
+            mat = self.model.doc_top[:,k_indices].T
 
-        return _simmat_documents_(self.corpus,
-                                  self.model.doc_top[:,topics].T,
+        return _simmat_documents_(self.corpus, mat,
                                   self.model.context_type,
                                   docs)
 
@@ -729,7 +732,7 @@ class LDAGibbsViewer(object):
 
     
 
-    def doc_isomap(self, doc=None, top=None, topic_dim=None, thres=0.4, n_neighbors=5, 
+    def doc_isomap(self, doc=None, top=None, k_indices=[], thres=0.4, n_neighbors=5, 
                    scale=True, trim=20): 
         """
         Takes document `doc` or topic `top` and plots an isomap for 
@@ -750,7 +753,7 @@ class LDAGibbsViewer(object):
             A document or a list of documents used as a query.
         top : string or int
             A topic or a list of topics used as a query. 
-        topic_dim : list of int
+        k_indices : list of int
             A list of topics based on which similarity matrix is computed.
             Default is all the topics in the model.
         thres : float
@@ -776,7 +779,7 @@ class LDAGibbsViewer(object):
 
         # create a list to be plotted from document or topic
         if doc:
-            doclist = self.sim_doc_doc(doc, topics=topic_dim)
+            doclist = self.sim_doc_doc(doc, k_indices=k_indices)
         else:
             doclist = self.sim_top_doc(top)
 
@@ -788,7 +791,7 @@ class LDAGibbsViewer(object):
 
 
         # calculate coordinates
-        simmat = self.simmat_docs(labels, topics=topic_dim)
+        simmat = self.simmat_docs(labels, k_indices=k_indices)
         distance = np.ones_like(simmat) - simmat
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
