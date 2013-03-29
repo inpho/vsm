@@ -582,7 +582,7 @@ class LDAGibbsViewer(object):
 
 
 
-    def topic_clusters(self, method='kmeans', n_clusters=None, by_cluster=True):
+    def cluster_topics(self, method='kmeans', n_clusters=None, by_cluster=True):
         """
         Clusters topics by a spceificed clustering algorithm. 
         Currently it supports K-means, Spectral Clustering and Affinity
@@ -691,7 +691,7 @@ class LDAGibbsViewer(object):
         return plt
 
 
-    def top_isomap(self, topics=None, n_neighbors=5): 
+    def isomap_topics(self, topics=None, n_neighbors=5): 
         """
         Plots an isomap of topics estimated LDA gibbs sampler.
         For isomap, see:
@@ -733,7 +733,7 @@ class LDAGibbsViewer(object):
 
     
 
-    def doc_isomap(self, doc=None, top=None, k_indices=[], thres=0.4, n_neighbors=5, 
+    def isomap_docs(self, doc=None, top=None, k_indices=[], thres=0.4, n_neighbors=5, 
                    scale=True, trim=20): 
         """
         Takes document `doc` or topic `top` and plots an isomap for 
