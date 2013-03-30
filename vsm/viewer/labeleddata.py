@@ -355,7 +355,6 @@ class DataTable(list):
 
         return out
 
-    
 
     def _repr_html_(self):
 	"""
@@ -428,6 +427,7 @@ class DataTable(list):
         s += '</table>'
 
         return s
+
 
 
 # TODO: Investigate compressed forms of symmetric matrix. Cf.
