@@ -729,7 +729,7 @@ class LDAGibbsViewer(object):
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 
-        return self.plot_clusters(pos, clusters, topics)
+        return self.plot_clusters(pos, topics, clusters=clusters)
 
     
 
@@ -807,55 +807,7 @@ class LDAGibbsViewer(object):
         if trim:
             labels = [lab[:trim] for lab in labels]
         
-        return self.plot_basic(pos,labels, size)
-
-
-
-    def plot_basic(self, arr, labels, size=[]):
-        """	
-    	Basic plot funtcion takes a 2-dimensional array, list of labels,
-    	and list of marker size. Returns plots in the graph.
-
-        Parameters
-        ----------
-        arr : 2-dimensional array
-            Array has x, y coordinates to be plotted on a 2-dimensional space.
-        labels : list
-	    List of labels to be displayed in the graph. 
-        size : list, optional
-            List of markersize for points where markersize can note the importance
-	    of the point. If not given, 'size' is a list of fixed markersize, 40. 
-	    Default is an empty list.
-
-        Returns
-        ----------
-        plt : maplotlit.pyplot object
-            A graph with scatter plots from 'arr'.
-    	"""
-        import matplotlib.pyplot as plt
-
-    	n = arr.shape[0]
-    	X = arr[:,0]
-    	Y = arr[:,1]
-    
-    	if len(size) == 0:
-            size = [40 for i in xrange(n)]
-        
-    	fig = plt.figure(figsize=(10,10))
-    	ax = plt.subplot(111)
-
-    	plt.scatter(X, Y, size)
-
-    	ax.set_xlim(np.min(X) - .1, np.max(X) + .1)
-    	ax.set_ylim(np.min(Y) - .1, np.max(Y) + .1)
-	ax.set_xticks([])
-	ax.set_yticks([])
-
-    	for label, x, y in zip(labels, X, Y):
-            plt.annotate(label, xy = (x, y), xytext=(-2, 3), 
-			textcoords='offset points', fontsize=10)
-
-    	plt.show()
+        return self.plot_clusters(pos, labels, size=[])
 
 
     def gen_colors(self, clusters):
@@ -881,7 +833,7 @@ class LDAGibbsViewer(object):
 	return colorm
 	
 	
-    def plot_clusters(self, arr, clusters, labels, size=[]):
+    def plot_clusters(self, arr, labels, clusters=[], size=[]):
         """	
     	Takes 2-dimensional array(simmat), list of clusters, list of labels,
     	and list of marker size. 'clusters' should be a flat list which can be
@@ -892,11 +844,12 @@ class LDAGibbsViewer(object):
         ----------
         arr : 2-dimensional array
             Array has x, y coordinates to be plotted on a 2-dimensional space.
-	clusters : list
-	    A flat list of integers where an integer represents which cluster
-	    the information belongs to.
         labels : list
 	    List of labels to be displayed in the graph. 
+ 	clusters : list, optional
+	    A flat list of integers where an integer represents which cluster
+	    the information belongs to. If not given, it returns a basic plot
+	    with no color variation. Default is an empty list.
         size : list, optional
             List of markersize for points where markersize can note the importance
 	    of the point. If not given, 'size' is a list of fixed markersize, 40. 
@@ -913,9 +866,6 @@ class LDAGibbsViewer(object):
     	n = arr.shape[0]
     	X = arr[:,0]
     	Y = arr[:,1]
-	
-	colors = self.gen_colors(clusters)
-	colors = [colors[i] for i in clusters]
 
     	if len(size) == 0:
             size = [40 for i in xrange(n)]
@@ -923,8 +873,14 @@ class LDAGibbsViewer(object):
     	fig = plt.figure(figsize=(10,10))
     	ax = plt.subplot(111)
 
-	for i in xrange(n):
-	    plt.scatter(X[i], Y[i], size, color=colors[i])
+	if len(clusters) == 0:
+	    plt.scatter(X, Y, size)
+	else:	
+	    colors = self.gen_colors(clusters)
+	    colors = [colors[i] for i in clusters]
+
+	    for i in xrange(n):
+	        plt.scatter(X[i], Y[i], size, color=colors[i])
 
     	ax.set_xlim(np.min(X) - .1, np.max(X) + .1)
     	ax.set_ylim(np.min(Y) - .1, np.max(Y) + .1)
