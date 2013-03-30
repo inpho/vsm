@@ -54,7 +54,7 @@ def format_(x, n):
 def default_col_widths(dtype):
     """
     Assigns default column widths depending on the dtype. 
-    Used in _str_ representation.
+    Used in LabeledColumn _str_ representation.
     """
     col_widths = []
     
@@ -65,6 +65,23 @@ def default_col_widths(dtype):
             col_widths.append(t.itemsize + 5)
         else:
             col_widths.append(10)
+    
+    return col_widths
+
+
+def compact_col_width(dtype):
+    """
+    Assigns second column width CompactList based on the dtype. 
+    """
+    values =zip(*dtype.fields.values())[0]
+    print values
+
+    col_width = 0
+    for t in values:
+        if t.kind == 'S':
+            col_width += t.itemsize + 1
+        else:
+            col_widths += 10
     
     return col_widths
 
@@ -247,6 +264,129 @@ class LabeledColumn(np.ndarray):
             for j in xrange(len(self.dtype)):
                 w = self.subcol_widths[j]
                 n = self.dtype.names[j]
+                s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
+            s += '</tr>'
+        
+        s += '</table>'
+ 
+        return s
+
+
+class CompactList(np.ndarray):
+
+    def __new__(cls, input_array, col_header=None, subcol_headers=None,
+                subcol_widths=None, col_len=None, num_words=None):
+        """
+        """
+        obj = np.asarray(input_array).view(cls)
+        obj.col_header = col_header
+        obj._col_len = col_len
+        obj.subcol_headers = subcol_headers
+        obj._subcol_widths = subcol_widths     
+	# number of words per topic.
+	obj._num_words = num_words        
+        return obj
+
+
+    def __array_finalize__(self, obj):
+        """
+        """
+        if obj is None: return
+
+        self.col_header = getattr(obj, 'col_header', None)
+        self._col_len = getattr(obj, '_col_len', None)
+        self.subcol_headers = getattr(obj, 'subcol_headers', None)
+        self._subcol_widths = getattr(obj, '_subcol_widths', None)
+	self._num_words = getattr(obj, '_num_words', None)
+
+    @property
+    def subcol_widths(self):
+        if not hasattr(self, '_subcol_widths') or not self._subcol_widths:
+            self._subcol_widths = compact_col_width(self.dtype)
+        return self._subcol_widths
+
+    @subcol_widths.setter
+    def subcol_widths(self, w):
+        self._subcol_widths = w
+
+    @property
+    def col_width(self):
+        return max(sum(self.subcol_widths), len(self.col_header))
+
+    @property
+    def col_len(self):
+	if not self._col_len:
+	    return self.shape[0]
+	return min(self.shape[0], self._col_len)
+
+    @col_len.setter
+    def col_len(self, n):
+	self._col_len = n
+
+    @property
+    def num_words(self):
+	if not self._num_words:
+	    return 5
+	return min(5, self.col_len)
+
+    @num_words.setter
+    def num_words(self, n):
+	self._num_words = n
+
+
+    def __str__(self):
+    	"""
+	Pretty prints the LabeledColumn when 'print' method is used.
+	"""     
+        line = '-' * self.col_width + '\n'
+        out = line
+        if self.col_header:
+            out += '{0:^{1}}'.format(format_(self.col_header, self.col_width), 
+                                     self.col_width) + '\n'
+            out += line
+            
+        if self.subcol_headers:
+            for i in xrange(len(self.subcol_headers)):
+                w = self.subcol_widths[i]
+                out += '{0:<{1}}'.format(format_(self.subcol_headers[i], w), w)
+            out += '\n'
+            out += line
+
+        for i in xrange(self.col_len):
+            for j in xrange(len(self.dtype)):
+                w = self.subcol_widths[j]
+                n = self.dtype.names[j]
+                out += '{0:<{1}}'.format(format_(self[n][i], w), w)
+            out += '\n'
+
+        return out
+
+
+    def _repr_html_(self):
+        """
+	Returns an html table in ipython online session.
+	""" 
+        s = '<table style="margin: 0">'
+
+        if self.col_header:
+            s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
+		="{0}">{1}</th></tr>'.format(len(self.subcol_widths), self.col_header)
+
+        if self.subcol_headers:
+            s += '<tr>'
+            for sch in self.subcol_headers:
+                s += '<th style="text-align: center; background: #EFF2FB; ">{0}\
+			</th>'.format(sch)
+            s += '</tr>'
+        
+        for i in xrange(self.col_len):
+            s += '<tr>'
+	    # Topics0. first column is the topic. second column is words.
+	    s += '<td>{0:<{1}}</td>'.format(self[n][0])
+            for j in xrange(len(self.dtype)):
+                w = ncol * self.subcol_widths[j]
+                #n = self.dtype.names[j]
+		
                 s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
             s += '</tr>'
         
