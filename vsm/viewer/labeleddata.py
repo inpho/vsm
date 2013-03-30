@@ -355,7 +355,6 @@ class DataTable(list):
 
         return out
 
-    
 
     def _repr_html_(self):
 	"""
@@ -428,6 +427,97 @@ class DataTable(list):
         s += '</table>'
 
         return s
+
+
+class ColorDataTable(DataTable):
+    """
+    Extends DataTable. adds color. 
+    """
+    from ldagibbsviewer import LDAGibbsViewer as LDAViewer
+
+    def __init__(self, d, clusters):
+	super(ColorDataTable, self).__init__(d) 
+
+
+    def _repr_html_(self):
+	"""
+	Returns a html table in ipython online session.
+	"""
+	colors = LDAViewer.gen_colors(self.clusters)
+	colors -> rgba to hex.
+
+	s = '<table>'
+
+	col_in_row = 3
+
+        if self.table_header:
+            s += '<tr><th style="text-align: center; background: #A9D0F5;\
+		fontsize: 14px;" colspan="{0}"> {1} </th></tr>'.format(col_in_row
+			 * len(self[0].subcol_headers), self.table_header)
+     
+	start = 0
+	n_arr = len(self)
+	m = n_arr % col_in_row
+
+        while start < n_arr:
+	    end = start + col_in_row
+	    group = self[start:end]	    
+	    
+	    s += '<tr>'
+	    for i, lc in enumerate(group):
+		if lc.col_header:
+	            s += '<th style="text-align: center; background: #CEE3F6;"\
+		 colspan="{0}">{1}</th>'.format(len(lc.subcol_headers), lc.col_header)
+
+		if end > n_arr and m and i == len(group)-1 and start > 0:
+		    for j in xrange(end - n_arr):
+			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
+		 	colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
+					' ' * self[0].col_width)
+    	    s += '</tr>'
+
+	    s += '<tr>'
+	    for i, lc in enumerate(group):
+        	
+		if lc.subcol_headers:
+            	    
+            	    for sch in lc.subcol_headers:
+                	s += '<th style="text-align: center; background: #EFF2FB;">\
+				{0}</th>'.format(sch)
+
+		if end > n_arr and m and i == len(group)-1 and start > 0:
+		    for j in xrange(end - n_arr):
+			s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
+		 colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
+						' ' * self[0].col_width)
+            s += '</tr>'
+            
+	    for i in xrange(self[0].col_len):
+
+	        s += '<tr>'
+		for k, lc in enumerate(group):
+            	   
+            	    for j in xrange(len(lc.dtype)):
+			w = lc.subcol_widths[j]
+                        n = lc.dtype.names[j]
+			
+			# add color,, zip...color list?
+	                s += '<td>{0}</td>'.format(format_(lc[n][i], w))
+		
+		    if end > n_arr and m and k == len(group)-1 and start > 0:
+		        for e in xrange(end - n_arr):
+			    s += '<td style="border-color: #EFF2FB; background: #EFF2FB;"\
+				colspan="{0}"> {1} </th>'.format(len(lc.subcol_headers),
+							 ' ' * self[0].col_width)
+                s += '</tr>'	
+	    
+	    start = end
+        s += '</table>'
+
+        return s
+
+
+
 
 
 # TODO: Investigate compressed forms of symmetric matrix. Cf.
