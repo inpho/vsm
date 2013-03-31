@@ -81,9 +81,9 @@ def compact_col_width(dtype):
         if t.kind == 'S':
             col_width += t.itemsize + 1
         else:
-            col_widths += 10
+            col_width += 10
     
-    return col_widths
+    return col_width
 
 
 class LabeledColumn(np.ndarray):
@@ -272,7 +272,7 @@ class LabeledColumn(np.ndarray):
         return s
 
 
-class CompactList(np.ndarray):
+class CompactTable(np.ndarray):
 
     def __new__(cls, input_array, col_header=None, subcol_headers=None,
                 subcol_widths=None, col_len=None, num_words=None):
@@ -354,7 +354,6 @@ class CompactList(np.ndarray):
 
         for i in xrange(self.col_len):
             for j in xrange(len(self.dtype)):
-                w = self.subcol_widths[j]
                 n = self.dtype.names[j]
                 out += '{0:<{1}}'.format(format_(self[n][i], w), w)
             out += '\n'
@@ -381,15 +380,19 @@ class CompactList(np.ndarray):
         
         for i in xrange(self.col_len):
             s += '<tr>'
-	    # Topics0. first column is the topic. second column is words.
-	    s += '<td>{0:<{1}}</td>'.format(self[n][0])
-            for j in xrange(len(self.dtype)):
-                w = ncol * self.subcol_widths[j]
-                #n = self.dtype.names[j]
-		
-                s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
+	    s += '<td>{0:<{1}}</td>'.format(self.col_header)
+	    # TODO col_header s in LabeledColumn needs to fill first col.
+	    # col_header => more like..col_entries
+	    # second column is words.
+	    for j in xrange(self.num_words):
+		s += '<td>{0:<{1}}</td>'.format(self[j][0])
+
+	    #s += '<td>{0:<{1}}</td>'.format(self[n][0])
+            #for j in xrange(len(self.dtype)):
+            #    w = ncol * self.subcol_widths[j]
+            #    n = self.dtype.names[j]
+            #    s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
             s += '</tr>'
-        
         s += '</table>'
  
         return s
@@ -609,6 +612,23 @@ def test_LabeledColumn():
     arr.subcol_headers = ['Word', 'Value']
     arr.col_header = 'Song lets make this longer than subcol headers'
     arr.col_len = 10
+
+    return arr
+
+
+def test_CompactTable():
+
+    words = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
+             'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
+             'is', 'but', 'a', 'dream']
+    values = [np.random.random() for t in words]
+    d = [('i', np.array(words).dtype), 
+         ('value', np.array(values).dtype)]
+    v = np.array(zip(words, values), dtype=d)
+    #v = LabeledColumn(v)
+    v.subcol_widths = [30, 20]
+    v.subcol_headers = ['Word', 'Value']
+    v.col_len = 10
 
     return arr
 
