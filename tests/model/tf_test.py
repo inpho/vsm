@@ -1,13 +1,21 @@
 import unittest
 import vsm.model.tf
+import numpy as np
 import os
-from vsm.util.corpustools import random_corpus
+from vsm.corpus import BaseCorpus
 from tempfile import NamedTemporaryFile
 
 class TestTfModel(unittest.TestCase):
 
     def setUp(self):
-        self.corpus = random_corpus(10000, 100, 0, 100, context_type='document')
+        
+        corpus = np.array([0, 3, 2, 1, 0, 3, 0, 2, 3, 0, 2, 3, 1, 
+                           2, 0, 3, 2, 1, 2, 2], dtype=np.int)
+        contextData = np.array([(3,), (5,), (7,), (11,), (11,), 
+                                (15,), (18,), (20,)], 
+                               dtype=[('idx', '<i8')])
+        self.corpus = BaseCorpus(corpus, context_data=[contextData], 
+                                 context_types='document')
         self.model = vsm.model.tf.TfModel(self.corpus, 'document')
 
 
