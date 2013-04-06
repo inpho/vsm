@@ -73,17 +73,15 @@ def compact_col_widths(dtype):
     """
     Assigns second column width CompactList based on the dtype. 
     """
-    ccol_widths = [0, 0]
+    ccol_widths = [10, 0]
 
-    values =zip(*dtype.fields.values())[0]
-    print values
-    ## THINK about first column and second column (sum)
-    for t in values:
-        if t.kind == 'S':
-            ccol_widths += t.itemsize + 1
-        else:
-            ccol_widths[1] += 10
+    value =zip(*dtype.fields.values())[0][0]
     
+    if value.kind == 'S':
+	ccol_widths[1] += value.itemsize + 2
+    else:
+	ccol_widths[1] += 10
+   
     return ccol_widths
 
 
@@ -316,7 +314,7 @@ class CompactTable(np.ndarray):
     def num_words(self):
 	if not self._num_words:
 	    return 5
-	return min(5, self.col_len)
+	return min(5, self._num_words)
 
     @num_words.setter
     def num_words(self, n):
@@ -619,7 +617,13 @@ def test_CompactTable():
     arr.subcol_headers = ['Topic', 'Words']
     arr.num_words = 3
 
-    return arr
+    t = []
+    for i in xrange(5):
+        t.append(arr.copy())
+        t[i].col_header = 'Iteration ' + str(i)
+     
+
+    return t
 
 
 def test_DataTable():

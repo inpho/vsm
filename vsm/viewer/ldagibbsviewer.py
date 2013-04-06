@@ -148,7 +148,7 @@ class LDAGibbsViewer(object):
         return _res_word_type_(self.corpus, word)
 
 
-    def topics(self, print_len=10, k_indices=[], as_strings=True):
+    def topics(self, print_len=10, k_indices=[], as_strings=True, prob=True):
         """
         Returns a list of topics estimated by `LDAGibbs` sampler. 
         Each topic is represented by a set of words and the corresponding probabilities.
