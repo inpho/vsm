@@ -185,6 +185,12 @@ class LDAGibbsViewer(object):
 	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
 				 field_name='word')
 	
+	# without probabilities, just words
+	if not prob:
+	    sch = ['Topic', 'Words']
+	    return _CompactTable_(k_arr, table_header='Topics Sorted by Index',
+			subcol_headers=sch, num_words=print_len)
+
         table = []
         for i,k in enumerate(k_indices):
             ch = 'Topic ' + str(k)
@@ -194,6 +200,7 @@ class LDAGibbsViewer(object):
             table.append(col)
 
         table = _DataTable_(table, 'Topics Sorted by Index')
+
 
         return table
 
