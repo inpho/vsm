@@ -110,12 +110,16 @@ def combine_models(m1, m2):
 def combine_corpus(c1, c2):
     """Takes two corpora and combines them into one super corpus. Also keeps an association list between the two old corpora and the new corpus."""
     
-    alist_c1 = []
-    alist_c2 = []
-    c3 = [c1.words[i] for i in c1.corpus]
-
-
-
+    from vsm.corpus import Corpus
+    c1dict = {}
+    c2dict = {}
+    text = [c1.words[i] for i in c1.corpus] + [c2.words[i] for i in c2.corpus]
+    c3 = Corpus(text)
+    for i,word in enumerate(c3.words):
+        if word in c1.words:
+            c1dict[word] = i
+        if word in c2.words:
+            c2dict[word] = i
 
 def test_TfModel():
 
