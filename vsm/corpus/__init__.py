@@ -23,6 +23,18 @@ def split_corpus(arr, indices):
     return out
 
 
+def compress(slice_ls):
+    """
+    Takes a list of slices and removes the gaps between slices.
+    """
+    k = 0
+    for i in xrange(len(slice_ls)):
+        slice_ls[i] = slice(k, k+slice_ls[i].stop-slice_ls[i].start)
+        k = slice_ls[i].stop
+
+    return slice_ls
+   
+
 
 class BaseCorpus(object):
     """
@@ -105,7 +117,7 @@ class BaseCorpus(object):
     array(['ran', 'away', 'chased', 'dog', 'cat', 'the'],
           dtype='|S6')
 
-    >>> c.meta_int('sentences',{'sent_label': 'intransitive'}, 'sent_label')
+    >>> c.meta_int('sentences',{'sent_label': 'intransitive'})
     1
 
     >>> b.get_metadatum('sentences', {'sent_label': 'intransitive'}, 'sent_label') 
@@ -361,7 +373,80 @@ class BaseCorpus(object):
                      if word not in word_set and not word_set.add(word)]
         self.words = np.array(word_list, dtype=self.corpus.dtype)
 
+        
+    def subcorpus(self, ctx_type, contexts):
+        """
+        """
+	from vsm.viewer import res_doc_type, doc_label_name
 
+        label_name = doc_label_name(ctx_type)
+        ctx_indices = [res_doc_type(self, ctx_type, label_name, c)[0]
+                       for c in contexts]
+
+        slice_ls = self.view_contexts(ctx_type, as_slices=True)
+        slice_sbls = [slice_ls[i] for i in ctx_indices]
+
+        ctx = [self.corpus[s] for s in slice_sbls]
+        corpus = np.array([i for c in ctx for i in c], dtype=np.int)
+	
+	ctx_data = self.sub_meta(ctx_type, contexts)
+        ctx_types = [ctx_type]
+	
+        c = BaseCorpus(corpus, context_data=ctx_data, context_types=ctx_types)
+
+        return c
+
+
+    def sub_meta(self, ctx_type, contexts):
+	"""
+	Takes ctx_type and indices and gets metadata.
+	"""
+	slice_dic = self.sub_indices(ctx_type, contexts)
+
+	mdlist = []
+	for k in slice_dic.keys():
+	    slices = slice_dic[k]
+	    md = self.view_metadata(k)
+
+	    indices = []
+	    for i in xrange(len(slices)):
+		for j in xrange(len(md)):
+		    if slices[i].stop == md['idx'][j]:
+		        indices.append(j)
+
+	    slice_ls = compress(slice_dic[k])
+
+	    idx = np.array([s.stop for s in slice_ls], dtype=np.int)
+	    md = md[indices]
+	    md['idx'] = idx
+
+	    mdlist.append(md)
+
+	return mdlist
+
+      
+    def sub_indices(self, ctx_type, indices):
+	"""
+	Returns a dictionary of keys as context types and values as list of slices.
+	"""
+	ctxlist = self.view_contexts(ctx_type, as_slices=True)
+	contexts = [ctxlist[i] for i in indices]
+
+	sub_indices = {}
+	for t in self.context_types:
+	    tctx = self.view_contexts(t, as_slices=True)
+	    
+	    if len(tctx) >= len(ctxlist):
+		sub_i = []
+		for ctx in contexts:
+		    for sl in tctx:
+		    	if ctx.start <= sl.start and sl.stop <= ctx.stop:
+			    sub_i.append(sl)
+	        sub_indices[t] = sub_i
+
+	return sub_indices
+
+				
 
 class Corpus(BaseCorpus):
     """
@@ -370,7 +455,7 @@ class Corpus(BaseCorpus):
 
     A Corpus object contains an integer representation of the text and
     maps to permit conversion between integer and string
-    epresentations of a given word.
+    representations of a given word.
 
     As a BaseCorpus object, it includes a dictionary of tokenizations
     of the corpus and a method for viewing (without copying) these
@@ -729,3 +814,90 @@ def test_file():
         os.remove(tmp.name)
 
     return c_reloaded
+
+
+def test_compress():
+
+    l1 = []
+    l2 = [slice(0,0)]
+    l3 = [slice(0,0), slice(0,0)]
+    l4 = [slice(1,3), slice(3,6)]
+    l5 = [slice(0,1), slice(4,5), slice(5,6), slice(6,6)]
+
+    assert(l1 == compress(l1))
+    assert(l2 == compress(l2))
+    assert(l3 == compress(l3))
+    assert([slice(0,2), slice(2,5)] == compress(l4))
+    assert(compress(l5) == [slice(0,1), slice(1,2), slice(2,3), slice(3,3)])
+
+
+def test_subcorpus():
+    corpus = [0,1,2,0,3,0,3,4,5]
+    context_types = ['sentences']
+    context_data = [np.array([(3, 'a'), (5, 'b'), (7, 'c'), (9, 'd')],
+                        dtype=[('idx', '<i8'), ('sent_label', '|S16')])]
+
+    c = BaseCorpus(corpus, context_types=context_types, context_data=context_data)
+
+    sub1 = c.subcorpus('sentences', [0,2])
+    ctx = sub1.view_contexts('sentences')
+
+    assert((sub1.corpus == np.array([0, 1, 2, 0, 3], dtype=np.int)).all())
+    assert((ctx[1] == np.array([0, 3], dtype=np.int)).all())
+    assert(sub1.meta_int('sentences',{'sent_label': 'c'}) == 1)
+
+    sub2 = c.subcorpus('sentences', [1,2])
+    ctx = sub2.view_contexts('sentences')
+
+    assert((sub2.corpus == np.array([0, 3, 0, 3], dtype=np.int)).all())
+    assert((ctx[0] == np.array([0, 3], dtype=np.int)).all)
+    assert(sub2.view_metadata('sentences')[0]['sent_label'] == 'b')
+
+    sub3 = c.subcorpus('sentences', [1,3])
+    ctx = sub3.view_contexts('sentences')
+
+    assert((sub3.corpus == np.array([0, 3, 4, 5], dtype=np.int)).all())
+    assert((ctx[1] == np.array([4, 5], dtype=np.int)).all())
+    assert(sub3.meta_int('sentences',{'sent_label': 'd'}) == 1)
+
+
+def test_sub_indices():
+    corpus = [0,4,3,7,3,4,0,2,0,5]
+    context_types = ['para', 'sent']
+    context_data = [np.array([(5,'p1'), (10, 'p2')], 
+			dtype=[('idx', '<i8'), ('plabel', '|S8')]),
+		    np.array([(2,'s1'), (5,'s2'),(9,'s3'),(10,'s4')],
+			dtype=[('idx', '<i8'), ('slabel', '|S8')])]
+
+    c = BaseCorpus(corpus, context_types=context_types, context_data=context_data)
+
+    assert(c.sub_indices('para', [1]) ==
+	{'sent': [slice(5, 9), slice(9, 10)], 'para': [slice(5,10)]})
+    assert(c.sub_indices('sent', [0,2])	== {'sent': [slice(0,2), slice(5,9)]})
+    assert(c.sub_indices('para', [0,1])	==
+	{'sent': [slice(0, 2), slice(2, 5), slice(5, 9), slice(9, 10)],
+	 'para': [slice(0,5), slice(5,10)]})
+
+
+def test_sub_meta():
+    corpus = [0,4,3,7,3,4,0,2,0,5]
+    context_types = ['para', 'sent']
+    context_data = [np.array([(5,'p1'), (10, 'p2')], 
+			dtype=[('idx', '<i8'), ('plabel', '|S8')]),
+		    np.array([(2,'s1'), (5,'s2'),(9,'s3'),(10,'s4')],
+			dtype=[('idx', '<i8'), ('slabel', '|S8')])]
+
+    c = BaseCorpus(corpus, context_types=context_types, context_data=context_data)
+
+    print c.sub_meta('sent', [0, 2])
+    print c.sub_meta('para', [1])
+
+    assert((c.sub_meta('sent', [0,2])[0] == np.array([(2, 's1'), (6, 's3')], 
+	dtype=[('idx', '<i8'), ('slabel', '|S8')])).all())
+    assert((c.sub_meta('sent', [1,3])[0] == np.array([(3, 's2'), (4, 's4')], 
+	dtype=[('idx', '<i8'), ('slabel', '|S8')])).all())
+    assert(c.sub_meta('para', [1]) ==
+	[np.array([(4, 's3'), (5, 's4')], dtype=[('idx', '<i8'), ('slabel', '|S8')]), 
+	np.array([(5, 'p2')], dtype=[('idx', '<i8'), ('plabel', '|S8')])])
+
+

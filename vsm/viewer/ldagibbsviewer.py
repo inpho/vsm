@@ -148,23 +148,25 @@ class LDAGibbsViewer(object):
         return _res_word_type_(self.corpus, word)
 
 
-    def topics(self, print_len=10, k_indices=[], as_strings=True):
+    def topics(self, k_indices=[], print_len=10, as_strings=True):
         """
         Returns a list of topics estimated by `LDAGibbs` sampler. 
-        Each topic is represented by a set of words and the corresponding probabilities.
+        Each topic is represented by a set of words and the corresponding 
+        probabilities.
         
         Parameters
         ----------
-        print_len : int
-            Number of words shown for each topic. If this is i, i top probability words 
-            are shown for each topic. Default is 10.
         k_indices : list of integers
-            Order of topics. For example, if k_indices = [3, 0, 2], the 4th, 1st and 3rd topics 
-            are printed in this order. Default is ascending from 0 to K-1, where K is the 
+            Order of topics. For example, if k_indices = [3, 0, 2], 
+            the 4th, 1st and 3rd topics are printed in this order. 
+            Default is ascending from 0 to K-1, where K is the 
             number of topics.
+        print_len : int
+            Number of words shown for each topic. If this is i, i top 
+            probability words are shown for each topic. Default is 10.
         as_string : boolean
-            If true, each topic displays words rather than its ID numbers. Default is True.
-
+            If true, each topic displays words rather than its ID numbers. 
+            Default is True.
         
         Returns
         ----------
@@ -200,18 +202,19 @@ class LDAGibbsViewer(object):
 
     def topic_entropies(self, print_len=10, as_strings=True):
         """
-        Returns a list of topics sorted according to the entropy of each topic.
-        The entropy of topic k is calculated by summing P(d|k) * log(P(d|k) over 
-        all document d, and is thought to measure how informative a given topic 
-        is to select documents. 
+        Returns a list of topics sorted according to the entropy of 
+        each topic. The entropy of topic k is calculated by summing 
+        P(d|k) * log(P(d|k) over all document d, and is thought to 
+        measure how informative a given topic is to select documents. 
         
         Parameters
         ----------
         print_len : int
-            Number of words shown for each topic. If this is i, i top probability words 
-            are shown for each topic. Default is 10.
+            Number of words shown for each topic. If this is i, i top 
+            probability words are shown for each topic. Default is 10.
         as_string : boolean
-            If true, each topic displays words rather than its ID numbers. Default is True.
+            If true, each topic displays words rather than its ID 
+            numbers. Default is True.
         
         Returns
         ----------
@@ -249,17 +252,18 @@ class LDAGibbsViewer(object):
         Parameters
         ----------
         doc : int or string
-             Specifies the document whose distribution over topics is returned.
-             It can either be the ID number (integer) or the name (string) of the document.
+             Specifies the document whose distribution over topics is 
+             returned. It can either be the ID number (integer) or the 
+             name (string) of the document.
         print_len : int
-            Number of topics to be listed. If this is i, i top probability topics are shown.
-            Default is 10.
+            Number of topics to be listed. If this is i, i top probability 
+            topics are shown.Default is 10.
         
         Returns
         ----------
         k_arr : a LabeledColumn object
-            An array of topics (represented by their number) and the corresponding 
-            probabilities.
+            An array of topics (represented by their number) and the 
+            corresponding probabilities.
 
         """
         d, label = self._res_doc_type(doc)
@@ -289,12 +293,14 @@ class LDAGibbsViewer(object):
         word : string 
             The word for which the search is performed.  
         as_strings : boolean 
-            If true, returns document names rather than ID numbers. Default is True.
+            If true, returns document names rather than ID numbers. 
+            Default is True.
 
         Returns
         ----------
         Z_w : a LabeledColumn Object
-            A structured array consisting of three columns. Each column is a list of:
+            A structured array consisting of three columns. Each column 
+            is a list of:
             (1) name/ID of document containing `word`
             (2) relative position of `word` in the document
             (3) Topic number assigned to the token.
@@ -372,16 +378,16 @@ class LDAGibbsViewer(object):
         Intuitively, the function sorts topics according to their 
         "relevance" to the query `word_or_words`.
         
-        Technically, it creates a pseudo-topic consisting of `word_or_words`
-        and computes the cosine values between that pseudo-topic and every
-        topic in the simplex defined by the probability distribution of words
-        conditional on topics. 
+        Technically, it creates a pseudo-topic consisting of 
+        `word_or_words` and computes the cosine values between that 
+        pseudo-topic and every topic in the simplex defined by the 
+        probability distribution of words conditional on topics. 
         
         If weights are not provided, the word list
         is represented in the space of topics as a topic which assigns
-        equal non-zero probability to each word in `words` and 0 to every
-        other word in the corpus. Otherwise, each word in `words` is
-        assigned the provided weight.
+        equal non-zero probability to each word in `words` and 0 to 
+        every other word in the corpus. Otherwise, each word in `words` 
+        is assigned the provided weight.
         
         Parameters
         ----------
@@ -482,14 +488,43 @@ class LDAGibbsViewer(object):
                                print_len=print_len, as_strings=as_strings)
 
 
-    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
+    def sim_doc_doc(self, doc_or_docs, k_indices=[], print_len=10, filter_nan=True,
                     label_fn=_def_label_fn_, as_strings=True):
         """
+        Computes and sorts the cosine(similarity) values between a document 
+        or list of documents and every documents in the topic space. 
+        
+        Parameters
+        ----------
+        doc_or_documents : string/integer or list of string/integer
+            Query document(s) to which cosine values are calculated
+        k_indices : list of integers
+            A list of topics based on which similarity value is computed.
+            Default is all the topics in the model.            
+        as_strings : boolean
+            If true, returns a list of words rather than IDs. 
+            Default is true.
+        print_len : int
+            Number of words printed by pretty-pringing function
+            Default is 10.
+        filter_nan : boolean
+            ?
+
+        Returns
+        ----------
+        w_arr : a LabeledColumn object
+            A 2-dim array containing documents and their cosine values to 
+            `doc_or_docs`. 
         """
-        return _sim_doc_doc_(self.corpus, self.model.doc_top.T,
-                             self.model.context_type, doc_or_docs,
-                             norms=self._doc_norms, print_len=print_len,
-                             filter_nan=filter_nan, 
+        
+        if len(k_indices) == 0:
+            mat = self.model.doc_top.T
+        else:
+            mat = self.model.doc_top[:,k_indices].T
+
+        return _sim_doc_doc_(self.corpus, mat, self.model.context_type, 
+                             doc_or_docs, norms=self._doc_norms, 
+                             print_len=print_len, filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=as_strings)
     
 
@@ -500,7 +535,7 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-    def simmat_docs(self, docs=None):
+    def simmat_docs(self, docs=[], k_indices=[]):
         """
         Calculates the similarity matrix for a given list of documents.
 
@@ -509,27 +544,35 @@ class LDAGibbsViewer(object):
         docs : list
             A list of documents whose similarity matrix is to be computed.
             Default is all the documents in the model.
+        k_indices : list
+            A list of topics based on which similarity matrix is computed.
+            Default is all the topics in the model.
 
         Returns
         ----------
         simmat_documents object
         """
-        if not docs:
+
+        if len(docs) == 0:
             docs = range(len(self.model.W))
 
-        return _simmat_documents_(self.corpus,
-                                  self.model.doc_top.T,
+        if len(k_indices) == 0:
+            mat = self.model.doc_top.T
+        else:
+            mat = self.model.doc_top[:,k_indices].T
+
+        return _simmat_documents_(self.corpus, mat,
                                   self.model.context_type,
                                   docs)
 
 
-    def simmat_topics(self, topics=None):
+    def simmat_topics(self, k_indices=[]):
         """
         Calculates the similarity matrix for a given list of topics.
 
         Parameters
         ----------
-        topics : list
+        k_indices : list
             A list of topics whose similarity matrix is to be computed.
             Default is all the topics in the model.
 
@@ -538,11 +581,69 @@ class LDAGibbsViewer(object):
         simmat_topicss object
         """
 
-        if not topics:
-            topics = range(self.model.K)
+        if len(k_indices) == 0:
+            k_indices = range(self.model.K)
 
-        return _simmat_topics_(self.model.top_word, topics)
+        return _simmat_topics_(self.model.top_word, k_indices)
 
+
+
+    def cluster_topics(self, method='kmeans', n_clusters=0, by_cluster=True):
+        """
+        Clusters topics by a spceificed clustering algorithm. 
+        Currently it supports K-means, Spectral Clustering and Affinity
+        Propagation algorithms. K-means and spectral clustering cluster
+        topics into a given number of clusters, whereas affinity
+        propagation does not require the fixed cluster number. 
+
+        To do: make it general to deal with documents?
+
+        Parameters
+        ----------
+        method : strings
+            Spceifies the algorithm used for clustring. Currently it 
+            supports 'kmeans', 'affinity' or 'spectral'. Default is 
+            'kmeans'.
+        n_clusters : int
+            Number of clusters used as the parameter for K-means or
+            spectral clustering algorithms. Default is K/10 where K is
+            the number of topics in the model.
+        by_cluster : boolean
+            If True, returns a list of clusters. Otherwise a list that
+            indicates cluster numbers for each topic is returned.
+            Default is true.
+
+        Returns
+        ----------
+        labels : list or list of lists
+            A list of clusters or list of cluster numbers.
+        """
+        # Default number of clusters = # topics / 10
+        if n_clusters == 0:
+            n_clusters = int(round(self.model.K/10))
+
+        # Obtain similarity matrix
+        simmat = self.simmat_topics()
+
+        if method == 'affinity':
+            from sklearn.cluster import AffinityPropagation
+            af = AffinityPropagation(affinity='precomputed').fit(simmat)
+            labels = af.labels_
+        elif method == 'spectral':
+            from sklearn.cluster import spectral_clustering
+            labels = spectral_clustering(simmat, n_clusters=n_clusters)
+        else:
+            from sklearn.cluster import KMeans
+            km = KMeans(n_clusters=n_clusters, init='k-means++', 
+                        max_iter=100, n_init=1,verbose=1)
+            km.fit(simmat)
+            labels = list(km.labels_)
+        
+        if by_cluster:
+            labels = [[i for i,lab in enumerate(labels) if lab == x] 
+                      for x in set(labels)]
+
+        return labels
 
 
     def logp_plot(self, range=[], step=1, show=True, grid=True):
@@ -578,7 +679,7 @@ class LDAGibbsViewer(object):
         import matplotlib.pyplot as plt
 
         # If range is not specified, include the whole chain.
-        if not(range):
+        if len(range) == 0:
             range = [0, len(self.model.log_prob)]
 
         x = []
@@ -597,12 +698,56 @@ class LDAGibbsViewer(object):
 
         return plt
 
+
+    def isomap_topics(self, k_indices=[], n_neighbors=5, n_clusters=0): 
+        """
+        Plots an isomap of topics estimated LDA gibbs sampler.
+        For isomap, see:
+        Tenenbaum, J.B., De Silva, V., & Langford, J.C. Science 290(5500)
+
+        Parameters
+        ----------
+        k_indices : list
+            A topic or a list of topics used as a query. Default plots all
+            topics in the model.
+        n_clusters : int
+            The number of clusters. The function applies `cluster_topics'
+            with k-means before plotting and use different colors to 
+            different clusters. Default is K/10 where K is the number of 
+            topics in the model.
+        n_neighbors : int
+            Used by isomap to determine the number of neighbors for each point.
+            Large neighbor size tends to produce a denser map. Default is 5.
+
+        Returns
+        ----------
+        basic_plot object
+            A graph wish scatter plots
+        """
+        from sklearn import manifold
+
+        # create a list to be plotted 
+        if len(k_indices) == 0:
+            k_indices = range(self.model.K)
+
+        # clustering  
+	clusters = self.cluster_topics(n_clusters=n_clusters,
+                                       by_cluster=False)
+
+        # calculate coordinates
+        simmat = self.simmat_topics(k_indices=k_indices)
+        distance = np.ones_like(simmat) - simmat
+        imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
+        pos  = imap.fit(distance).embedding_
+
+        return self.plot_clusters(pos, k_indices, clusters=clusters)
+
     
 
-    def doc_isomap(self, doc=None, top=None, thres=0.4, n_neighbors=5, 
-                   scale=True, trim=20): 
+    def isomap_docs(self, docs=[], topics=[], k_indices=[], thres=0.4, 
+                    n_neighbors=5, scale=True, trim=20): 
         """
-        Takes document `doc` or topic `top` and plots an isomap for 
+        Takes document `docs` or topic `topics` and plots an isomap for 
         the documents similar/relevant to the query. 
         
         The function first determines documents to be plotted by applying 
@@ -616,10 +761,13 @@ class LDAGibbsViewer(object):
 
         Parameters
         ----------
-        doc : string or int
-            A document or a list of documents used as a query.
-        top : string or int
-            A topic or a list of topics used as a query. 
+        docs : list
+            A list of documents used as a query.
+        toppics : list
+            A list of topics used as a query. 
+        k_indices : list
+            A list of topics based on which document similarity matrix is 
+            computed. Default is all the topics in the model.
         thres : float
             Threshhold t. If t<1, documents with similarity value >t are 
             selected. Otherwise, the t' most similar documents are selected 
@@ -635,17 +783,18 @@ class LDAGibbsViewer(object):
 
         Returns
         ----------
-        Basic plot.
+        basic_plot object
+            A graph wish scatter plots
 
         """
         from sklearn import manifold
         from math import ceil
 
         # create a list to be plotted from document or topic
-        if doc:
-            doclist = self.sim_doc_doc(doc)
+        if len(docs) > 0:
+            doclist = self.sim_doc_doc(docs, k_indices=k_indices)
         else:
-            doclist = self.sim_top_doc(top)
+            doclist = self.sim_top_doc(topics)
 
         # cut down the list by the threshold
         if thres < 1:
@@ -653,8 +802,9 @@ class LDAGibbsViewer(object):
         else:
             labels, size = zip(*doclist[:int(ceil(thres))])
 
+
         # calculate coordinates
-        simmat = self.simmat_docs(labels)
+        simmat = self.simmat_docs(labels, k_indices=k_indices)
         distance = np.ones_like(simmat) - simmat
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
@@ -669,26 +819,89 @@ class LDAGibbsViewer(object):
         if trim:
             labels = [lab[:trim] for lab in labels]
         
-        return self.basic_plot(pos,labels, size)
+        return self.plot_clusters(pos, labels, size=size)
 
 
+    def gen_colors(self, clusters):
+	"""
+	Takes 'clusters' and creates a list of colors so a cluster has a color.
 
-    def basic_plot(self, pos, labels, size=None):
-        """
-        Basic place holder plotting function. For test only.
-        """
+	Parameters
+	----------
+	clusters : list
+	    A flat list of integers where an integer represents which cluster
+	    the information belongs to.
 
+	Returns
+	----------
+	colorm : list
+	    A list of colors obtained from matplotlib colormap cm.hsv. 
+	    The length of 'colorm' is the same as the number of distinct clusters.
+	"""
+	import matplotlib.cm as cm
+	
+	n = len(set(clusters))
+	colorm = [cm.hsv(i * 1.0 /n, 1) for i in xrange(n)]
+	return colorm
+	
+	
+    def plot_clusters(self, arr, labels, clusters=[], size=[]):
+        """	
+    	Takes 2-dimensional array(simmat), list of clusters, list of labels,
+    	and list of marker size. 'clusters' should be a flat list which can be
+	obtained from cluster_topics(by_cluster=False).
+	Plots each clusters in different colors.
+
+        Parameters
+        ----------
+        arr : 2-dimensional array
+            Array has x, y coordinates to be plotted on a 2-dimensional space.
+        labels : list
+	    List of labels to be displayed in the graph. 
+ 	clusters : list, optional
+	    A flat list of integers where an integer represents which cluster
+	    the information belongs to. If not given, it returns a basic plot
+	    with no color variation. Default is an empty list.
+        size : list, optional
+            List of markersize for points where markersize can note the importance
+	    of the point. If not given, 'size' is a list of fixed markersize, 40. 
+	    Default is an empty list.
+
+        Returns
+        ----------
+        plt : maplotlit.pyplot object
+            A graph with scatter plots from 'arr'.
+
+	"""
         import matplotlib.pyplot as plt
 
-        fig = plt.figure(figsize=(10, 10), dpi=80)
-        plt.scatter(pos[:, 0], pos[:, 1], size)
+    	n = arr.shape[0]
+    	X = arr[:,0]
+    	Y = arr[:,1]
 
-        ax_ = fig.add_subplot(111)
+    	if len(size) == 0:
+            size = [40 for i in xrange(n)]
+        
+    	fig = plt.figure(figsize=(10,10))
+    	ax = plt.subplot(111)
 
-        ax_.set_xlim(np.min(pos[:, 0]) - .1, np.max(pos[:, 0]) + .1)
-        ax_.set_ylim(np.min(pos[:, 1]) - .1, np.max(pos[:, 1]) + .1)
+	if len(clusters) == 0:
+	    plt.scatter(X, Y, size)
+	else:	
+	    colors = self.gen_colors(clusters)
+	    colors = [colors[i] for i in clusters]
 
-        for label, x, y in zip(labels, pos[:, 0], pos[:, 1]):
-            plt.annotate(label, xy = (x, y), xytext = (-2, 2), textcoords='offset points')
+	    for i in xrange(n):
+	        plt.scatter(X[i], Y[i], size, color=colors[i])
 
-        return plt.show()
+    	ax.set_xlim(np.min(X) - .1, np.max(X) + .1)
+    	ax.set_ylim(np.min(Y) - .1, np.max(Y) + .1)
+	ax.set_xticks([])
+	ax.set_yticks([])
+
+    	for label, x, y in zip(labels, X, Y):
+            plt.annotate(label, xy = (x, y), xytext=(-2, 3), 
+			textcoords='offset points', fontsize=10)
+
+    	plt.show()
+
