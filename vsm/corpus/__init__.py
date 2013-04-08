@@ -66,7 +66,6 @@ class BaseCorpus(object):
         cast to an array of data-type `dtype` (if provided).
     words : 1-D array
         The indexed set of atomic words appearing in `corpus`.
-        Computed on initialization by `_extract_words`.
     context_types: 1-D array-like
 
     context_data: list of 1-D array-like
@@ -74,17 +73,17 @@ class BaseCorpus(object):
     Methods
     -------
     meta_int
-	Takes a type of tokenization and a query and 
-	returns the index of the metadata found in the query.
+		Takes a type of tokenization and a query and 
+		returns the index of the metadata found in the query.
     get_metadatum
-	Takes a type of tokenization and a query and returns 
-	the metadatum corresponding to the query and the field.
+		Takes a type of tokenization and a query and returns 
+		the metadatum corresponding to the query and the field.
     view_contexts
         Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly.
     view_metadata
-	Takes a type of tokenization and returns a view of the metadata
-	of the tokenization.
+		Takes a type of tokenization and returns a view of the metadata
+		of the tokenization.
 
     Examples
     --------
@@ -126,22 +125,22 @@ class BaseCorpus(object):
                  dtype=None,
                  context_types=[],
                  context_data=[],
-		 remove_empty=True):
+				 remove_empty=True):
 
-        self.corpus = np.asarray(corpus, dtype=dtype)
-        self.dtype = self.corpus.dtype
+		self.corpus = np.asarray(corpus, dtype=dtype)
+		self.dtype = self.corpus.dtype
 
-        self._extract_words()
+		self.words = np.unique(self.corpus)
 
-        self.context_data = []
-        for t in context_data:
-            if self._validate_indices(t['idx']):
-                self.context_data.append(t)
+		self.context_data = []
+		for t in context_data:
+			if self._validate_indices(t['idx']):
+				self.context_data.append(t)
+		
+		self._gen_context_types(context_types)
 
-        self._gen_context_types(context_types)
-
-	if remove_empty:
-	    self.remove_empty()
+		if remove_empty:
+			self.remove_empty()
 
 
     def _gen_context_types(self, context_types):
@@ -333,36 +332,6 @@ class BaseCorpus(object):
 
 
     
-    def _extract_words(self):
-        """
-        Produces an indexed set of words from a corpus.
-        
-        Parameters
-        ----------
-        corpus : array-like
-        
-        Returns
-        -------
-        An indexed set of the elements in `corpus` as a 1-D array.
-        
-        See Also
-        --------
-        BaseCorpus
-        
-        Notes
-        -----
-        """
-
-        # Benchmarked by Peter Bengtsson
-        # (http://www.peterbe.com/plog/uniqifiers-benchmark)
-        
-        word_set = set()
-        word_list = [word for word in self.corpus
-                     if word not in word_set and not word_set.add(word)]
-        self.words = np.array(word_list, dtype=self.corpus.dtype)
-
-
-
 class Corpus(BaseCorpus):
     """
     The goal of the Corpus class is to provide an efficient
