@@ -10,6 +10,7 @@ from vsm.linalg import row_norms as _row_norms_
 
 from labeleddata import (
     LabeledColumn as _LabeledColumn_,
+    CompactTable as _CompactTable_,
     DataTable as _DataTable_,
     format_entry as _format_entry_)
 
@@ -188,8 +189,9 @@ class LDAGibbsViewer(object):
 	# without probabilities, just words
 	if not prob:
 	    sch = ['Topic', 'Words']
+	    fc = ['Topic ' + str(k) for k in k_indices]
 	    return _CompactTable_(k_arr, table_header='Topics Sorted by Index',
-			subcol_headers=sch, num_words=print_len)
+			subcol_headers=sch, first_cols=fc, num_words=print_len)
 
         table = []
         for i,k in enumerate(k_indices):

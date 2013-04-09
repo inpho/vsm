@@ -69,18 +69,19 @@ def default_col_widths(dtype):
     return col_widths
 
 
-def compact_col_widths(dtype):
+def compact_col_widths(dtype, n):
     """
     Assigns second column width CompactList based on the dtype. 
     """
     ccol_widths = [10, 0]
 
     value =zip(*dtype.fields.values())[0][0]
-    
-    if value.kind == 'S':
-	ccol_widths[1] += value.itemsize + 2
-    else:
-	ccol_widths[1] += 10
+
+    for i in xrange(n):
+    	if value.kind == 'S':
+	    ccol_widths[1] += value.itemsize + 2
+    	else:
+	    ccol_widths[1] += 10
    
     return ccol_widths
 
@@ -273,15 +274,15 @@ class LabeledColumn(np.ndarray):
 
 class CompactTable(np.ndarray):
 
-    def __new__(cls, input_array, col_header=None, subcol_headers=None,
-                subcol_widths=None, num_words=None):
+    def __new__(cls, input_array, table_header=None, subcol_headers=None,
+                first_cols=None, subcol_widths=None, num_words=None):
         """
         """
         obj = np.asarray(input_array).view(cls)
-        obj.col_header = col_header
+        obj.table_header = table_header
         obj.subcol_headers = subcol_headers
+	obj._first_cols = first_cols
         obj._subcol_widths = subcol_widths     
-	# number of words per topic.
 	obj._num_words = num_words        
         return obj
 
@@ -291,15 +292,16 @@ class CompactTable(np.ndarray):
         """
         if obj is None: return
 
-        self.col_header = getattr(obj, 'col_header', None)
+        self.table_header = getattr(obj, 'table_header', None)
         self.subcol_headers = getattr(obj, 'subcol_headers', None)
+	self._first_cols = getattr(obj, '_first_cols', None)
         self._subcol_widths = getattr(obj, '_subcol_widths', None)
 	self._num_words = getattr(obj, '_num_words', None)
 
     @property
     def subcol_widths(self):
         if not hasattr(self, '_subcol_widths') or not self._subcol_widths:
-            self._subcol_widths = compact_col_widths(self.dtype)
+            self._subcol_widths = compact_col_widths(self.dtype, self.num_words)
         return self._subcol_widths
 
     @subcol_widths.setter
@@ -307,14 +309,20 @@ class CompactTable(np.ndarray):
         self._subcol_widths = w
 
     @property
-    def col_width(self):
-        return max(sum(self.subcol_widths), len(self.col_header))
+    def first_cols(self):
+        if not hasattr(self, '_first_cols') or not self._first_cols:
+            self._first_cols = ['Topic ' + str(i) for i in xrange(len(self))]
+        return self._first_cols
+
+    @first_cols.setter
+    def first_cols(self, w):
+        self._first_cols = w
 
     @property
     def num_words(self):
 	if not self._num_words:
 	    return 5
-	return min(5, self._num_words)
+	return self._num_words
 
     @num_words.setter
     def num_words(self, n):
@@ -325,11 +333,12 @@ class CompactTable(np.ndarray):
     	"""
 	Pretty prints the LabeledColumn when 'print' method is used.
 	"""     
-        line = '-' * self.col_width + '\n'
+	width = sum(self.subcol_widths)
+        line = '-' * width + '\n'
         out = line
-        if self.col_header:
-            out += '{0:^{1}}'.format(format_(self.col_header, self.col_width), 
-                                     self.col_width) + '\n'
+        if self.table_header:
+            out += '{0:^{1}}'.format(format_(self.table_header, width), 
+                                     width) + '\n'
             out += line
             
         if self.subcol_headers:
@@ -339,11 +348,15 @@ class CompactTable(np.ndarray):
             out += '\n'
             out += line
 
-        for i in xrange(self.num_words):
-            for j in xrange(len(self.dtype)):
-                n = self.dtype.names[j]
-                out += '{0:<{1}}'.format(format_(self[n][i], w), w)
-            out += '\n'
+        for i in xrange(len(self)):
+            w = self.subcol_widths[0]
+            out += '{0:<{1}}'.format(format_(self.first_cols[i], w), w)
+
+            for j in xrange(self.num_words):
+            	n = self.dtype.names[0]	
+		w = self.subcol_widths[1] / self.num_words
+		out += '{0:<{1}}'.format(format_(self[i][n][j], w), w)
+	    out += '\n'
 
         return out
 
@@ -354,31 +367,30 @@ class CompactTable(np.ndarray):
 	""" 
         s = '<table style="margin: 0">'
 
-        if self.col_header:
+        if self.table_header:
             s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
-		="{0}">{1}</th></tr>'.format(len(self.subcol_widths), self.col_header)
+		="{0}">{1}</th></tr>'.format(1 + self.num_words, self.table_header)
 
         if self.subcol_headers:
             s += '<tr>'
-            for sch in self.subcol_headers:
-                s += '<th style="text-align: center; background: #EFF2FB; ">{0}\
-			</th>'.format(sch)
+            for i, sch in enumerate(self.subcol_headers):
+		w = 1
+		if i == 1:
+		    w = self.num_words
+                s += '<th style="text-align: center; background: #EFF2FB;" \
+			colspan="{0}">{1}</th>'.format(w, sch)
             s += '</tr>'
         
-        for i in xrange(self.size):
+        for i in xrange(len(self)):
             s += '<tr>'
-	    s += '<td>{0:<{1}}</td>'.format(self.col_header)
-	    # TODO col_header s in LabeledColumn needs to fill first col.
-	    # col_header => more like..col_entries
-	    # second column is words.
-	    for j in xrange(self.num_words):
-		s += '<td>{0:<{1}}</td>'.format(self[j][0])
+	    s += '<td>{0}</td>'.format(self.first_cols[i])
 
-	    #s += '<td>{0:<{1}}</td>'.format(self[n][0])
-            #for j in xrange(len(self.dtype)):
-            #    w = ncol * self.subcol_widths[j]
-            #    n = self.dtype.names[j]
-            #    s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
+            for j in xrange(self.num_words):
+		#s += '<td>' ##for all words in one cell
+            	n = self.dtype.names[0]	
+		w = self.subcol_widths[1] / self.num_words
+		s += '<td>{0:<{1}}</td>'.format(format_(self[i][n][j], w), w)
+		#s += '</td>'
             s += '</tr>'
         s += '</table>'
  
@@ -604,7 +616,7 @@ def test_LabeledColumn():
 
 
 def test_CompactTable():
-
+    #TODO: test is not correct.
     words = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
              'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
              'is', 'but', 'a', 'dream']
@@ -613,17 +625,12 @@ def test_CompactTable():
          ('value', np.array(values).dtype)]
     v = np.array(zip(words, values), dtype=d)
     arr = v.view(CompactTable)
-    arr.col_header = 'Topics Sorted by Index'
+    arr.table_header = 'Topics Sorted by Index'
+    arr.first_cols = ['Topic ' + str(i) for i in xrange(5)]
     arr.subcol_headers = ['Topic', 'Words']
     arr.num_words = 3
 
-    t = []
-    for i in xrange(5):
-        t.append(arr.copy())
-        t[i].col_header = 'Iteration ' + str(i)
-     
-
-    return t
+    return arr
 
 
 def test_DataTable():
