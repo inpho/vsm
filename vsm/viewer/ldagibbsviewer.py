@@ -10,6 +10,7 @@ from vsm.linalg import row_norms as _row_norms_
 
 from labeleddata import (
     LabeledColumn as _LabeledColumn_,
+    CompactTable as _CompactTable_,
     DataTable as _DataTable_,
     format_entry as _format_entry_)
 
@@ -148,7 +149,7 @@ class LDAGibbsViewer(object):
         return _res_word_type_(self.corpus, word)
 
 
-    def topics(self, k_indices=[], print_len=10, as_strings=True):
+    def topics(self, print_len=10, k_indices=[], as_strings=True, prob=True):
         """
         Returns a list of topics estimated by `LDAGibbs` sampler. 
         Each topic is represented by a set of words and the corresponding 
@@ -186,6 +187,13 @@ class LDAGibbsViewer(object):
         if as_strings:
 	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
 				 field_name='word')
+
+        # without probabilities, just words
+        if not prob:
+            sch = ['Topic', 'Words']
+            fc = [str(k) for k in k_indices]
+            return _CompactTable_(k_arr, table_header='Topics Sorted by Index',
+		    	subcol_headers=sch, first_cols=fc, num_words=print_len)
 	
         table = []
         for i,k in enumerate(k_indices):
@@ -197,10 +205,11 @@ class LDAGibbsViewer(object):
 
         table = _DataTable_(table, 'Topics Sorted by Index')
 
+
         return table
 
 
-    def topic_entropies(self, print_len=10, as_strings=True):
+    def topic_entropies(self, print_len=10, k_indices=[], as_strings=True, prob=True):
         """
         Returns a list of topics sorted according to the entropy of 
         each topic. The entropy of topic k is calculated by summing 
@@ -222,6 +231,9 @@ class LDAGibbsViewer(object):
             A structured array of topics sorted by entropy.
 
         """
+        if len(k_indices) == 0:
+            k_indices = np.arange(self.model.top_word.shape[0])
+
         # Normalize the document-topic matrix so that documents are
         # distributions
         theta = (self.model.doc_top[:, k_indices] / 
