@@ -310,15 +310,16 @@ class LDAGibbsViewer(object):
 
         # Search for occurrences of a word in the corpus and return a
         # positions and topic assignments for each found
-        idx = [(self.model.W[d] == w) for d in xrange(len(self.model.W))]
+        ct = self.model.context_type
+        contexts = self.corpus.view_contexts(ct)
+        idx = [(contexts[d] == w) for d in xrange(len(contexts))]
         Z = self.model.Z
         Z_w = [(d, i, t) for d in xrange(len(Z)) 
                for i,t in enumerate(Z[d]) if idx[d][i]]
 
         # Label data
         if as_strings:
-            tn = self.model.context_type
-            docs = self.corpus.view_metadata(tn)[self._doc_label_name]
+            docs = self.corpus.view_metadata(ct)[self._doc_label_name]
             dt = [('doc', docs.dtype), ('pos',np.int), ('value', np.int)]
             Z_w = [(docs[d], i, t) for (d, i, t) in Z_w]
         else:
