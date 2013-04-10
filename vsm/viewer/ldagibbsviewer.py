@@ -200,7 +200,7 @@ class LDAGibbsViewer(object):
         return table
 
 
-    def topic_entropies(self, print_len=10, as_strings=True):
+    def topic_entropies(self, k_indices=[], print_len=10, as_strings=True):
         """
         Returns a list of topics sorted according to the entropy of 
         each topic. The entropy of topic k is calculated by summing 
@@ -222,6 +222,9 @@ class LDAGibbsViewer(object):
             A structured array of topics sorted by entropy.
 
         """
+        if len(k_indices) == 0:
+            k_indices = np.arange(self.model.top_word.shape[0])
+
         # Normalize the document-topic matrix so that documents are
         # distributions
         theta = (self.model.doc_top[:, k_indices] / 
