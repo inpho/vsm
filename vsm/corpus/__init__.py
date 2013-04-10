@@ -24,6 +24,7 @@ def split_corpus(arr, indices):
 
 
 
+
 class BaseCorpus(object):
     """
     A BaseCorpus object stores a corpus along with its tokenizations
@@ -105,7 +106,7 @@ class BaseCorpus(object):
     array(['ran', 'away', 'chased', 'dog', 'cat', 'the'],
           dtype='|S6')
 
-    >>> c.meta_int('sentences',{'sent_label': 'intransitive'}, 'sent_label')
+    >>> c.meta_int('sentences',{'sent_label': 'intransitive'})
     1
 
     >>> b.get_metadatum('sentences', {'sent_label': 'intransitive'}, 'sent_label') 
@@ -360,8 +361,9 @@ class BaseCorpus(object):
         word_list = [word for word in self.corpus
                      if word not in word_set and not word_set.add(word)]
         self.words = np.array(word_list, dtype=self.corpus.dtype)
+        
 
-
+				
 
 class Corpus(BaseCorpus):
     """
@@ -370,7 +372,7 @@ class Corpus(BaseCorpus):
 
     A Corpus object contains an integer representation of the text and
     maps to permit conversion between integer and string
-    epresentations of a given word.
+    representations of a given word.
 
     As a BaseCorpus object, it includes a dictionary of tokenizations
     of the corpus and a method for viewing (without copying) these
@@ -729,3 +731,5 @@ def test_file():
         os.remove(tmp.name)
 
     return c_reloaded
+
+

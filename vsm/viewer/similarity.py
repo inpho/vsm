@@ -160,7 +160,7 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
                 label_fn=def_label_fn, as_strings=True):
     """
     """
-    # Resolve `word_or_words`
+    # Resolve `doc_or_docs`
     label_name = doc_label_name(context_type)    
     if (isstr(doc_or_docs) or isint(doc_or_docs) 
         or isinstance(doc_or_docs, dict)):
