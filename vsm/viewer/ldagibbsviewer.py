@@ -329,15 +329,16 @@ class LDAGibbsViewer(object):
 
         # Search for occurrences of a word in the corpus and return a
         # positions and topic assignments for each found
-        idx = [(self.model.W[d] == w) for d in xrange(len(self.model.W))]
+        ct = self.model.context_type
+        contexts = self.corpus.view_contexts(ct)
+        idx = [(contexts[d] == w) for d in xrange(len(contexts))]
         Z = self.model.Z
         Z_w = [(d, i, t) for d in xrange(len(Z)) 
                for i,t in enumerate(Z[d]) if idx[d][i]]
 
         # Label data
         if as_strings:
-            tn = self.model.context_type
-            docs = self.corpus.view_metadata(tn)[self._doc_label_name]
+            docs = self.corpus.view_metadata(ct)[self._doc_label_name]
             dt = [('doc', docs.dtype), ('pos',np.int), ('value', np.int)]
             Z_w = [(docs[d], i, t) for (d, i, t) in Z_w]
         else:
@@ -370,7 +371,7 @@ class LDAGibbsViewer(object):
                               as_strings=False, label_fn=label_fn, 
                               filter_nan=filter_nan)
         
-	topics = _res_top_type_(topic_or_topics)
+        topics = _res_top_type_(topic_or_topics)
 
         if len(filter_words) > 0:
             white = set()
@@ -638,6 +639,21 @@ class LDAGibbsViewer(object):
             indicates cluster numbers for each topic is returned.
             Default is true.
 
+        Parameters
+        ----------
+        method : strings
+            Spceifies the algorithm used for clustring. Currently it 
+            supports 'kmeans', 'affinity' or 'spectral'. Default is 
+            'kmeans'.
+        n_clusters : int
+            Number of clusters used as the parameter for K-means or
+            spectral clustering algorithms. Default is K/10 where K is
+            the number of topics in the model.
+        by_cluster : boolean
+            If True, returns a list of clusters. Otherwise a list that
+            indicates cluster numbers for each topic is returned.
+            Default is true.
+
         Returns
         ----------
         labels : list or list of lists
@@ -756,7 +772,7 @@ class LDAGibbsViewer(object):
             k_indices = range(self.model.K)
 
         # clustering  
-	clusters = self.cluster_topics(n_clusters=n_clusters,
+        clusters = self.cluster_topics(n_clusters=n_clusters,
                                        by_cluster=False)
 
         # calculate coordinates
@@ -848,56 +864,56 @@ class LDAGibbsViewer(object):
 
 
     def gen_colors(self, clusters):
-	"""
-	Takes 'clusters' and creates a list of colors so a cluster has a color.
+        """
+        Takes 'clusters' and creates a list of colors so a cluster has a color.
 
-	Parameters
-	----------
-	clusters : list
-	    A flat list of integers where an integer represents which cluster
-	    the information belongs to.
+        Parameters
+        ----------
+        clusters : list
+            A flat list of integers where an integer represents which cluster
+            the information belongs to.
 
-	Returns
-	----------
-	colorm : list
-	    A list of colors obtained from matplotlib colormap cm.hsv. 
-	    The length of 'colorm' is the same as the number of distinct clusters.
-	"""
-	import matplotlib.cm as cm
+        Returns
+        ----------
+        colorm : list
+            A list of colors obtained from matplotlib colormap cm.hsv. 
+            The length of 'colorm' is the same as the number of distinct clusters.
+        """
+        import matplotlib.cm as cm
 	
-	n = len(set(clusters))
-	colorm = [cm.hsv(i * 1.0 /n, 1) for i in xrange(n)]
-	return colorm
+        n = len(set(clusters))
+        colorm = [cm.hsv(i * 1.0 /n, 1) for i in xrange(n)]
+        return colorm
 	
 	
     def plot_clusters(self, arr, labels, clusters=[], size=[]):
         """	
     	Takes 2-dimensional array(simmat), list of clusters, list of labels,
     	and list of marker size. 'clusters' should be a flat list which can be
-	obtained from cluster_topics(by_cluster=False).
-	Plots each clusters in different colors.
+        obtained from cluster_topics(by_cluster=False).
+        Plots each clusters in different colors.
 
         Parameters
         ----------
         arr : 2-dimensional array
             Array has x, y coordinates to be plotted on a 2-dimensional space.
         labels : list
-	    List of labels to be displayed in the graph. 
- 	clusters : list, optional
-	    A flat list of integers where an integer represents which cluster
-	    the information belongs to. If not given, it returns a basic plot
-	    with no color variation. Default is an empty list.
+            List of labels to be displayed in the graph. 
+        clusters : list, optional
+            A flat list of integers where an integer represents which cluster
+            the information belongs to. If not given, it returns a basic plot
+            with no color variation. Default is an empty list.
         size : list, optional
             List of markersize for points where markersize can note the importance
-	    of the point. If not given, 'size' is a list of fixed markersize, 40. 
-	    Default is an empty list.
+            of the point. If not given, 'size' is a list of fixed markersize, 40. 
+            Default is an empty list.
 
         Returns
         ----------
         plt : maplotlit.pyplot object
             A graph with scatter plots from 'arr'.
 
-	"""
+        """
         import matplotlib.pyplot as plt
 
     	n = arr.shape[0]
@@ -910,19 +926,19 @@ class LDAGibbsViewer(object):
     	fig = plt.figure(figsize=(10,10))
     	ax = plt.subplot(111)
 
-	if len(clusters) == 0:
-	    plt.scatter(X, Y, size)
-	else:	
-	    colors = self.gen_colors(clusters)
-	    colors = [colors[i] for i in clusters]
+        if len(clusters) == 0:
+            plt.scatter(X, Y, size)
+        else:	
+            colors = self.gen_colors(clusters)
+            colors = [colors[i] for i in clusters]
 
 	    for i in xrange(n):
 	        plt.scatter(X[i], Y[i], size, color=colors[i])
 
     	ax.set_xlim(np.min(X) - .1, np.max(X) + .1)
     	ax.set_ylim(np.min(Y) - .1, np.max(Y) + .1)
-	ax.set_xticks([])
-	ax.set_yticks([])
+        ax.set_xticks([])
+        ax.set_yticks([])
 
     	for label, x, y in zip(labels, X, Y):
             plt.annotate(label, xy = (x, y), xytext=(-2, 3), 

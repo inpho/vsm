@@ -250,7 +250,7 @@ class LabeledColumn(np.ndarray):
 
 		if self.col_header:
 			s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
-		="{0}">{1}</th></tr>'.format(len(self.subcol_widths), self.col_header)
+		        ="{0}">{1}</th></tr>'.format(len(self.subcol_widths), self.col_header)
 
 		if self.subcol_headers:
 			s += '<tr>'
@@ -574,6 +574,7 @@ class DataTable(list):
 
 
 
+
 # TODO: Investigate compressed forms of symmetric matrix. Cf.
 # scipy.spatial.distance.squareform
 class IndexedSymmArray(np.ndarray):
@@ -616,23 +617,6 @@ def test_LabeledColumn():
 
 	return arr
 
-
-def test_CompactTable():
-	#TODO: test is not correct.
-	words = ['row', 'row', 'row', 'your', 'boat', 'gently', 'down', 'the', 
-			 'stream', 'merrily', 'merrily', 'merrily', 'merrily', 'life', 
-			 'is', 'but', 'a', 'dream']
-	values = [np.random.random() for t in words]
-	d = [('i', np.array(words).dtype), 
-		 ('value', np.array(values).dtype)]
-	v = np.array(zip(words, values), dtype=d)
-	arr = v.view(CompactTable)
-	arr.table_header = 'Topics Sorted by Index'
-	arr.first_cols = ['Topic ' + str(i) for i in xrange(5)]
-	arr.subcol_headers = ['Topic', 'Words']
-	arr.num_words = 3
-
-	return arr
 
 
 def test_DataTable():
