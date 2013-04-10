@@ -779,7 +779,7 @@ class LDAGibbsViewer(object):
 
         # clustering  
         clusters = self.cluster_topics(n_clusters=n_clusters,
-                                       k_indices=k_indices
+                                       k_indices=k_indices,
                                        by_cluster=False)
 
         # calculate coordinates
