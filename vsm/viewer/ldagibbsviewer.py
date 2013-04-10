@@ -614,7 +614,8 @@ class LDAGibbsViewer(object):
 
 
 
-    def cluster_topics(self, method='kmeans', n_clusters=0, by_cluster=True):
+    def cluster_topics(self, method='kmeans', k_indices=[],
+                       n_clusters=0, by_cluster=True):
         """
         Clusters topics by a spceificed clustering algorithm. 
         Currently it supports K-means, Spectral Clustering and Affinity
@@ -630,6 +631,7 @@ class LDAGibbsViewer(object):
             Spceifies the algorithm used for clustring. Currently it 
             supports 'kmeans', 'affinity' or 'spectral'. Default is 
             'kmeans'.
+        k_indices : list
         n_clusters : int
             Number of clusters used as the parameter for K-means or
             spectral clustering algorithms. Default is K/10 where K is
@@ -659,12 +661,16 @@ class LDAGibbsViewer(object):
         labels : list or list of lists
             A list of clusters or list of cluster numbers.
         """
-        # Default number of clusters = # topics / 10
+        # Default use all topics 
+        if len(k_indices) == 0:
+            k_indices = range(self.model.K)
+
+         # Default number of clusters = # topics / 10
         if n_clusters == 0:
             n_clusters = int(round(self.model.K/10))
 
         # Obtain similarity matrix
-        simmat = self.simmat_topics()
+        simmat = self.simmat_topics(k_indices)
 
         if method == 'affinity':
             from sklearn.cluster import AffinityPropagation
@@ -773,6 +779,7 @@ class LDAGibbsViewer(object):
 
         # clustering  
         clusters = self.cluster_topics(n_clusters=n_clusters,
+                                       k_indices=k_indices
                                        by_cluster=False)
 
         # calculate coordinates
