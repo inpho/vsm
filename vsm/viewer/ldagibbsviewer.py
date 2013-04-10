@@ -149,7 +149,7 @@ class LDAGibbsViewer(object):
         return _res_word_type_(self.corpus, word)
 
 
-    def topics(self, print_len=10, k_indices=[], as_strings=True, prob=True):
+    def topics(self, print_len=10, k_indices=[], as_strings=True, compact_view=True):
         """
         Returns a list of topics estimated by `LDAGibbs` sampler. 
         Each topic is represented by a set of words and the corresponding 
@@ -189,7 +189,7 @@ class LDAGibbsViewer(object):
 				 field_name='word')
 
         # without probabilities, just words
-        if not prob:
+        if not compact_view:
             sch = ['Topic', 'Words']
             fc = [str(k) for k in k_indices]
             return _CompactTable_(k_arr, table_header='Topics Sorted by Index',
@@ -209,7 +209,7 @@ class LDAGibbsViewer(object):
         return table
 
 
-    def topic_entropies(self, print_len=10, k_indices=[], as_strings=True, prob=True):
+    def topic_entropies(self, print_len=10, k_indices=[], as_strings=True, compact_view=True):
         """
         Returns a list of topics sorted according to the entropy of 
         each topic. The entropy of topic k is calculated by summing 
@@ -246,9 +246,16 @@ class LDAGibbsViewer(object):
         k_indices = _enum_sort_(ent)['i'][::-1]
         
         # Retrieve topics
+        if not compact_view:
+            k_arr = self.topics(print_len=print_len, k_indices=k_indices,
+                as_strings=as_strings, compact_view=compact_view)
+            k_arr.table_header = 'Sorted by Entropy'
+            return k_arr
+
         k_arr = self.topics(print_len=print_len, k_indices=k_indices,
                             as_strings=as_strings)
-        
+
+            
         # Label data
         k_arr.table_header = 'Sorted by Entropy'
         for i in xrange(k_indices.size):
@@ -383,7 +390,7 @@ class LDAGibbsViewer(object):
 
 
     def sim_word_top(self, word_or_words, weights=[], filter_nan=True,
-                     show_topics=True, print_len=10, as_strings=True):
+                     show_topics=True, print_len=10, as_strings=True, compact_view=True):
         """
         A wrapper of `sim_word_top` in similarity.py. 
 
@@ -444,6 +451,12 @@ class LDAGibbsViewer(object):
             k_indices = sim[sim.dtype.names[0]]
 
             # Retrieve topics
+            if not compact_view:
+                k_arr = self.topics(print_len=print_len, k_indices=k_indices,
+                    as_strings=as_strings, compact_view=compact_view)
+                k_arr.table_header = 'Sorted by Word Similarity'
+                return k_arr
+
             k_arr = self.topics(k_indices=k_indices, print_len=print_len,
                                 as_strings=as_strings)
 
