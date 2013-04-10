@@ -14,6 +14,7 @@ class LdaCgsMulti(object):
 
         # The width of the word by topic matrix and the height of the
         # topic by context matrix
+        self.K = K
         global _K
         _K = mp.Value('i', K, lock=False)
 
@@ -168,6 +169,7 @@ class LdaCgsMulti(object):
     @property
     def W(self):
         # For viewer until it gets updated
+        # This method is very slow for corpora with many documents
         return [np.array(_corpus[ctx], dtype=np.int) for ctx in self.contexts]
     
     @property
@@ -184,8 +186,8 @@ class LdaCgsMulti(object):
     def top_word(self):
         # For viewer until it gets updated
         return self.word_top.T
-    
-    
+
+
     @staticmethod
     def load(filename):
 
