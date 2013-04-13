@@ -38,12 +38,20 @@ def rem_num(tsent):
 
     return [word for word in tsent if re.search(p, word)]
 
-
-
 def rehyph(sent):
     """
     """
     return re.sub(r'(?P<x1>.)--(?P<x2>.)', '\g<x1> - \g<x2>', sent)
+
+
+def add_metadata(corpus, ctx_type, new_field, metadata):
+    """
+    """
+    i = corpus.context_types.index(ctx_type)
+    md = corpus.context_data[i]
+    corpus.context_data[i] = arr_add_field(md, new_field, metadata)
+
+    return corpus
 
 
 
@@ -70,8 +78,7 @@ def filter_by_suffix(l, ignore):
 
 
 def word_tokenize(text):
-    """
-    Takes a string and returns a list of strings. Intended use: the
+    """Takes a string and returns a list of strings. Intended use: the
     input string is English text and the output consists of the
     lower-case words in this text with numbers and punctuation, except
     for hyphens, removed.
