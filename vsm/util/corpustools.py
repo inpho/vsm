@@ -48,7 +48,6 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
     """
     """
     from vsm import arr_add_field
-
     i = corpus.context_types.index(ctx_type)
     md = corpus.context_data[i]
     corpus.context_data[i] = arr_add_field(md, new_field, metadata)
