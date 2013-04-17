@@ -605,7 +605,7 @@ class LDAGibbsViewer(object):
 
         Returns
         ----------
-        simmat_topicss object
+        simmat_topics object
         """
 
         if len(k_indices) == 0:
@@ -615,7 +615,8 @@ class LDAGibbsViewer(object):
 
 
 
-    def cluster_topics(self, method='kmeans', n_clusters=0, by_cluster=True):
+    def cluster_topics(self, method='kmeans', k_indices=[], 
+				n_clusters=0, by_cluster=True):
         """
         Clusters topics by a spceificed clustering algorithm. 
         Currently it supports K-means, Spectral Clustering and Affinity
@@ -646,6 +647,8 @@ class LDAGibbsViewer(object):
             Spceifies the algorithm used for clustring. Currently it 
             supports 'kmeans', 'affinity' or 'spectral'. Default is 
             'kmeans'.
+		k_indices : list
+			List of topics to be clustered. Default is all topics.
         n_clusters : int
             Number of clusters used as the parameter for K-means or
             spectral clustering algorithms. Default is K/10 where K is
@@ -665,7 +668,7 @@ class LDAGibbsViewer(object):
             n_clusters = int(round(self.model.K/10))
 
         # Obtain similarity matrix
-        simmat = self.simmat_topics()
+        simmat = self.simmat_topics(k_indices)
 
         if method == 'affinity':
             from sklearn.cluster import AffinityPropagation
@@ -680,7 +683,7 @@ class LDAGibbsViewer(object):
                         max_iter=100, n_init=1,verbose=1)
             km.fit(simmat)
             labels = list(km.labels_)
-        
+
         if by_cluster:
             labels = [[i for i,lab in enumerate(labels) if lab == x] 
                       for x in set(labels)]
