@@ -1,6 +1,23 @@
 import numpy as np
 
 
+def arr_add_field(arr, new_field, vals):
+
+    # Constructing new dtype
+    new_dtype = np.array(vals).dtype
+    dt = [(n, arr.dtype[n]) for n in arr.dtype.names]
+    dt.append((new_field, new_dtype))
+
+    # Building new structured array
+    new_arr = np.empty_like(arr, dtype=dt)
+    for n in new_arr.dtype.names:
+        if n == new_field:
+            new_arr[n][:] = vals[:]
+        else:
+            new_arr[n][:] = arr[n][:]
+
+    return new_arr
+    
 
 def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     """
@@ -138,6 +155,22 @@ def isfloat(x):
 #
 # Testing
 #
+
+
+def arr_add_field_test():
+
+    arr = np.array([(1, '1'), (2, '2'), (3, '3')],
+                   dtype=[('i', np.int), ('c', '|S1')])
+    new_arr = np.array([(1, '1', 0), (2, '2', 0), (3, '3', 0)],
+                       dtype=[('i', np.int), ('c', '|S1'), ('new', np.int)])
+
+    new_field = 'new'
+    vals = np.zeros(3, dtype=np.int)
+
+    test_arr = arr_add_field(arr, new_field, vals)
+
+    assert (new_arr==test_arr).all()
+    assert new_arr.dtype==test_arr.dtype
 
 
 

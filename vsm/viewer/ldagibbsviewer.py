@@ -11,6 +11,7 @@ from vsm.linalg import row_norms as _row_norms_
 
 from labeleddata import (
     LabeledColumn as _LabeledColumn_,
+    CompactTable as _CompactTable_,
     DataTable as _DataTable_,
     format_entry as _format_entry_)
 
@@ -149,35 +150,26 @@ class LDAGibbsViewer(object):
         return _res_word_type_(self.corpus, word)
 
 
-    def _empty_docs(self):
-        """
-        Returns indices of empty documents
-        """
-        indices = []
-        for i, doc in enumerate(self.model.W):
-            if len(doc) < 1:
-                indices.append(i)
-
-        return indices
-
-
-    def topics(self, print_len=10, k_indices=[], as_strings=True):
+    def topics(self, print_len=10, k_indices=[], as_strings=True, 
+                compact_view=True):
         """
         Returns a list of topics estimated by `LDAGibbs` sampler. 
-        Each topic is represented by a set of words and the corresponding probabilities.
+        Each topic is represented by a set of words and the corresponding 
+        probabilities.
         
         Parameters
         ----------
-        print_len : int
-            Number of words shown for each topic. If this is i, i top probability words 
-            are shown for each topic. Default is 10.
         k_indices : list of integers
-            Order of topics. For example, if k_indices = [3, 0, 2], the 4th, 1st and 3rd topics 
-            are printed in this order. Default is ascending from 0 to K-1, where K is the 
+            Order of topics. For example, if k_indices = [3, 0, 2], 
+            the 4th, 1st and 3rd topics are printed in this order. 
+            Default is ascending from 0 to K-1, where K is the 
             number of topics.
+        print_len : int
+            Number of words shown for each topic. If this is i, i top 
+            probability words are shown for each topic. Default is 10.
         as_string : boolean
-            If true, each topic displays words rather than its ID numbers. Default is True.
-
+            If true, each topic displays words rather than its ID numbers. 
+            Default is True.
         
         Returns
         ----------
@@ -197,6 +189,13 @@ class LDAGibbsViewer(object):
         if as_strings:
 	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
 				 field_name='word')
+
+        # without probabilities, just words
+        if compact_view:
+            sch = ['Topic', 'Words']
+            fc = [str(k) for k in k_indices]
+            return _CompactTable_(k_arr, table_header='Topics Sorted by Index',
+		    	subcol_headers=sch, first_cols=fc, num_words=print_len)
 	
         table = []
         for i,k in enumerate(k_indices):
@@ -208,23 +207,26 @@ class LDAGibbsViewer(object):
 
         table = _DataTable_(table, 'Topics Sorted by Index')
 
+
         return table
 
 
-    def topic_entropies(self, print_len=10, as_strings=True):
+    def topic_entropies(self, print_len=10, k_indices=[], as_strings=True, 
+                        compact_view=True):
         """
-        Returns a list of topics sorted according to the entropy of each topic.
-        The entropy of topic k is calculated by summing P(d|k) * log(P(d|k) over 
-        all document d, and is thought to measure how informative a given topic 
-        is to select documents. 
+        Returns a list of topics sorted according to the entropy of 
+        each topic. The entropy of topic k is calculated by summing 
+        P(d|k) * log(P(d|k) over all document d, and is thought to 
+        measure how informative a given topic is to select documents. 
         
         Parameters
         ----------
         print_len : int
-            Number of words shown for each topic. If this is i, i top probability words 
-            are shown for each topic. Default is 10.
+            Number of words shown for each topic. If this is i, i top 
+            probability words are shown for each topic. Default is 10.
         as_string : boolean
-            If true, each topic displays words rather than its ID numbers. Default is True.
+            If true, each topic displays words rather than its ID 
+            numbers. Default is True.
         
         Returns
         ----------
@@ -232,6 +234,9 @@ class LDAGibbsViewer(object):
             A structured array of topics sorted by entropy.
 
         """
+        if len(k_indices) == 0:
+            k_indices = np.arange(self.model.top_word.shape[0])
+
         # Normalize the document-topic matrix so that documents are
         # distributions
         theta = (self.model.doc_top[:, k_indices] / 
@@ -244,9 +249,15 @@ class LDAGibbsViewer(object):
         k_indices = _enum_sort_(ent)['i'][::-1]
         
         # Retrieve topics
+        if compact_view:
+            k_arr = self.topics(print_len=print_len, k_indices=k_indices,
+                as_strings=as_strings, compact_view=compact_view)
+            k_arr.table_header = 'Sorted by Entropy'
+            return k_arr
+
         k_arr = self.topics(print_len=print_len, k_indices=k_indices,
-                            as_strings=as_strings)
-        
+                            as_strings=as_strings, compact_view=compact_view)
+
         # Label data
         k_arr.table_header = 'Sorted by Entropy'
         for i in xrange(k_indices.size):
@@ -262,17 +273,18 @@ class LDAGibbsViewer(object):
         Parameters
         ----------
         doc : int or string
-             Specifies the document whose distribution over topics is returned.
-             It can either be the ID number (integer) or the name (string) of the document.
+             Specifies the document whose distribution over topics is 
+             returned. It can either be the ID number (integer) or the 
+             name (string) of the document.
         print_len : int
-            Number of topics to be listed. If this is i, i top probability topics are shown.
-            Default is 10.
+            Number of topics to be listed. If this is i, i top probability 
+            topics are shown.Default is 10.
         
         Returns
         ----------
         k_arr : a LabeledColumn object
-            An array of topics (represented by their number) and the corresponding 
-            probabilities.
+            An array of topics (represented by their number) and the 
+            corresponding probabilities.
 
         """
         d, label = self._res_doc_type(doc)
@@ -302,12 +314,14 @@ class LDAGibbsViewer(object):
         word : string 
             The word for which the search is performed.  
         as_strings : boolean 
-            If true, returns document names rather than ID numbers. Default is True.
+            If true, returns document names rather than ID numbers. 
+            Default is True.
 
         Returns
         ----------
         Z_w : a LabeledColumn Object
-            A structured array consisting of three columns. Each column is a list of:
+            A structured array consisting of three columns. Each column 
+            is a list of:
             (1) name/ID of document containing `word`
             (2) relative position of `word` in the document
             (3) Topic number assigned to the token.
@@ -317,15 +331,16 @@ class LDAGibbsViewer(object):
 
         # Search for occurrences of a word in the corpus and return a
         # positions and topic assignments for each found
-        idx = [(self.model.W[d] == w) for d in xrange(len(self.model.W))]
+        ct = self.model.context_type
+        contexts = self.corpus.view_contexts(ct)
+        idx = [(contexts[d] == w) for d in xrange(len(contexts))]
         Z = self.model.Z
         Z_w = [(d, i, t) for d in xrange(len(Z)) 
                for i,t in enumerate(Z[d]) if idx[d][i]]
 
         # Label data
         if as_strings:
-            tn = self.model.context_type
-            docs = self.corpus.view_metadata(tn)[self._doc_label_name]
+            docs = self.corpus.view_metadata(ct)[self._doc_label_name]
             dt = [('doc', docs.dtype), ('pos',np.int), ('value', np.int)]
             Z_w = [(docs[d], i, t) for (d, i, t) in Z_w]
         else:
@@ -358,7 +373,7 @@ class LDAGibbsViewer(object):
                               as_strings=False, label_fn=label_fn, 
                               filter_nan=filter_nan)
         
-	topics = _res_top_type_(topic_or_topics)
+        topics = _res_top_type_(topic_or_topics)
 
         if len(filter_words) > 0:
             white = set()
@@ -378,23 +393,23 @@ class LDAGibbsViewer(object):
 
 
     def sim_word_top(self, word_or_words, weights=[], filter_nan=True,
-                     show_topics=True, print_len=10, as_strings=True):
+                     show_topics=True, print_len=10, as_strings=True, compact_view=True):
         """
         A wrapper of `sim_word_top` in similarity.py. 
 
         Intuitively, the function sorts topics according to their 
         "relevance" to the query `word_or_words`.
         
-        Technically, it creates a pseudo-topic consisting of `word_or_words`
-        and computes the cosine values between that pseudo-topic and every
-        topic in the simplex defined by the probability distribution of words
-        conditional on topics. 
+        Technically, it creates a pseudo-topic consisting of 
+        `word_or_words` and computes the cosine values between that 
+        pseudo-topic and every topic in the simplex defined by the 
+        probability distribution of words conditional on topics. 
         
         If weights are not provided, the word list
         is represented in the space of topics as a topic which assigns
-        equal non-zero probability to each word in `words` and 0 to every
-        other word in the corpus. Otherwise, each word in `words` is
-        assigned the provided weight.
+        equal non-zero probability to each word in `words` and 0 to 
+        every other word in the corpus. Otherwise, each word in `words` 
+        is assigned the provided weight.
         
         Parameters
         ----------
@@ -439,8 +454,14 @@ class LDAGibbsViewer(object):
             k_indices = sim[sim.dtype.names[0]]
 
             # Retrieve topics
+            if compact_view:
+                k_arr = self.topics(print_len=print_len, k_indices=k_indices,
+                    as_strings=as_strings, compact_view=compact_view)
+                k_arr.table_header = 'Sorted by Word Similarity'
+                return k_arr
+
             k_arr = self.topics(k_indices=k_indices, print_len=print_len,
-                                as_strings=as_strings)
+                                as_strings=as_strings, compact_view=compact_view)
 
             # Relabel results
             k_arr.table_header = 'Sorted by Word Similarity'
@@ -495,21 +516,43 @@ class LDAGibbsViewer(object):
                                print_len=print_len, as_strings=as_strings)
 
 
-    def sim_doc_doc(self, doc_or_docs, print_len=10, filter_nan=True,
-                    filter_empty=True, label_fn=_def_label_fn_, as_strings=True):
+    def sim_doc_doc(self, doc_or_docs, k_indices=[], print_len=10, filter_nan=True,
+                    label_fn=_def_label_fn_, as_strings=True):
         """
+        Computes and sorts the cosine(similarity) values between a document 
+        or list of documents and every documents in the topic space. 
+        
+        Parameters
+        ----------
+        doc_or_documents : string/integer or list of string/integer
+            Query document(s) to which cosine values are calculated
+        k_indices : list of integers
+            A list of topics based on which similarity value is computed.
+            Default is all the topics in the model.            
+        as_strings : boolean
+            If true, returns a list of words rather than IDs. 
+            Default is true.
+        print_len : int
+            Number of words printed by pretty-pringing function
+            Default is 10.
+        filter_nan : boolean
+            ?
+
+        Returns
+        ----------
+        w_arr : a LabeledColumn object
+            A 2-dim array containing documents and their cosine values to 
+            `doc_or_docs`. 
         """
-        if _isint_(doc_or_docs):
-            doc_or_docs = [doc_or_docs]
-        if filter_empty:
-            doc_or_docs = [d for d in doc_or_docs if d not in self._empty_docs()]
+        
+        if len(k_indices) == 0:
+            mat = self.model.doc_top.T
+        else:
+            mat = self.model.doc_top[:,k_indices].T
 
-        # To do: error handling when doc_or_docs is empty
-
-        return _sim_doc_doc_(self.corpus, self.model.doc_top.T,
-                             self.model.context_type, doc_or_docs,
-                             norms=self._doc_norms, print_len=print_len,
-                             filter_nan=filter_nan, 
+        return _sim_doc_doc_(self.corpus, mat, self.model.context_type, 
+                             doc_or_docs, norms=self._doc_norms, 
+                             print_len=print_len, filter_nan=filter_nan, 
                              label_fn=label_fn, as_strings=as_strings)
     
 
@@ -520,44 +563,158 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-    def simmat_docs(self, docs, filter_empty=True):
+    def simmat_docs(self, docs=[], k_indices=[]):
+        """
+        Calculates the similarity matrix for a given list of documents.
 
-        if filter_empty:
-            docs = [d for d in docs if d not in self._empty_docs()]
+        Parameters
+        ----------
+        docs : list
+            A list of documents whose similarity matrix is to be computed.
+            Default is all the documents in the model.
+        k_indices : list
+            A list of topics based on which similarity matrix is computed.
+            Default is all the topics in the model.
 
-        # To do: error handling when doc_or_docs is empty
+        Returns
+        ----------
+        simmat_documents object
+        """
 
-        return _simmat_documents_(self.corpus,
-                                  self.model.doc_top.T,
+        if len(docs) == 0:
+            docs = range(len(self.model.W))
+
+        if len(k_indices) == 0:
+            mat = self.model.doc_top.T
+        else:
+            mat = self.model.doc_top[:,k_indices].T
+
+        return _simmat_documents_(self.corpus, mat,
                                   self.model.context_type,
                                   docs)
 
 
-    def simmat_topics(self, topics):
+    def simmat_topics(self, k_indices=[]):
+        """
+        Calculates the similarity matrix for a given list of topics.
 
-        return _simmat_topics_(self.model.top_word, topics)
+        Parameters
+        ----------
+        k_indices : list
+            A list of topics whose similarity matrix is to be computed.
+            Default is all the topics in the model.
 
+        Returns
+        ----------
+        simmat_topics object
+        """
+
+        if len(k_indices) == 0:
+            k_indices = range(self.model.K)
+
+        return _simmat_topics_(self.model.top_word, k_indices)
+
+
+
+
+    def cluster_topics(self, method='kmeans', k_indices=[],
+                       n_clusters=10, by_cluster=True):
+        """
+        Clusters topics by a spceificed clustering algorithm. 
+        Currently it supports K-means, Spectral Clustering and Affinity
+        Propagation algorithms. K-means and spectral clustering cluster
+        topics into a given number of clusters, whereas affinity
+        propagation does not require the fixed cluster number. 
+
+        To do: make it general to deal with documents?
+
+        Parameters
+        ----------
+        method : strings
+            Spceifies the algorithm used for clustring. Currently it 
+            supports 'kmeans', 'affinity' or 'spectral'. Default is 
+            'kmeans'.
+        k_indices : list
+        n_clusters : int
+            Number of clusters used as the parameter for K-means or
+            spectral clustering algorithms. Default is 10.
+        by_cluster : boolean
+            If True, returns a list of clusters. Otherwise a list that
+            indicates cluster numbers for each topic is returned.
+            Default is true.
+
+        Parameters
+        ----------
+        method : strings
+            Spceifies the algorithm used for clustring. Currently it 
+            supports 'kmeans', 'affinity' or 'spectral'. Default is 
+            'kmeans'.
+		k_indices : list
+			List of topics to be clustered. Default is all topics.
+        n_clusters : int
+            Number of clusters used as the parameter for K-means or
+            spectral clustering algorithms. Default is K/10 where K is
+            the number of topics in the model.
+        by_cluster : boolean
+            If True, returns a list of clusters. Otherwise a list that
+            indicates cluster numbers for each topic is returned.
+            Default is true.
+
+        Returns
+        ----------
+        labels : list or list of lists
+            A list of clusters or list of cluster numbers.
+        """
+        # Default use all topics 
+        if len(k_indices) == 0:
+            k_indices = range(self.model.K)
+
+        # Obtain similarity matrix
+        simmat = self.simmat_topics(k_indices)
+
+        if method == 'affinity':
+            from sklearn.cluster import AffinityPropagation
+            af = AffinityPropagation(affinity='precomputed').fit(simmat)
+            labels = af.labels_
+        elif method == 'spectral':
+            from sklearn.cluster import spectral_clustering
+            labels = spectral_clustering(simmat, n_clusters=n_clusters)
+        else:
+            from sklearn.cluster import KMeans
+            km = KMeans(n_clusters=n_clusters, init='k-means++', 
+                        max_iter=100, n_init=1,verbose=1)
+            km.fit(simmat)
+            labels = list(km.labels_)
+
+        # Make a list of labels
+        if by_cluster:
+            labels = [[k_indices[i] for i,lab in enumerate(labels) if lab == x]
+                      for x in set(labels)]
+            
+        return labels
 
 
     def logp_plot(self, range=[], step=1, show=True, grid=True):
         """
-        Returns a plot of log probabilities for the specified range of the MCMC chain
-        used to fit a topic model by `LDAGibbs`.
+        Returns a plot of log probabilities for the specified range of 
+        the MCMC chain used to fit a topic model by `LDAGibbs`.
         The function requires matplotlib package. 
 
         Parameters
         ----------
         range : list of integer
-            Specifies the range of the MCMC chain whose log probabilites are to be plotted.
-            For example, range = [0, 999] plots log probabilities from the 1st to the 1000th 
-            iterations. The length of the list must be exactly two, and the first element must be
-            smaller than the second which can not exceed the total length of the MCMC chain.
+            Specifies the range of the MCMC chain whose log probabilites 
+            are to be plotted. For example, range = [0, 999] plots log 
+            probabilities from the 1st to the 1000th iterations. 
+            The length of the list must be exactly two, and the first 
+            element must be smaller than the second which can not exceed 
+            the total length of the MCMC chain.
             Default produces the plot for the entire chain.
         step : int
             Steps by which points are plotted. Default is 1.
         show : boolean
-            If it is True, the function actually draws the plot in addition to returning 
-            a plot object. Default is True.
+            If it is True, the function actually draws the plot in addition 
+            to returning a plot object. Default is True.
         grid : boolean
             Draw a grid. Default is True. 
         
@@ -570,7 +727,7 @@ class LDAGibbsViewer(object):
         import matplotlib.pyplot as plt
 
         # If range is not specified, include the whole chain.
-        if not(range):
+        if len(range) == 0:
             range = [0, len(self.model.log_prob)]
 
         x = []
@@ -588,3 +745,212 @@ class LDAGibbsViewer(object):
             plt.show()
 
         return plt
+
+
+    def isomap_topics(self, k_indices=[], n_neighbors=5, n_clusters=0): 
+        """
+        Plots an isomap of topics estimated LDA gibbs sampler.
+        For isomap, see:
+        Tenenbaum, J.B., De Silva, V., & Langford, J.C. Science 290(5500)
+
+        Parameters
+        ----------
+        k_indices : list
+            A topic or a list of topics used as a query. Default plots all
+            topics in the model.
+        n_clusters : int
+            The number of clusters. The function applies `cluster_topics'
+            with k-means before plotting and use different colors to 
+            different clusters. Default is K/10 where K is the number of 
+            topics in the model.
+        n_neighbors : int
+            Used by isomap to determine the number of neighbors for each point.
+            Large neighbor size tends to produce a denser map. Default is 5.
+
+        Returns
+        ----------
+        basic_plot object
+            A graph wish scatter plots
+        """
+        from sklearn import manifold
+
+        # create a list to be plotted 
+        if len(k_indices) == 0:
+            k_indices = range(self.model.K)
+
+        # clustering  
+        clusters = self.cluster_topics(n_clusters=n_clusters,
+                                       k_indices=k_indices,
+                                       by_cluster=False)
+
+        # calculate coordinates
+        simmat = self.simmat_topics(k_indices=k_indices)
+        distance = np.ones_like(simmat) - simmat
+        imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
+        pos  = imap.fit(distance).embedding_
+
+        return self.plot_clusters(pos, k_indices, clusters=clusters)
+
+    
+
+    def isomap_docs(self, docs=[], topics=[], k_indices=[], thres=0.4, 
+                    n_neighbors=5, scale=True, trim=20): 
+        """
+        Takes document `docs` or topic `topics` and plots an isomap for 
+        the documents similar/relevant to the query. 
+        
+        The function first determines documents to be plotted by applying 
+        `sim_doc_doc` or `sim_top_doc` for the given document(s) or topic(s). 
+        It then calculates the similarity matrix for the list of the obtained 
+        documents using `simmat_docs`. Finally, a plot is generated by 
+        using the isomap algorithm  in `sklearn` package.
+
+        For isomap, see:
+        Tenenbaum, J.B., De Silva, V., & Langford, J.C. Science 290(5500)
+
+        Parameters
+        ----------
+        docs : list
+            A list of documents used as a query.
+        toppics : list
+            A list of topics used as a query. 
+        k_indices : list
+            A list of topics based on which document similarity matrix is 
+            computed. Default is all the topics in the model.
+        thres : float
+            Threshhold t. If t<1, documents with similarity value >t are 
+            selected. Otherwise, the t' most similar documents are selected 
+            where t' is the smallest integer greater than t. Devault is 0.4.
+        n_neighbors : int
+            Used by isomap to determine the number of neighbors for each point.
+            Large neighbor size tends to produce a denser map. Default is 5.
+        scale : boolean
+            If true, points are scaled accoridng to its similarity to the query.
+            Default is true.
+        trim : int
+            Labels are trimmed to this value. Default is 20.
+
+        Returns
+        ----------
+        basic_plot object
+            A graph wish scatter plots
+
+        """
+        from sklearn import manifold
+        from math import ceil
+
+        # create a list to be plotted from document or topic
+        if len(docs) > 0:
+            doclist = self.sim_doc_doc(docs, k_indices=k_indices)
+        else:
+            doclist = self.sim_top_doc(topics)
+
+        # cut down the list by the threshold
+        if thres < 1:
+            labels, size = zip(*[(d,s) for (d,s) in doclist if s > thres])
+        else:
+            labels, size = zip(*doclist[:int(ceil(thres))])
+
+
+        # calculate coordinates
+        simmat = self.simmat_docs(labels, k_indices=k_indices)
+        distance = np.ones_like(simmat) - simmat
+        imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
+        pos  = imap.fit(distance).embedding_
+
+        # set graphic parameteres
+        # - scale point size
+        if scale:
+            size = [s**2*150 for s in size] 
+        else:
+            size = np.ones_like(size) * 50
+        # - trim labels
+        if trim:
+            labels = [lab[:trim] for lab in labels]
+        
+        return self.plot_clusters(pos, labels, size=size)
+
+
+    def gen_colors(self, clusters):
+        """
+        Takes 'clusters' and creates a list of colors so a cluster has a color.
+
+        Parameters
+        ----------
+        clusters : list
+            A flat list of integers where an integer represents which cluster
+            the information belongs to.
+
+        Returns
+        ----------
+        colorm : list
+            A list of colors obtained from matplotlib colormap cm.hsv. 
+            The length of 'colorm' is the same as the number of distinct clusters.
+        """
+        import matplotlib.cm as cm
+	
+        n = len(set(clusters))
+        colorm = [cm.hsv(i * 1.0 /n, 1) for i in xrange(n)]
+        return colorm
+	
+	
+    def plot_clusters(self, arr, labels, clusters=[], size=[]):
+        """	
+    	Takes 2-dimensional array(simmat), list of clusters, list of labels,
+    	and list of marker size. 'clusters' should be a flat list which can be
+        obtained from cluster_topics(by_cluster=False).
+        Plots each clusters in different colors.
+
+        Parameters
+        ----------
+        arr : 2-dimensional array
+            Array has x, y coordinates to be plotted on a 2-dimensional space.
+        labels : list
+            List of labels to be displayed in the graph. 
+        clusters : list, optional
+            A flat list of integers where an integer represents which cluster
+            the information belongs to. If not given, it returns a basic plot
+            with no color variation. Default is an empty list.
+        size : list, optional
+            List of markersize for points where markersize can note the importance
+            of the point. If not given, 'size' is a list of fixed markersize, 40. 
+            Default is an empty list.
+
+        Returns
+        ----------
+        plt : maplotlit.pyplot object
+            A graph with scatter plots from 'arr'.
+
+        """
+        import matplotlib.pyplot as plt
+
+    	n = arr.shape[0]
+    	X = arr[:,0]
+    	Y = arr[:,1]
+
+    	if len(size) == 0:
+            size = [40 for i in xrange(n)]
+        
+    	fig = plt.figure(figsize=(10,10))
+    	ax = plt.subplot(111)
+
+        if len(clusters) == 0:
+            plt.scatter(X, Y, size)
+        else:	
+            colors = self.gen_colors(clusters)
+            colors = [colors[i] for i in clusters]
+
+	    for i in xrange(n):
+	        plt.scatter(X[i], Y[i], size, color=colors[i])
+
+    	ax.set_xlim(np.min(X) - .1, np.max(X) + .1)
+    	ax.set_ylim(np.min(Y) - .1, np.max(Y) + .1)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    	for label, x, y in zip(labels, X, Y):
+            plt.annotate(label, xy = (x, y), xytext=(-2, 3), 
+			textcoords='offset points', fontsize=10)
+
+    	plt.show()
+

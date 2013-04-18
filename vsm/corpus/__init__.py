@@ -24,6 +24,7 @@ def split_corpus(arr, indices):
 
 
 
+
 class BaseCorpus(object):
     """
     A BaseCorpus object stores a corpus along with its tokenizations
@@ -66,7 +67,6 @@ class BaseCorpus(object):
         cast to an array of data-type `dtype` (if provided).
     words : 1-D array
         The indexed set of atomic words appearing in `corpus`.
-        Computed on initialization by `_extract_words`.
     context_types: 1-D array-like
 
     context_data: list of 1-D array-like
@@ -74,17 +74,17 @@ class BaseCorpus(object):
     Methods
     -------
     meta_int
-	Takes a type of tokenization and a query and 
-	returns the index of the metadata found in the query.
+		Takes a type of tokenization and a query and 
+		returns the index of the metadata found in the query.
     get_metadatum
-	Takes a type of tokenization and a query and returns 
-	the metadatum corresponding to the query and the field.
+		Takes a type of tokenization and a query and returns 
+		the metadatum corresponding to the query and the field.
     view_contexts
         Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly.
     view_metadata
-	Takes a type of tokenization and returns a view of the metadata
-	of the tokenization.
+		Takes a type of tokenization and returns a view of the metadata
+		of the tokenization.
 
     Examples
     --------
@@ -105,7 +105,7 @@ class BaseCorpus(object):
     array(['ran', 'away', 'chased', 'dog', 'cat', 'the'],
           dtype='|S6')
 
-    >>> c.meta_int('sentences',{'sent_label': 'intransitive'}, 'sent_label')
+    >>> c.meta_int('sentences',{'sent_label': 'intransitive'})
     1
 
     >>> b.get_metadatum('sentences', {'sent_label': 'intransitive'}, 'sent_label') 
@@ -125,19 +125,23 @@ class BaseCorpus(object):
                  corpus,
                  dtype=None,
                  context_types=[],
-                 context_data=[]):
+                 context_data=[],
+				 remove_empty=True):
 
-        self.corpus = np.asarray(corpus, dtype=dtype)
-        self.dtype = self.corpus.dtype
+		self.corpus = np.asarray(corpus, dtype=dtype)
+		self.dtype = self.corpus.dtype
 
-        self._extract_words()
+		self.words = np.unique(self.corpus)
 
-        self.context_data = []
-        for t in context_data:
-            if self._validate_indices(t['idx']):
-                self.context_data.append(t)
+		self.context_data = []
+		for t in context_data:
+			if self._validate_indices(t['idx']):
+				self.context_data.append(t)
+		
+		self._gen_context_types(context_types)
 
-        self._gen_context_types(context_types)
+		if remove_empty:
+			self.remove_empty()
 
 
     def _gen_context_types(self, context_types):
@@ -190,6 +194,16 @@ class BaseCorpus(object):
 
         return True
 
+    
+    def remove_empty(self):
+	"""
+	Removes empty tokenizations.
+	"""	
+	for j, t in enumerate(self.context_types):
+	    token_list = self.view_contexts(t)
+
+	    indices = np.array([ctx.size != 0 for ctx in token_list], dtype=np.bool)
+	    self.context_data[j] = self.context_data[j][indices]
 
 
     def view_metadata(self, ctx_type):
@@ -276,7 +290,7 @@ class BaseCorpus(object):
         return self.view_metadata(ctx_type)[i][field]
 
 
-    def view_contexts(self, ctx_type):
+    def view_contexts(self, ctx_type, as_slices=False):
         """
         Displays a tokenization of the corpus.
 
@@ -284,6 +298,10 @@ class BaseCorpus(object):
         ----------
         ctx_type : string-like
            The type of a tokenization.
+	as_slices : Boolean, optional
+            If True, a list of slices corresponding to 'ctx_type' is 
+	    returned. Otherwise, integer representations are returned.
+	    Default is `False`.
 
         Returns
         -------
@@ -297,41 +315,24 @@ class BaseCorpus(object):
         """
         i = self.context_types.index(ctx_type)
         indices = self.context_data[i]['idx']
-        
+
+	if as_slices:
+	    meta_list = self.view_metadata(ctx_type)
+	    indices = meta_list['idx'] 
+	    
+	    if len(indices) == 0:
+		return [slice(0, 0)]
+
+	    slices = []
+	    slices.append(slice(0, indices[0]))
+	    for i in xrange(len(indices) - 1):
+		slices.append(slice(indices[i], indices[i+1]))
+	    return slices	    
+       
         return split_corpus(self.corpus, indices)
 
 
     
-    def _extract_words(self):
-        """
-        Produces an indexed set of words from a corpus.
-        
-        Parameters
-        ----------
-        corpus : array-like
-        
-        Returns
-        -------
-        An indexed set of the elements in `corpus` as a 1-D array.
-        
-        See Also
-        --------
-        BaseCorpus
-        
-        Notes
-        -----
-        """
-
-        # Benchmarked by Peter Bengtsson
-        # (http://www.peterbe.com/plog/uniqifiers-benchmark)
-        
-        word_set = set()
-        word_list = [word for word in self.corpus
-                     if word not in word_set and not word_set.add(word)]
-        self.words = np.array(word_list, dtype=self.corpus.dtype)
-
-
-
 class Corpus(BaseCorpus):
     """
     The goal of the Corpus class is to provide an efficient
@@ -339,7 +340,7 @@ class Corpus(BaseCorpus):
 
     A Corpus object contains an integer representation of the text and
     maps to permit conversion between integer and string
-    epresentations of a given word.
+    representations of a given word.
 
     As a BaseCorpus object, it includes a dictionary of tokenizations
     of the corpus and a method for viewing (without copying) these
@@ -445,12 +446,14 @@ class Corpus(BaseCorpus):
     def __init__(self,
                  corpus,
                  context_types=[],
-                 context_data=[]):
+                 context_data=[],
+		 remove_empty=True):
 
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
                                      context_data=context_data,
-                                     dtype=np.str_)
+                                     dtype=np.str_,
+				     remove_empty=True)
 
         self.__set_words_int()
 
@@ -469,7 +472,7 @@ class Corpus(BaseCorpus):
         self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
 
-    def view_contexts(self, ctx_type, as_strings=False):
+    def view_contexts(self, ctx_type, as_strings=False, as_slices=False):
         """
         Displays a tokenization of the corpus.
 
@@ -481,6 +484,10 @@ class Corpus(BaseCorpus):
             If True, string representations of words are returned.
             Otherwise, integer representations are returned. Default
             is `False`.
+	as_slices : Boolean, optional
+            If True, a list of slices corresponding to 'ctx_type' is 
+	    returned. Otherwise, integer representations are returned.
+	    Default is `False`.
 
         Returns
         -------
@@ -492,7 +499,7 @@ class Corpus(BaseCorpus):
         BaseCorpus
         """
         token_list = super(Corpus, self).view_contexts(ctx_type)
-
+	 
         if as_strings:
             token_list_ = []
             for token in token_list:
@@ -500,6 +507,20 @@ class Corpus(BaseCorpus):
                 token_list_.append(token)
 
             return token_list_
+
+	if as_slices:
+	    meta_list = super(Corpus, self).view_metadata(ctx_type)
+	    indices = meta_list['idx'] 
+
+	    if len(indices) == 0:
+		return []
+
+	    slices = []
+	    slices.append(slice(0, indices[0]))
+	    for i in xrange(len(indices) - 1):
+		slices.append(slice(indices[i], indices[i+1]))
+
+	    return slices	    
 
         return token_list
 	
@@ -544,6 +565,7 @@ class Corpus(BaseCorpus):
         c.__set_words_int()
 
         return c
+
 
 
     def save(self, file):
@@ -677,3 +699,5 @@ def test_file():
         os.remove(tmp.name)
 
     return c_reloaded
+
+
