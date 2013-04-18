@@ -746,7 +746,7 @@ class LDAGibbsViewer(object):
         return plt
 
 
-    def isomap_topics(self, k_indices=[], n_neighbors=5): 
+    def isomap_topics(self, k_indices=[], n_neighbors=5, size=[]): 
         """
         Plots an isomap of topics estimated LDA gibbs sampler.
         For isomap, see:
@@ -789,7 +789,7 @@ class LDAGibbsViewer(object):
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 
-        return self.plot_clusters(pos, k_indices, clusters=clusters)
+        return self.plot_clusters(pos, k_indices, clusters=clusters, size=size)
 
     
 
