@@ -785,7 +785,8 @@ class LDAGibbsViewer(object):
 
         # calculate coordinates
         simmat = self.simmat_topics(k_indices=k_indices)
-        distance = np.ones_like(simmat) - simmat
+        simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
+        distance = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 
@@ -854,7 +855,8 @@ class LDAGibbsViewer(object):
 
         # calculate coordinates
         simmat = self.simmat_docs(labels, k_indices=k_indices)
-        distance = np.ones_like(simmat) - simmat
+        simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
+        distance = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 
