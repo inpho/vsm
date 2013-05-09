@@ -3,6 +3,63 @@ from scipy.sparse import issparse
 
 
 
+def KL_divergence(p, q):
+    """ 
+    Compute KL divergence of distribution vector p and 
+    each row of distribution matrix Q, K(p || q) for q in Q.
+    """
+    #Can we use a matrix for p?
+#    indices = np.indices((len(p),len(q)))
+#    logp = np.log2(p[indices[0]]/q[indices[1]])
+#    out  = np.einsum('ik,ijk->ij',p,logp)
+#    return out
+    logp = np.log2(p/q)
+    return np.dot(logp, p)
+
+
+def JS_divergence(p, q):
+    """ 
+    Compute the square root of the Jensen-Shannon divergence of 
+    two vectors, defined by
+       JSD = (K(p || m) + K(q || m))/2
+    where m = (p+q)/2. 
+    The returned value is a metric.
+    """
+    m   = (p+q)/2
+    JSD = (KL_divergence(p, m) + KL_divergence(q, m))/2 
+    return JSD**0.5
+
+
+def JS_simmat(rows, mat, norm=False, fill_tril=True):
+    """
+    Compute the similarity matrix for set of distributions P from 
+    pairwise Jansen-Shannon divergence.
+    """
+    if norm:
+        mat /=  mat.sum(axis=1)[:,np.newaxis]
+#        for i in xrange(mat.shape[0]):
+#            mat[i] = mat[i] / np.sum(mat[i])
+
+#    sm = np.ones((P.shape[0], P.shape[0]))
+#    for i,j in zip(*np.triu_indices_from(sm, k=1)):
+#        sm[i,j] -= JS_divergence(P[i,:], P[j,:])
+#        sm[j,i] = sm[i,j]
+#    return sm    
+    sm = np.ones((len(rows), len(rows)), dtype=np.float64)
+    indices = np.triu_indices_from(sm, k=1)
+    f = np.vectorize(lambda i, j: JS_divergence(mat[i,:], mat[j,:]) )
+
+    sm[indices] -= f(*indices)[:]
+
+    if fill_tril:
+        indices = np.tril_indices_from(sm, -1)
+        sm[indices] = sm.T[indices]
+
+    return sm
+
+
+
+
 def row_norms(matrix):
     """
     """
