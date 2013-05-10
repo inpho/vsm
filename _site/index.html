@@ -14,7 +14,7 @@
 	<body>
 		<div class="wrapper">
 			<header>
-				<h1><a href="http://inpho.github.io/vsm">VSM</a></h1>
+				<h1>VSM</h1>
 				<p>The Vector Space Model Framework developed for the InPhO Project.</p>
 				<ul>
 					<li><a href="https://github.com/inpho/vsm/zipball/master">Download <strong>ZIP File</strong></a></li>
@@ -28,10 +28,14 @@
 				<p>Tutorials for the Vector Space Model Framework developed for InPhO.</p>
 
 				<h2>Tutorials</h2>
-				<ul>
-					{% for post in site.posts %}
-					<li><a href="{{ post.url }}">{{ post.title }}</a><abbr>{{ post.date | date_to_string }}</abbr></li>
-					{% endfor %}
+				<ul id="archive">
+				
+					<li><a href="/lda-training-model-from-single-file.html">LDA - Training a model from a single file</a> (10 May 2013)</li>
+				
+					<li><a href="/lda-exploring-topics.html">LDA - Exploring topics</a> (10 May 2013)</li>
+				
+					<li><a href="/lda-exploring-documents-and-words.html">LDA - Exploring documents and words</a> (10 May 2013)</li>
+				
 				</ul>
 
 				<h2>Authors and Contributors</h2>

@@ -1,3 +1,7 @@
+---
+title: Home
+---
+
 <!doctype html>
 <html>
 	<head>
@@ -14,7 +18,7 @@
 	<body>
 		<div class="wrapper">
 			<header>
-				<h1><a href="http://inpho.github.io/vsm">VSM</a></h1>
+				<h1>VSM</h1>
 				<p>The Vector Space Model Framework developed for the InPhO Project.</p>
 				<ul>
 					<li><a href="https://github.com/inpho/vsm/zipball/master">Download <strong>ZIP File</strong></a></li>
@@ -28,10 +32,10 @@
 				<p>Tutorials for the Vector Space Model Framework developed for InPhO.</p>
 
 				<h2>Tutorials</h2>
-				<ul>
-					{% for post in site.posts %}
-					<li><a href="{{ post.url }}">{{ post.title }}</a><abbr>{{ post.date | date_to_string }}</abbr></li>
-					{% endfor %}
+				<ul id="archive">
+				{% for post in site.posts %}
+					<li><a href="{{ post.url }}">{{ post.title }}</a> ({{ post.date | date_to_string }})</li>
+				{% endfor %}
 				</ul>
 
 				<h2>Authors and Contributors</h2>
