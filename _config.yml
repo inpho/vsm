@@ -1,0 +1,4 @@
+permalink: none
+pygments: true
+exclude:
+- README.md
