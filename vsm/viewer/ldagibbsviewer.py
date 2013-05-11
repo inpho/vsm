@@ -747,7 +747,7 @@ class LDAGibbsViewer(object):
         return plt
 
 
-    def isomap_topics(self, k_indices=[], n_neighbors=5, n_clusters=0): 
+    def isomap_topics(self, k_indices=[], n_neighbors=5, size=[]): 
         """
         Plots an isomap of topics estimated LDA gibbs sampler.
         For isomap, see:
@@ -756,13 +756,10 @@ class LDAGibbsViewer(object):
         Parameters
         ----------
         k_indices : list
-            A topic or a list of topics used as a query. Default plots all
-            topics in the model.
-        n_clusters : int
-            The number of clusters. The function applies `cluster_topics'
-            with k-means before plotting and use different colors to 
-            different clusters. Default is K/10 where K is the number of 
-            topics in the model.
+            List or list of lists of topics to be plotted. If a list of lists
+            is provided, each sublist is shown with a different color. This can
+            be used to plot the result of `cluster_topics`.
+            Default plots all topics in the model without any cluster.
         n_neighbors : int
             Used by isomap to determine the number of neighbors for each point.
             Large neighbor size tends to produce a denser map. Default is 5.
@@ -778,18 +775,23 @@ class LDAGibbsViewer(object):
         if len(k_indices) == 0:
             k_indices = range(self.model.K)
 
-        # clustering  
-        clusters = self.cluster_topics(n_clusters=n_clusters,
-                                       k_indices=k_indices,
-                                       by_cluster=False)
+        # converting list of topics and creating cluster infromation
+        if any(isinstance(item, list) for item in k_indices):
+            clusters = [[i] * len(cls) for i,cls in enumerate(k_indices)]
+            clusters = [item for cls in clusters for item in cls]
+            k_indices = [item for sublist in k_indices for item in sublist]
+        else:
+            clusters = []
+
 
         # calculate coordinates
         simmat = self.simmat_topics(k_indices=k_indices)
-        distance = np.ones_like(simmat) - simmat
+        simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
+        distance = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 
-        return self.plot_clusters(pos, k_indices, clusters=clusters)
+        return self.plot_clusters(pos, k_indices, clusters=clusters, size=size)
 
     
 
@@ -854,7 +856,8 @@ class LDAGibbsViewer(object):
 
         # calculate coordinates
         simmat = self.simmat_docs(labels, k_indices=k_indices)
-        distance = np.ones_like(simmat) - simmat
+        simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
+        distance = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 

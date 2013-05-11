@@ -12,8 +12,7 @@ import enchant
 
 from corpustools import filter_by_suffix
 
-__all__ = ['proc_htrc_coll', 'htrc_load_metadata', 'htrc_get_titles',
-           'htrc_label_fn', 'htrc_find_duplicates']
+
 
 def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
     """
@@ -92,6 +91,7 @@ def rm_lb_hyphens(plain_root, logger, ignore=['.json', '.log']):
             page = inner(page)
             f.seek(0)
             f.write(page)
+            f.truncate()
 
 
 
