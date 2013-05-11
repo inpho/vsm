@@ -5,10 +5,27 @@ from scipy import sparse
 
 from vsm.model import BaseModel
 from vsm.model.tf import TfModel as TfSeq
-from vsm.corpus import Corpus
 
 
+def count_matrix(arr, slices, m=None):
+    """
+    arr_ls : list of numpy integer arrays
+    m : integer
+    """
+    if not m:
+        m = arr.max()
+    shape = (m, len(slices))
 
+    data = np.ones_like(arr)
+    row_indices = arr
+    col_indices = np.empty_like(arr)
+    for i,s in enumerate(slices):
+        col_indices[s] = i
+
+    return sparse.coo_matrix((data, (row_indices, col_indices)),
+                             shape=shape, dtype=np.int32)
+
+    
 def hstack_coo(mat_ls):
     """
     """
@@ -33,34 +50,17 @@ def hstack_coo(mat_ls):
                              dtype=data.dtype)
 
 
-#TODO: Replace this with the subcorpus method when it has a parameter
-#for preserving the original word list
-def split_corpus(corpus, context_type, n):
+def mp_split_ls(ls, n):
 
-    contexts = corpus.view_contexts(context_type, as_slices=True)
+    # Split list into an `n`-length list of arrays
+    return np.array_split(ls, min(len(ls), n))
 
-    # Split contexts into an `n`-length list of lists of contexts
-    if n == 1:
-        ctx_ls = [contexts]
-    else:
-        ctx_ls = np.array_split(contexts, n-1)
-        if len(ctx_ls) != n:
-            ctx_ls = np.array_split(contexts, n)
 
-    corp_ls = []
-    for ctx_sbls in ctx_ls:
-        corp_slice = slice(ctx_sbls[0].start, ctx_sbls[-1].stop)
-        sbcorp = Corpus([])
-        sbcorp.corpus = corpus.corpus[corp_slice]
-        cdata = np.array([(s.stop - corp_slice.start,) for s in ctx_sbls], 
-                         dtype=[('idx', '<i8')])
-        sbcorp.context_data = [cdata]
-        sbcorp.context_types = [context_type]
-        sbcorp.words = corpus.words
-        sbcorp.words_int = corpus.words_int
-        corp_ls.append(sbcorp)
-
-    return corp_ls
+def mp_shared_array(arr, ctype='i'):
+    
+    shared_arr_base = mp.Array(ctype, arr.size)
+    shared_arr_base[:] = arr
+    return np.ctypeslib.as_array(shared_arr_base.get_obj())
 
 
 
@@ -69,33 +69,38 @@ class TfMulti(BaseModel):
     """
     def __init__(self, corpus, context_type):
 
-        self.corpus = corpus
         self.context_type = context_type
+        self.contexts = corpus.view_contexts(context_type, as_slices=True)
+        
+        global _corpus
+        _corpus = mp_shared_array(corpus.corpus)
+
+        global _m_words
+        _m_words = mp.Value('i', corpus.words.size)
 
 
     def train(self, n_procs):
 
-        # Split the corpus into subcorpora to map over
-        corp_ls = split_corpus(self.corpus, self.context_type, n_procs)
-        corp_ls = [(sbcorp, self.context_type) for sbcorp in corp_ls]
+        ctx_ls = mp_split_ls(self.contexts, n_procs)
 
         print 'Mapping'
         p=mp.Pool(n_procs)
-        # models = map(tf_fn, corp_ls) # For debugging        
-        models = p.map(tf_fn, corp_ls)
+        # cnt_mats = map(tf_fn, ctx_ls) # For debugging        
+        cnt_mats = p.map(tf_fn, ctx_ls)
         p.close()
 
         print 'Reducing'
         # Horizontally stack TF matrices and store the result
-        self.matrix = hstack_coo([m.matrix for m in models])
+        self.matrix = hstack_coo(cnt_mats)
 
 
-def tf_fn((sbcorp, ctx_type)):
+def tf_fn(ctx_sbls):
     """
     """
-    m = TfSeq(sbcorp, ctx_type)
-    m.train()
-    return m
+    offset = ctx_sbls[0].start
+    corpus = _corpus[offset: ctx_sbls[-1].stop]
+    slices = [slice(s.start-offset, s.stop-offset) for s in ctx_sbls]
+    return count_matrix(corpus, slices, _m_words.value)
 
 
 
@@ -111,47 +116,50 @@ def hstack_coo_test():
     assert (np.hstack(dense_mat_ls) == hstack_coo(mat_ls).toarray()).all()
 
 
-def split_corpus_test():
-    
-    corpus = np.array([0, 3, 2, 1, 0, 3, 0, 2, 3, 0, 2, 3, 1, 2, 0, 3, 
-                       2, 1, 2, 2], dtype=np.int)
-    context_data = np.array([(3,), (5,), (7,), (11,), (11,), (15,), (18,), 
-                             (20,)], dtype=[('idx', '<i8')])
-    corpus = Corpus(corpus, context_data=[context_data], 
-                    context_types=['document'])
+def mp_split_ls_test():
 
-    corp_ls = split_corpus(corpus, 'document', 3)
-    assert len(corp_ls) == 3
-    assert (corp_ls[0].words == corpus.words).all()
-    assert (corp_ls[1].words == corpus.words).all()
-    assert (corp_ls[2].words == corpus.words).all()
-    contexts0 = corp_ls[0].view_contexts('document')
-    for i in xrange(3):
-        assert (contexts0[i] == corpus.view_contexts('document')[i]).all()
-    contexts1 = corp_ls[1].view_contexts('document')
-    for i in xrange(2):
-        assert (contexts1[i] == corpus.view_contexts('document')[i+3]).all()
-    contexts2 = corp_ls[2].view_contexts('document')
-    for i in xrange(2):
-        assert (contexts2[i] == corpus.view_contexts('document')[i+5]).all()
+    l = [slice(0,0), slice(0,0), slice(0,0)]
+    assert len(mp_split_ls(l, 1)) == 1
+    assert (mp_split_ls(l, 1)[0] == l).all()
+    assert len(mp_split_ls(l, 2)) == 2
+    assert (mp_split_ls(l, 2)[0] == [slice(0,0), slice(0,0)]).all()
+    assert (mp_split_ls(l, 2)[1] == [slice(0,0)]).all()
+    assert len(mp_split_ls(l, 3)) == 3
+    assert (mp_split_ls(l, 3)[0] == [slice(0,0)]).all()
+    assert (mp_split_ls(l, 3)[1] == [slice(0,0)]).all()
+    assert (mp_split_ls(l, 3)[2] == [slice(0,0)]).all()
 
+
+def count_matrix_test():
+
+    arr = [1, 2, 4, 2, 1]
+    slices = [slice(0,1), slice(1, 3), slice(3,3), slice(3, 5)]
+    m = 6
+    result = sparse.coo_matrix([[0, 0, 0, 0],
+                                [1, 0, 0, 1],
+                                [0, 1, 0, 1],
+                                [0, 0, 0, 0],
+                                [0, 1, 0, 0],
+                                [0, 0, 0, 0]])
+
+    assert (result.toarray() == count_matrix(arr, slices, m).toarray()).all()
 
 
 def TfMulti_test():
 
     from vsm.util.corpustools import random_corpus
 
-    c = random_corpus(10000, 100, 0, 100, context_type='document')
+    c = random_corpus(1000000, 4000, 0, 100, context_type='document')
 
     m0 = TfMulti(c, 'document')
-    m0.train(n_procs=3)
+    m0.train(n_procs=4)
 
     m1 = TfSeq(c, 'document')
     m1.train()
 
     assert (m0.matrix.toarray() == m1.matrix.toarray()).all()
 
-    # I/O
+    #I/O
     from tempfile import NamedTemporaryFile
     import os
 
