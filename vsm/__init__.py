@@ -1,3 +1,4 @@
+import multiprocessing as mp
 import numpy as np
 
 
@@ -129,12 +130,24 @@ def map_strarr(arr, m, k, new_k=None):
     return new_arr
 
 
+def mp_split_ls(ls, n):
+    """
+    Split list into an `n`-length list of arrays
+    """
+    return np.array_split(ls, min(len(ls), n))
+
+
+def mp_shared_array(arr, ctype='i'):
+    
+    shared_arr_base = mp.Array(ctype, arr.size)
+    shared_arr_base[:] = arr
+    return np.ctypeslib.as_array(shared_arr_base.get_obj())
+
 
 def isstr(x):
     """
     """
     return isinstance(x, basestring) or isinstance(x, np.flexible)
-
 
 
 def isint(x):
@@ -144,12 +157,10 @@ def isint(x):
             or isinstance(x, int) or isinstance(x, long))
 
 
-
 def isfloat(x):
     """
     """
     return (isinstance(x, np.inexact) or isinstance(x, np.float))
-
 
 
 #
@@ -183,3 +194,17 @@ def test_map_strarr():
 
     assert (arr['str'] == np.array(m, dtype=np.array(m).dtype)).all()
     assert (arr['v'] == np.array([1., 2.], dtype='f4')).all()
+
+
+def mp_split_ls_test():
+
+    l = [slice(0,0), slice(0,0), slice(0,0)]
+    assert len(mp_split_ls(l, 1)) == 1
+    assert (mp_split_ls(l, 1)[0] == l).all()
+    assert len(mp_split_ls(l, 2)) == 2
+    assert (mp_split_ls(l, 2)[0] == [slice(0,0), slice(0,0)]).all()
+    assert (mp_split_ls(l, 2)[1] == [slice(0,0)]).all()
+    assert len(mp_split_ls(l, 3)) == 3
+    assert (mp_split_ls(l, 3)[0] == [slice(0,0)]).all()
+    assert (mp_split_ls(l, 3)[1] == [slice(0,0)]).all()
+    assert (mp_split_ls(l, 3)[2] == [slice(0,0)]).all()

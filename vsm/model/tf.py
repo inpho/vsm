@@ -1,10 +1,12 @@
+import multiprocessing as mp
 import numpy as np
-from scipy import sparse
 
+from vsm import mp_split_ls, mp_shared_array
 from vsm.model import BaseModel
+from vsm.linalg import hstack_coo, count_matrix
 
 
-class TfModel(BaseModel):
+class TfSeq(BaseModel):
     """
     Trains a term-frequency model. 
 
@@ -53,95 +55,84 @@ class TfModel(BaseModel):
     scipy.sparse.coo_matrix
     """
     def __init__(self, corpus, context_type):
-        self.corpus = corpus
+
         self.context_type = context_type
+        self.corpus = corpus.corpus
+        self.contexts = corpus.view_contexts(context_type, as_slices=True)
+        self.m_words = corpus.words.size
 
 
     def train(self):
-        docs = self.corpus.view_contexts(self.context_type)
-        shape = (self.corpus.words.size, len(docs))
-
-        print 'Computing term frequencies'
-        data = np.ones_like(self.corpus.corpus)
-        row_indices = self.corpus.corpus
-        col_indices = np.empty_like(self.corpus.corpus)
-        j, k = 0, 0
-
-        for i,token in enumerate(docs):
-            k += len(token)
-            col_indices[j:k] = i
-            j = k
-
-        coo_in = (data, (row_indices, col_indices))
-        self.matrix = sparse.coo_matrix(coo_in, shape=shape, 
-                                        dtype=np.int32)
+        self.matrix = count_matrix(self.corpus, self.contexts, self.m_words)
 
 
-    def combine_models(m1, m2):
-        """Takes two models. Chooses which model is bigger and clones it to a third
-        model. It then iterates over the second model adding values that already
-        exists into the third model and creating new entries for those that
-        didn't already exist"""
-        size_1 = m1.get_shape()
-        size_2 = m2.get_shape()
-        data_1 = m1.data
-        data_2 = m2.data
-        size_of_data3 = 0
-    
-        if np.size(data_1) >= np.size(data_2):
-            size_of_data3 = np.size(data_1)
-            while np.size(data_1) != np.size(data_2):
-                np.append(data_2, 0)
-        else:
-            size_of_data3 = np.size(data_2)
-            while np.size(data_2) != np.size(data_1):
-                np.append(data_1, 0)
-            
-        words_in_data1 = 0
-        data_3 = np.concatenate(data_1, data_2)
-        data_3 = np.trim_zeros(data_3)
-        rows = np.arrange(np.size(data_3))
-        cols = np.arrange(np.size(data_3))
-        coo_in = (data_3, (rows, cols))
-        self.model_3 = sparse.coo_matrix(coo_in, shape=((np.size(data_3)), (np.size(data_3))))
-        return model_3
-    
-    
-    def combine_corpus(c1, c2):
-        """Takes two corpora and combines them into one super corpus. Also keeps an association list
-        between the two old corpora and the new corpus."""
+
+
+class TfMulti(BaseModel):
+    """
+    """
+    def __init__(self, corpus, context_type):
+
+        self.context_type = context_type
+        self.contexts = corpus.view_contexts(context_type, as_slices=True)
         
-        from vsm.corpus import Corpus
-        self.c1dict = {}
-        self.c2dict = {}
-        text = [c1.words[i] for i in c1.corpus] + [c2.words[i] for i in c2.corpus]
-        self.c3 = Corpus(text)
-        for i,word in enumerate(c3.words):
-            if word in c1.words:
-                self.c1dict[word] = i
-            if word in c2.words:
-                self.c2dict[word] = i
+        global _corpus
+        _corpus = mp_shared_array(corpus.corpus)
 
-def test_TfModel():
+        global _m_words
+        _m_words = mp.Value('i', corpus.words.size)
+
+
+    def train(self, n_procs):
+
+        ctx_ls = mp_split_ls(self.contexts, n_procs)
+
+        print 'Mapping'
+        p=mp.Pool(n_procs)
+        # cnt_mats = map(tf_fn, ctx_ls) # For debugging        
+        cnt_mats = p.map(tf_fn, ctx_ls)
+        p.close()
+
+        print 'Reducing'
+        # Horizontally stack TF matrices and store the result
+        self.matrix = hstack_coo(cnt_mats)
+
+
+def tf_fn(ctx_sbls):
+    """
+    """
+    offset = ctx_sbls[0].start
+    corpus = _corpus[offset: ctx_sbls[-1].stop]
+    slices = [slice(s.start-offset, s.stop-offset) for s in ctx_sbls]
+    return count_matrix(corpus, slices, _m_words.value)
+
+
+
+
+def TfMulti_test():
 
     from vsm.util.corpustools import random_corpus
 
-    c = random_corpus(10000, 100, 0, 100, context_type='document')
+    c = random_corpus(1000000, 10000, 0, 1000, context_type='document')
 
-    m = TfModel(c, 'document')
-    m.train()
+    m0 = TfMulti(c, 'document')
+    m0.train(n_procs=4)
 
-    from tempfile import NamedTemporaryFile
-    import os
+    m1 = TfSeq(c, 'document')
+    m1.train()
 
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        m.save(tmp.name)
-        tmp.close()
-        m1 = TfModel.load(tmp.name)
-        assert (m.matrix.todense() == m1.matrix.todense()).all()
+    # assert (m0.matrix.toarray() == m1.matrix.toarray()).all()
+
+    #I/O
+    # from tempfile import NamedTemporaryFile
+    # import os
+
+    # try:
+    #     tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+    #     m0.save(tmp.name)
+    #     tmp.close()
+    #     m1 = TfMulti.load(tmp.name)
+    #     assert (m0.matrix.todense() == m1.matrix.todense()).all()
     
-    finally:
-        os.remove(tmp.name)
-
-    return m.matrix
+    # finally:
+    #     os.remove(tmp.name)

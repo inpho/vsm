@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.sparse import issparse
+from scipy.sparse import coo_matrix, issparse
 
 
 
@@ -152,6 +152,51 @@ def row_cos_mat(rows, mat, norms=None, fill_tril=True):
     return sm
 
 
+def hstack_coo(mat_ls):
+    """
+    """
+    #TODO: Raise an exception if matrices do not all have the same
+    #number of rows
+    if len(mat_ls) > 0:
+        shape_0 = mat_ls[0].shape[0]
+    shape_1 = np.sum([mat.shape[1] for mat in mat_ls]) 
+
+    data = np.hstack([mat.data for mat in mat_ls])
+    row = np.hstack([mat.row for mat in mat_ls])
+
+    col_ls = [m.col.copy() for m in mat_ls]
+    offset = 0
+    for i in xrange(len(mat_ls)):
+        col_ls[i] += offset
+        offset += mat_ls[i].shape[1]
+    col = np.hstack(col_ls)
+
+    return coo_matrix((data, (row, col)),
+                      shape=(shape_0, shape_1),
+                      dtype=data.dtype)
+
+
+def count_matrix(arr, slices, m=None):
+    """
+    arr : numpy array
+    slices : list of slices
+    m : integer
+    """
+    if not m:
+        m = arr.max()
+    shape = (m, len(slices))
+
+    data = np.ones_like(arr)
+    row_indices = arr
+    col_indices = np.empty_like(arr)
+    for i,s in enumerate(slices):
+        col_indices[s] = i
+
+    return coo_matrix((data, (row_indices, col_indices)),
+                      shape=shape, dtype=np.int32)
+
+    
+
 #
 # Testing
 #
@@ -177,3 +222,29 @@ def test_row_cos_mat():
     out_2 = row_cos_mat(range(10), m, fill_tril=False)
         
     assert np.allclose(out_1, out_2), (out_1, out_2)
+
+
+def hstack_coo_test():
+
+    dense_mat_ls = [np.random.random((3,4)),
+                    np.random.random((3,5)),
+                    np.random.random((3,6))]
+
+    mat_ls = [coo_matrix(m) for m in dense_mat_ls]
+    
+    assert (np.hstack(dense_mat_ls) == hstack_coo(mat_ls).toarray()).all()
+
+
+def count_matrix_test():
+
+    arr = [1, 2, 4, 2, 1]
+    slices = [slice(0,1), slice(1, 3), slice(3,3), slice(3, 5)]
+    m = 6
+    result = coo_matrix([[0, 0, 0, 0],
+                         [1, 0, 0, 1],
+                         [0, 1, 0, 1],
+                         [0, 0, 0, 0],
+                         [0, 1, 0, 0],
+                         [0, 0, 0, 0]])
+    
+    assert (result.toarray() == count_matrix(arr, slices, m).toarray()).all()
