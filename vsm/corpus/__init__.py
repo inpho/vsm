@@ -74,17 +74,19 @@ class BaseCorpus(object):
     Methods
     -------
     meta_int
-		Takes a type of tokenization and a query and 
-		returns the index of the metadata found in the query.
+	Takes a type of tokenization and a query and returns the index
+	of the metadata found in the query.
     get_metadatum
-		Takes a type of tokenization and a query and returns 
-		the metadatum corresponding to the query and the field.
+        Takes a type of tokenization and a query and returns the
+	metadatum corresponding to the query and the field.
     view_contexts
         Takes a type of tokenization and returns a view of the corpus
         tokenized accordingly.
     view_metadata
-		Takes a type of tokenization and returns a view of the metadata
-		of the tokenization.
+        Takes a type of tokenization and returns a view of the
+        metadata of the tokenization.
+    tolist
+        Returns Corpus object as a list of lists.
 
     Examples
     --------
@@ -332,6 +334,13 @@ class BaseCorpus(object):
         return split_corpus(self.corpus, indices)
 
 
+    def tolist(self, context_type):
+        """
+        Returns Corpus object as a list of lists.
+        """
+        return self.view_contexts(context_type)
+
+
     
 class Corpus(BaseCorpus):
     """
@@ -396,6 +405,9 @@ class Corpus(BaseCorpus):
     apply_stoplist
 	Takes a list of stopwords and returns a copy of the corpus
 	with the stopwords removed.
+    tolist
+        Returns Corpus object as a list of lists of either integers or
+        strings, according to `as_strings`.
     
     See Also
     --------
@@ -525,7 +537,15 @@ class Corpus(BaseCorpus):
         return token_list
 	
 	
+    def tolist(self, context_type, as_strings=False):
+        """
+        Returns Corpus object as a list of lists of either integers or
+        strings, according to `as_strings`.
+        """
+        ls = self.view_contexts(context_type, as_strings=as_strings)
+        return [arr.tolist() for arr in ls]
 
+    
     @staticmethod
     def load(file):
 	"""

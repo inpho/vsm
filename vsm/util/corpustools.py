@@ -6,7 +6,7 @@ import numpy as np
 import nltk
 
 from vsm.corpus import Corpus
-
+from vsm.corpus.util import *
 
 
 __all__=['apply_stoplist', 'toy_corpus', 'file_corpus',
@@ -140,37 +140,6 @@ def empty_corpus(context_type):
     return Corpus([],
                   context_data=[np.array([], dtype=[('idx', np.int)])],
                   context_types=[context_type])
-
-
-
-def random_corpus(corpus_len,
-                  n_words,
-                  min_token_len,
-                  max_token_len,
-                  context_type='random',
-                  metadata=False):
-    """
-    Generate a random integer corpus.
-    """
-    corpus = np.random.randint(n_words, size=corpus_len)
-
-    indices = []
-    i = np.random.randint(min_token_len, max_token_len)
-    while i < corpus_len:
-        indices.append(i)
-        i += np.random.randint(min_token_len, max_token_len)
-    indices.append(corpus_len)
-
-    if metadata:
-        metadata_ = ['token_' + str(i) for i in xrange(len(indices))]
-        dtype=[('idx', np.array(indices).dtype), 
-               (context_type + '_label', np.array(metadata_).dtype)]
-        rand_tok = np.array(zip(indices, metadata_), dtype=dtype)
-    else:
-        rand_tok = np.array([(i,) for i in indices], 
-                            dtype=[('idx', np.array(indices).dtype)])
-
-    return Corpus(corpus, context_types=[context_type], context_data=[rand_tok])
 
 
 
