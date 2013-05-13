@@ -9,7 +9,7 @@ layout: default
 <h2>Tutorials</h2>
 <ul id="archive">
 {% for post in site.posts %}
-	<li><a href="{{ post.url }}">{{ post.title }}</a> ({{ post.date | date_to_string }})</li>
+	<li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a> ({{ post.date | date_to_string }})</li>
 {% endfor %}
 </ul>
 
