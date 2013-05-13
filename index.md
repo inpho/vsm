@@ -18,6 +18,7 @@ layout: default
 	<li>Robert Rose (<a href="https://github.com/rrose1" class="user-mention">@rrose1</a>)</li>
 	<li>Jun Otsuka (<a href="https://github.com/junotk" class="user-mention">@junotk</a>)</li>
 	<li>Tim Downey (<a href="https://github.com/tcdowney" class="user-mention">@tcdowney</a>)</li>
+	<li>Doori Lee (<a href="https://github.com/doori" class="user-mention">@doori</a>)</li>
 </ul>
 
 <h2>Support</h2>
