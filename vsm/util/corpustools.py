@@ -134,15 +134,6 @@ def paragraph_tokenize(text):
 
 
 
-def empty_corpus(context_type):
-    """
-    """
-    return Corpus([],
-                  context_data=[np.array([], dtype=[('idx', np.int)])],
-                  context_types=[context_type])
-
-
-
 def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
                stop_freq=0, add_stop=None, metadata=None):
     """
