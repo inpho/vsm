@@ -144,6 +144,11 @@ def mp_shared_array(arr, ctype='i'):
     return np.ctypeslib.as_array(shared_arr_base.get_obj())
 
 
+def mp_shared_value(x, ctype='i'):
+
+    return mp.Value(ctype, x)
+
+
 def isstr(x):
     """
     """

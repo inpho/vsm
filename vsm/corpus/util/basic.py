@@ -25,7 +25,7 @@ def corpus_fromlist(ls, context_type='context'):
                   context_types=[context_type])
 
 
-def empty_corpus(context_type):
+def empty_corpus(context_type='context'):
     """
     """
     return Corpus([],
@@ -37,7 +37,7 @@ def random_corpus(corpus_len,
                   n_words,
                   min_token_len,
                   max_token_len,
-                  context_type='random',
+                  context_type='context',
                   metadata=False):
     """
     Generate a random integer corpus.

@@ -1,7 +1,7 @@
 import multiprocessing as mp
 import numpy as np
 
-from vsm import mp_split_ls, mp_shared_array
+from vsm import mp_split_ls, mp_shared_array, mp_shared_value
 from vsm.model import BaseModel
 from vsm.linalg import hstack_coo, count_matrix
 
@@ -54,35 +54,52 @@ class TfSeq(BaseModel):
     vsm.corpus.Corpus
     scipy.sparse.coo_matrix
     """
-    def __init__(self, corpus, context_type):
+    def __init__(self, corpus=None, context_type=None):
 
         self.context_type = context_type
-        self.corpus = corpus.corpus
-        self.contexts = corpus.view_contexts(context_type, as_slices=True)
-        self.m_words = corpus.words.size
+        if corpus:
+            self.corpus = corpus.corpus
+            self.contexts = corpus.view_contexts(context_type, as_slices=True)
+            self.m_words = corpus.words.size
+        else:
+            self.corpus = []
+            self.contexts = []
+            self.m_words = 0
 
 
     def train(self):
         self.matrix = count_matrix(self.corpus, self.contexts, self.m_words)
 
 
-
-
+    
 class TfMulti(BaseModel):
     """
     """
-    def __init__(self, corpus, context_type):
+    def __init__(self, corpus=None, context_type=None):
 
         self.context_type = context_type
-        self.contexts = corpus.view_contexts(context_type, as_slices=True)
-        
+        if corpus:
+            self.contexts = corpus.view_contexts(context_type, as_slices=True)
+            self._set_corpus(corpus.corpus)
+            self._set_m_words(corpus.words.size)
+        else:
+            self.contexts = []
+            self._set_corpus(np.array([], dtype=np.int))
+            self._set_m_words(0)
+
+
+    @staticmethod
+    def _set_corpus(arr):
         global _corpus
-        _corpus = mp_shared_array(corpus.corpus)
+        _corpus = mp_shared_array(arr)
 
+
+    @staticmethod
+    def _set_m_words(n):
         global _m_words
-        _m_words = mp.Value('i', corpus.words.size)
+        _m_words = mp_shared_value(n)
 
-
+        
     def train(self, n_procs):
 
         ctx_ls = mp_split_ls(self.contexts, n_procs)
@@ -105,34 +122,3 @@ def tf_fn(ctx_sbls):
     corpus = _corpus[offset: ctx_sbls[-1].stop]
     slices = [slice(s.start-offset, s.stop-offset) for s in ctx_sbls]
     return count_matrix(corpus, slices, _m_words.value)
-
-
-
-
-def TfMulti_test():
-
-    from vsm.util.corpustools import random_corpus
-
-    c = random_corpus(1000000, 10000, 0, 1000, context_type='document')
-
-    m0 = TfMulti(c, 'document')
-    m0.train(n_procs=4)
-
-    m1 = TfSeq(c, 'document')
-    m1.train()
-
-    # assert (m0.matrix.toarray() == m1.matrix.toarray()).all()
-
-    #I/O
-    # from tempfile import NamedTemporaryFile
-    # import os
-
-    # try:
-    #     tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-    #     m0.save(tmp.name)
-    #     tmp.close()
-    #     m1 = TfMulti.load(tmp.name)
-    #     assert (m0.matrix.todense() == m1.matrix.todense()).all()
-    
-    # finally:
-    #     os.remove(tmp.name)
