@@ -1,4 +1,5 @@
 permalink: none
+relative_permalinks: false
 pygments: true
 exclude:
 - README.md

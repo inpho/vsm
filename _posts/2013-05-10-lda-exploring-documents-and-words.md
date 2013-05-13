@@ -1,6 +1,6 @@
 --- 
 title: LDA - Exploring documents and words
-layout: default
+layout: post
 ---
 
 ##LDA Tutorial: Exploring documents and words

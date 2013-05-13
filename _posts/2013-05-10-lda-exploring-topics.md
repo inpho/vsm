@@ -1,6 +1,6 @@
 --- 
 title: LDA - Exploring topics
-layout: default
+layout: post
 ---
 
 ##LDA: Exploring topics

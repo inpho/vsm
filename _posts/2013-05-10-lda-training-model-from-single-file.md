@@ -1,6 +1,6 @@
 --- 
 title: LDA - Training a model from a single file
-layout: default
+layout: post
 ---
 
 ##LDA: Training a model from a single file
