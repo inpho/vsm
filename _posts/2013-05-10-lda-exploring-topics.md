@@ -9,28 +9,28 @@ In this page we illustrate various ways to analyze a trained LDA model. As an ex
 
 First, we load both a corpus (`sep_corpus.npz`) and a trained LDA model (`sep_model.npz`):
 
-```
+{% highlight bash %}
 $ from vsm.util.corpustools import Corpus
 $ c = Corpus.load('sep_corpus.npz')
 Loading corpus from descartes_corpus.npz
 $ from vsm.model.ldagibbs import LDAGibbs as LDA
 $ m = LDA.load('sep_model.npz')
 Loading LDA-Gibbs data from descartes.npz
-```
+{% endhighlight %}
 
 To analyze an LDA model, we create a viewer object from the corpus and the model:
 
-```
+{% highlight bash %}
 $ from vsm.viewer.ldagibbsviewer import LDAGibbsViewer as LDAViewer
 $ v = LDAViewer(c, m)
-```
+{% endhighlight %}
 
 First, let's plot the log probabilities (not available on remote ipython session).  
 
-```
+{% highlight bash %}
 $ v.logp_plot()
 <module 'matplotlib.pyplot' from '/Library/Python/2.7/site-packages/matplotlib-1.3.x-py2.7-macosx-10.8-intel.egg/matplotlib/pyplot.pyc'>
-```
+{% endhighlight %}
 
 **TODO: put image here**
 
@@ -40,16 +40,16 @@ The chain seems to be roughly converged.
 
 To see all topics in the model from command line, type:
 
-```
+{% highlight bash %}
 $ print v.topics()
-```
+{% endhighlight %}
 
 This gives a list of all topics, each of which is a list of words and corresponding probabilities. 
 In an ip notebook, 
 
-```
+{% highlight bash %}
 $ v.topics()
-```
+{% endhighlight %}
 
 gives a compact html table where each topic is represented by the top 10 probability words:
 
@@ -57,9 +57,9 @@ gives a compact html table where each topic is represented by the top 10 probabi
 
 If not only words characterizing topics but also there probabilities are needed, type:
 
-```
+{% highlight bash %}
 $ v.topics(compact_view=False)
-```
+{% endhighlight %}
 
 which gives words and their corresponding probability for each topic as:
 
@@ -68,9 +68,9 @@ which gives words and their corresponding probability for each topic as:
 
 To see specific topics, use `k_indices` as:
 
-```
+{% highlight bash %}
 $ print v.topics(k_indices=[2,6,13])
-```
+{% endhighlight %}
 
 which lists just three topics, 2, 6 and 13.
 
@@ -78,13 +78,13 @@ which lists just three topics, 2, 6 and 13.
 
 Looking at the topics shown above topic 2 seems to be related to the classical physics. Are there other topics similar to it? To see similarities between topics, we use `sim_top_top`:
 
-```
+{% highlight bash %}
 $ print v.sim_top_top([2])
-....................
+------------------------
      Topics: 2
-....................
+------------------------
 Topic     Cosine
-....................
+------------------------
 2         1.00000
 89        0.20470
 79        0.20083
@@ -95,14 +95,14 @@ Topic     Cosine
 36        0.10747
 51        0.09974
 73        0.09409
-```
+{% endhighlight %}
 
 These are topics similar to topic 2. 
 Let's see the top 6 topics from this list using `k_indices` in `topics` method:
 
-```
+{% highlight bash %}
 $ v.topics(k_indices=[2, 89, 79, 93, 21, 83])
-```
+{% endhighlight %}
 
 <table style="margin: 0"><tr><th style="text-align: center; background: #CEE3F6" colspan ="11">Topics Sorted by Index</th></tr><tr><th style="text-align: center; background: #EFF2FB;" >Topic</th><th style="text-align: center; background: #EFF2FB;" >Words</th></tr><tr><td style="padding-left:0.75em;">2</td><td> motion, newton, space, bodies, force, body, matter, atoms, leibniz, forces </td></tr><tr><td style="padding-left:0.75em;">89</td><td> soul, knowledge, human, body, natural, nature, matter, things, mind, material </td></tr><tr><td style="padding-left:0.75em;">79</td><td> time, change, infinite, past, temporal, sequence, state, finite, chance, future </td></tr><tr><td style="padding-left:0.75em;">93</td><td> spacetime, theory, relativity, einstein, field, physical, physics, quantum, general, space </td></tr><tr><td style="padding-left:0.75em;">21</td><td> energy, bohr, principle, quantum, entropy, state, mechanics, correspondence, boltzmann, theory </td></tr><tr><td style="padding-left:0.75em;">83</td><td> descartes, god, leibniz, spinoza, substance, ideas, mind, malebranche, nature, substances </td></tr></table>
 
@@ -111,7 +111,7 @@ Hence the topics related to the general/contemporary physics and the modern phil
 We can also look at the similarities between each pair from a given set of topics by using `simmat_topics`. 
 This will return a numpy array containing the similarity matrix for a given topics 
 
-```
+{% highlight bash %}
 $ v.simmat_topics(k_indices=[2, 89, 79, 93, 21, 83])
 IndexedSymmArray([[ 1.        ,  0.20469593,  0.2008326 ,  0.19487031,  0.17824172, 0.16437827],
                   [ 0.20469593,  1.        ,  0.05569496,  0.08155678,  0.07375815, 0.17739257],
@@ -119,19 +119,19 @@ IndexedSymmArray([[ 1.        ,  0.20469593,  0.2008326 ,  0.19487031,  0.178241
                   [ 0.19487031,  0.08155678,  0.15310955,  1.        ,  0.30703874, 0.05445239],
                   [ 0.17824172,  0.07375815,  0.19200546,  0.30703874,  1.        , 0.04247789],
                   [ 0.16437827,  0.17739257,  0.05160133,  0.05445239,  0.04247789, 1.        ]])
-```
+{% endhighlight %}
 
 ### Explore topics by document
 
 In LDA, each document in the corpus is assigned with a probability distribution over topics, which characterizes the content of the document. Suppose we are interested in the SEP article on [Descartes](http://plato.stanford.edu/entries/descartes/), and ask which topics are discussed in it. For this we use `doc_topics`:
 
-```
+{% highlight bash %}
 $ print v.doc_topics('descartes.txt')
-.......................
+------------------------
 Document: descartes.txt
-.......................
+------------------------
 Topic     Prob
-.......................
+------------------------
 83        0.21227
 89        0.19220
 82        0.10778
@@ -142,13 +142,13 @@ Topic     Prob
 51        0.04415
 48        0.04071
 52        0.03239
-```
+{% endhighlight %}
 
 Let's look at the top five topics:
 
-```
+{% highlight bash %}
 $ v.topics(k_indices=[83, 89, 82, 9, 2])
-```
+{% endhighlight %}
 
 <table style="margin: 0"><tr><th style="text-align: center; background: #CEE3F6" colspan ="11">Topics Sorted by Index</th></tr><tr><th style="text-align: center; background: #EFF2FB;" >Topic</th><th style="text-align: center; background: #EFF2FB;" >Words</th></tr><tr><td style="padding-left:0.75em;">83</td><td> descartes, god, leibniz, spinoza, substance, ideas, mind, malebranche, nature, substances </td></tr><tr><td style="padding-left:0.75em;">89</td><td> soul, knowledge, human, body, natural, nature, matter, things, mind, material </td></tr><tr><td style="padding-left:0.75em;">82</td><td> work, published, first, time, new, one, years, also, could, book </td></tr><tr><td style="padding-left:0.75em;">9</td><td> would, even, whether, could, two, however, since, rather, another, also </td></tr><tr><td style="padding-left:0.75em;">2</td><td> motion, newton, space, bodies, force, body, matter, atoms, leibniz, forces </td></tr></table>
 
@@ -159,9 +159,9 @@ In this list we recognize the terms related to the modern philosophy (topic 83),
 One can also ask which topics are most relevant to a given word. This gives the contexts in which a particular word is used in the corpus. Let's take the word "anthropomorphism" for example and see which topics are related to this word.
 To this we use `sim_word_top`: 
 
-```
+{% highlight bash %}
 $ v.sim_word_top('anthropomorphism')
-```
+{% endhighlight %}
 
 <table style="margin: 0"><tr><th style="text-align: center; background: #CEE3F6" colspan ="11">Sorted by Word Similarity</th></tr><tr><th style="text-align: center; background: #EFF2FB;" >Topic</th><th style="text-align: center; background: #EFF2FB;" >Words</th></tr><tr><td style="padding-left:0.75em;">76</td><td> behavior, psychology, cognitive, mental, human, mind, psychological, attention, imagery, animals </td></tr><tr><td style="padding-left:0.75em;">19</td><td> god, divine, world, human, religion, theological, power, christian, creation, nature </td></tr><tr><td style="padding-left:0.75em;">31</td><td> world, one, reality, within, experience, process, human, time, self, individual </td></tr><tr><td style="padding-left:0.75em;">...</td><td> .........</td></tr></table>
 
@@ -176,7 +176,7 @@ When there are lot of topics, one may have a group of related topics. In such ca
 Here we use k-means to illustrate topic clusters in our LDA model. 
 k-means algorithm requires cluster number to be fixed. We choose 10 clusters.
 
-```
+{% highlight bash %}
 $ cls = v.cluster_topics(method='k-means', n_clusters=10)
 Initialization complete
 Iteration 0, inertia 149.883810088
@@ -184,11 +184,11 @@ Iteration 1, inertia 84.901591324
 Iteration 2, inertia 84.7033890556
 Iteration 3, inertia 84.4245218161
 Converged to similar centers at iteration 3
-```
+{% endhighlight %}
 
 `cls` now contains a list of 10 clusters:
 
-```
+{% highlight bash %}
 $ cls
 [[19, 23, 31, 69, 83],
  [4, 7, 10, 13, 18, 27, 34, 35, 50, 53, 57, 59, 61, 86, 98],
@@ -200,22 +200,22 @@ $ cls
  [8, 32, 36, 49, 73, 76, 80, 92, 97, 99],
  [0, 14, 25, 26, 39, 62, 89, 94, 95],
  [3, 22, 37, 54, 60, 68, 71]]
-```
+{% endhighlight %}
 
 One can look at each cluster by using `topics` function:
 
-```
+{% highlight bash %}
 $ v.topics(k_indices=cls[0])
-```
+{% endhighlight %}
 
 <table style="margin: 0"><tr><th style="text-align: center; background: #CEE3F6" colspan ="11">Topics Sorted by Index</th></tr><tr><th style="text-align: center; background: #EFF2FB;" >Topic</th><th style="text-align: center; background: #EFF2FB;" >Words</th></tr><tr><td style="padding-left:0.75em;">19</td><td> god, divine, world, human, religion, theological, power, christian, creation, nature </td></tr><tr><td style="padding-left:0.75em;">23</td><td> possible, worlds, world, modal, true, object, w, actual, objects, kripke </td></tr><tr><td style="padding-left:0.75em;">31</td><td> world, one, reality, within, experience, process, human, time, self, individual </td></tr><tr><td style="padding-left:0.75em;">69</td><td> god, theism, hartshorne, evil, world, universe, existence, chisholm, whitehead, process </td></tr><tr><td style="padding-left:0.75em;">83</td><td> descartes, god, leibniz, spinoza, substance, ideas, mind, malebranche, nature, substances </td></tr></table>
 
 Which looks like a mixture of theological / modern philosophy and possible world semantics.
 As another example, let's look at cluster 5: 
 
-```
+{% highlight bash %}
 $ v.topics(k_indices=cls[5])
-```
+{% endhighlight %}
 
 <table style="margin: 0"><tr><th style="text-align: center; background: #CEE3F6" colspan ="11">Topics Sorted by Index</th></tr><tr><th style="text-align: center; background: #EFF2FB;" >Topic</th><th style="text-align: center; background: #EFF2FB;" >Words</th></tr><tr><td style="padding-left:0.75em;">5</td><td> x, y, f, 0, set, n, algebra, b, c, function </td></tr><tr><td style="padding-left:0.75em;">12</td><td> x, set, theory, sets, y, frege, type, ph, f, axiom </td></tr><tr><td style="padding-left:0.75em;">42</td><td> mathematics, mathematical, proof, godel, numbers, hilbert, logic, brouwer, intuitionistic, arithmetic </td></tr><tr><td style="padding-left:0.75em;">46</td><td> logic, logical, reasoning, formal, calculus, rules, inference, default, ai, form </td></tr><tr><td style="padding-left:0.75em;">55</td><td> p, 1, b, 2, 3, see, 4, two, following, section </td></tr><tr><td style="padding-left:0.75em;">64</td><td> probability, evidence, e, h, probabilities, hypothesis, hypotheses, inductive, induction, p </td></tr><tr><td style="padding-left:0.75em;">84</td><td> logic, ph, m, b, l, g, formula, formulas, logics, semantics </td></tr><tr><td style="padding-left:0.75em;">90</td><td> b, p, belief, lewis, conditional, set, conditionals, k, w, probability </td></tr></table>
 
