@@ -28,3 +28,6 @@ pip-log.txt
 
 # gh-pages
 /_site/
+
+# docs build
+/docs/_build/
