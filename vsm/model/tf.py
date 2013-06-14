@@ -74,6 +74,51 @@ class TfSeq(BaseModel):
     
 class TfMulti(BaseModel):
     """
+    Trains a term-frequency model. 
+
+    In a term-frequency model, the number of occurrences of a word
+    type in a context is counted for all word types and contexts. Word
+    types correspond to matrix rows and contexts correspond to matrix
+    columns.
+
+    The data structure is a sparse integer matrix.
+
+    Parameters
+    ----------
+    corpus : Corpus
+        A Corpus object containing the training data
+    context_type : string
+        A string specifying the type of context over which the model
+        trainer is applied.
+
+    Attributes
+    ----------
+    corpus : Corpus
+        A Corpus object containing the training data
+    context_type : string
+        A string specifying the type of context over which the model
+        trainer is applied.
+    matrix : scipy.sparse.coo_matrix
+        A sparse matrix in 'coordinate' format that contains the
+        frequency counts.
+
+    Methods
+    -------
+    train
+        Counts word-type occurrences per context and stores the
+        results in `self.matrix`
+    save
+        Takes a filename or file object and saves `self.matrix` and
+        `self.context_type` in an npz archive.
+    load
+        Takes a filename or file object and loads it as an npz archive
+        into a BaseModel object.
+
+    See Also
+    --------
+    BaseModel
+    vsm.corpus.Corpus
+    scipy.sparse.coo_matrix
     """
     def __init__(self, corpus=None, context_type=None):
 
@@ -101,7 +146,13 @@ class TfMulti(BaseModel):
 
         
     def train(self, n_procs):
+        """
+        Takes a number of processes `n_procs` over which to map and reduce.
 
+        See Also
+        --------
+        vsm.model.TfMulti
+        """
         ctx_ls = mp_split_ls(self.contexts, n_procs)
 
         print 'Mapping'
@@ -117,6 +168,8 @@ class TfMulti(BaseModel):
 
 def tf_fn(ctx_sbls):
     """
+    The map function for vsm.model.TfMulti. Takes a list of contexts
+    as slices and returns a count matrix.
     """
     offset = ctx_sbls[0].start
     corpus = _corpus[offset: ctx_sbls[-1].stop]
