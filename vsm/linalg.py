@@ -126,7 +126,13 @@ def row_cosines(row, matrix, norms=None):
     return out
 
 
+def row_acos(row, matrix, norms=None):
+    
+    cosines = row_cosines(row, matrix, norms=norms)
 
+    return np.arccos(cosines)
+    
+    
 def row_cos_mat(rows, mat, norms=None, fill_tril=True):
 
     if issparse(mat):
@@ -152,6 +158,13 @@ def row_cos_mat(rows, mat, norms=None, fill_tril=True):
     return sm
 
 
+def row_acos_mat(rows, mat, norms=None, fill_tril=True):
+
+    cos_mat = row_cos_mat(rows, mat, norms=norms, fill_tril=fill_tril)
+
+    return np.arccos(cos_mat)
+
+    
 def hstack_coo(mat_ls):
     """
     """

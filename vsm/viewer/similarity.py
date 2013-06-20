@@ -10,12 +10,16 @@ from vsm.viewer import (
 
 from labeleddata import LabeledColumn, IndexedSymmArray
 
+def_sim_fn = row_cosines
+def_simmat_fn = row_cos_mat
+def_order = 'd'
 
 # TODO: Update module so that any function wrapping a similarity
 # function assumes that similarity is computed row-wise
 
-def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
-                  as_strings=True, print_len=20, filter_nan=True):
+def sim_word_word(corp, mat, word_or_words, weights=None,
+                  norms=None, as_strings=True, print_len=20,
+                  filter_nan=True, sim_fn=row_cosines, order='d'):
     """
     Computes and sorts the cosine values between a word or list of
     words and every word. If weights are provided, the word list is
@@ -61,13 +65,20 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
     word = np.average(rows, weights=weights, axis=0)[np.newaxis, :]
     
     # Compute similarities
-    w_arr = row_cosines(word, mat, norms=norms)
+    w_arr = sim_fn(word, mat, norms=norms)
 
     if as_strings:
         w_arr = enum_sort(w_arr, indices=corp.words, field_name='word',
 			filter_nan=filter_nan)
     else:
     	w_arr = enum_sort(w_arr, filter_nan=filter_nan)
+
+    if order=='d':
+        pass
+    elif order=='i':
+        w_arr = w_arr[::-1]
+    else:
+        raise Exception('Invalid order parameter.')
 
     # Label data
     w_arr = w_arr.view(LabeledColumn)
@@ -78,8 +89,8 @@ def sim_word_word(corp, mat, word_or_words, weights=None, norms=None,
     return w_arr
 
 
-def sim_word_top(corp, mat, word_or_words, weights=[],
-                 norms=None, print_len=10, filter_nan=True):
+def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
+                 print_len=10, filter_nan=True, sim_fn=row_cosines, order='d'):
     """
     Computes and sorts the cosine values between a word or a list of
     words and every topic. If weights are not provided, the word list
@@ -104,8 +115,15 @@ def sim_word_top(corp, mat, word_or_words, weights=[],
         top[:, words] = weights
 
     # Compute similarities
-    k_arr = row_cosines(top, mat, norms=norms)
+    k_arr = sim_fn(top, mat, norms=norms)
     k_arr = enum_sort(k_arr, filter_nan=filter_nan)
+
+    if order=='d':
+        pass
+    elif order=='i':
+        w_arr = w_arr[::-1]
+    else:
+        raise Exception('Invalid order parameter.')
 
     # Label data
     k_arr = k_arr.view(LabeledColumn)
@@ -118,7 +136,8 @@ def sim_word_top(corp, mat, word_or_words, weights=[],
 
 def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[], 
                 norms=None, print_len=10, filter_nan=True, 
-                label_fn=def_label_fn, as_strings=True):
+                label_fn=def_label_fn, as_strings=True,
+                sim_fn=row_cosines, order='d'):
     """
     Takes a topic or list of topics (by integer index) and returns a
     list of documents sorted by the posterior probabilities of
@@ -136,7 +155,7 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
         doc[:, topics] = weights
 
     # Compute similarites
-    d_arr = row_cosines(doc, mat, norms=norms)
+    d_arr = sim_fn(doc, mat, norms=norms)
 
     # Label data
     if as_strings:
@@ -145,6 +164,13 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
         d_arr = enum_sort(d_arr, indices=docs, field_name='doc')
     else:
 	d_arr = enum_sort(d_arr, filter_nan=filter_nan)
+
+    if order=='d':
+        pass
+    elif order=='i':
+        w_arr = w_arr[::-1]
+    else:
+        raise Exception('Invalid order parameter.')
 
     d_arr = d_arr.view(LabeledColumn)
     d_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
@@ -156,8 +182,9 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
 
 
 def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
-                norms=None, filter_nan=True, print_len=10, 
-                label_fn=def_label_fn, as_strings=True):
+                norms=None, filter_nan=True, print_len=10,
+                label_fn=def_label_fn, as_strings=True,
+                sim_fn=row_cosines, order='d'):
     """
     """
     # Resolve `doc_or_docs`
@@ -180,7 +207,7 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
     doc = np.average(rows, weights=weights, axis=0)[np.newaxis, :]
 
     # Compute cosines
-    d_arr = row_cosines(doc, mat, norms=norms)
+    d_arr = sim_fn(doc, mat, norms=norms)
 
     # Label data
     if as_strings:
@@ -189,6 +216,13 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
         d_arr = enum_sort(d_arr, indices=docs, field_name='doc')
     else:
         d_arr = enum_sort(d_arr, filter_nan=filter_nan)
+
+    if order=='d':
+        pass
+    elif order=='i':
+        w_arr = w_arr[::-1]
+    else:
+        raise Exception('Invalid order parameter.')
 
     d_arr = d_arr.view(LabeledColumn)
     # TODO: Finish this header
@@ -200,7 +234,8 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
 
 
 def sim_top_top(mat, topic_or_topics, weights=None, 
-                norms=None, print_len=10, filter_nan=True):
+                norms=None, print_len=10,
+                filter_nan=True, sim_fn=row_cosines, order='d'):
     """
     Computes and sorts the cosine values between a given topic `k`
     and every topic.
@@ -213,8 +248,15 @@ def sim_top_top(mat, topic_or_topics, weights=None,
     top = np.average(mat[topics], weights=weights, axis=0)[np.newaxis, :]
 
     # Compute similarities
-    k_arr = row_cosines(top, mat, norms=norms)
+    k_arr = sim_fn(top, mat, norms=norms)
     k_arr = enum_sort(k_arr, filter_nan=filter_nan)
+
+    if order=='d':
+        pass
+    elif order=='i':
+        w_arr = w_arr[::-1]
+    else:
+        raise Exception('Invalid order parameter.')
 
     # Label data
     k_arr = k_arr.view(LabeledColumn)
@@ -226,14 +268,14 @@ def sim_top_top(mat, topic_or_topics, weights=None,
 
 
 
-def simmat_words(corp, matrix, word_list, norms=None):
+def simmat_words(corp, matrix, word_list, norms=None, sim_fn=row_cos_mat):
     """
     """
     indices, words = zip(*[res_word_type(corp, word) 
                            for word in word_list])
     indices, words = np.array(indices), np.array(words)
 
-    sm = row_cos_mat(indices, matrix, norms=norms, fill_tril=True)
+    sm = sim_fn(indices, matrix, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)
     sm.labels = words
     
@@ -241,7 +283,8 @@ def simmat_words(corp, matrix, word_list, norms=None):
 
 
 
-def simmat_documents(corp, matrix, context_type, doc_list, norms=None):
+def simmat_documents(corp, matrix, context_type, doc_list,
+                     norms=None, sim_fn=row_cos_mat):
     """
     """
     label_name = doc_label_name(context_type)
@@ -250,7 +293,7 @@ def simmat_documents(corp, matrix, context_type, doc_list, norms=None):
                             for doc in doc_list])
     indices, labels = np.array(indices), np.array(labels)
 
-    sm = row_cos_mat(indices, matrix.T, norms=norms, fill_tril=True)
+    sm = sim_fn(indices, matrix.T, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)
     sm.labels = labels
     
@@ -258,10 +301,10 @@ def simmat_documents(corp, matrix, context_type, doc_list, norms=None):
 
 
 
-def simmat_topics(kw_mat, topics, norms=None):
+def simmat_topics(kw_mat, topics, norms=None, sim_fn=row_cos_mat):
     """
     """
-    sm = row_cos_mat(topics, kw_mat, norms=norms, fill_tril=True)
+    sm = sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)
     sm.labels = [str(k) for k in topics]
     
