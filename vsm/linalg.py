@@ -129,6 +129,13 @@ def row_acos(row, matrix, norms=None):
     
     cosines = row_cosines(row, matrix, norms=norms)
 
+    # To optimize
+    for i in xrange(len(cosines)):
+        if np.allclose(cosines[i], 1):
+            cosines[i] = 1
+        if np.allclose(cosines[i], -1):
+            cosines[i] = -1
+
     return np.arccos(cosines)
     
     
@@ -160,6 +167,13 @@ def row_cos_mat(rows, mat, norms=None, fill_tril=True):
 def row_acos_mat(rows, mat, norms=None, fill_tril=True):
 
     cos_mat = row_cos_mat(rows, mat, norms=norms, fill_tril=fill_tril)
+
+    # To optimize
+    for i in np.ndindex(*cos_mat.shape):
+        if np.allclose(cos_mat[i], 1):
+            cos_mat[i] = 1
+        if np.allclose(cos_mat[i], -1):
+            cos_mat[i] = -1
 
     return np.arccos(cos_mat)
 

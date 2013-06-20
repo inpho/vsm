@@ -43,7 +43,7 @@ class BeagleViewer(object):
     def simmat_words(self, word_list, sim_fn=def_simmat_fn):
 
         return _simmat_words_(self.corpus, self.model.matrix,
-                              word_list, sim_fn=simmat_fn)
+                              word_list, sim_fn=sim_fn)
 
 
 
