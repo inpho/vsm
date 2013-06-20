@@ -45,8 +45,7 @@ def rand_pt_unit_sphere(n, seed=None):
     """
     np.random.seed(seed)
 
-    pt = np.random.random(n)
-    pt = pt * 2 - 1
+    pt = np.random.normal(size=n)
     pt = pt / np.dot(pt, pt)**.5
 
     return pt
