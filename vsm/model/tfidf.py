@@ -1,11 +1,10 @@
-from scipy import sparse
 import numpy as np
 
 from vsm.model import BaseModel
 
 
 
-class TfIdfModel(BaseModel):
+class TfIdf(BaseModel):
     """
     Transforms a term-frequency model into a term-frequency
     inverse-document-frequency model.
@@ -42,6 +41,9 @@ class TfIdfModel(BaseModel):
     matrix : scipy.sparse.coo_matrix
         A sparse matrix in 'coordinate' format that contains the
         frequency counts.
+    undefined_rows : list
+        A list of row indices corresponding to words which have zero
+        document frequency (so which have an undefined idf).
 
     Methods
     -------
@@ -62,82 +64,39 @@ class TfIdfModel(BaseModel):
     BaseModel
     scipy.sparse.coo_matrix
 
-
     Notes
     -----
-
     A zero in the matrix might arise in two ways: (1) the word type
     occurs in every document, in which case the IDF value is 0; (2)
     the word type occurs in no document at all, in which case the IDF
-    value is actually undefined.
-
-    TODO: Add a parameter to the training to allow for NANs to appear
-    in case 2.
+    value is undefined.
     """
-    def __init__(self, tf_matrix, context_type):
-        """
-        """
+    def __init__(self, tf_matrix=None, context_type=None):
+
+        #`context_type` here is purely for bookkeeping purposes
         self.context_type = context_type
-        self.matrix = tf_matrix.copy()
-        self.matrix = self.matrix.tocsr()
-        self.matrix = self.matrix.astype(np.float64)
+        if tf_matrix:
+            self.matrix = tf_matrix.copy()
+            self.matrix = self.matrix.tocsr()
+            self.matrix = self.matrix.astype(np.float64)
+        else:
+            self.matrix = np.array([])
+        self.undefined_rows = []
 
 
     def train(self):
-        """
-        """
-        n_docs = np.float64(self.matrix.shape[1])
 
-        # Suppress division by zero errors
-        old_settings = np.seterr(divide='ignore')
+        if self.matrix.size > 0:
+            n_docs = np.float64(self.matrix.shape[1])
+            
+            for i in xrange(self.matrix.indptr.shape[0] - 1):
 
-        # NOTE: Adding np.inf wherever we have a zero row results in an
-        # overly dense sparse matrix. Leaving `zero_rows` in case we
-        # still want to know about them in future code versions.
-        zero_rows = []
+                start = self.matrix.indptr[i]
+                stop = self.matrix.indptr[i + 1]
 
-        print 'Computing tf-idfs'
-        for i in xrange(self.matrix.indptr.shape[0] - 1):
-
-            start = self.matrix.indptr[i]
-            stop = self.matrix.indptr[i + 1]
-
-            if start == stop:
-                zero_rows.append(i)
-            else:
-                row = self.matrix.data[start:stop]
-                row *= np.log(n_docs / np.count_nonzero(row))
-                start = stop
-        
-        # Restore default handling of floating-point errors
-        np.seterr(**old_settings)
-
-
-
-def test_TfIdfModel():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.model.tf import TfModel
-
-    c = random_corpus(1000, 100, 0, 20, context_type='document', metadata=True)
-
-    tf = TfModel(c, 'document')
-    tf.train()
-
-    m = TfIdfModel(tf.matrix, 'document')
-    m.train()
-
-    from tempfile import NamedTemporaryFile
-    import os
-
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        m.save(tmp.name)
-        tmp.close()
-        m1 = TfIdfModel.load(tmp.name)
-        assert (m.matrix.todense() == m1.matrix.todense()).all()
-    
-    finally:
-        os.remove(tmp.name)
-
-    return m.matrix
+                if start == stop:
+                    self.undefined_rows.append(i)
+                else:
+                    row = self.matrix.data[start:stop]
+                    row *= np.log(n_docs / np.count_nonzero(row))
+                    start = stop

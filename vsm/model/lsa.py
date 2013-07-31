@@ -6,10 +6,9 @@ from scipy.sparse import linalg as linalgs
 
 class BaseLsaModel(object):
 
-    def __init__(self, context_type, word_matrix=None, 
+    def __init__(self, context_type=None, word_matrix=None, 
                  eigenvalues=None, doc_matrix=None):
-        """
-        """
+
         self.word_matrix = word_matrix
         self.doc_matrix = doc_matrix
         self.eigenvalues = eigenvalues
@@ -78,72 +77,41 @@ class BaseLsaModel(object):
 
 
 
-class LsaModel(BaseLsaModel):
+class Lsa(BaseLsaModel):
     """
     """
-    def __init__(self, td_matrix, context_type):
-        """
-        """
-        super(LsaModel, self).__init__(context_type)
+    def __init__(self, td_matrix=np.array([]), context_type=None):
 
-        td_matrix = sparse.coo_matrix(td_matrix)
-        # Removing infinite values for SVD
-        finite_mask = np.isfinite(td_matrix.data)
-        coo_in = (td_matrix.data[finite_mask],
-                  (td_matrix.row[finite_mask], 
-                   td_matrix.col[finite_mask]))
-        td_matrix = sparse.coo_matrix(coo_in, shape=td_matrix.shape, 
-                                      dtype=np.float64)
-        self.td_matrix = td_matrix.tocsr()
+        super(Lsa, self).__init__(context_type)
+
+        if td_matrix.size > 0:
+            td_matrix = sparse.coo_matrix(td_matrix)
+            
+            # Removing infinite values for SVD
+            finite_mask = np.isfinite(td_matrix.data)
+            coo_in = (td_matrix.data[finite_mask],
+                      (td_matrix.row[finite_mask], 
+                       td_matrix.col[finite_mask]))
+
+            td_matrix = sparse.coo_matrix(coo_in, shape=td_matrix.shape, 
+                                          dtype=np.float64)
+            self.td_matrix = td_matrix.tocsr()
+        else:
+            self.td_matrix = np.array([])
 
 
     def train(self, k_factors=300):
-        """
-        """
-        if self.td_matrix.shape[0] < k_factors:
-            k_factors = self.td_matrix.shape[0] - 1
-            
-        if self.td_matrix.shape[1] < k_factors:
-            k_factors = self.td_matrix.shape[1] - 1
 
-        print 'Performing sparse SVD'
-        u, s, v = linalgs.svds(self.td_matrix, k=k_factors)
+        u,s,v = np.array([]), np.array([]), np.array([])
+
+        if self.td_matrix.size > 0:
+            s = min(self.td_matrix.shape)
+            if s < k_factors:
+                k_factors = s - 1
+
+            print 'Performing sparse SVD'
+            u, s, v = linalgs.svds(self.td_matrix, k=k_factors)
+
         self.word_matrix = u
         self.eigenvalues = s
         self.doc_matrix = v
-
-
-
-def test_LsaModel():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.model.tf import TfModel
-    from vsm.model.tfidf import TfIdfModel
-
-    c = random_corpus(10000, 1000, 0, 30, context_type='document')
-
-    tf = TfModel(c, 'document')
-    tf.train()
-
-    tfidf = TfIdfModel(tf.matrix, 'document')
-    tfidf.train()
-
-    m = LsaModel(tfidf.matrix, 'document')
-    m.train()
-
-    from tempfile import NamedTemporaryFile
-    import os
-
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        m.save(tmp.name)
-        tmp.close()
-        m1 = BaseLsaModel.load(tmp.name)
-        assert (m.word_matrix == m1.word_matrix).all()
-        assert (m.eigenvalues == m1.eigenvalues).all()
-        assert (m.doc_matrix == m1.doc_matrix).all()
-    
-    finally:
-        os.remove(tmp.name)
-
-    return m

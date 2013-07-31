@@ -4,7 +4,8 @@ from vsm import (
     map_strarr as _map_strarr_,
     enum_matrix as _enum_matrix_,
     enum_sort as _enum_sort_, 
-    isstr as _isstr_)
+    isstr as _isstr_,
+    isint as _isint_)
 
 from vsm.linalg import row_norms as _row_norms_
 

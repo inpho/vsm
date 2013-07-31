@@ -18,9 +18,8 @@ class BeagleEnvironment(BaseModel):
     def train(self):
         """
         """
-        self.matrix = np.array(np.random.random(self.shape), 
+        self.matrix = np.array(np.random.normal(size=self.shape),
                                dtype=self.dtype)
-        self.matrix = self.matrix * 2 - 1
         self.matrix = row_normalize(self.matrix)
 
 
