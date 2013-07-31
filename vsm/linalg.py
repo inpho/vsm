@@ -18,7 +18,7 @@ def KL_divergence(p, q):
 
 
 
-def JS_divergence(p, q, sqrt=True):
+def JS_divergence(p, q, metric=True):
     """  
     Compute (the square root of) the Jensen-Shannon divergence 
     of two vectors, defined by
@@ -29,7 +29,7 @@ def JS_divergence(p, q, sqrt=True):
     m   = (p+q)/2
     JSD = (KL_divergence(p, m) + KL_divergence(q, m))/2 
 
-    if sqrt:
+    if metric:
         JSD = JSD**0.5
 
     return JSD
