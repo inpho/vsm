@@ -3,10 +3,11 @@ from scipy.sparse import coo_matrix, issparse
 
 
 
-def KL_divergence(p, q):
+def KL_divergence(p, q, norms=None):
     """ 
     Compute KL divergence of distribution vector p and 
     each row of distribution matrix Q, K(p || q) for q in Q.
+    NB: `norms` is a dummy argument. 
     """
     #Can we use a matrix for p?
 #    indices = np.indices((len(p),len(q)))
@@ -18,13 +19,14 @@ def KL_divergence(p, q):
 
 
 
-def JS_divergence(p, q, metric=True):
+def JS_divergence(p, q, norms=None, metric=True):
     """  
     Compute (the square root of) the Jensen-Shannon divergence 
     of two vectors, defined by
        JSD = (KL(p || m) + KL(q || m))/2
     where m = (p+q)/2. 
     The square root of the JS divergence is a metric.
+    NB: `norms` is a dummy argument.
     """
     m   = (p+q)/2
     JSD = (KL_divergence(p, m) + KL_divergence(q, m))/2 
@@ -36,21 +38,32 @@ def JS_divergence(p, q, metric=True):
 
 
 
-def JS_dismat(P, fill_tril=True):
+def JS_dismat(rows, mat, norm=None, fill_tril=True):
     """
-    Compute the distance matrix for set of distributions P by computing 
-    pairwise Jansen-Shannon divergences.
+    Compute the distance matrix for a set of distributions in `mat` 
+    by computing pairwise Jansen-Shannon divergences.
+    
+    Parameters
+    ----------
+    rows : 1-dim array
+        Species distributions whose distances are to be calculated.
+    mat : 2-dim floating point array
+        The set of probability distributions where each row is a 
+        distribution.
+    norm : dummy argument
     """
-    # Need to replace it with a faster way
-    dismat = np.zeros((P.shape[0], P.shape[0]))
-    for i,j in zip(*np.triu_indices_from(dismat, k=1)):
-        dismat[i,j] = JS_divergence(P[i,:], P[j,:])
+    mat = mat[rows]
+
+    dsm = np.zeros((len(rows), len(rows)), dtype=np.float64)
+    indices = np.triu_indices_from(dsm)
+    f = np.vectorize(lambda i, j: JS_divergence(mat[i,:], mat[j,:]))
+    dsm[indices] = f(*indices)[:]
 
     if fill_tril:
-        indices = np.tril_indices_from(dismat, -1)
-        dismat[indices] = dismat.T[indices]
+        indices = np.tril_indices_from(dsm, -1)
+        dsm[indices] = dsm.T[indices]
 
-    return dismat
+    return dsm
 
 
 

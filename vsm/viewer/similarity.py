@@ -21,19 +21,19 @@ def sim_word_word(corp, mat, word_or_words, weights=None,
                   norms=None, as_strings=True, print_len=20,
                   filter_nan=True, sim_fn=row_cosines, order='d'):
     """
-    Computes and sorts the cosine values between a word or list of
-    words and every word. If weights are provided, the word list is
-    represented as the weighted average of the words in the list. If
-    weights are not provided, the arithmetic mean is used.
+    Computes and sorts similarity of a word or list of words with 
+    every other word. If weights are provided, the word list is
+    represented as the weighted average of the words in the list. 
+    Otherwise the arithmetic mean is used.
 
     Parameters
     ----------
     corp : Corpus
         Source of observed data
     mat : 2-dim floating point array
-        Similarity matrix based on which cosine values are calculated
+        Matrix based on which similarity is calculated
     word_or_words : string or list of string
-        Query word(s) to which cosine values are calculated
+        Query word(s) to which similarities are calculated
     weights : list of floating point
         Specify weights for each query word in `word_or_words`. 
         Default uses equal weights (i.e. arithmetic mean)
@@ -92,12 +92,11 @@ def sim_word_word(corp, mat, word_or_words, weights=None,
 def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
                  print_len=10, filter_nan=True, sim_fn=row_cosines, order='d'):
     """
-    Computes and sorts the cosine values between a word or a list of
-    words and every topic. If weights are not provided, the word list
-    is represented in the space of topics as a topic which assigns
-    equal non-zero probability to each word in `words` and 0 to every
-    other word in the corpus. Otherwise, each word in `words` is
-    assigned the provided weight.
+    Computes similarity of a word or a list of words with every topic
+    and sorts the results. The function treats query words as a pseudo-topic
+    that has non-zero probability mass on those words. `weight` specifies
+    such probability masses on each words. Otherwise equal probability 
+    is assigned to each word in `word_or_words`. 
     """
     # Resolve `word_or_words`
     if isstr(word_or_words):
@@ -128,7 +127,7 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
     # Label data
     k_arr = k_arr.view(LabeledColumn)
     k_arr.col_header = 'Words: ' + ', '.join(labels)
-    k_arr.subcol_headers = ['Topic', 'Cosine']
+    k_arr.subcol_headers = ['Topic', 'Similarity']
     k_arr.col_len = print_len
 
     return k_arr
