@@ -3,7 +3,7 @@ from scipy.sparse import issparse
 
 from vsm import enum_matrix, enum_sort, map_strarr, isstr, isint
 
-from vsm.linalg import row_cosines, row_cos_mat
+from vsm.linalg import row_cosines, row_cos_mat, KL_divergence, JS_divergence, JS_dismat
 
 from vsm.viewer import (
     res_word_type, res_doc_type, res_top_type, def_label_fn, doc_label_name)
@@ -90,13 +90,12 @@ def sim_word_word(corp, mat, word_or_words, weights=None,
 
 
 def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
-                 print_len=10, filter_nan=True, sim_fn=row_cosines, order='d'):
+                 print_len=10, filter_nan=True, sim_fn=KL_divergence, order='i'):
     """
-    Computes similarity of a word or a list of words with every topic
-    and sorts the results. The function treats query words as a pseudo-topic
-    that has non-zero probability mass on those words. `weight` specifies
-    such probability masses on each words. Otherwise equal probability 
-    is assigned to each word in `word_or_words`. 
+    Computes (dis)similarity of a word or a list of words with every topic
+    and sorts the results. The function treats the query words as a pseudo-topic
+    that assign to those words non-zero probability masses specified by `weight`.
+    Otherwise equal probability is assigned to each word in `word_or_words`. 
     """
     # Resolve `word_or_words`
     if isstr(word_or_words):
@@ -120,7 +119,7 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        k_arr = k_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 

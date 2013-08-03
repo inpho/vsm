@@ -24,8 +24,12 @@ def KL_divergence(p, q, norms=None):
 #    out  = np.einsum('ik,ijk->ij',p,logp)
 #    return out
 
+    old = np.seterr(divide='ignore') # Suppress division by zero errors
     logp = np.log2(p/q)
-    return np.dot(logp, p.T)
+    np.seterr(**old) # Restore error settings
+    KLD  = np.dot(logp, p.T)
+    KLD  = np.ravel(KLD)
+    return KLD
 
 
 
