@@ -7,15 +7,25 @@ def KL_divergence(p, q, norms=None):
     """ 
     Compute KL divergence of distribution vector p and 
     each row of distribution matrix Q, K(p || q) for q in Q.
-    NB: `norms` is a dummy argument. 
+    
+    Parameters
+    ----------
+    p : 1-dim or 2-dim floating point array
+        The distribution with which KL_divergence is computed.
+        2-dim array must has the form (1,n).
+    q : 2-dim floating point array
+        Matrix containing distributions to be compared with `p`
+    norms : None
+        Dummy argument.
     """
     #Can we use a matrix for p?
 #    indices = np.indices((len(p),len(q)))
 #    logp = np.log2(p[indices[0]]/q[indices[1]])
 #    out  = np.einsum('ik,ijk->ij',p,logp)
 #    return out
+
     logp = np.log2(p/q)
-    return np.dot(logp, p)
+    return np.dot(logp, p.T)
 
 
 
@@ -26,7 +36,15 @@ def JS_divergence(p, q, norms=None, metric=True):
        JSD = (KL(p || m) + KL(q || m))/2
     where m = (p+q)/2. 
     The square root of the JS divergence is a metric.
-    NB: `norms` is a dummy argument.
+
+    Parameters
+    ----------
+    p : 1-dim floating point array
+        First distribution.
+    q : 1-dim floating point array
+        Second distribution.
+    norms : None
+        Dummy argument.
     """
     m   = (p+q)/2
     JSD = (KL_divergence(p, m) + KL_divergence(q, m))/2 
