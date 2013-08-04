@@ -135,11 +135,13 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
 def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[], 
                 norms=None, print_len=10, filter_nan=True, 
                 label_fn=def_label_fn, as_strings=True,
-                sim_fn=row_cosines, order='d'):
+                sim_fn=KL_divergence, order='i'):
     """
-    Takes a topic or list of topics (by integer index) and returns a
-    list of documents sorted by the posterior probabilities of
-    documents given the topic.
+    Computes (dis)similarity of a topic or a list of topics with every 
+    documents and sorts the results. The function treats the query topics
+    as a pseudo-document that assign to those topics non-zero probability 
+    masses specified by `weight`. Otherwise equal probability is assigned 
+    to each topic in `topic_or_topics'.
     """
     topics = res_top_type(topic_or_topics)
             
@@ -166,7 +168,7 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        d_arr = w_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
@@ -182,8 +184,10 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
 def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
                 norms=None, filter_nan=True, print_len=10,
                 label_fn=def_label_fn, as_strings=True,
-                sim_fn=row_cosines, order='d'):
+                sim_fn=KL_divergence, order='i'):
     """
+    Computes similarities of a document (or a list of documents) 
+    to every other documents in the model and sorts the result.
     """
     # Resolve `doc_or_docs`
     label_name = doc_label_name(context_type)    
@@ -218,14 +222,14 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        d_arr = d_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
     d_arr = d_arr.view(LabeledColumn)
     # TODO: Finish this header
     d_arr.col_header = 'Documents: '
-    d_arr.subcol_headers = ['Document', 'Cosine']
+    d_arr.subcol_headers = ['Document', 'Similarity']
     d_arr.col_len = print_len
 
     return d_arr
@@ -233,10 +237,10 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
 
 def sim_top_top(mat, topic_or_topics, weights=None, 
                 norms=None, print_len=10,
-                filter_nan=True, sim_fn=row_cosines, order='d'):
+                filter_nan=True, sim_fn=KL_divergence, order='i'):
     """
-    Computes and sorts the cosine values between a given topic `k`
-    and every topic.
+    Computes similarities of a topic (or a list of topics) to 
+    every other topics and sorts the result.
     """
     topics = res_top_type(topic_or_topics)
 
@@ -252,14 +256,14 @@ def sim_top_top(mat, topic_or_topics, weights=None,
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        k_arr = w_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
     # Label data
     k_arr = k_arr.view(LabeledColumn)
     k_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
-    k_arr.subcol_headers = ['Topic', 'Cosine']
+    k_arr.subcol_headers = ['Topic', 'Similarity']
     k_arr.col_len = print_len
 
     return k_arr
@@ -282,7 +286,7 @@ def simmat_words(corp, matrix, word_list, norms=None, sim_fn=row_cos_mat):
 
 
 def simmat_documents(corp, matrix, context_type, doc_list,
-                     norms=None, sim_fn=row_cos_mat):
+                     norms=None, sim_fn=JS_dismat):
     """
     """
     label_name = doc_label_name(context_type)
@@ -291,7 +295,7 @@ def simmat_documents(corp, matrix, context_type, doc_list,
                             for doc in doc_list])
     indices, labels = np.array(indices), np.array(labels)
 
-    sm = sim_fn(indices, matrix.T, norms=norms, fill_tril=True)
+    sm = 1-sim_fn(indices, matrix.T, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)
     sm.labels = labels
     
@@ -299,10 +303,10 @@ def simmat_documents(corp, matrix, context_type, doc_list,
 
 
 
-def simmat_topics(kw_mat, topics, norms=None, sim_fn=row_cos_mat):
+def simmat_topics(kw_mat, topics, norms=None, sim_fn=JS_dismat):
     """
     """
-    sm = sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
+    sm = 1-sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)
     sm.labels = [str(k) for k in topics]
     
