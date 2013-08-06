@@ -60,7 +60,7 @@ def JS_divergence(p, q, norms=None, metric=True):
 
 
 
-def JS_dismat(rows, mat, norm=None, fill_tril=True):
+def JS_dismat(rows, mat, norms=None, fill_tril=True):
     """
     Compute the distance matrix for a set of distributions in `mat` 
     by computing pairwise Jansen-Shannon divergences.

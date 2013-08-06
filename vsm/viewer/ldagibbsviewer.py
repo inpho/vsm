@@ -371,7 +371,7 @@ class LDAGibbsViewer(object):
                               self.model.context_type, weights=weights, 
                               norms=self._doc_norms, print_len=print_len,
                               as_strings=False, label_fn=label_fn, 
-                              sim_fn=KL_divergence, filter_nan=filter_nan)
+                              filter_nan=filter_nan)
         
         topics = _res_top_type_(topic_or_topics)
 
@@ -394,7 +394,7 @@ class LDAGibbsViewer(object):
 
     def sim_word_top(self, word_or_words, weights=[], filter_nan=True,
                      show_topics=True, print_len=10, as_strings=True, 
-                     sim_fn=KL_divergence, compact_view=True):
+                     compact_view=True):
         """
         A wrapper of `sim_word_top` in similarity.py. 
 
@@ -441,7 +441,7 @@ class LDAGibbsViewer(object):
         """
         sim = _sim_word_top_(self.corpus, self.model.top_word, word_or_words,
                              weights=weights, norms=self._topic_norms, 
-                             print_len=print_len, sim_fn=sim_fn, filter_nan=filter_nan)
+                             print_len=print_len, filter_nan=filter_nan)
 
         if show_topics:
             if _isstr_(word_or_words):
@@ -554,8 +554,7 @@ class LDAGibbsViewer(object):
         return _sim_doc_doc_(self.corpus, mat, self.model.context_type, 
                              doc_or_docs, norms=self._doc_norms, 
                              print_len=print_len, filter_nan=filter_nan, 
-                             label_fn=label_fn, as_strings=as_strings,
-                             sim_fn=KL_divergence)
+                             label_fn=label_fn, as_strings=as_strings)
     
 
     def simmat_words(self, word_list):
@@ -593,7 +592,7 @@ class LDAGibbsViewer(object):
 
         return _simmat_documents_(self.corpus, mat,
                                   self.model.context_type,
-                                  docs, sim_fn=JS_dismat)
+                                  docs)
 
 
     def simmat_topics(self, k_indices=[]):
@@ -614,8 +613,7 @@ class LDAGibbsViewer(object):
         if len(k_indices) == 0:
             k_indices = range(self.model.K)
 
-        return _simmat_topics_(self.model.top_word, k_indices,
-                               sim_fn=JS_dismat)
+        return _simmat_topics_(self.model.top_word, k_indices)
 
 
 

@@ -135,7 +135,8 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
 def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[], 
                 norms=None, print_len=10, filter_nan=True, 
                 label_fn=def_label_fn, as_strings=True,
-                sim_fn=KL_divergence, order='i'):
+#                sim_fn=KL_divergence, order='i'):
+                sim_fn=row_cosines, order='d'):
     """
     Computes (dis)similarity of a topic or a list of topics with every 
     documents and sorts the results. The function treats the query topics
@@ -168,7 +169,7 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
     if order=='d':
         pass
     elif order=='i':
-        d_arr = w_arr[::-1]
+        d_arr = d_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
@@ -256,7 +257,7 @@ def sim_top_top(mat, topic_or_topics, weights=None,
     if order=='d':
         pass
     elif order=='i':
-        k_arr = w_arr[::-1]
+        k_arr = k_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
