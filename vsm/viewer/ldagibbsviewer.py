@@ -364,21 +364,15 @@ class LDAGibbsViewer(object):
 
     def sim_top_doc(self, topic_or_topics, weights=[], filter_words=[],
                     print_len=10, as_strings=True, label_fn=_def_label_fn_, 
-                    filter_nan=True):
+                    filter_nan=True, method='posterior'):
         """
         """
-        dt  = self.model.doc_top
-        out   = np.zeros(dt.shape[0])
-        norms = dt.sum(axis=1)
-        for (k, w) in zip(topic_or_topics, weights):
-            pr_kD = dt[:, k] / norms
-            out += w * pr_kD / pr_kD.sum()
-
-#        d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
-#                              self.model.context_type, weights=weights, 
-#                              norms=self._doc_norms, print_len=print_len,
-#                              as_strings=False, label_fn=label_fn, 
-#                              filter_nan=filter_nan)
+        d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
+                              self.model.context_type, weights=weights, 
+                              norms=self._doc_norms, print_len=print_len,
+                              as_strings=False, label_fn=label_fn, 
+                              filter_nan=filter_nan,
+                              method=method)
         
         topics = _res_top_type_(topic_or_topics)
 
