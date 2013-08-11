@@ -166,7 +166,6 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
             doc[:, topics] = np.ones(len(topics))
         else:
             doc[:, topics] = weights
-
         # Compute similarites
         d_arr = sim_fn(doc, mat, norms=norms)
 
