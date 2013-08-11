@@ -137,16 +137,17 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
 def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[], 
                 norms=None, print_len=10, filter_nan=True, 
                 label_fn=def_label_fn, as_strings=True,
-                method='posterior', 
-                sim_fn=row_cosines, order='d'):
+                sim_fn=row_cosines, order='d', method='posterior'):
     """
     Takes a topic or list of topics (by integer index) and returns a
     list of documents sorted by the posterior probabilities of
-    documents given the topic.
+    documents given the topic, if `method` is "posterior" (default).
+    Otherwise it calculate cosine similarity (fot test only).
     """
     topics = res_top_type(topic_or_topics)
     # Assume documents are rows
             
+    # Posterior calculation
     if method == 'posterior':
         if len(weights) == 0:
             weights = np.ones(len(topics)) / len(topics)   # equal weights
@@ -156,7 +157,8 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
             post_k = mat[:, k] / norms      # posteriors of topic k given various values of D
             post_d = post_k / post_k.sum()  # posteriors of D given topic k, assuming uniform prior for D
             d_arr += w * post_d
-        d_arr /= d_arr.sum()
+        d_arr /= d_arr.sum()     # normalize in case `weights` do not sum up to 1
+    # Cosine calculation
     else:
         # Generate pseudo-document
         doc = np.zeros((1, mat.shape[1]), dtype=np.float64)
