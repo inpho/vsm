@@ -16,13 +16,16 @@ def KL_divergence(p, q, norms=None):
     q : 2-dim floating point array
         Matrix containing distributions to be compared with `p`
     norms : None
-        Dummy argument.
+        secifies norms to be used. 
     """
     #Can we use a matrix for p?
 #    indices = np.indices((len(p),len(q)))
 #    logp = np.log2(p[indices[0]]/q[indices[1]])
 #    out  = np.einsum('ik,ijk->ij',p,logp)
 #    return out
+    if norms is None:
+        p = row_normalize(p, norm='sum')
+        q = row_normalize(q, norm='sum')
 
     old = np.seterr(divide='ignore') # Suppress division by zero errors
     logp = np.log2(p/q)
@@ -48,10 +51,9 @@ def JS_divergence(p, q, norms=None, metric=True):
     q : 1-dim floating point array
         Second distribution.
     norms : None
-        Dummy argument.
     """
     m   = (p+q)/2
-    JSD = (KL_divergence(p, m) + KL_divergence(q, m))/2 
+    JSD = (KL_divergence(p, m, norms) + KL_divergence(q, m, norms))/2 
 
     if metric:
         JSD = JSD**0.5
@@ -78,7 +80,7 @@ def JS_dismat(rows, mat, norms=None, fill_tril=True):
 
     dsm = np.zeros((len(rows), len(rows)), dtype=np.float64)
     indices = np.triu_indices_from(dsm)
-    f = np.vectorize(lambda i, j: JS_divergence(mat[i,:], mat[j,:]))
+    f = np.vectorize(lambda i, j: JS_divergence(mat[i,:], mat[j,:], norms))
     dsm[indices] = f(*indices)[:]
 
     if fill_tril:
@@ -117,11 +119,23 @@ def row_norms_sparse(matrix):
 
 
 
-def row_normalize(m):
+def row_normalize(m, norm='SS'):
     """
-    Takes a 2-d array and returns it with its rows normalized
+    Takes a 2-d array and returns it with its rows normalized.
+
+    Parameters
+    ----------
+    norm : str
+        Method to be used as a normalizing constant. 'SS' is the 
+        rooted square sum (yields a unit vector) while 'sum' uses
+        an ordinary summation (yields a probability).
     """
-    norms = row_norms(m)
+    if norm=='SS':
+        norms = row_norms(m)
+    elif norm=='sum':
+        norms = m.sum(axis=1)
+    else:
+        raise Exception('Invalid normalizing parameter.')
     return m / norms[:, np.newaxis]
 
 
