@@ -10,7 +10,7 @@ def KL_divergence(p, q, norms=None):
     
     Parameters
     ----------
-    p : 1-dim or 2-dim floating point array
+    p : 2-dim floating point array
         The distribution with which KL_divergence is computed.
         2-dim array must has the form (1,n).
     q : 2-dim floating point array
@@ -80,7 +80,8 @@ def JS_dismat(rows, mat, norms=None, fill_tril=True):
 
     dsm = np.zeros((len(rows), len(rows)), dtype=np.float64)
     indices = np.triu_indices_from(dsm)
-    f = np.vectorize(lambda i, j: JS_divergence(mat[i,:], mat[j,:], norms))
+    f = np.vectorize(lambda i, j: JS_divergence(np.atleast_2d(mat[i,:]), 
+                                                np.atleast_2d(mat[j,:]), norms))
     dsm[indices] = f(*indices)[:]
 
     if fill_tril:

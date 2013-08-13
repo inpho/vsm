@@ -209,7 +209,7 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
         rows = mat[docs]
     doc = np.average(rows, weights=weights, axis=0)[np.newaxis, :]
 
-    # Compute cosines
+    # Compute (dis)similarities
     d_arr = sim_fn(doc, mat, norms=norms)
 
     # Label data
