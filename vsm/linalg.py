@@ -3,7 +3,7 @@ from scipy.sparse import coo_matrix, issparse
 
 
 
-def KL_divergence(p, q, norms=None):
+def KL_divergence(p, q, normalize=True):
     """ 
     Compute KL divergence of distribution vector p and 
     each row of distribution matrix Q, K(p || q) for q in Q.
@@ -15,15 +15,15 @@ def KL_divergence(p, q, norms=None):
         2-dim array must has the form (1,n).
     q : 2-dim floating point array
         Matrix containing distributions to be compared with `p`
-    norms : None
-        secifies norms to be used. 
+    normalize : Logical
+        normalize p and q if True. 
     """
     #Can we use a matrix for p?
 #    indices = np.indices((len(p),len(q)))
 #    logp = np.log2(p[indices[0]]/q[indices[1]])
 #    out  = np.einsum('ik,ijk->ij',p,logp)
 #    return out
-    if norms is None:
+    if normalize:
         p = row_normalize(p, norm='sum')
         q = row_normalize(q, norm='sum')
 
@@ -36,7 +36,7 @@ def KL_divergence(p, q, norms=None):
 
 
 
-def JS_divergence(p, q, norms=None, metric=True):
+def JS_divergence(p, q, normalize=False, metric=True):
     """  
     Compute (the square root of) the Jensen-Shannon divergence 
     of two vectors, defined by
@@ -50,10 +50,10 @@ def JS_divergence(p, q, norms=None, metric=True):
         First distribution.
     q : 1-dim floating point array
         Second distribution.
-    norms : None
+    norms : Logical
     """
     m   = (p+q)/2
-    JSD = (KL_divergence(p, m, norms) + KL_divergence(q, m, norms))/2 
+    JSD = (KL_divergence(p, m, normalize) + KL_divergence(q, m, normalize))/2 
 
     if metric:
         JSD = JSD**0.5
@@ -74,9 +74,12 @@ def JS_dismat(rows, mat, norms=None, fill_tril=True):
     mat : 2-dim floating point array
         The set of probability distributions where each row is a 
         distribution.
-    norm : dummy argument
+    norms : normalize mat if none
     """
     mat = mat[rows]
+
+    if norms is None:
+        mat = row_normalize(mat, norm='sum')        
 
     dsm = np.zeros((len(rows), len(rows)), dtype=np.float64)
     indices = np.triu_indices_from(dsm)

@@ -564,7 +564,7 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-    def simmat_docs(self, docs=[], k_indices=[]):
+    def simmat_docs(self, docs=[], k_indices=[], method='JSD'):
         """
         Calculates the similarity matrix for a given list of documents.
 
@@ -592,10 +592,10 @@ class LDAGibbsViewer(object):
 
         return _simmat_documents_(self.corpus, mat,
                                   self.model.context_type,
-                                  docs)
+                                  docs, method=method)
 
 
-    def simmat_topics(self, k_indices=[]):
+    def simmat_topics(self, k_indices=[], method='JSD'):
         """
         Calculates the similarity matrix for a given list of topics.
 
@@ -613,7 +613,7 @@ class LDAGibbsViewer(object):
         if len(k_indices) == 0:
             k_indices = range(self.model.K)
 
-        return _simmat_topics_(self.model.top_word, k_indices)
+        return _simmat_topics_(self.model.top_word, k_indices, method=method)
 
 
 

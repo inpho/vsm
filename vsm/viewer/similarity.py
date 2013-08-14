@@ -287,16 +287,25 @@ def simmat_words(corp, matrix, word_list, norms=None, sim_fn=row_cos_mat):
 
 
 def simmat_documents(corp, matrix, context_type, doc_list,
-                     norms=None, sim_fn=JS_dismat):
+                     norms=None, method='JSD'):
     """
     """
+    if method=='JSD':
+        sim_fn = JS_dismat
+    elif method=='cosine':
+        sim_fn = row_cos_mat
+    else:
+        raise Exception('Invalid method type (choose JSD or cosine)')
+
     label_name = doc_label_name(context_type)
 
     indices, labels = zip(*[res_doc_type(corp, context_type, label_name, doc) 
                             for doc in doc_list])
     indices, labels = np.array(indices), np.array(labels)
 
-    sm = 1-sim_fn(indices, matrix.T, norms=norms, fill_tril=True)
+    sm = sim_fn(indices, matrix.T, norms=norms, fill_tril=True)
+    if sim_fn==row_cos_mat:
+        sm = 1-sm
     sm = sm.view(IndexedSymmArray)
     sm.labels = labels
     
@@ -304,10 +313,19 @@ def simmat_documents(corp, matrix, context_type, doc_list,
 
 
 
-def simmat_topics(kw_mat, topics, norms=None, sim_fn=JS_dismat):
+def simmat_topics(kw_mat, topics, norms=None, method='JSD'):
     """
     """
-    sm = 1-sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
+    if method=='JSD':
+        sim_fn = JS_dismat
+    elif method=='cosine':
+        sim_fn = row_cos_mat
+    else:
+        raise Exception('Invalid method type (choose JSD or cosine)')
+
+    sm = sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
+    if sim_fn==row_cos_mat:
+        sm = 1-sm
     sm = sm.view(IndexedSymmArray)
     sm.labels = [str(k) for k in topics]
     
