@@ -16,6 +16,18 @@ from corpustools import filter_by_suffix
 
 def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
     """
+    Given a collection, cleans up plain page files for books in the collection.
+
+    Parameters
+    ----------
+    coll_dir : string
+        The path for collection.
+    ignore : list of strings, optional
+        List of file extensions to ignore in the directory.
+
+    See Also
+    --------
+    proc_htrc_book
     """
     books = os.listdir(coll_dir)
     books = filter_by_suffix(books, ignore)
@@ -30,7 +42,24 @@ def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
 
 
 def proc_htrc_book(book, coll_dir, ignore=['.json', '.log']):
+    """
+    Cleans up page headers, line breaks, and hyphens for all plain pages in the book directory. 
+    Creates a log file for debugging purposes.  
+  
+    Parameters
+    ----------
+    book : string
+        The name of the book directory in coll_dir.
+    coll_dir : string
+        The path for collection.
+    ignore : list of strings, optional
+        List of file extensions to ignore in the directory.
 
+    See Also
+    --------
+    rm_pg_headers
+    rm_lb_hyphens
+    """
     book_root = os.path.join(coll_dir, book)
 
     logger = logging.getLogger(book)
