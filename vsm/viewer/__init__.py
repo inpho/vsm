@@ -17,6 +17,8 @@ def def_label_fn(metadata):
 def doc_label_name(context_type):
     """
     """
+    if context_type == 'sentence':
+        return 'sent_label'
     return context_type + '_label'
 
 
