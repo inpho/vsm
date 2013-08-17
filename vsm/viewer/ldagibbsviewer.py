@@ -619,7 +619,7 @@ class LDAGibbsViewer(object):
 
 
     def cluster_topics(self, method='kmeans', k_indices=[],
-                       n_clusters=10, by_cluster=True, method='JSD'):
+                       n_clusters=10, by_cluster=True, similarity='JSD'):
         """
         Clusters topics by a spceificed clustering algorithm. 
         Currently it supports K-means, Spectral Clustering and Affinity
