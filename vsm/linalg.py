@@ -61,6 +61,13 @@ def JS_divergence(p, q, normalize=False, metric=True):
     return JSD
 
 
+def log_dot(v):
+    """
+    computes dot product of a vector v and its log
+    """
+    return np.dot(v, np.log2(v))
+
+
 
 def JS_dismat(rows, mat, norms=None, fill_tril=True):
     """
@@ -75,6 +82,41 @@ def JS_dismat(rows, mat, norms=None, fill_tril=True):
         The set of probability distributions where each row is a 
         distribution.
     norms : normalize mat if none
+    fill_tril : Dummy
+        Dummy variable (JS_dismat always returns a symmetric matrix)
+    """
+    # Known issue: Some zero entories (diagonal) get nonzero scores 
+    # due to numerical computation.
+    P = mat[rows]
+
+    if norms is None:
+        P = row_normalize(P, norm='sum')        
+
+    # Compute midpoint part
+    M = np.zeros((len(rows), len(rows)), dtype=np.float64)
+    indices = np.triu_indices_from(M)
+    f = np.vectorize(lambda i, j: log_dot(P[i,:]+P[j,:])-2) 
+    M[indices] = f(*indices)[:]
+    # Make it symetric
+    indices = np.tril_indices_from(M, -1)
+    M[indices] = M.T[indices]
+
+    # Compute probability part
+    P = np.tile((P*np.log2(P)).sum(axis=1), (len(rows),1))
+    P = P + P.T
+
+    old = np.seterr(divide='ignore') # Suppress division by zero errors
+    out = ((P-M)/2)**0.5
+    out = np.nan_to_num(out)
+    np.seterr(**old) # Restore error settings
+
+    return out
+
+
+
+def JS_dismat_old(rows, mat, norms=None, fill_tril=True):
+    """
+    An older (and slower) version of JS_dismat
     """
     mat = mat[rows]
 
