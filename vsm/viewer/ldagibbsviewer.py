@@ -619,7 +619,7 @@ class LDAGibbsViewer(object):
 
 
     def cluster_topics(self, method='kmeans', k_indices=[],
-                       n_clusters=10, by_cluster=True):
+                       n_clusters=10, by_cluster=True, method='JSD'):
         """
         Clusters topics by a spceificed clustering algorithm. 
         Currently it supports K-means, Spectral Clustering and Affinity
@@ -671,7 +671,7 @@ class LDAGibbsViewer(object):
             k_indices = range(self.model.K)
 
         # Obtain similarity matrix
-        simmat = self.simmat_topics(k_indices)
+        simmat = self.simmat_topics(k_indices, method=method)
 
         if method == 'affinity':
             from sklearn.cluster import AffinityPropagation
@@ -748,7 +748,7 @@ class LDAGibbsViewer(object):
         return plt
 
 
-    def isomap_topics(self, k_indices=[], n_neighbors=5, size=[]): 
+    def isomap_topics(self, k_indices=[], n_neighbors=5, size=[], method='JSD'): 
         """
         Plots an isomap of topics estimated LDA gibbs sampler.
         For isomap, see:
@@ -786,9 +786,10 @@ class LDAGibbsViewer(object):
 
 
         # calculate coordinates
-        simmat = self.simmat_topics(k_indices=k_indices)
+        simmat = self.simmat_topics(k_indices=k_indices, method=method)
         simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
-        distance = np.arccos(simmat)       # convert to dissimilarity
+        if method=='cosine':
+            distance = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 
@@ -796,8 +797,8 @@ class LDAGibbsViewer(object):
 
     
 
-    def isomap_docs(self, docs=[], topics=[], k_indices=[], thres=0.4, 
-                    n_neighbors=5, scale=True, trim=20): 
+    def isomap_docs(self, docs=[], topics=[], k_indices=[], method='JSD', 
+                    thres=0.4, n_neighbors=5, scale=True, trim=20): 
         """
         Takes document `docs` or topic `topics` and plots an isomap for 
         the documents similar/relevant to the query. 
@@ -856,9 +857,10 @@ class LDAGibbsViewer(object):
 
 
         # calculate coordinates
-        simmat = self.simmat_docs(labels, k_indices=k_indices)
+        simmat = self.simmat_docs(labels, k_indices=k_indices, method=method)
         simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
-        distance = np.arccos(simmat)       # convert to dissimilarity
+        if method=='cosine':
+            distance = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(distance).embedding_
 
