@@ -671,7 +671,7 @@ class LDAGibbsViewer(object):
             k_indices = range(self.model.K)
 
         # Obtain similarity matrix
-        simmat = self.simmat_topics(k_indices, method=method)
+        simmat = self.simmat_topics(k_indices, method=similarity)
 
         if method == 'affinity':
             from sklearn.cluster import AffinityPropagation
@@ -789,9 +789,9 @@ class LDAGibbsViewer(object):
         simmat = self.simmat_topics(k_indices=k_indices, method=method)
         simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
         if method=='cosine':
-            distance = np.arccos(simmat)       # convert to dissimilarity
+            simmat = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
-        pos  = imap.fit(distance).embedding_
+        pos  = imap.fit(simmat).embedding_
 
         return self.plot_clusters(pos, k_indices, clusters=clusters, size=size)
 
@@ -860,9 +860,9 @@ class LDAGibbsViewer(object):
         simmat = self.simmat_docs(labels, k_indices=k_indices, method=method)
         simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
         if method=='cosine':
-            distance = np.arccos(simmat)       # convert to dissimilarity
+            simmat = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
-        pos  = imap.fit(distance).embedding_
+        pos  = imap.fit(simmat).embedding_
 
         # set graphic parameteres
         # - scale point size
