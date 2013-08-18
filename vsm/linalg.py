@@ -3,7 +3,8 @@ from scipy.sparse import coo_matrix, issparse
 
 
 
-def KL_divergence(p, q, normalize=True):
+def KL_divergence(p, q, norms=None):
+    # `norms` parameter is a bit odd. Logical parameter makes more sense.
     """ 
     Compute KL divergence of distribution vector p and 
     each row of distribution matrix Q, K(p || q) for q in Q.
@@ -15,10 +16,10 @@ def KL_divergence(p, q, normalize=True):
         2-dim array must has the form (1,n).
     q : 2-dim floating point array
         Matrix containing distributions to be compared with `p`
-    normalize : Logical
-        normalize p and q if True. 
+    normalize :
+        normalize p and q if None. 
     """
-    if normalize:
+    if norms==None:
         p = row_normalize(p, norm='sum')
         q = row_normalize(q, norm='sum')
 
