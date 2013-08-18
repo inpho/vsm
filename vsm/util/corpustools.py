@@ -6,6 +6,7 @@ import numpy as np
 import nltk
 
 from vsm.corpus import Corpus
+from vsm.corpus import CorpusSent
 from vsm.corpus.util import *
 
 
@@ -272,7 +273,7 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
     """
     """
-    words, chk_tokens, sent_tokens = [], [], []
+    words, chk_tokens, sent_tokens, sent_orig = [], [], [], []
     sent_break, chk_n, sent_n = 0, 0, 0
 
     if paragraphs:
@@ -291,6 +292,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
                     words.extend(w)
                     sent_break += len(w)
                     sent_tokens.append((sent_break, label, par_n, sent_n))
+                    sent_orig.append(sent)
                     sent_n += 1
 
                 par_tokens.append((sent_break, label, par_n))
@@ -308,6 +310,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
                 words.extend(w)
                 sent_break += len(w)
                 sent_tokens.append((sent_break, label, sent_n))
+		sent_orig.append(sent)
                 sent_n += 1
 
             chk_tokens.append((sent_break, label))
@@ -330,12 +333,12 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
         dtype = [idx_dt, label_dt, sent_label_dt]
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
-    return words, corpus_data
+    return words, corpus_data, sent_orig
 
 
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
-               nltk_stop=True, stop_freq=1, add_stop=None):
+               nltk_stop=True, stop_freq=1, add_stop=None, corpus_sent=False):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -383,11 +386,15 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
         with open(filename, mode='r') as f:
             chunks.append(f.read())
 
-    words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
+    words, tok, sent = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
                               paragraphs=paragraphs)
     names, data = zip(*tok.items())
     
-    c = Corpus(words, context_data=data, context_types=names)
+    if corpus_sent:
+        c = CorpusSent(words, sent, context_data=data, context_types=names,
+			remove_empty=False)
+    else:
+        c = Corpus(words, context_data=data, context_types=names)
     c = apply_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
 
