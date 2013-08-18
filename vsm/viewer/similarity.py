@@ -135,7 +135,6 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
 def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[], 
                 norms=None, print_len=10, filter_nan=True, 
                 label_fn=def_label_fn, as_strings=True,
-#                sim_fn=KL_divergence, order='i'):
                 sim_fn=row_cosines, order='d'):
     """
     Computes (dis)similarity of a topic or a list of topics with every 

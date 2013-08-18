@@ -3,8 +3,7 @@ from scipy.sparse import coo_matrix, issparse
 
 
 
-def KL_divergence(p, q, norms=None):
-    # `norms` parameter is a bit odd. Logical parameter makes more sense.
+def KL_divergence(p, q, normalizes=True, norms=None):
     """ 
     Compute KL divergence of distribution vector p and 
     each row of distribution matrix Q, K(p || q) for q in Q.
@@ -244,7 +243,7 @@ def sparse_mvdot(m, v, submat_size=10000):
 
 
 
-def row_cosines(row, matrix, norms=None):
+def row_cosines(row, matrix, norms=None, normalize=True):
     """
     `row` must be a 2-dimensional array.
     """
