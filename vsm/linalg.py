@@ -18,11 +18,6 @@ def KL_divergence(p, q, normalize=True):
     normalize : Logical
         normalize p and q if True. 
     """
-    #Can we use a matrix for p?
-#    indices = np.indices((len(p),len(q)))
-#    logp = np.log2(p[indices[0]]/q[indices[1]])
-#    out  = np.einsum('ik,ijk->ij',p,logp)
-#    return out
     if normalize:
         p = row_normalize(p, norm='sum')
         q = row_normalize(q, norm='sum')
@@ -116,7 +111,8 @@ def JS_dismat(rows, mat, norms=None, fill_tril=True):
 
 def JS_dismat_old(rows, mat, norms=None, fill_tril=True):
     """
-    An older (and slower) version of JS_dismat
+    An old version of JS_dismat.
+    Very slow --- for test only.
     """
     mat = mat[rows]
 

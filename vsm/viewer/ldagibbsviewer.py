@@ -564,7 +564,7 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-    def simmat_docs(self, docs=[], k_indices=[], method='JSD'):
+    def simmat_docs(self, docs=[], k_indices=[], measure='JSD'):
         """
         Calculates the similarity matrix for a given list of documents.
 
@@ -592,10 +592,10 @@ class LDAGibbsViewer(object):
 
         return _simmat_documents_(self.corpus, mat,
                                   self.model.context_type,
-                                  docs, method=method)
+                                  docs, measure=measure)
 
 
-    def simmat_topics(self, k_indices=[], method='JSD'):
+    def simmat_topics(self, k_indices=[], measure='JSD'):
         """
         Calculates the similarity matrix for a given list of topics.
 
@@ -613,13 +613,13 @@ class LDAGibbsViewer(object):
         if len(k_indices) == 0:
             k_indices = range(self.model.K)
 
-        return _simmat_topics_(self.model.top_word, k_indices, method=method)
+        return _simmat_topics_(self.model.top_word, k_indices, measure=measure)
 
 
 
 
     def cluster_topics(self, method='kmeans', k_indices=[],
-                       n_clusters=10, by_cluster=True, similarity='JSD'):
+                       n_clusters=10, by_cluster=True, measure='JSD'):
         """
         Clusters topics by a spceificed clustering algorithm. 
         Currently it supports K-means, Spectral Clustering and Affinity
@@ -643,23 +643,9 @@ class LDAGibbsViewer(object):
             If True, returns a list of clusters. Otherwise a list that
             indicates cluster numbers for each topic is returned.
             Default is true.
-
-        Parameters
-        ----------
-        method : strings
-            Spceifies the algorithm used for clustring. Currently it 
-            supports 'kmeans', 'affinity' or 'spectral'. Default is 
-            'kmeans'.
-		k_indices : list
-			List of topics to be clustered. Default is all topics.
-        n_clusters : int
-            Number of clusters used as the parameter for K-means or
-            spectral clustering algorithms. Default is K/10 where K is
-            the number of topics in the model.
-        by_cluster : boolean
-            If True, returns a list of clusters. Otherwise a list that
-            indicates cluster numbers for each topic is returned.
-            Default is true.
+        measure : strings
+            Specifies the distance measure to be used to calculate
+            similarity matrix. Default is Jansen-Shannon divergence.
 
         Returns
         ----------
@@ -671,7 +657,7 @@ class LDAGibbsViewer(object):
             k_indices = range(self.model.K)
 
         # Obtain similarity matrix
-        simmat = self.simmat_topics(k_indices, method=similarity)
+        simmat = self.simmat_topics(k_indices, measure=measure)
 
         if method == 'affinity':
             from sklearn.cluster import AffinityPropagation
@@ -748,7 +734,7 @@ class LDAGibbsViewer(object):
         return plt
 
 
-    def isomap_topics(self, k_indices=[], n_neighbors=5, size=[], method='JSD'): 
+    def isomap_topics(self, k_indices=[], n_neighbors=5, size=[], measure='JSD'): 
         """
         Plots an isomap of topics estimated LDA gibbs sampler.
         For isomap, see:
@@ -764,6 +750,8 @@ class LDAGibbsViewer(object):
         n_neighbors : int
             Used by isomap to determine the number of neighbors for each point.
             Large neighbor size tends to produce a denser map. Default is 5.
+        measure : strings
+            Specifies the distance measure. Default is Jansen-Shannon divergence.
 
         Returns
         ----------
@@ -786,9 +774,9 @@ class LDAGibbsViewer(object):
 
 
         # calculate coordinates
-        simmat = self.simmat_topics(k_indices=k_indices, method=method)
+        simmat = self.simmat_topics(k_indices=k_indices, measure=measure)
         simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
-        if method=='cosine':
+        if measure=='cosine':
             simmat = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(simmat).embedding_
@@ -797,7 +785,7 @@ class LDAGibbsViewer(object):
 
     
 
-    def isomap_docs(self, docs=[], topics=[], k_indices=[], method='JSD', 
+    def isomap_docs(self, docs=[], topics=[], k_indices=[], measure='JSD', 
                     thres=0.4, n_neighbors=5, scale=True, trim=20): 
         """
         Takes document `docs` or topic `topics` and plots an isomap for 
@@ -821,6 +809,9 @@ class LDAGibbsViewer(object):
         k_indices : list
             A list of topics based on which document similarity matrix is 
             computed. Default is all the topics in the model.
+        measure : strings
+            Specifies the distance measure. Default is Jansen-Shannon 
+            divergence.
         thres : float
             Threshhold t. If t<1, documents with similarity value >t are 
             selected. Otherwise, the t' most similar documents are selected 
@@ -857,9 +848,9 @@ class LDAGibbsViewer(object):
 
 
         # calculate coordinates
-        simmat = self.simmat_docs(labels, k_indices=k_indices, method=method)
+        simmat = self.simmat_docs(labels, k_indices=k_indices, measure=measure)
         simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
-        if method=='cosine':
+        if measure=='cosine':
             simmat = np.arccos(simmat)       # convert to dissimilarity
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(simmat).embedding_
