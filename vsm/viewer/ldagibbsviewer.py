@@ -10,8 +10,7 @@ from vsm import (
 from vsm.linalg import (
     row_norms as _row_norms_,
     row_cosines, row_cos_mat, 
-    KL_divergence as KLD, 
-    JS_dismat)
+    KL_divergence, JS_dismat)
 
 from labeleddata import (
     LabeledColumn as _LabeledColumn_,
