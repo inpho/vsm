@@ -7,7 +7,11 @@ from vsm import (
     isstr as _isstr_,
     isint as _isint_)
 
-from vsm.linalg import row_norms as _row_norms_
+from vsm.linalg import (
+    row_norms as _row_norms_,
+    row_cosines, row_cos_mat, 
+    KL_divergence as KLD, 
+    JS_dismat)
 
 from labeleddata import (
     LabeledColumn as _LabeledColumn_,
@@ -354,24 +358,24 @@ class LDAGibbsViewer(object):
 
 
     def sim_top_top(self, topic_or_topics, weights=None, 
-                    print_len=10, filter_nan=True):
+                    print_len=10, filter_nan=True, sim_fn=KL_divergence):
         """
         """
         return _sim_top_top_(self.model.top_word, topic_or_topics, 
                              norms=self._topic_norms, weights=weights, 
-                             print_len=print_len, filter_nan=filter_nan)
+                             print_len=print_len, filter_nan=filter_nan, sim_fn=sim_fn)
 
 
     def sim_top_doc(self, topic_or_topics, weights=[], filter_words=[],
                     print_len=10, as_strings=True, label_fn=_def_label_fn_, 
-                    filter_nan=True):
+                    filter_nan=True, sim_fn=KL_divergence):
         """
         """
         d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
                               self.model.context_type, weights=weights, 
                               norms=self._doc_norms, print_len=print_len,
                               as_strings=False, label_fn=label_fn, 
-                              filter_nan=filter_nan)
+                              filter_nan=filter_nan, sim_fn=sim_fn)
         
         topics = _res_top_type_(topic_or_topics)
 
@@ -518,7 +522,7 @@ class LDAGibbsViewer(object):
 
 
     def sim_doc_doc(self, doc_or_docs, k_indices=[], print_len=10, filter_nan=True,
-                    label_fn=_def_label_fn_, as_strings=True):
+                    label_fn=_def_label_fn_, as_strings=True, sim_fn=KL_divergence):
         """
         Computes and sorts the cosine(similarity) values between a document 
         or list of documents and every documents in the topic space. 
@@ -554,7 +558,8 @@ class LDAGibbsViewer(object):
         return _sim_doc_doc_(self.corpus, mat, self.model.context_type, 
                              doc_or_docs, norms=self._doc_norms, 
                              print_len=print_len, filter_nan=filter_nan, 
-                             label_fn=label_fn, as_strings=as_strings)
+                             label_fn=label_fn, as_strings=as_strings,
+                             sim_fn=sim_fn)
     
 
     def simmat_words(self, word_list):
