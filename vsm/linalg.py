@@ -72,7 +72,7 @@ def JS_dismat(rows, mat, norms=None, fill_tril=True):
     Parameters
     ----------
     rows : 1-dim array
-        Species distributions whose distances are to be calculated.
+        Specifies distributions whose distances are to be calculated.
     mat : 2-dim floating point array
         The set of probability distributions where each row is a 
         distribution.
@@ -81,7 +81,7 @@ def JS_dismat(rows, mat, norms=None, fill_tril=True):
         Dummy variable (JS_dismat always returns a symmetric matrix)
     """
     # Known issue: Some zero entories (diagonal) get nonzero scores 
-    # due to numerical computation.
+    # due to rounding
     P = mat[rows]
 
     if norms is None:
@@ -100,12 +100,9 @@ def JS_dismat(rows, mat, norms=None, fill_tril=True):
     P = np.tile((P*np.log2(P)).sum(axis=1), (len(rows),1))
     P = P + P.T
 
-    old = np.seterr(divide='ignore') # Suppress division by zero errors
-    out = ((P-M)/2)**0.5
-    out = np.nan_to_num(out)
-    np.seterr(**old) # Restore error settings
+    out = ((P-M)/2).clip(0) 
 
-    return out
+    return out**0.5
 
 
 
