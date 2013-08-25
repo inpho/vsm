@@ -101,6 +101,5 @@ class TestCorpus(unittest.TestCase):
             os.remove(tmp.name)
 
 
-if __name__=='__main__':
-    unittest.main()
-
+suite = unittest.TestLoader().loadTestsFromTestCase(TestCorpus)
+unittest.TextTestRunner(verbosity=2).run(suite)
