@@ -360,7 +360,7 @@ class LDAGibbsViewer(object):
 
 
     def sim_top_top(self, topic_or_topics, weights=None, 
-                    print_len=10, filter_nan=True, sim_fn=_KL_divergence)_:
+                    print_len=10, filter_nan=True, sim_fn=_KL_divergence_):
         """
         """
         return _sim_top_top_(self.model.top_word, topic_or_topics, 
