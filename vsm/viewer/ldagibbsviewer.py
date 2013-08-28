@@ -7,7 +7,10 @@ from vsm import (
     isstr as _isstr_,
     isint as _isint_)
 
-from vsm.linalg import row_norms as _row_norms_
+from vsm.linalg import (
+    row_norms as _row_norms_,
+    row_cosines as _row_cosines_,
+    posterior as _posterior_)
 
 from labeleddata import (
     LabeledColumn as _LabeledColumn_,
@@ -364,14 +367,14 @@ class LDAGibbsViewer(object):
 
     def sim_top_doc(self, topic_or_topics, weights=[], filter_words=[],
                     print_len=10, as_strings=True, label_fn=_def_label_fn_, 
-                    filter_nan=True):
+                    filter_nan=True, sim_fn=_row_cosines_):
         """
         """
         d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
                               self.model.context_type, weights=weights, 
                               norms=self._doc_norms, print_len=print_len,
                               as_strings=False, label_fn=label_fn, 
-                              filter_nan=filter_nan)
+                              filter_nan=filter_nan, sim_fn=sim_fn)
         
         topics = _res_top_type_(topic_or_topics)
 
