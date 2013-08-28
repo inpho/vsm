@@ -3,7 +3,7 @@ from scipy.sparse import issparse
 
 from vsm import enum_matrix, enum_sort, map_strarr, isstr, isint
 
-from vsm.linalg import row_cosines, row_cos_mat, KL_divergence, JS_divergence, JS_dismat
+from vsm.linalg import row_cosines, row_cos_mat, KL_divergence, JS_divergence, JS_dismat, posterior
 
 from vsm.viewer import (
     res_word_type, res_doc_type, res_top_type, def_label_fn, doc_label_name)
@@ -137,24 +137,20 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
                 label_fn=def_label_fn, as_strings=True,
                 sim_fn=row_cosines, order='d'):
     """
-    Computes (dis)similarity of a topic or a list of topics with every 
-    documents and sorts the results. The function treats the query topics
-    as a pseudo-document that assign to those topics non-zero probability 
-    masses specified by `weight`. Otherwise equal probability is assigned 
-    to each topic in `topic_or_topics'.
+    Takes a topic or list of topics (by integer index) and returns a
+    list of documents sorted by similarities or divergences calculated 
+    according to `sim_fn`.
     """
     topics = res_top_type(topic_or_topics)
-            
     # Assume documents are rows
-
+            
     # Generate pseudo-document
     doc = np.zeros((1, mat.shape[1]), dtype=np.float64)
     if len(weights) == 0:
         doc[:, topics] = np.ones(len(topics))
     else:
         doc[:, topics] = weights
-
-    # Compute similarites
+    # Compute similarites/divergences
     d_arr = sim_fn(doc, mat, norms=norms)
 
     # Label data
@@ -174,7 +170,7 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
 
     d_arr = d_arr.view(LabeledColumn)
     d_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
-    d_arr.subcol_headers = ['Document', 'Prob']
+    d_arr.subcol_headers = ['Document', 'Similarity']
     d_arr.col_len = print_len
 
     return d_arr
