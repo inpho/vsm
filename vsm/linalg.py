@@ -134,8 +134,8 @@ def posterior(row, mat, norms=None):
     """
     Compute weighted average of posterors used in sim_top_doc
     """
-    row = row / row.sum(axis=1)[:, np.newaxis]   # replace this line by row_normalize
-    post = mat / mat.sum(axis=1)[:, np.newaxis]  # replace this line by row_normalize
+    row = row_normalize(row, norm='sum')    # weights must add up to one
+    post = row_normalize(mat, norm='sum')
     post /= post.sum(axis=0)
     out = (row * post).sum(axis=1)
     
