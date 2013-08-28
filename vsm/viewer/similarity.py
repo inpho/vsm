@@ -3,7 +3,7 @@ from scipy.sparse import issparse
 
 from vsm import enum_matrix, enum_sort, map_strarr, isstr, isint
 
-from vsm.linalg import row_cosines, row_cos_mat
+from vsm.linalg import row_cosines, row_cos_mat, posterior
 
 from vsm.viewer import (
     res_word_type, res_doc_type, res_top_type, def_label_fn, doc_label_name)
@@ -137,37 +137,23 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
 def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[], 
                 norms=None, print_len=10, filter_nan=True, 
                 label_fn=def_label_fn, as_strings=True,
-                sim_fn=row_cosines, order='d', method='posterior'):
+                sim_fn=row_cosines, order='d'):
     """
     Takes a topic or list of topics (by integer index) and returns a
-    list of documents sorted by the posterior probabilities of
-    documents given the topic, if `method` is "posterior" (default).
-    Otherwise it calculate cosine similarity (fot test only).
+    list of documents sorted by similarities or divergences calculated 
+    according to `sim_fn`.
     """
     topics = res_top_type(topic_or_topics)
     # Assume documents are rows
             
-    # Posterior calculation
-    if method == 'posterior':
-        if len(weights) == 0:
-            weights = np.ones(len(topics)) / len(topics)   # equal weights
-        d_arr   = np.zeros(mat.shape[0])
-        norms = mat.sum(axis=1)
-        for (k, w) in zip(topics, weights):
-            post_k = mat[:, k] / norms      # posteriors of topic k given various values of D
-            post_d = post_k / post_k.sum()  # posteriors of D given topic k, assuming uniform prior for D
-            d_arr += w * post_d
-        d_arr /= d_arr.sum()     # normalize in case `weights` do not sum up to 1
-    # Cosine calculation
+    # Generate pseudo-document
+    doc = np.zeros((1, mat.shape[1]), dtype=np.float64)
+    if len(weights) == 0:
+        doc[:, topics] = np.ones(len(topics))
     else:
-        # Generate pseudo-document
-        doc = np.zeros((1, mat.shape[1]), dtype=np.float64)
-        if len(weights) == 0:
-            doc[:, topics] = np.ones(len(topics))
-        else:
-            doc[:, topics] = weights
-        # Compute similarites
-        d_arr = sim_fn(doc, mat, norms=norms)
+        doc[:, topics] = weights
+    # Compute similarites/divergences
+    d_arr = sim_fn(doc, mat, norms=norms)
 
     # Label data
     if as_strings:
@@ -186,7 +172,7 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
 
     d_arr = d_arr.view(LabeledColumn)
     d_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
-    d_arr.subcol_headers = ['Document', 'Prob']
+    d_arr.subcol_headers = ['Document', 'Similarity']
     d_arr.col_len = print_len
 
     return d_arr
