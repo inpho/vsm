@@ -156,7 +156,7 @@ gh-pages:
 	make html
 	git clone https://github.com/inpho/vsm vsm_gh_pages
 	cd vsm_gh_pages
-	git checkout gh_pages
+	git checkout gh-pages
 	rm -rf *
 	touch .nojekyll
 	mv ../$(BUILD_DIR)/html/* .
