@@ -156,8 +156,8 @@ gh-pages:
 	make html
 	git clone https://github.com/inpho/vsm vsm_gh_pages
 	cd vsm_gh_pages
-	git checkout gh-pages
-	rm -rf * _static _sources
+	# git checkout gh-pages
+	# rm -rf * _static _sources
 	# mv ../$(BUILDDIR)/html/* .
 	# git add -A
 	# git commit -m "Generated gh-pages for `git log develop -1 --pretty=short --abbrev-commit`"
