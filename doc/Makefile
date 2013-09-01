@@ -157,13 +157,10 @@ gh-pages:
 	git clone https://github.com/inpho/vsm vsm_gh_pages
 	cd vsm_gh_pages
 	git checkout gh-pages
-	ls -a
 	rm -rf * _static _sources
-	ls -a
-	ls -a ..
-	mv ../$(BUILDDIR)/html/* .
-	git add -A
-	git commit -m "Generated gh-pages for `git log develop -1 --pretty=short --abbrev-commit`"
-	git push origin gh-pages
-	cd ..
-	rm -rf $(BUILDDIR) vsm_gh_pages
+	# mv ../$(BUILDDIR)/html/* .
+	# git add -A
+	# git commit -m "Generated gh-pages for `git log develop -1 --pretty=short --abbrev-commit`"
+	# git push origin gh-pages
+	# cd ..
+	# rm -rf $(BUILDDIR) vsm_gh_pages
