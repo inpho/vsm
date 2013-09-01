@@ -49,7 +49,7 @@ class BeagleViewer(object):
 
 def test_BeagleViewer():
 
-    from vsm.util.corpustools import random_corpus
+    from vsm.corpus.util import random_corpus
     from vsm.model.beagleenvironment import BeagleEnvironment
     from vsm.model.beaglecontext import BeagleContextSeq
     from vsm.model.beagleorder import BeagleOrderSeq
