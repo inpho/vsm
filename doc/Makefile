@@ -159,9 +159,9 @@ gh-pages:
 	git checkout gh-pages
 	rm -rf *
 	touch .nojekyll
-	mv ../$(BUILD_DIR)/html/* .
+	mv ../$(BUILDDIR)/html/* .
 	git add -A
 	git commit -m "Generated gh-pages for `git log develop -1 --pretty=short --abbrev-commit`"
 	git push origin gh-pages
 	cd ..
-	rm -rf $(BUILD_DIR) vsm_gh_pages
+	rm -rf $(BUILDDIR) vsm_gh_pages
