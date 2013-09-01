@@ -26,14 +26,15 @@ Viewer object contains a variety of methods for analysis and
 visualization and achieves its full functionality within an IPython
 notebook session extended with matplotlib and scikit-learn.
 
-This documentation site is in its early days. Existing documentation
-for :mod:`vsm` consists of docstrings and example IPython notebooks.
+This documentation site is in its early days. We'll soon have
+documentation for :mod:`vsm` generated from docstrings and example
+IPython notebooks.
 
-.. toctree::
-   :maxdepth: 2
+.. .. toctree::
+..    :maxdepth: 2
 
-   demos
-   auto
+..    demos
+..    auto
    
 ..
    Indices and tables
