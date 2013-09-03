@@ -280,3 +280,35 @@ def htrc_find_duplicates(metadata, vol_list):
             mem.append(r)
 
     return indices
+
+
+def book_url(corpus, ctx_type, coll_dir):
+    """
+    Returns a list of urls whose order matches with the existing metadata.
+    It creates url metadata that can be added to a Corpus object with
+    add_metadata function in vsm.corpus.util.
+    """
+    import json
+    from vsm.viewer import def_label_fn
+
+    # colls = os.listdir(coll_dir)
+    # colls = filter_by_suffix(colls, ignore)
+
+    md = []
+    label_name = ctx_type + '_label'
+    labels = corpus.view_metadata(ctx_type)[label_name]
+    for label in labels:
+        coll_path = os.path.join(coll_dir, label)
+        book = os.listdir(coll_path)
+        book = filter_by_suffix(book, ignore=['.txt', '.pickle'])
+       
+        book_path = os.path.join(coll_path, book[0])
+        with open(book_path, 'r') as f:
+            d = json.load(f)
+            for k in d.keys():
+                if k == 'items':
+                    li = sorted(d[k], key=lambda k: int(k['lastUpdate']))
+                    s = li[-1]['itemURL']
+                    md.append( s.encode('ascii') )
+    return md
+
