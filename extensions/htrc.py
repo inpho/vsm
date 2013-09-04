@@ -11,7 +11,7 @@ from nltk.corpus import wordnet as wn
 import enchant
 
 from vsm.corpus.util import filter_by_suffix
-
+from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
 
 
 def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
@@ -282,6 +282,56 @@ def htrc_find_duplicates(metadata, vol_list):
     return indices
 
 
+def add_link(s):
+    """
+    """
+    if s.startswith('http'):
+        a = '<a href="{0}" target="_blank">'.format(s)
+        a += s
+        a += '</a>'
+        return a
+
+def htrc_label_link_fn_86(metadata):
+    """
+    """
+    md = htrc_load_metadata_86()
+
+    titles = []
+    for v in metadata['book_label']:
+        title = unidecode(htrc_get_titles(md, v)[0])
+        if len(title) > 60:
+            title = title[:60]
+        titles.append(title)
+    
+    names = [name for name in metadata.dtype.names if name.endswith('_label')]
+    links = [add_link(x[n]) for n in names if n.endswith('_url_label') for x in metadata]
+
+    arr = np.array(zip(titles, links), dtype=[('titles', '|S60'), ('links', '|S160')])
+    dtypes = ['titles', 'links']
+    return np.array([', '.join([x[n] for n in dtypes]) for x in arr])
+
+
+def htrc_label_link_fn_1315(metadata):
+    """
+    """
+    md = htrc_load_metadata_1315()
+
+    titles = []
+    for v in metadata['book_label']:
+        title = unidecode(htrc_get_titles(md, v)[0])
+        if len(title) > 60:
+            title = title[:60]
+        titles.append(title)
+    
+    names = [name for name in metadata.dtype.names if name.endswith('_label')]
+    links = [add_link(x[n]) for n in names if n.endswith('_url_label') for x in metadata]
+
+    arr = np.array(zip(titles, links), dtype=[('titles', '|S60'), ('links', '|S160')])
+    dtypes = ['titles', 'links']
+    return np.array([', '.join([x[n] for n in dtypes]) for x in arr])
+
+
+
 def url_metadata(corpus, ctx_type, coll_dir):
     """
     Returns a list of urls whose order matches with the existing metadata.
@@ -316,4 +366,7 @@ def url_metadata(corpus, ctx_type, coll_dir):
                     else:
                         md.append( unidecode(url))
     return md
+
+
+
 
