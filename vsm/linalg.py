@@ -3,31 +3,52 @@ from scipy.sparse import coo_matrix, issparse
 
 
 
-def KL_divergence(p, q):
+def KL_divergence(p, q, normalize=True, norms=None):
     """ 
     Compute KL divergence of distribution vector p and 
     each row of distribution matrix Q, K(p || q) for q in Q.
+    
+    Parameters
+    ----------
+    p : 2-dim floating point array
+        The distribution with which KL_divergence is computed.
+        2-dim array must has the form (1,n).
+    q : 2-dim floating point array
+        Matrix containing distributions to be compared with `p`
+    normalize : Logical
+        normalize p and q if None. 
     """
-    #Can we use a matrix for p?
-#    indices = np.indices((len(p),len(q)))
-#    logp = np.log2(p[indices[0]]/q[indices[1]])
-#    out  = np.einsum('ik,ijk->ij',p,logp)
-#    return out
+    if normalize:
+        p = row_normalize(p, norm='sum')
+        q = row_normalize(q, norm='sum')
+
+    old = np.seterr(divide='ignore') # Suppress division by zero errors
     logp = np.log2(p/q)
-    return np.dot(logp, p)
+    np.seterr(**old) # Restore error settings
+    KLD  = np.dot(logp, p.T)
+    KLD  = np.ravel(KLD)
+    return KLD
 
 
 
-def JS_divergence(p, q, metric=True):
+def JS_divergence(p, q, normalize=False, metric=True):
     """  
     Compute (the square root of) the Jensen-Shannon divergence 
     of two vectors, defined by
        JSD = (KL(p || m) + KL(q || m))/2
     where m = (p+q)/2. 
     The square root of the JS divergence is a metric.
+
+    Parameters
+    ----------
+    p : 1-dim floating point array
+        First distribution.
+    q : 1-dim floating point array
+        Second distribution.
+    norms : Logical
     """
     m   = (p+q)/2
-    JSD = (KL_divergence(p, m) + KL_divergence(q, m))/2 
+    JSD = (KL_divergence(p, m, normalize) + KL_divergence(q, m, normalize))/2 
 
     if metric:
         JSD = JSD**0.5
@@ -35,22 +56,77 @@ def JS_divergence(p, q, metric=True):
     return JSD
 
 
+def log_dot(v):
+    """
+    computes dot product of a vector v and its log
+    """
+    return np.dot(v, np.log2(v))
 
-def JS_dismat(P, fill_tril=True):
+
+
+def JS_dismat(rows, mat, norms=None, fill_tril=True):
     """
-    Compute the distance matrix for set of distributions P by computing 
-    pairwise Jansen-Shannon divergences.
+    Compute the distance matrix for a set of distributions in `mat` 
+    by computing pairwise Jansen-Shannon divergences.
+    
+    Parameters
+    ----------
+    rows : 1-dim array
+        Specifies distributions whose distances are to be calculated.
+    mat : 2-dim floating point array
+        The set of probability distributions where each row is a 
+        distribution.
+    norms : normalize mat if none
+    fill_tril : Dummy
+        Dummy variable (JS_dismat always returns a symmetric matrix)
     """
-    # Need to replace it with a faster way
-    dismat = np.zeros((P.shape[0], P.shape[0]))
-    for i,j in zip(*np.triu_indices_from(dismat, k=1)):
-        dismat[i,j] = JS_divergence(P[i,:], P[j,:])
+    # Known issue: Some zero entories (diagonal) get nonzero scores 
+    # due to rounding
+    P = mat[rows]
+
+    if norms is None:
+        P = row_normalize(P, norm='sum')        
+
+    # Compute midpoint part
+    M = np.zeros((len(rows), len(rows)), dtype=np.float64)
+    indices = np.triu_indices_from(M)
+    f = np.vectorize(lambda i, j: log_dot(P[i,:]+P[j,:])-2) 
+    M[indices] = f(*indices)[:]
+    # Make it symetric
+    indices = np.tril_indices_from(M, -1)
+    M[indices] = M.T[indices]
+
+    # Compute probability part
+    P = np.tile((P*np.log2(P)).sum(axis=1), (len(rows),1))
+    P = P + P.T
+
+    out = ((P-M)/2).clip(0) 
+
+    return out**0.5
+
+
+
+def JS_dismat_old(rows, mat, norms=None, fill_tril=True):
+    """
+    An old version of JS_dismat.
+    Very slow --- for test only.
+    """
+    mat = mat[rows]
+
+    if norms is None:
+        mat = row_normalize(mat, norm='sum')        
+
+    dsm = np.zeros((len(rows), len(rows)), dtype=np.float64)
+    indices = np.triu_indices_from(dsm)
+    f = np.vectorize(lambda i, j: JS_divergence(np.atleast_2d(mat[i,:]), 
+                                                np.atleast_2d(mat[j,:]), norms))
+    dsm[indices] = f(*indices)[:]
 
     if fill_tril:
-        indices = np.tril_indices_from(dismat, -1)
-        dismat[indices] = dismat.T[indices]
+        indices = np.tril_indices_from(dsm, -1)
+        dsm[indices] = dsm.T[indices]
 
-    return dismat
+    return dsm
 
 
 
@@ -58,8 +134,8 @@ def posterior(row, mat, norms=None):
     """
     Compute weighted average of posterors used in sim_top_doc
     """
-    row = row / row.sum(axis=1)[:, np.newaxis]   # replace this line by row_normalize
-    post = mat / mat.sum(axis=1)[:, np.newaxis]  # replace this line by row_normalize
+    row = row_normalize(row, norm='sum')    # weights must add up to one
+    post = row_normalize(mat, norm='sum')
     post /= post.sum(axis=0)
     out = (row * post).sum(axis=1)
     
@@ -95,11 +171,23 @@ def row_norms_sparse(matrix):
 
 
 
-def row_normalize(m):
+def row_normalize(m, norm='SS'):
     """
-    Takes a 2-d array and returns it with its rows normalized
+    Takes a 2-d array and returns it with its rows normalized.
+
+    Parameters
+    ----------
+    norm : str
+        Method to be used as a normalizing constant. 'SS' is the 
+        rooted square sum (yields a unit vector) while 'sum' uses
+        an ordinary summation (yields a probability).
     """
-    norms = row_norms(m)
+    if norm=='SS':
+        norms = row_norms(m)
+    elif norm=='sum':
+        norms = m.sum(axis=1)
+    else:
+        raise Exception('Invalid normalizing parameter.')
     return m / norms[:, np.newaxis]
 
 
@@ -165,7 +253,7 @@ def sparse_mvdot(m, v, submat_size=10000):
 
 
 
-def row_cosines(row, matrix, norms=None):
+def row_cosines(row, matrix, norms=None, normalize=True):
     """
     `row` must be a 2-dimensional array.
     """

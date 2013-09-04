@@ -3,7 +3,7 @@ from scipy.sparse import issparse
 
 from vsm import enum_matrix, enum_sort, map_strarr, isstr, isint
 
-from vsm.linalg import row_cosines, row_cos_mat, posterior
+from vsm.linalg import row_cosines, row_cos_mat, KL_divergence, JS_divergence, JS_dismat, posterior
 
 from vsm.viewer import (
     res_word_type, res_doc_type, res_top_type, def_label_fn, doc_label_name)
@@ -21,19 +21,19 @@ def sim_word_word(corp, mat, word_or_words, weights=None,
                   norms=None, as_strings=True, print_len=20,
                   filter_nan=True, sim_fn=row_cosines, order='d'):
     """
-    Computes and sorts the cosine values between a word or list of
-    words and every word. If weights are provided, the word list is
-    represented as the weighted average of the words in the list. If
-    weights are not provided, the arithmetic mean is used.
+    Computes and sorts similarity of a word or list of words with 
+    every other word. If weights are provided, the word list is
+    represented as the weighted average of the words in the list. 
+    Otherwise the arithmetic mean is used.
 
     Parameters
     ----------
     corp : Corpus
         Source of observed data
     mat : 2-dim floating point array
-        Similarity matrix based on which cosine values are calculated
+        Matrix based on which similarity is calculated
     word_or_words : string or list of string
-        Query word(s) to which cosine values are calculated
+        Query word(s) to which similarities are calculated
     weights : list of floating point
         Specify weights for each query word in `word_or_words`. 
         Default uses equal weights (i.e. arithmetic mean)
@@ -90,14 +90,12 @@ def sim_word_word(corp, mat, word_or_words, weights=None,
 
 
 def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
-                 print_len=10, filter_nan=True, sim_fn=row_cosines, order='d'):
+                 print_len=10, filter_nan=True, sim_fn=KL_divergence, order='i'):
     """
-    Computes and sorts the cosine values between a word or a list of
-    words and every topic. If weights are not provided, the word list
-    is represented in the space of topics as a topic which assigns
-    equal non-zero probability to each word in `words` and 0 to every
-    other word in the corpus. Otherwise, each word in `words` is
-    assigned the provided weight.
+    Computes (dis)similarity of a word or a list of words with every topic
+    and sorts the results. The function treats the query words as a pseudo-topic
+    that assign to those words non-zero probability masses specified by `weight`.
+    Otherwise equal probability is assigned to each word in `word_or_words`. 
     """
     # Resolve `word_or_words`
     if isstr(word_or_words):
@@ -121,14 +119,14 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        k_arr = k_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
     # Label data
     k_arr = k_arr.view(LabeledColumn)
     k_arr.col_header = 'Words: ' + ', '.join(labels)
-    k_arr.subcol_headers = ['Topic', 'Cosine']
+    k_arr.subcol_headers = ['Topic', 'Similarity']
     k_arr.col_len = print_len
 
     return k_arr
@@ -166,7 +164,7 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        d_arr = d_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
@@ -182,8 +180,10 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
 def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
                 norms=None, filter_nan=True, print_len=10,
                 label_fn=def_label_fn, as_strings=True,
-                sim_fn=row_cosines, order='d'):
+                sim_fn=KL_divergence, order='i'):
     """
+    Computes similarities of a document (or a list of documents) 
+    to every other documents in the model and sorts the result.
     """
     # Resolve `doc_or_docs`
     label_name = doc_label_name(context_type)    
@@ -204,7 +204,7 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
         rows = mat[docs]
     doc = np.average(rows, weights=weights, axis=0)[np.newaxis, :]
 
-    # Compute cosines
+    # Compute (dis)similarities
     d_arr = sim_fn(doc, mat, norms=norms)
 
     # Label data
@@ -218,14 +218,14 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        d_arr = d_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
     d_arr = d_arr.view(LabeledColumn)
     # TODO: Finish this header
     d_arr.col_header = 'Documents: '
-    d_arr.subcol_headers = ['Document', 'Cosine']
+    d_arr.subcol_headers = ['Document', 'Similarity']
     d_arr.col_len = print_len
 
     return d_arr
@@ -233,10 +233,10 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
 
 def sim_top_top(mat, topic_or_topics, weights=None, 
                 norms=None, print_len=10,
-                filter_nan=True, sim_fn=row_cosines, order='d'):
+                filter_nan=True, sim_fn=KL_divergence, order='i'):
     """
-    Computes and sorts the cosine values between a given topic `k`
-    and every topic.
+    Computes similarities of a topic (or a list of topics) to 
+    every other topics and sorts the result.
     """
     topics = res_top_type(topic_or_topics)
 
@@ -252,14 +252,14 @@ def sim_top_top(mat, topic_or_topics, weights=None,
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        k_arr = k_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
     # Label data
     k_arr = k_arr.view(LabeledColumn)
     k_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
-    k_arr.subcol_headers = ['Topic', 'Cosine']
+    k_arr.subcol_headers = ['Topic', 'Similarity']
     k_arr.col_len = print_len
 
     return k_arr
@@ -282,9 +282,12 @@ def simmat_words(corp, matrix, word_list, norms=None, sim_fn=row_cos_mat):
 
 
 def simmat_documents(corp, matrix, context_type, doc_list,
-                     norms=None, sim_fn=row_cos_mat):
+                     norms=None, sim_fn=JS_dismat):
     """
+    If sim_fn=JS_dismat, output is distance matirx.
+    If sim_fn=row_cos_mat, output is similarity matrix.
     """
+
     label_name = doc_label_name(context_type)
 
     indices, labels = zip(*[res_doc_type(corp, context_type, label_name, doc) 
@@ -299,8 +302,10 @@ def simmat_documents(corp, matrix, context_type, doc_list,
 
 
 
-def simmat_topics(kw_mat, topics, norms=None, sim_fn=row_cos_mat):
+def simmat_topics(kw_mat, topics, norms=None, sim_fn=JS_dismat):
     """
+    If sim_fn=JS_dismat, output is distance matirx.
+    If sim_fn=row_cos_mat, output is similarity matrix.
     """
     sm = sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)
