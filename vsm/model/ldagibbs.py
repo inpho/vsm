@@ -212,7 +212,7 @@ class LDAGibbs(object):
     def load(filename):
 
         from vsm.corpus import split_corpus
-        from vsm.util.corpustools import empty_corpus
+        from vsm.corpus.util.corpusbuilders import empty_corpus
 
         print 'Loading LDA-Gibbs data from', filename
         arrays_in = np.load(filename)
