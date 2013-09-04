@@ -35,5 +35,5 @@ setup(
               'vsm.corpus.util',
               'vsm.model',
               'vsm.viewer',
-              'vsm.extensions'],
+              'extensions'],
 )
