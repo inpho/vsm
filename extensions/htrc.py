@@ -286,7 +286,7 @@ def add_link(s):
     """
     """
     if s.startswith('http'):
-        a = '<a href="{0}">'.format(s)
+        a = '<a href="{0}" target="_blank">'.format(s)
         a += s
         a += '</a>'
         return a
@@ -366,29 +366,6 @@ def url_metadata(corpus, ctx_type, coll_dir):
                     else:
                         md.append( unidecode(url))
     return md
-
-
-class LDAGibbs_htrc_Viewer(LDAGibbsViewer):
-    """
-    """
-    def sim_top_doc(self, topic_or_topics, weights=[], filter_words=[],
-                    print_len=10, as_strings=True, label_fn=htrc_label_link_fn_1315,
-                    filter_nan=True):
-        """
-        """
-        return super(LDAGibbs_htrc_Viewer, self).sim_top_doc(topic_or_topics, weights=weights, 
-                    filter_words=filter_words, print_len=print_len, as_strings=as_strings,
-                    label_fn=htrc_label_link_fn_1315, filter_nan=filter_nan)
-
-
-    def sim_doc_doc(self, doc_or_docs, k_indices=[], print_len=10, as_strings=True, 
-                label_fn=htrc_label_link_fn_1315, filter_nan=True):
-        """
-        """
-        return super(LDAGibbs_htrc_Viewer, self).sim_doc_doc(doc_or_docs, k_indices=k_indices, 
-                    print_len=print_len, as_strings=as_strings,
-                    label_fn=htrc_label_link_fn_1315, filter_nan=filter_nan)
-
 
 
 
