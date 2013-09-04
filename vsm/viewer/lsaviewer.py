@@ -82,7 +82,7 @@ class LsaViewer(object):
 
 def test_LsaViewer():
 
-    from vsm.util.corpustools import random_corpus
+    from vsm.corpus.util import random_corpus
     from vsm.model.tf import TfModel
     from vsm.model.tfidf import TfIdfModel
     from vsm.model.lsa import LsaModel

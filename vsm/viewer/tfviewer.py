@@ -113,7 +113,7 @@ class TfViewer(object):
 
 def test_TfViewer():
 
-    from vsm.util.corpustools import random_corpus
+    from vsm.corpus.util import random_corpus
     from vsm.model.tf import TfModel
 
     c = random_corpus(1000, 50, 0, 20, context_type='document', metadata=True)

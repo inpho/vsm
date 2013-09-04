@@ -73,7 +73,7 @@ def row_norms(matrix):
     if issparse(matrix):
         return row_norms_sparse(matrix)
 
-    norms = np.empty(matrix.shape[0])
+    norms = np.empty(matrix.shape[0], dtype=matrix.dtype)
     for i in xrange(norms.shape[0]):
         row = matrix[i:i+1, :]
         norms[i] = np.dot(row, row.T)**0.5
@@ -85,7 +85,7 @@ def row_norms(matrix):
 def row_norms_sparse(matrix):
     """
     """
-    norms = np.empty(matrix.shape[0])
+    norms = np.empty(matrix.shape[0], dtype=matrix.dtype)
     matrix = matrix.tocsr()
     for i in xrange(norms.shape[0]):
         row = matrix[i:i+1, :].toarray()

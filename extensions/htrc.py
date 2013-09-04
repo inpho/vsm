@@ -10,7 +10,7 @@ from unidecode import unidecode
 from nltk.corpus import wordnet as wn
 import enchant
 
-from corpustools import filter_by_suffix
+from vsm.corpus.util import filter_by_suffix
 
 
 

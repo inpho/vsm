@@ -80,7 +80,7 @@ class TfIdfViewer(object):
 
 def test_TfIdfViewer():
 
-    from vsm.util.corpustools import random_corpus
+    from vsm.corpus.util import random_corpus
     from vsm.model.tf import TfModel
     from vsm.model.tfidf import TfIdfModel
 
