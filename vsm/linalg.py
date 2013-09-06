@@ -270,7 +270,7 @@ def row_cosines(row, matrix, norms=None, normalize=True):
     row_norm = row_norms(row)[0]
     dens = norms * row_norm
 
-    old = np.seterr(divide='ignore') # Suppress division by zero errors
+    old = np.seterr(divide='ignore', invalid='ignore') # Suppress division by zero errors
     out = nums / dens
     np.seterr(**old) # Restore error settings
 

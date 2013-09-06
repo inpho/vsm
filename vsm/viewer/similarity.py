@@ -83,7 +83,7 @@ def sim_word_word(corp, mat, word_or_words, weights=None,
     # Label data
     w_arr = w_arr.view(LabeledColumn)
     w_arr.col_header = 'Words: ' + ', '.join(labels)
-    w_arr.subcol_headers = ['Word', 'Cosine']
+    w_arr.subcol_headers = ['Word', 'Value']
     w_arr.col_len = print_len
 
     return w_arr
@@ -126,7 +126,7 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
     # Label data
     k_arr = k_arr.view(LabeledColumn)
     k_arr.col_header = 'Words: ' + ', '.join(labels)
-    k_arr.subcol_headers = ['Topic', 'Similarity']
+    k_arr.subcol_headers = ['Topic', 'Value']
     k_arr.col_len = print_len
 
     return k_arr
@@ -225,7 +225,7 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
     d_arr = d_arr.view(LabeledColumn)
     # TODO: Finish this header
     d_arr.col_header = 'Documents: '
-    d_arr.subcol_headers = ['Document', 'Similarity']
+    d_arr.subcol_headers = ['Document', 'Value']
     d_arr.col_len = print_len
 
     return d_arr
@@ -259,7 +259,7 @@ def sim_top_top(mat, topic_or_topics, weights=None,
     # Label data
     k_arr = k_arr.view(LabeledColumn)
     k_arr.col_header = 'Topics: ' + ', '.join([str(t) for t in topics])
-    k_arr.subcol_headers = ['Topic', 'Similarity']
+    k_arr.subcol_headers = ['Topic', 'Value']
     k_arr.col_len = print_len
 
     return k_arr

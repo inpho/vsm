@@ -1,10 +1,17 @@
-from vsm.linalg import row_norms as _row_norms_
+import numpy as np
 
-from similarity import def_sim_fn, def_simmat_fn, def_order
+from vsm.linalg import row_norms as _row_norms_
+from vsm.linalg import (
+    row_acos as _row_acos_,
+    row_acos_mat as _row_acos_mat_)
+
 from similarity import (
     sim_word_word as _sim_word_word_,
     simmat_words as _simmat_words_)
 
+from plotting import (
+    gen_colors as _gen_colors_,
+    plot_clusters as _plot_clusters_)
 
 
 class BeagleViewer(object):
@@ -30,7 +37,7 @@ class BeagleViewer(object):
 
     def sim_word_word(self, word_or_words, weights=None, 
                       filter_nan=True, print_len=10, as_strings=True,
-                      sim_fn=def_sim_fn, order=def_order):
+                      sim_fn=_row_acos_, order='i'):
         """
         """
         return _sim_word_word_(self.corpus, self.model.matrix, 
@@ -40,10 +47,49 @@ class BeagleViewer(object):
                                sim_fn=sim_fn, order=order)
 
 
-    def simmat_words(self, word_list, sim_fn=def_simmat_fn):
+    def simmat_words(self, word_list, sim_fn=_row_acos_mat_):
 
         return _simmat_words_(self.corpus, self.model.matrix,
                               word_list, sim_fn=sim_fn)
+
+
+    # This is a quick adaptation of the isomap_docs function from
+    # ldagibbsviewer. This should be abstracted and moved to
+    # similarity.py or something equivalent.
+    def isomap_words(self, words=[], weights=None, thres=.8,
+                     n_neighbors=5, scale=True, trim=20):
+        """
+        """
+        from sklearn import manifold
+        from math import ceil
+
+        # create a list to be plotted
+        word_list = self.sim_word_word(words, weights=weights)
+
+        # cut down the list by the threshold
+        labels, size = zip(*[(w,s) for (w,s) in word_list if s < thres])
+
+        # calculate coordinates
+        simmat = self.simmat_words(labels)
+        simmat = np.clip(simmat, 0, 2)     # cut off values outside [0, 1]
+        imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
+        pos  = imap.fit(simmat).embedding_
+
+        # set graphic parameters
+        # - scale point size
+        if scale:
+            size = [s**2*150 for s in size] 
+        else:
+            size = np.ones_like(size) * 50
+        # - trim labels
+        if trim:
+            labels = [lab[:trim] for lab in labels]
+
+        # hack for unidecode issues in matplotlib
+        labels = [label.decode('utf-8', 'ignore') for label in labels]
+        
+        return _plot_clusters_(pos, labels, size=size)
+
 
 
 
