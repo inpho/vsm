@@ -38,7 +38,9 @@ from similarity import (
     simmat_documents as _simmat_documents_,
     simmat_topics as _simmat_topics_)
 
-
+from manifold import (
+    clustering as _clustering_,
+    isomap as _isomap_)
 
 class LDAGibbsViewer(object):
     """
@@ -664,19 +666,8 @@ class LDAGibbsViewer(object):
         # Obtain similarity matrix
         simmat = self.simmat_topics(k_indices, sim_fn=sim_fn)
 
-        if method == 'affinity':
-            from sklearn.cluster import AffinityPropagation
-            af = AffinityPropagation(affinity='precomputed').fit(simmat)
-            labels = af.labels_
-        elif method == 'spectral':
-            from sklearn.cluster import spectral_clustering
-            labels = spectral_clustering(simmat, n_clusters=n_clusters)
-        else:
-            from sklearn.cluster import KMeans
-            km = KMeans(n_clusters=n_clusters, init='k-means++', 
-                        max_iter=100, n_init=1,verbose=1)
-            km.fit(simmat)
-            labels = list(km.labels_)
+        # Call clustering in manifold.py
+        labels = _clustering_(simmat, n_clusters=n_clusters, method=method)
 
         # Make a list of labels
         if by_cluster:
@@ -761,7 +752,6 @@ class LDAGibbsViewer(object):
         basic_plot object
             A graph wish scatter plots
         """
-        from sklearn import manifold
 
         # create a list to be plotted 
         if len(k_indices) == 0:
@@ -779,17 +769,17 @@ class LDAGibbsViewer(object):
         # calculate coordinates
         simmat = self.simmat_topics(k_indices=k_indices, sim_fn=sim_fn)
         simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
-        if sim_fn==row_cos_mat:
+        if sim_fn==_row_cos_mat_:
             simmat = np.arccos(simmat)       # convert to dissimilarity
-        imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
-        pos  = imap.fit(simmat).embedding_
+
+        pos = _isomap_(simmat, n_neighbors=n_neighbors)
 
         return self.plot_clusters(pos, k_indices, clusters=clusters, size=size)
 
     
 
     def isomap_docs(self, docs=[], topics=[], k_indices=[], sim_fn=_JS_dismat_, 
-                    thres=0.4, n_neighbors=5, scale=True, trim=20): 
+                    thres=0.4, n_neighbors=5, scale=False, trim=20): 
         """
         Takes document `docs` or topic `topics` and plots an isomap for 
         the documents similar/relevant to the query. 
@@ -831,7 +821,6 @@ class LDAGibbsViewer(object):
             A graph wish scatter plots
 
         """
-        from sklearn import manifold
         from math import ceil
 
         # create a list to be plotted from document or topic
@@ -852,8 +841,8 @@ class LDAGibbsViewer(object):
         simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
         if sim_fn==_row_cos_mat_:
             simmat = np.arccos(simmat)       # convert to dissimilarity
-        imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
-        pos  = imap.fit(simmat).embedding_
+        pos = _isomap_(simmat, n_neighbors=n_neighbors)
+
 
         # set graphic parameteres
         # - scale point size
