@@ -12,8 +12,8 @@ from vsm.linalg import (
     row_cosines as _row_cosines_,
     row_cos_mat as _row_cos_mat_,
     posterior as _posterior_,
-    KL_divergence as _KL_divergence_,
-    JS_dismat as _JS_dismat_)
+    row_kld as _row_kld_,
+    row_js_mat as _row_js_mat_)
 
 from labeleddata import (
     LabeledColumn as _LabeledColumn_,
@@ -362,7 +362,7 @@ class LDAGibbsViewer(object):
 
 
     def sim_top_top(self, topic_or_topics, weights=None, 
-                    print_len=10, filter_nan=True, sim_fn=_KL_divergence_):
+                    print_len=10, filter_nan=True, sim_fn=_row_kld_):
         """
         """
         return _sim_top_top_(self.model.top_word, topic_or_topics, 
@@ -526,7 +526,7 @@ class LDAGibbsViewer(object):
 
 
     def sim_doc_doc(self, doc_or_docs, k_indices=[], print_len=10, filter_nan=True,
-                    label_fn=_def_label_fn_, as_strings=True, sim_fn=_KL_divergence_):
+                    label_fn=_def_label_fn_, as_strings=True, sim_fn=_row_kld_):
         """
         Computes and sorts the cosine(similarity) values between a document 
         or list of documents and every documents in the topic space. 
@@ -573,7 +573,7 @@ class LDAGibbsViewer(object):
                               word_list)
     
 
-    def simmat_docs(self, docs=[], k_indices=[], sim_fn=_JS_dismat_):
+    def simmat_docs(self, docs=[], k_indices=[], sim_fn=_row_js_mat_):
         """
         Calculates the similarity matrix for a given list of documents.
 
@@ -604,7 +604,7 @@ class LDAGibbsViewer(object):
                                   docs, sim_fn=sim_fn)
 
 
-    def simmat_topics(self, k_indices=[], sim_fn=_JS_dismat_):
+    def simmat_topics(self, k_indices=[], sim_fn=_row_js_mat_):
         """
         Calculates the similarity matrix for a given list of topics.
 
@@ -628,7 +628,7 @@ class LDAGibbsViewer(object):
 
 
     def cluster_topics(self, method='kmeans', k_indices=[],
-                       n_clusters=10, by_cluster=True, sim_fn=_JS_dismat_):
+                       n_clusters=10, by_cluster=True, sim_fn=_row_js_mat_):
         """
         Clusters topics by a spceificed clustering algorithm. 
         Currently it supports K-means, Spectral Clustering and Affinity
@@ -730,7 +730,7 @@ class LDAGibbsViewer(object):
         return plt
 
 
-    def isomap_topics(self, k_indices=[], n_neighbors=5, size=[], sim_fn=_JS_dismat_):
+    def isomap_topics(self, k_indices=[], n_neighbors=5, size=[], sim_fn=_row_js_mat_):
         """
         Plots an isomap of topics estimated LDA gibbs sampler.
         For isomap, see:
@@ -778,7 +778,7 @@ class LDAGibbsViewer(object):
 
     
 
-    def isomap_docs(self, docs=[], topics=[], k_indices=[], sim_fn=_JS_dismat_, 
+    def isomap_docs(self, docs=[], topics=[], k_indices=[], sim_fn=_row_js_mat_, 
                     thres=0.4, n_neighbors=5, scale=False, trim=20): 
         """
         Takes document `docs` or topic `topics` and plots an isomap for 

@@ -3,145 +3,6 @@ from scipy.sparse import coo_matrix, issparse
 
 
 
-def KL_divergence(p, q, normalize=True, norms=None):
-    """ 
-    Compute KL divergence of distribution vector p and 
-    each row of distribution matrix Q, K(p || q) for q in Q.
-    
-    Parameters
-    ----------
-    p : 2-dim floating point array
-        The distribution with which KL_divergence is computed.
-        2-dim array must has the form (1,n).
-    q : 2-dim floating point array
-        Matrix containing distributions to be compared with `p`
-    normalize : Logical
-        normalize p and q if None. 
-    """
-    if normalize:
-        p = row_normalize(p, norm='sum')
-        q = row_normalize(q, norm='sum')
-
-    old = np.seterr(divide='ignore') # Suppress division by zero errors
-    logp = np.log2(p/q)
-    np.seterr(**old) # Restore error settings
-    KLD  = np.dot(logp, p.T)
-    KLD  = np.ravel(KLD)
-    return KLD
-
-
-
-def JS_divergence(p, q, normalize=False, metric=True):
-    """  
-    Compute (the square root of) the Jensen-Shannon divergence 
-    of two vectors, defined by
-       JSD = (KL(p || m) + KL(q || m))/2
-    where m = (p+q)/2. 
-    The square root of the JS divergence is a metric.
-
-    Parameters
-    ----------
-    p : 1-dim floating point array
-        First distribution.
-    q : 1-dim floating point array
-        Second distribution.
-    norms : Logical
-    """
-    m   = (p+q)/2
-    JSD = (KL_divergence(p, m, normalize) + KL_divergence(q, m, normalize))/2 
-
-    if metric:
-        JSD = JSD**0.5
-
-    return JSD
-
-
-def log_dot(v):
-    """
-    computes dot product of a vector v and its log
-    """
-    return np.dot(v, np.log2(v))
-
-
-
-def JS_dismat(rows, mat, norms=None, fill_tril=True):
-    """
-    Compute the distance matrix for a set of distributions in `mat` 
-    by computing pairwise Jansen-Shannon divergences.
-    
-    Parameters
-    ----------
-    rows : 1-dim array
-        Specifies distributions whose distances are to be calculated.
-    mat : 2-dim floating point array
-        The set of probability distributions where each row is a 
-        distribution.
-    norms : normalize mat if none
-    fill_tril : Dummy
-        Dummy variable (JS_dismat always returns a symmetric matrix)
-    """
-    # Known issue: Some zero entories (diagonal) get nonzero scores 
-    # due to rounding
-    P = mat[rows]
-
-    if norms is None:
-        P = row_normalize(P, norm='sum')        
-
-    # Compute midpoint part
-    M = np.zeros((len(rows), len(rows)), dtype=np.float64)
-    indices = np.triu_indices_from(M)
-    f = np.vectorize(lambda i, j: log_dot(P[i,:]+P[j,:])-2) 
-    M[indices] = f(*indices)[:]
-    # Make it symetric
-    indices = np.tril_indices_from(M, -1)
-    M[indices] = M.T[indices]
-
-    # Compute probability part
-    P = np.tile((P*np.log2(P)).sum(axis=1), (len(rows),1))
-    P = P + P.T
-
-    out = ((P-M)/2).clip(0) 
-
-    return out**0.5
-
-
-
-def JS_dismat_old(rows, mat, norms=None, fill_tril=True):
-    """
-    An old version of JS_dismat.
-    Very slow --- for test only.
-    """
-    mat = mat[rows]
-
-    if norms is None:
-        mat = row_normalize(mat, norm='sum')        
-
-    dsm = np.zeros((len(rows), len(rows)), dtype=np.float64)
-    indices = np.triu_indices_from(dsm)
-    f = np.vectorize(lambda i, j: JS_divergence(np.atleast_2d(mat[i,:]), 
-                                                np.atleast_2d(mat[j,:]), norms))
-    dsm[indices] = f(*indices)[:]
-
-    if fill_tril:
-        indices = np.tril_indices_from(dsm, -1)
-        dsm[indices] = dsm.T[indices]
-
-    return dsm
-
-
-
-def posterior(row, mat, norms=None):
-    """
-    Compute weighted average of posterors used in sim_top_doc
-    """
-    row = row_normalize(row, norm='sum')    # weights must add up to one
-    post = row_normalize(mat, norm='sum')
-    post /= post.sum(axis=0)
-    out = (row * post).sum(axis=1)
-    
-    return out 
-
-
 
 def row_norms(matrix):
     """
@@ -253,19 +114,31 @@ def sparse_mvdot(m, v, submat_size=10000):
 
 
 
-def row_cosines(row, matrix, norms=None, normalize=True):
+def log_dot(v):
+    """
+    computes dot product of a vector v and its log
+    """
+    return np.dot(v, np.log2(v))
+
+
+
+#
+# Methods to calculate a simulatiry vector
+# 
+
+def row_cosines(row, mat, norms=None, normalize=True):
     """
     `row` must be a 2-dimensional array.
     """
-    if issparse(matrix):
-        matrix = matrix.tocsr()
-        nums = sparse_mvdot(matrix, row.T)
+    if issparse(mat):
+        mat = mat.tocsr()
+        nums = sparse_mvdot(mat, row.T)
     else:
-        nums = np.dot(matrix, row.T)
+        nums = np.dot(mat, row.T)
         nums = np.ravel(nums)
 
     if norms is None:
-        norms = row_norms(matrix)
+        norms = row_norms(mat)
 
     row_norm = row_norms(row)[0]
     dens = norms * row_norm
@@ -277,9 +150,9 @@ def row_cosines(row, matrix, norms=None, normalize=True):
     return out
 
 
-def row_acos(row, matrix, norms=None):
+def row_acos(row, mat, norms=None):
     
-    cosines = row_cosines(row, matrix, norms=norms)
+    cosines = row_cosines(row, mat, norms=norms)
 
     # To optimize
     for i in xrange(len(cosines)):
@@ -289,7 +162,53 @@ def row_acos(row, matrix, norms=None):
             cosines[i] = -1
 
     return np.arccos(cosines)
+
+
+
+def row_kld(row, mat, normalize=True, norms=None):
+    """ 
+    Compute KL divergence of distribution vector `row` and 
+    each row of distribution matrix `mat`.
     
+    Parameters
+    ----------
+    row : 2-dim floating point array
+        The distribution with which KL divergence is computed.
+        2-dim array must has the form (1,n).
+    mat : 2-dim floating point array
+        Matrix containing distributions to be compared with `row`
+    normalize : Logical
+        Normalizes `row` and `mat` if None. 
+    """
+    if normalize:
+        row = row_normalize(row, norm='sum')
+        mat = row_normalize(mat, norm='sum')
+
+    old = np.seterr(divide='ignore') # Suppress division by zero errors
+    logp = np.log2(row/mat)
+    np.seterr(**old) # Restore error settings
+    KLD  = np.dot(logp, row.T)
+    KLD  = np.ravel(KLD)
+    return KLD
+
+
+
+def posterior(row, mat, norms=None):
+    """
+    Compute weighted average of posterors used in sim_top_doc
+    """
+    row = row_normalize(row, norm='sum')    # weights must add up to one
+    post = row_normalize(mat, norm='sum')
+    post /= post.sum(axis=0)
+    out = (row * post).sum(axis=1)
+    
+    return out 
+
+
+
+#
+# Methods to calculate a simularity matrix
+#    
     
 def row_cos_mat(rows, mat, norms=None, fill_tril=True):
 
@@ -316,6 +235,7 @@ def row_cos_mat(rows, mat, norms=None, fill_tril=True):
     return sm
 
 
+
 def row_acos_mat(rows, mat, norms=None, fill_tril=True):
 
     cos_mat = row_cos_mat(rows, mat, norms=norms, fill_tril=fill_tril)
@@ -328,6 +248,49 @@ def row_acos_mat(rows, mat, norms=None, fill_tril=True):
             cos_mat[i] = -1
 
     return np.arccos(cos_mat)
+
+
+
+def row_js_mat(rows, mat, norms=None, fill_tril=True):
+    """
+    Compute the similarity matrix for a set of distributions in `mat` 
+    by computing pairwise Jansen-Shannon divergences.
+    
+    Parameters
+    ----------
+    rows : 1-dim array
+        Specifies distributions whose distances are to be calculated.
+    mat : 2-dim floating point array
+        The set of probability distributions where each row is a 
+        distribution.
+    norms : normalize mat if none
+    fill_tril : Dummy
+        Not used (row_js_mat always returns a symmetric matrix)
+    """
+    # Known issue: Some zero entories (diagonal) get nonzero scores 
+    # due to rounding
+    P = mat[rows]
+
+    if norms is None:
+        P = row_normalize(P, norm='sum')        
+
+    # Compute midpoint part
+    M = np.zeros((len(rows), len(rows)), dtype=np.float64)
+    indices = np.triu_indices_from(M)
+    f = np.vectorize(lambda i, j: log_dot(P[i,:]+P[j,:])-2) 
+    M[indices] = f(*indices)[:]
+    # Make it symetric
+    indices = np.tril_indices_from(M, -1)
+    M[indices] = M.T[indices]
+
+    # Compute probability part
+    P = np.tile((P*np.log2(P)).sum(axis=1), (len(rows),1))
+    P = P + P.T
+
+    out = ((P-M)/2).clip(0) 
+
+    return 1 - out**0.5
+
 
     
 def hstack_coo(mat_ls):

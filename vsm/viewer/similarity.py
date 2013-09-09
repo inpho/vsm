@@ -3,7 +3,7 @@ from scipy.sparse import issparse
 
 from vsm import enum_matrix, enum_sort, map_strarr, isstr, isint
 
-from vsm.linalg import row_cosines, row_cos_mat, KL_divergence, JS_divergence, JS_dismat, posterior
+from vsm.linalg import row_cosines, row_kld, row_cos_mat, row_js_mat, posterior
 
 from vsm.viewer import (
     res_word_type, res_doc_type, res_top_type, def_label_fn, doc_label_name)
@@ -90,7 +90,7 @@ def sim_word_word(corp, mat, word_or_words, weights=None,
 
 
 def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
-                 print_len=10, filter_nan=True, sim_fn=KL_divergence, order='i'):
+                 print_len=10, filter_nan=True, sim_fn=row_kld, order='i'):
     """
     Computes (dis)similarity of a word or a list of words with every topic
     and sorts the results. The function treats the query words as a pseudo-topic
@@ -180,7 +180,7 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
 def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
                 norms=None, filter_nan=True, print_len=10,
                 label_fn=def_label_fn, as_strings=True,
-                sim_fn=KL_divergence, order='i'):
+                sim_fn=row_kld, order='i'):
     """
     Computes similarities of a document (or a list of documents) 
     to every other documents in the model and sorts the result.
@@ -233,7 +233,7 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
 
 def sim_top_top(mat, topic_or_topics, weights=None, 
                 norms=None, print_len=10,
-                filter_nan=True, sim_fn=KL_divergence, order='i'):
+                filter_nan=True, sim_fn=row_kld, order='i'):
     """
     Computes similarities of a topic (or a list of topics) to 
     every other topics and sorts the result.
@@ -282,10 +282,8 @@ def simmat_words(corp, matrix, word_list, norms=None, sim_fn=row_cos_mat):
 
 
 def simmat_documents(corp, matrix, context_type, doc_list,
-                     norms=None, sim_fn=JS_dismat):
+                     norms=None, sim_fn=row_js_mat):
     """
-    If sim_fn=JS_dismat, output is distance matirx.
-    If sim_fn=row_cos_mat, output is similarity matrix.
     """
 
     label_name = doc_label_name(context_type)
@@ -302,10 +300,8 @@ def simmat_documents(corp, matrix, context_type, doc_list,
 
 
 
-def simmat_topics(kw_mat, topics, norms=None, sim_fn=JS_dismat):
+def simmat_topics(kw_mat, topics, norms=None, sim_fn=row_js_mat):
     """
-    If sim_fn=JS_dismat, output is distance matirx.
-    If sim_fn=row_cos_mat, output is similarity matrix.
     """
     sm = sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)
