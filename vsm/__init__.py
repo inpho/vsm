@@ -3,7 +3,37 @@ import numpy as np
 
 
 def arr_add_field(arr, new_field, vals):
+    """
+    Adds a new field to a structured array.
+    This is a handy function for adding new metadata to 
+    the original metadata array in Corpus object.
+    
+    **Parameters**
 
+    arr : array
+        A structured array.
+    new_field : string
+        The dtype name for the values.
+    vals : list
+        A list of values. `vals` must have the same length as `arr`.
+
+    **Returns**
+
+    New array with the added values.
+
+    **See Also**
+    
+    Corpus.view_metadata
+
+    **Examples**
+
+    >>> arr = np.array([('a', 1), ('b', 2), ('c', 3)], 
+            dtype=[('field', '|S4'), ('i', '<i4')])
+    >>> vals = [-1, -2, -3]
+    >>> arr_add_field(arr, 'neg_i', vals)
+    array([('a', 1, -1), ('b', 2, -2), ('c', 3, -3)], 
+          dtype=[('field', '|S4'), ('i', '<i4'), ('neg_i', '<i8')])
+    """
     # Constructing new dtype
     new_dtype = np.array(vals).dtype
     dt = [(n, arr.dtype[n]) for n in arr.dtype.names]
@@ -24,31 +54,61 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     """
     Takes a 1-dimensional or 2-dimensional array and returns a sorted
     structured array with indices.
+
+    **Parameters**
+
+    arr : array
+        1-dimensional or 2-dimensional numpy array.
+    axis : int, optional
+        Array axis 0 or 1. Default is 0.
+    indices : list, optional
+        List of indices. If 'indices' is empty, then `indices` is set to
+        a range of indices for the length of `arr`. Default is an empty list.
+    field_name : string, optional
+        Name for indices in the structured array dtype. Default is 'i'.
+
+    **Returns**
+
+    A sorted structured array with indices.
+
+    **See Also**
+
+    zip_arr
+
+    **Examples**
+
+    >>> arr = np.array([[6,3,7],[2,0,4]])
+    >>> enum_matrix(arr)
+    array([[(2, 7), (0, 6), (1, 3)],
+           [(2, 4), (0, 2), (1, 0)]], 
+           dtype=[('i', '<i8'), ('value', '<i8')])
     """
-    if len(indices) == 0:
+    #if len(indices) == 0:
+    #    indices = np.arange(arr.shape[1])
+    if len(indices) == 0 and len(arr.shape) > 1:
         indices = np.arange(arr.shape[1])
+
     ind = np.array([indices.copy() for i in xrange(arr.shape[0])])
     dt = [(field_name, indices.dtype), ('value', arr.dtype)]
     mt = zip_arr(ind, arr, field_names=[field_name, 'value'])
 
-    if len(arr.shape) > 1:  
-	if axis:
-	    for i in xrange(arr.shape[axis]):
-	        idx = np.argsort(mt['value'][:,i])
-	        mt[field_name][:,i] = ind[:,i][idx]
-                mt['value'][:,i] = arr[:,i][idx]
-	        mt[:,i] = mt[:,i][::-1]	
-	else: 
+    if len(arr.shape) > 1:
+        if axis:
             for i in xrange(arr.shape[axis]):
-	        idx = np.argsort(mt['value'][i])
-	        mt[field_name][i] = ind[i][idx]
+                idx = np.argsort(mt['value'][:,i])
+                mt[field_name][:,i] = ind[:,i][idx]
+                mt['value'][:,i] = arr[:,i][idx]
+                mt[:,i] = mt[:,i][::-1]	
+        else:
+            for i in xrange(arr.shape[axis]):
+                idx = np.argsort(mt['value'][i])
+                mt[field_name][i] = ind[i][idx]
                 mt['value'][i] = arr[i][idx]
-	        mt[i,:] = mt[i,:][::-1]
-
+                mt[i,:] = mt[i,:][::-1]
     else:
-	idx = np.argsort(arr)
-	mt[field_name][:] = idx[:]
-	mt['value'][:] = arr[idx]
+        idx = np.argsort(arr)
+        mt[field_name][:] = idx[:]
+        mt['value'][:] = arr[idx]
 
     return mt
 
@@ -56,13 +116,37 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     
 def enum_sort(arr, indices=[], field_name='i', filter_nan=False):
     """
-    Takes a 1-dimensional array and returns a sorted structured array.
+    Takes a 1-dimensional array and returns a sorted array with matching
+    indices from the original array.
+
+    **Parameters**
+
+    arr : array
+        A structured 1-dimensional array.
+    indices : list, optional
+        List of indices. If `indices` is empty, then `indices` is set to
+        a range of indices for the length of `arr`. Default is an empty list.
+    field_name : string, optional
+        Name for indices in the structured array dtype. Default is 'i'.
+    filter_nan : boolean, optional
+        If True, Not a Number values are filtered. Default is False.
+
+    **Returns**
+    
+    A sorted structured array.
+
+    **Examples**
+
+    >>> arr = np.array([7,3,1,8,2])
+    >>> enum_sort(arr)
+    array([(3, 8), (0, 7), (1, 3), (4, 2), (2, 1)], 
+          dtype=[('i', '<i8'), ('value', '<i8')])
     """
     idx = np.argsort(arr)
     if len(indices) == 0:
-	indices = np.arange(arr.shape[0])
+        indices = np.arange(arr.shape[0])
     else:
-	indices = np.array(indices)
+        indices = np.array(indices)
 	
     dt = [(field_name, indices.dtype), ('value', arr.dtype)]
 
@@ -75,23 +159,71 @@ def enum_sort(arr, indices=[], field_name='i', filter_nan=False):
         
     return new_arr[::-1]
 
+ 
 
-
-def enum_array(a, indices=None, field_name='i'):
+def enum_array(arr, indices=[], field_name='i'):
     """
-    """
-    a1 = np.arange(a.size)
+    Takes an array and returns a structured array with indices
+    and values as dtype names.
 
-    if indices == None:
-    	return zip_arr(a1, a, field_names=[field_name, 'value'])    
+    **Parameters**
+    
+    arr : array
+        1-dimensional array
+    indices : list, optional
+        List of indices. If `indices` is empty, then `indices` is set to
+        a range of indices for the length of `arr`. Default is an empty list.
+    field_name : string, optional 
+        Name for indices in the structured array dtype. Default is 'i'.
+
+    **Returns**
+
+    A structured array with indices and value fields.
+
+    **See Also**
+
+    zip_arr
+
+    **Examples**
+
+    >>> arr = np.array([7,3,1,8,2])
+    >>> enum_array(arr)
+    array([(0, 7), (1, 3), (2, 1), (3, 8), (4, 2)], 
+          dtype=[('i', '<i8'), ('value', '<i8')])
+    """
+    if len(indices) == 0:
+        indices = np.arange(arr.size)
     else:
-	return zip_arr(indices, a, field_names=[field_name, 'value'])
+        indices = np.array(indices)
+    return zip_arr(indices, arr, field_names=[field_name, 'value'])
 
 
 
 def zip_arr(arr_1, arr_2, field_names=['arr_1','arr_2']):
     """
-    Takes two arrays and returns a zipped structured array.
+    Takes two arrays with same shape and returns a zipped structured array.
+
+    **Parameters**
+
+    arr_1 : array
+        1-dimensional array.        
+    arr_2 : array
+        1-dimensional array.
+    field_names : list, optional
+        List of numpy dtype names.
+
+    **Returns**
+
+    Zipped array of `arr_1` and `arr_2`.
+
+    **Examples**
+
+    >>> a1 = np.array([[2,4], [6,8]])
+    >>> a2 = np.array([[1,3],[5,7]])
+    >>> zip_arr(a1, a2, field_names=['even', 'odd'])
+    array([[(2, 1), (4, 3)],
+           [(6, 5), (8, 7)]], 
+           dtype=[('even', '<i8'), ('odd', '<i8')])
     """
     if field_names:
         dt = [(field_names[0], arr_1.dtype), (field_names[1], arr_2.dtype)]
@@ -110,6 +242,32 @@ def map_strarr(arr, m, k, new_k=None):
     `m` and returns a copy of `arr` with its field `k` values mapped
     according to `m`. If `new_name` is given, the field name `k` is
     replaced with `new_name`.
+
+    **Parameters**
+
+    arr : array
+
+    m : iterable
+        An indexable array or list to retrieve the values from.
+        The iterable contains values to replace the original `k` values.
+    k : string
+        Field name with values to be replaced. arr[k] should be an integer
+        type.
+    new_k : string, optional
+        Field name for the new values. Default is None, which is then set to
+        `k`, the original field name.
+
+    **Returns**
+    
+    A new array with `k` values replaced by values in `m`.
+
+    **Examples**
+
+    >>> arr = np.array([(0, 1.), (1, 2.)], dtype=[('i', 'i4'), ('v', 'f4')])
+    >>> m = ['foo', 'bar']
+    >>> map_strarr(arr, m, 'i', 'string')
+    array([('foo', 1.0), ('bar', 2.0)], 
+          dtype=[('string', '|S3'), ('v', '<f4')])
     """
     # Constructing new dtype
     if not new_k:
@@ -132,7 +290,22 @@ def map_strarr(arr, m, k, new_k=None):
 
 def mp_split_ls(ls, n):
     """
-    Split list into an `n`-length list of arrays
+    Split list into an `n`-length list of arrays.
+
+    **Parameters**
+
+    ls : list
+
+    n : int
+
+    **Returns**
+    
+    List of arrays whose length is 'n'.
+
+    **Examples**
+    >>> ls = [1,5,6,8,2,8]
+    >>> mp_split_ls(ls, 4)
+    [array([1, 5]), array([6, 8]), array([2]), array([8])]
     """
     return np.array_split(ls, min(len(ls), n))
 
@@ -151,12 +324,14 @@ def mp_shared_value(x, ctype='i'):
 
 def isstr(x):
     """
+    Returns True if `x` is an instance of a string.
     """
     return isinstance(x, basestring) or isinstance(x, np.flexible)
 
 
 def isint(x):
     """
+    Returns True if `x` is an instance of an int.
     """
     return (isinstance(x, np.integer) 
             or isinstance(x, int) or isinstance(x, long))
@@ -164,6 +339,7 @@ def isint(x):
 
 def isfloat(x):
     """
+    Returns True if `x` is an instance of a float.
     """
     return (isinstance(x, np.inexact) or isinstance(x, np.float))
 
