@@ -8,6 +8,8 @@ class CorpusSent(Corpus):
     """
     A subclass of Corpus whose purpose is to store original
     sentence information in the Corpus
+    
+    :See Also: :class: Corpus
     """
     def __init__(self, corpus, sentences, context_types=[], context_data=[], 
 		remove_empty=False):
@@ -27,26 +29,20 @@ class CorpusSent(Corpus):
         """ 
         Takes a Corpus object and returns a copy of it with words in the
         stoplist removed and with words of frequency <= `freq` removed.
-
-        Parameters
-        ----------
-	stoplist : list
-	    The list of words to be removed.
-	freq : integer, optional
-	    A threshold where words of frequency <= 'freq' are removed. 
-	    Default is 0.
-            
-        Returns
-        -------
-	Copy of corpus with words in the stoplist and words of frequnecy
-	<= 'freq' removed.
-
-        See Also
-        --------
-        Corpus
-        """
         
-	if freq:
+	    :param stoplist: The list of words to be removed.
+        :type stoplist: list
+        
+        :type freq: integer, optional
+	    :param freq: A threshold where words of frequency <= 'freq' are 
+            removed. Default is 0.
+            
+        :retursn: Copy of corpus with words in the stoplist and words of
+            frequnecy <= 'freq' removed.
+
+        :See Also: :class: Corpus
+        """
+        if freq:
             #TODO: Use the TF model instead
 
             print 'Computing collection frequencies'
@@ -84,11 +80,25 @@ class CorpusSent(Corpus):
             tok['idx'] = np.cumsum(spans)
             context_data.append(tok)
 
-        return CorpusSent(corpus, self.sentences, context_data=context_data, context_types=self.context_types)
+        return CorpusSent(corpus, self.sentences, context_data=context_data,
+                            context_types=self.context_types)
 
 
     @staticmethod
     def load(file):
+        """
+        Loads data into a Corpus object that has been stored using
+        `save`.
+        
+        :param file: Designates the file to read. If `file` is a string ending
+            in `.gz`, the file is first gunzipped. See `numpy.load`
+            for further details.
+        :type file: string-like or file-like object
+
+        :returns: c : A Corpus object storing the data found in `file`.
+
+        :See Also: :class: Corpus, :meth: Corpus.load, :meth: numpy.load
+        """
         print 'Loading corpus from', file
         arrays_in = np.load(file)
 
@@ -111,21 +121,13 @@ class CorpusSent(Corpus):
         """
         Saves data from a CorpusSent object as an `npz` file.
         
-        Parameters
-        ----------
-        file : str-like or file-like object
-            Designates the file to which to save data. See
+        :param file: Designates the file to which to save data. See
             `numpy.savez` for further details.
+        :type file: str-like or file-like object
             
-        Returns
-        -------
-        None
+        :returns: None
 
-        See Also
-        --------
-        Corpus
-        Corpus.load
-        numpy.savez
+        :See Also: :class: Corpus, :meth: Corpus.save, :meth: numpy.savez
         """
 	
 	print 'Saving corpus as', file
@@ -210,7 +212,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
-               nltk_stop=True, stop_freq=1, add_stop=None, corpus_sent=False):
+               nltk_stop=True, stop_freq=1, add_stop=None, corpus_sent=True):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -222,32 +224,41 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     It will also strip punctuation and arabic numerals outside the
     range 1-29. All letters are made lowercase.
 
-    Parameters
-    ----------
-    plain_dir : string-like
-        String containing directory containing a plain-text corpus.
-    chunk_name : string-line
-        The name of the tokenization corresponding to individual
-        files. For example, if the files are pages of a book, one
-        might set `chunk_name` to `pages`. Default is `articles`.
-    paragraphs : boolean
-        If `True`, a paragraph-level tokenization is included.
-        Defaults to `True`.
-    nltk_stop : boolean
-        If `True` then the corpus object is masked using the NLTK
-        English stop words. Default is `False`.
-    stop_freq : int
-        The upper bound for a word to be masked on the basis of its
-        collection frequency. Default is 0.
-    add_stop : array-like
-        A list of stop words. Default is `None`.
+    :param plain_dir: String containing directory containing a 
+        plain-text corpus.
+    :type plain_dir: string-like
+    
+    :param chunk_name: The name of the tokenization corresponding 
+        to individual files. For example, if the files are pages 
+        of a book, one might set `chunk_name` to `pages`. Default 
+        is `articles`.
+    :type chunk_name: string-like, optional
+    
+    :param paragraphs: If `True`, a paragraph-level tokenization 
+        is included. Defaults to `True`.
+    :type paragraphs: boolean, optional
+    
+    :param nltk_stop: If `True` then the corpus object is masked 
+        using the NLTK English stop words. Default is `False`.
+    :type nltk_stop: boolean, optional
+    
+    :param stop_freq: The upper bound for a word to be masked on 
+        the basis of its collection frequency. Default is 1.
+    :type stop_freq: int, optional
 
-    Returns
-    -------
-    c : a Corpus object
+    :param corpus_sent: If `True` a CorpusSent object is returned.
+        Otherwise Corpus object is returned. Default is `True`. 
+    :type corpus_sent: boolean, optional
+
+    :param add_stop: A list of stop words. Default is `None`.
+    :type add_stop: array-like, optional
+
+    :returns: c : Corpus or CorpusSent
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
-
+    
+    :See Also: :class: Corpus, :class: CorpusSent, :meth: dir_tokenize,
+        :meth: apply_stoplist
     """
     chunks = []
     filenames = os.listdir(plain_dir)
