@@ -605,6 +605,13 @@ class LDAGibbsViewer(object):
 
     def simmat_words(self, word_list):
         """
+        Calculates the similarity matrix for `word_list`.
+
+        :param word_list: A list of words whose similarity matrix is to be
+            computed.
+        :type word_list: list
+        
+        :returns: Similarity matrix.
         """
         return _simmat_words_(self.corpus,
                               self.model.top_word.T,
@@ -623,7 +630,7 @@ class LDAGibbsViewer(object):
             computed. Default is all the topics in the model.
         :type k_indices: list
 
-        :returns: Array ...
+        :returns: Similarity matrix.
         """
 
         if len(docs) == 0:
@@ -645,7 +652,7 @@ class LDAGibbsViewer(object):
 
         :param k_indices: A list of topics whose similarity matrix is to be
             computed. Default is all topics in the model.
-        :type k_indices: list
+        :type k_indices: list, optional
 
         :returns: simmat_topics object
         """
@@ -739,7 +746,7 @@ class LDAGibbsViewer(object):
             in addition to returning a plot object. Default is `True`.
         :type show: boolean, optional
 
-        :param grid: If `True` draw a grid. Default is True. 
+        :param grid: If `True` draw a grid. Default is `True`. 
         :type grid: boolean, optional
         
         :returns: plt : a matplotlib.pyplot object
