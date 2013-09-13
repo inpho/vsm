@@ -40,6 +40,7 @@ from similarity import (
 
 from manifold import (
     clustering as _clustering_,
+    mds as _mds_,
     isomap as _isomap_)
 
 class LDAGibbsViewer(object):
@@ -627,24 +628,13 @@ class LDAGibbsViewer(object):
 
 
 
-    def cluster_topics(self, method='kmeans', k_indices=[],
-                       n_clusters=10, by_cluster=True, sim_fn=_row_js_mat_):
+    def clusters(self, simmat, method='Kmeans', n_clusters=10, by_cluster=True):
         """
-        Clusters topics by a spceificed clustering algorithm. 
-        Currently it supports K-means, Spectral Clustering and Affinity
-        Propagation algorithms. K-means and spectral clustering cluster
-        topics into a given number of clusters, whereas affinity
-        propagation does not require the fixed cluster number. 
-
-        To do: make it general to deal with documents?
+        Wrapper of `clustering` in manifold.py
 
         Parameters
         ----------
-        method : strings
-            Spceifies the algorithm used for clustring. Currently it 
-            supports 'kmeans', 'affinity' or 'spectral'. Default is 
-            'kmeans'.
-        k_indices : list
+        simmat : np array
         n_clusters : int
             Number of clusters used as the parameter for K-means or
             spectral clustering algorithms. Default is 10.
@@ -652,26 +642,20 @@ class LDAGibbsViewer(object):
             If True, returns a list of clusters. Otherwise a list that
             indicates cluster numbers for each topic is returned.
             Default is true.
-        sim_fn : similarity function
+
 
         Returns
         ----------
         labels : list or list of lists
             A list of clusters or list of cluster numbers.
         """
-        # Default use all topics 
-        if len(k_indices) == 0:
-            k_indices = range(self.model.K)
-
-        # Obtain similarity matrix
-        simmat = self.simmat_topics(k_indices, sim_fn=sim_fn)
 
         # Call clustering in manifold.py
         labels = _clustering_(simmat, n_clusters=n_clusters, method=method)
 
         # Make a list of labels
         if by_cluster:
-            labels = [[k_indices[i] for i,lab in enumerate(labels) if lab == x]
+            labels = [[simmat.labels[i] for i,lab in enumerate(labels) if lab == x]
                       for x in set(labels)]
             
         return labels
@@ -730,11 +714,18 @@ class LDAGibbsViewer(object):
         return plt
 
 
-    def isomap_topics(self, k_indices=[], n_neighbors=5, size=[], sim_fn=_row_js_mat_):
+
+    def plot_simmat(self, simmat, cls=[], method=_isomap_):
         """
-        Plots an isomap of topics estimated LDA gibbs sampler.
-        For isomap, see:
-        Tenenbaum, J.B., De Silva, V., & Langford, J.C. Science 290(5500)
+        """
+        pos = method(mat = 1 - simmat)
+        return self.plot_clusters(pos, simmat.labels, clusters=cls)
+
+
+
+    def plot_topics(self, k_indices=[], method=_isomap_, size=[], sim_fn=_row_js_mat_):
+        """
+        Plots topics estimated LDA gibbs sampler using a projection.
 
         Parameters
         ----------
@@ -743,9 +734,6 @@ class LDAGibbsViewer(object):
             is provided, each sublist is shown with a different color. This can
             be used to plot the result of `cluster_topics`.
             Default plots all topics in the model without any cluster.
-        n_neighbors : int
-            Used by isomap to determine the number of neighbors for each point.
-            Large neighbor size tends to produce a denser map. Default is 5.
 
         Returns
         ----------
@@ -765,47 +753,30 @@ class LDAGibbsViewer(object):
         else:
             clusters = []
 
-
         # calculate coordinates
         simmat = self.simmat_topics(k_indices=k_indices, sim_fn=sim_fn)
-        simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
-        if sim_fn==_row_cos_mat_:
-            simmat = np.arccos(simmat)       # convert to dissimilarity
+        plot = self.plot_simmat(simmat, cls=clusters, method=method)
 
-        pos = _isomap_(simmat, n_neighbors=n_neighbors)
-
-        return self.plot_clusters(pos, k_indices, clusters=clusters, size=size)
+        return plot
 
     
 
-    def isomap_docs(self, docs=[], topics=[], k_indices=[], sim_fn=_row_js_mat_, 
-                    thres=0.4, n_neighbors=5, scale=False, trim=20): 
+    def plot_docs(self, docs=[], k_indices=[], sim_fn=_row_js_mat_, 
+                    thres=25, n_neighbors=5, scale=True, trim=20): 
         """
         Takes document `docs` or topic `topics` and plots an isomap for 
         the documents similar/relevant to the query. 
         
-        The function first determines documents to be plotted by applying 
-        `sim_doc_doc` or `sim_top_doc` for the given document(s) or topic(s). 
-        It then calculates the similarity matrix for the list of the obtained 
-        documents using `simmat_docs`. Finally, a plot is generated by 
-        using the isomap algorithm  in `sklearn` package.
-
-        For isomap, see:
-        Tenenbaum, J.B., De Silva, V., & Langford, J.C. Science 290(5500)
 
         Parameters
         ----------
         docs : list
             A list of documents used as a query.
-        toppics : list
-            A list of topics used as a query. 
         k_indices : list
             A list of topics based on which document similarity matrix is 
             computed. Default is all the topics in the model.
-        thres : float
-            Threshhold t. If t<1, documents with similarity value >t are 
-            selected. Otherwise, the t' most similar documents are selected 
-            where t' is the smallest integer greater than t. Devault is 0.4.
+        thres : int
+            Number of documents to be plotted. 
         n_neighbors : int
             Used by isomap to determine the number of neighbors for each point.
             Large neighbor size tends to produce a denser map. Default is 5.
@@ -821,28 +792,14 @@ class LDAGibbsViewer(object):
             A graph wish scatter plots
 
         """
-        from math import ceil
-
-        # create a list to be plotted from document or topic
-        if len(docs) > 0:
-            doclist = self.sim_doc_doc(docs, k_indices=k_indices)
-        else:
-            doclist = self.sim_top_doc(topics)
-
-        # cut down the list by the threshold
-        if thres < 1:
-            labels, size = zip(*[(d,s) for (d,s) in doclist if s > thres])
-        else:
-            labels, size = zip(*doclist[:int(ceil(thres))])
-
+        # create a list to be plotted from a document
+        labels = [i[0] for i in self.sim_doc_doc(docs, k_indices=k_indices)[:thres]]
 
         # calculate coordinates
         simmat = self.simmat_docs(labels, k_indices=k_indices, sim_fn=sim_fn)
-        simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
-        if sim_fn==_row_cos_mat_:
-            simmat = np.arccos(simmat)       # convert to dissimilarity
-        pos = _isomap_(simmat, n_neighbors=n_neighbors)
+        size = simmat[:,0]
 
+        pos = _isomap_(simmat, n_neighbors=n_neighbors)
 
         # set graphic parameteres
         # - scale point size

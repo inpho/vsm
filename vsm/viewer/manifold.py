@@ -1,31 +1,47 @@
 from sklearn.cluster import KMeans, AffinityPropagation, SpectralClustering
-from sklearn.manifold import Isomap
+from sklearn.manifold import Isomap, MDS
 
 
 def clustering(mat, n_clusters, method="Kmeans"):
     """
-    Spectral clustring works with a similarity matrix.
+    Clusters matrix by a spceificed clustering algorithm. 
+    Currently it supports K-means, Spectral Clustering and Affinity
+    Propagation algorithms. K-means and spectral clustering cluster
+    topics into a given number of clusters, whereas affinity
+    propagation does not require the fixed cluster number. 
+
     NB: computing K-means out of similarity matrix is not mathematically sound.
+
+    Parameters
+    ----------
+
     """
     if method == 'affinity':
-        af = AffinityPropagation(affinity='precomputed').fit(mat)
-        labels = af.labels_
+        model = AffinityPropagation(affinity='precomputed').fit(mat)
     elif method == 'spectral':
-        sc = SpectralClustering(n_clusters=n_clusters, affinity='precomputed')
-        sc = sc.fit(mat)
-        labels = sc.labels_
+        model = SpectralClustering(n_clusters=n_clusters, 
+                                   affinity='precomputed').fit(mat)
     else:
-        km = KMeans(n_clusters=n_clusters, init='k-means++', 
-                    max_iter=100, n_init=1,verbose=1)
-        km.fit(mat)
-        labels = list(km.labels_)
-    
-    return labels
+        model = KMeans(n_clusters=n_clusters, init='k-means++', 
+                    max_iter=100, n_init=1,verbose=1).fit(mat)
+
+    return list(model.labels_)
+
+
+
+def mds(mat, n_components=2, dissimilarity='precomputed'): 
+    """
+    This requires sklearn ver 0.14 due to dissimilarity argument.
+    """
+    model = MDS(n_components=n_components, dissimilarity=dissimilarity, max_iter=100)
+    pos = model.fit_transform(mat)
+    return pos
+
 
 
 def isomap(mat, n_components=2, n_neighbors=3):
-    imap = Isomap(n_components=n_components, n_neighbors=n_neighbors)
-    pos  = imap.fit(mat).embedding_
+    model = Isomap(n_components=n_components, n_neighbors=n_neighbors)
+    pos  = model.fit(mat).embedding_
     return pos
 
 
