@@ -81,23 +81,27 @@ class BaseCorpus(object):
     :type remove_empty: boolean, optional
 
     :attributes: 
-        * **corpus**  (1-dimensional array) - Stores the value of the `corpus` parameter after it has been cast to an array of data-type `dtype` (if provided).
-
-        * **words**  (1-dimensional array) - The indexed set of atomic words appearing in `corpus`.
-
+        * **corpus**  (1-dimensional array)
+            Stores the value of the `corpus` parameter after it has been cast
+            to an array of data-type `dtype` (if provided).
+        * **words**  (1-dimensional array)
+            The indexed set of atomic words appearing in `corpus`.
         * **context_types**  (1-dimensional array-like)
-
         * **context_data**   (list of 1-D array-like)
 
     :methods: 
-        * **meta_int**: Takes a type of tokenization and a query and returns the index of the metadata found in the query.
-    
-        * **get_metadatum**: Takes a type of tokenization and a query and returns the metadatum corresponding to the query and the field.
-
-        * **view_contexts**: Takes a type of tokenization and returns a view of the corpus tokenized accordingly.
-    
-        * **view_metadata**: Takes a type of tokenization and returns a view of the metadata of the tokenization.
-    
+        * **meta_int**
+            Takes a type of tokenization and a query and returns the index of
+            the metadata found in the query.
+        * **get_metadatum**
+            Takes a type of tokenization and a query and returns the metadatum
+            corresponding to the query and the field.
+        * **view_contexts**
+            Takes a type of tokenization and returns a view of the corpus
+            tokenized accordingly.
+        * **view_metadata**
+            Takes a type of tokenization and returns a view of the metadata
+            of the tokenization.
         * **tolist**: Returns Corpus object as a list of lists.
 
     **Examples**
@@ -360,16 +364,33 @@ class Corpus(BaseCorpus):
     :type context_types: array-like, optional
 
     :attributes: 
-        * **corpus** (1-D 32-bit integer array) - corpus is the integer representation of the input string array-like value value of the corpus parameter
-        * **words** (1-D string array) - The indexed set of strings occurring in corpus. It is a string-typed array.
-        * **words_in** (1-D 32-bit integer dictionary) - A dictionary whose keys are `words` and whose values are their corresponding integers (i.e., indices in `words`).
+        * **corpus** (1-D 32-bit integer array)
+            corpus is the integer representation of the input string array-like
+            value of the corpus parameter
+        * **words** (1-D string array)
+            The indexed set of strings occurring in corpus. It is a string-typed array.
+        * **words_in** (1-D 32-bit integer dictionary)
+            A dictionary whose keys are `words` and whose values are their 
+            corresponding integers (i.e., indices in `words`).
         
     :methods:
-        * **view_contexts**: Takes a type of tokenization and returns a view of the corpus tokenized accordingly. The optional parameter `strings` takes a boolean value: True to view string representations of words; False to view integer representations of words. Default is `False`.
-        * **save**: Takes a filename and saves the data contained in a Corpus object to a `npy` file using `numpy.savez`.
-        * **load**: Static method. Takes a filename, loads the file data into a Corpus object and returns the object.
-        * **apply_stoplist**: Takes a list of stopwords and returns a copy of the corpus with the stopwords removed.
-        * **tolist**: Returns Corpus object as a list of lists of either integers or strings, according to `as_strings`.
+        * **view_contexts**
+            Takes a type of tokenization and returns a view of the corpus tokenized
+            accordingly. The optional parameter `strings` takes a boolean value: 
+            True to view string representations of words; False to view integer 
+            representations of words. Default is `False`.
+        * **save**
+            Takes a filename and saves the data contained in a Corpus object to 
+            a `npy` file using `numpy.savez`.
+        * **load**
+            Static method. Takes a filename, loads the file data into a Corpus
+            object and returns the object.
+        * **apply_stoplist**
+            Takes a list of stopwords and returns a copy of the corpus with 
+            the stopwords removed.
+        * **tolist**
+            Returns Corpus object as a list of lists of either integers or strings, 
+            according to `as_strings`.
         
     :See Also: :class:`BaseCorpus`
 
