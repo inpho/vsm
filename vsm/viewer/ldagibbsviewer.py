@@ -38,10 +38,9 @@ from similarity import (
     simmat_documents as _simmat_documents_,
     simmat_topics as _simmat_topics_)
 
-from manifold import (
-    clustering as _clustering_,
-    mds as _mds_,
-    isomap as _isomap_)
+from manifold import Manifold
+
+
 
 class LDAGibbsViewer(object):
     """
@@ -567,14 +566,19 @@ class LDAGibbsViewer(object):
                              sim_fn=sim_fn)
     
 
-    def simmat_words(self, word_list):
+    def dismat_words(self, word_list):
 
-        return _simmat_words_(self.corpus,
-                              self.model.top_word.T,
-                              word_list)
-    
+        sm =  _simmat_words_(self.corpus,
+                             self.model.top_word.T,
+                             word_list)
 
-    def simmat_docs(self, docs=[], k_indices=[], sim_fn=_row_js_mat_):
+        dismat = Manifold(1-sm, sm.labels)
+
+        return dismat
+
+
+
+    def dismat_docs(self, docs=[], k_indices=[], sim_fn=_row_js_mat_):
         """
         Calculates the similarity matrix for a given list of documents.
 
@@ -600,12 +604,17 @@ class LDAGibbsViewer(object):
         else:
             mat = self.model.doc_top[:,k_indices].T
 
-        return _simmat_documents_(self.corpus, mat,
-                                  self.model.context_type,
-                                  docs, sim_fn=sim_fn)
+        sm =  _simmat_documents_(self.corpus, mat,
+                                 self.model.context_type,
+                                 docs, sim_fn=sim_fn)
+
+        dismat = Manifold(1-sm, sm.labels)
+
+        return dismat
 
 
-    def simmat_topics(self, k_indices=[], sim_fn=_row_js_mat_):
+
+    def dismat_topics(self, k_indices=[], sim_fn=_row_js_mat_):
         """
         Calculates the similarity matrix for a given list of topics.
 
@@ -623,42 +632,12 @@ class LDAGibbsViewer(object):
         if len(k_indices) == 0:
             k_indices = range(self.model.K)
 
-        return _simmat_topics_(self.model.top_word, k_indices, sim_fn=sim_fn)
+        sm = _simmat_topics_(self.model.top_word, k_indices, sim_fn=sim_fn)
 
+        dismat = Manifold(1-sm, sm.labels)
 
+        return dismat
 
-
-    def clusters(self, simmat, method='Kmeans', n_clusters=10, by_cluster=True):
-        """
-        Wrapper of `clustering` in manifold.py
-
-        Parameters
-        ----------
-        simmat : np array
-        n_clusters : int
-            Number of clusters used as the parameter for K-means or
-            spectral clustering algorithms. Default is 10.
-        by_cluster : boolean
-            If True, returns a list of clusters. Otherwise a list that
-            indicates cluster numbers for each topic is returned.
-            Default is true.
-
-
-        Returns
-        ----------
-        labels : list or list of lists
-            A list of clusters or list of cluster numbers.
-        """
-
-        # Call clustering in manifold.py
-        labels = _clustering_(simmat, n_clusters=n_clusters, method=method)
-
-        # Make a list of labels
-        if by_cluster:
-            labels = [[simmat.labels[i] for i,lab in enumerate(labels) if lab == x]
-                      for x in set(labels)]
-            
-        return labels
 
 
     def logp_plot(self, range=[], step=1, show=True, grid=True):
@@ -713,187 +692,4 @@ class LDAGibbsViewer(object):
 
         return plt
 
-
-
-    def plot_simmat(self, simmat, cls=[], method=_isomap_):
-        """
-        """
-        pos = method(mat = 1 - simmat)
-        return self.plot_clusters(pos, simmat.labels, clusters=cls)
-
-
-
-    def plot_topics(self, k_indices=[], method=_isomap_, size=[], sim_fn=_row_js_mat_):
-        """
-        Plots topics estimated LDA gibbs sampler using a projection.
-
-        Parameters
-        ----------
-        k_indices : list
-            List or list of lists of topics to be plotted. If a list of lists
-            is provided, each sublist is shown with a different color. This can
-            be used to plot the result of `cluster_topics`.
-            Default plots all topics in the model without any cluster.
-
-        Returns
-        ----------
-        basic_plot object
-            A graph wish scatter plots
-        """
-
-        # create a list to be plotted 
-        if len(k_indices) == 0:
-            k_indices = range(self.model.K)
-
-        # converting list of topics and creating cluster infromation
-        if any(isinstance(item, list) for item in k_indices):
-            clusters = [[i] * len(cls) for i,cls in enumerate(k_indices)]
-            clusters = [item for cls in clusters for item in cls]
-            k_indices = [item for sublist in k_indices for item in sublist]
-        else:
-            clusters = []
-
-        # calculate coordinates
-        simmat = self.simmat_topics(k_indices=k_indices, sim_fn=sim_fn)
-        plot = self.plot_simmat(simmat, cls=clusters, method=method)
-
-        return plot
-
-    
-
-    def plot_docs(self, docs=[], k_indices=[], sim_fn=_row_js_mat_, 
-                    thres=25, n_neighbors=5, scale=True, trim=20): 
-        """
-        Takes document `docs` or topic `topics` and plots an isomap for 
-        the documents similar/relevant to the query. 
-        
-
-        Parameters
-        ----------
-        docs : list
-            A list of documents used as a query.
-        k_indices : list
-            A list of topics based on which document similarity matrix is 
-            computed. Default is all the topics in the model.
-        thres : int
-            Number of documents to be plotted. 
-        n_neighbors : int
-            Used by isomap to determine the number of neighbors for each point.
-            Large neighbor size tends to produce a denser map. Default is 5.
-        scale : boolean
-            If true, points are scaled accoridng to its similarity to the query.
-            Default is true.
-        trim : int
-            Labels are trimmed to this value. Default is 20.
-
-        Returns
-        ----------
-        basic_plot object
-            A graph wish scatter plots
-
-        """
-        # create a list to be plotted from a document
-        labels = [i[0] for i in self.sim_doc_doc(docs, k_indices=k_indices)[:thres]]
-
-        # calculate coordinates
-        simmat = self.simmat_docs(labels, k_indices=k_indices, sim_fn=sim_fn)
-        size = simmat[:,0]
-
-        pos = _isomap_(simmat, n_neighbors=n_neighbors)
-
-        # set graphic parameteres
-        # - scale point size
-        if scale:
-            size = [s**2*150 for s in size] 
-        else:
-            size = np.ones_like(size) * 50
-        # - trim labels
-        if trim:
-            labels = [lab[:trim] for lab in labels]
-        
-        return self.plot_clusters(pos, labels, size=size)
-
-
-    def gen_colors(self, clusters):
-        """
-        Takes 'clusters' and creates a list of colors so a cluster has a color.
-
-        Parameters
-        ----------
-        clusters : list
-            A flat list of integers where an integer represents which cluster
-            the information belongs to.
-
-        Returns
-        ----------
-        colorm : list
-            A list of colors obtained from matplotlib colormap cm.hsv. 
-            The length of 'colorm' is the same as the number of distinct clusters.
-        """
-        import matplotlib.cm as cm
-	
-        n = len(set(clusters))
-        colorm = [cm.hsv(i * 1.0 /n, 1) for i in xrange(n)]
-        return colorm
-	
-	
-    def plot_clusters(self, arr, labels, clusters=[], size=[]):
-        """	
-    	Takes 2-dimensional array(simmat), list of clusters, list of labels,
-    	and list of marker size. 'clusters' should be a flat list which can be
-        obtained from cluster_topics(by_cluster=False).
-        Plots each clusters in different colors.
-
-        Parameters
-        ----------
-        arr : 2-dimensional array
-            Array has x, y coordinates to be plotted on a 2-dimensional space.
-        labels : list
-            List of labels to be displayed in the graph. 
-        clusters : list, optional
-            A flat list of integers where an integer represents which cluster
-            the information belongs to. If not given, it returns a basic plot
-            with no color variation. Default is an empty list.
-        size : list, optional
-            List of markersize for points where markersize can note the importance
-            of the point. If not given, 'size' is a list of fixed markersize, 40. 
-            Default is an empty list.
-
-        Returns
-        ----------
-        plt : maplotlit.pyplot object
-            A graph with scatter plots from 'arr'.
-
-        """
-        import matplotlib.pyplot as plt
-
-    	n = arr.shape[0]
-    	X = arr[:,0]
-    	Y = arr[:,1]
-
-    	if len(size) == 0:
-            size = [40 for i in xrange(n)]
-        
-    	fig = plt.figure(figsize=(10,10))
-    	ax = plt.subplot(111)
-
-        if len(clusters) == 0:
-            plt.scatter(X, Y, size)
-        else:	
-            colors = self.gen_colors(clusters)
-            colors = [colors[i] for i in clusters]
-
-	    for i in xrange(n):
-	        plt.scatter(X[i], Y[i], size, color=colors[i])
-
-    	ax.set_xlim(np.min(X) - .1, np.max(X) + .1)
-    	ax.set_ylim(np.min(Y) - .1, np.max(Y) + .1)
-        ax.set_xticks([])
-        ax.set_yticks([])
-
-    	for label, x, y in zip(labels, X, Y):
-            plt.annotate(label, xy = (x, y), xytext=(-2, 3), 
-			textcoords='offset points', fontsize=10)
-
-    	plt.show()
 
