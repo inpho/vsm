@@ -3,15 +3,16 @@ from scipy.sparse import issparse
 
 from vsm import enum_matrix, enum_sort, map_strarr, isstr, isint
 
-from vsm.linalg import row_cosines, row_kld, row_cos_mat, row_js_mat, posterior
+from vsm.linalg import (row_cosines, row_kld, row_cos_mat, 
+                        row_acos_mat, row_js_mat, posterior)
 
-from vsm.viewer import (
-    res_word_type, res_doc_type, res_top_type, def_label_fn, doc_label_name)
+from vsm.viewer import (res_word_type, res_doc_type, res_top_type, 
+                        def_label_fn, doc_label_name)
 
 from labeleddata import LabeledColumn, IndexedSymmArray
 
 def_sim_fn = row_cosines
-def_simmat_fn = row_cos_mat
+def_dismat_fn = row_acos_mat
 def_order = 'd'
 
 # TODO: Update module so that any function wrapping a similarity
@@ -266,22 +267,22 @@ def sim_top_top(mat, topic_or_topics, weights=None,
 
 
 
-def simmat_words(corp, matrix, word_list, norms=None, sim_fn=row_cos_mat):
+def dismat_words(corp, matrix, word_list, norms=None, sim_fn=row_acos_mat):
     """
     """
     indices, words = zip(*[res_word_type(corp, word) 
                            for word in word_list])
     indices, words = np.array(indices), np.array(words)
 
-    sm = sim_fn(indices, matrix, norms=norms, fill_tril=True)
-    sm = sm.view(IndexedSymmArray)
-    sm.labels = words
+    dm = sim_fn(indices, matrix, norms=norms, fill_tril=True)
+    dm = dm.view(IndexedSymmArray)
+    dm.labels = words
     
-    return sm
+    return dm
 
 
 
-def simmat_documents(corp, matrix, context_type, doc_list,
+def dismat_documents(corp, matrix, context_type, doc_list,
                      norms=None, sim_fn=row_js_mat):
     """
     """
@@ -292,19 +293,19 @@ def simmat_documents(corp, matrix, context_type, doc_list,
                             for doc in doc_list])
     indices, labels = np.array(indices), np.array(labels)
 
-    sm = sim_fn(indices, matrix.T, norms=norms, fill_tril=True)
-    sm = sm.view(IndexedSymmArray)
-    sm.labels = labels
+    dm = sim_fn(indices, matrix.T, norms=norms, fill_tril=True)
+    dm = dm.view(IndexedSymmArray)
+    dm.labels = labels
     
-    return sm
+    return dm
 
 
 
-def simmat_topics(kw_mat, topics, norms=None, sim_fn=row_js_mat):
+def dismat_topics(kw_mat, topics, norms=None, sim_fn=row_js_mat):
     """
     """
-    sm = sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
-    sm = sm.view(IndexedSymmArray)
-    sm.labels = [str(k) for k in topics]
+    dm = sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
+    dm = dm.view(IndexedSymmArray)
+    dm.labels = [str(k) for k in topics]
     
-    return sm
+    return dm

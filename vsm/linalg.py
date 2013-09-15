@@ -207,7 +207,7 @@ def posterior(row, mat, norms=None):
 
 
 #
-# Methods to calculate a simularity matrix
+# Methods to calculate a (dis)similarity matrix
 #    
     
 def row_cos_mat(rows, mat, norms=None, fill_tril=True):
@@ -253,7 +253,7 @@ def row_acos_mat(rows, mat, norms=None, fill_tril=True):
 
 def row_js_mat(rows, mat, norms=None, fill_tril=True):
     """
-    Compute the similarity matrix for a set of distributions in `mat` 
+    Compute a distance matrix for a set of distributions in `mat` 
     by computing pairwise Jansen-Shannon divergences.
     
     Parameters
@@ -289,7 +289,7 @@ def row_js_mat(rows, mat, norms=None, fill_tril=True):
 
     out = ((P-M)/2).clip(0) 
 
-    return 1 - out**0.5
+    return out**0.5
 
 
     
