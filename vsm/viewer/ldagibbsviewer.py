@@ -399,6 +399,9 @@ class LDAGibbsViewer(object):
     def sim_top_top(self, topic_or_topics, weights=None, 
                     print_len=10, filter_nan=True):
         """
+        Takes a topic or list of topics (by integer index) and returns
+        a list of topics sorted by the posterior probabilities of 
+        topics given the topic.
         """
         return _sim_top_top_(self.model.top_word, topic_or_topics, 
                              norms=self._topic_norms, weights=weights, 
@@ -409,6 +412,42 @@ class LDAGibbsViewer(object):
                     print_len=10, as_strings=True, label_fn=_def_label_fn_, 
                     filter_nan=True):
         """
+        Takes a topic or list of topics (by integer index) and returns a 
+        list of documents sorted by the posterior probabilities of
+        documents given the topic.
+
+        :param topic_or_topics: Query topic(s) to which cosine values are calculated
+        :type topic_or_topics: string or list of strings
+        
+        :param weights: Specify weights for each topic in `topic_or_topics`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+
+        :param filter_words: The topics that include these words are considered.
+            If not provided, by default all topics are considered.
+        :type filter_words: list of words, optional
+ 
+        :param print_len: Number of documents printed by pretty-pringing function
+            Default is 10.
+        :type print_len: int, optional       
+        
+        :param as_strings: If `True`, returns a list of documents as strings rather
+            than their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :param label_fn: A function that defines how documents are represented.
+            Default is def_label_fn which retrieves the labels from corpus metadata.
+        :type label_fn: string, optional
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :returns: w_arr : a LabeledColumn object
+            A 2-dim array containing words and their cosine values to 
+            `word_or_words`. 
+
+        :See Also: :meth: def_label_fn, :meth: word_topics
         """
         d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
                               self.model.context_type, weights=weights, 
@@ -455,7 +494,7 @@ class LDAGibbsViewer(object):
         is assigned the provided weight.
         
         :param word_or_words: word(s) to which cosine values are calculated
-        :type word_or_words: string or list of string
+        :type word_or_words: string or list of strings
         
         :param weights: Specify weights for each query word in `word_or_words`. 
             Default uses equal weights.
@@ -533,7 +572,7 @@ class LDAGibbsViewer(object):
         provided, the arithmetic mean is used.
 
         :param word_or_words: Query word(s) to which cosine values are calculated
-        :type word_or_words: string or list of string
+        :type word_or_words: string or list of strings
         
         :param weights: Specify weights for each query word in `word_or_words`. 
             Default uses equal weights (i.e. arithmetic mean)
@@ -569,7 +608,7 @@ class LDAGibbsViewer(object):
         
         :param doc_or_documents: Query document(s) to which cosine values
             are calculated
-        :type doc_or_documents: string/integer or list of string/integer
+        :type doc_or_documents: string/integer or list of strings/integers
         
         :param k_indices: A list of topics based on which similarity value is
             computed. Default is all the topics in the model.            
