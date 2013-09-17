@@ -36,9 +36,9 @@ from similarity import (
 
 class LDAGibbsViewer(object):
     """
-    A class for viewing a topic model estimated by `LDAGibbs`
+    A class for viewing a topic model estimated by `LDAGibbs`.
 
-    :param corpus: Source of observed data
+    :param corpus: Source of observed data.
     :type corpus: Corpus
     
     :param model: A topic modeled fitted by `LDAGibbs`
@@ -602,7 +602,7 @@ class LDAGibbsViewer(object):
             than their integer representations. Default is `True`.
         :type as_strings: boolean, optional
 
-        :param print_len: Number of words printed by pretty-pringing function
+        :param print_len: Number of words printed by pretty-printing function
             Default is 10.
         :type print_len: int, optional
 
@@ -626,18 +626,14 @@ class LDAGibbsViewer(object):
         Computes and sorts the cosine similarity values between a document 
         or list of documents and every document in the topic space. 
         
-        :param doc_or_documents: Query document(s) to which cosine values
+        :param doc_or_docs: Query document(s) to which cosine values
             are calculated
-        :type doc_or_documents: string/integer or list of strings/integers
+        :type doc_or_docs: string/integer or list of strings/integers
         
         :param k_indices: A list of topics based on which similarity value is
             computed. Default is all the topics in the model.            
         :type k_indices: list of integers, optional
-        
-        :param as_strings: If `True`, returns a list of words rather than
-            their integer representations. Default is `True`.
-        :type as_strings: boolean, optional
-        
+       
         :param print_len: Number of words printed by pretty-printing function.
             Default is 10.
         :type print_len: int, optional
@@ -645,6 +641,15 @@ class LDAGibbsViewer(object):
         :param filter_nan: If `True` not a number entries are filtered.
             Default is `True`.
         :type filter_nan: boolean, optional
+
+        :param label_fn: A function that defines how documents are represented.
+            Default is def_label_fn which retrieves the labels from corpus metadata.
+        :type label_fn: string, optional
+
+        :param as_strings: If `True`, returns a list of words rather than
+            their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
+        
 
         :returns: w_arr : a LabeledColumn object
             A 2-dim array containing documents and their cosine values to 
