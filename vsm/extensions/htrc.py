@@ -222,6 +222,7 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log']):
 
 def htrc_load_metadata_1315():
     """
+    Loads hathitrust metadata for the 1315 volumes.
     """
     import os
     import json
@@ -237,6 +238,7 @@ def htrc_load_metadata_1315():
 
 def htrc_load_metadata_86():
     """
+    Loads hathitrust metadata for the 86 volumes.
     """
     import os
     import json
@@ -252,6 +254,8 @@ def htrc_load_metadata_86():
 
 def htrc_get_titles(metadata, vol_id):
     """
+    Gets titles of the volume given the metadata from a json file
+    and volume id.
     """
     try:
         md = metadata[vol_id]
@@ -350,6 +354,7 @@ def htrc_find_duplicates(metadata, vol_list):
 
 def add_link(s):
     """
+    if `s` is a url, then adds anchor tags for html representation in ipynb.
     """
     if s.startswith('http'):
         a = '<a href="{0}" target="_blank">'.format(s)

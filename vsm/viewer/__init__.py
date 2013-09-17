@@ -95,6 +95,7 @@ def res_word_type(corp, word):
 
 def res_top_type(topic_or_topics):
     """
+    If `topic_or_topics` is an int, then returns it in a list.
     """
     if isint(topic_or_topics):
         topic_or_topics = [topic_or_topics]

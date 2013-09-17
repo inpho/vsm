@@ -6,15 +6,12 @@ from vsm import enum_sort, map_strarr, isfloat, isint, isstr
 def format_entry(x):
 	"""
 	Formats floats to 5 decimal points and returns a string.
-	If 'x' is a tuple, all elements in the tuple are formatted.
+	If `x` is a tuple, all elements in the tuple are formatted.
 
-	Parameters
-	----------
-	x : string, number, or tuple
+	:param x: Float to be truncated to 5 decimal points.
+    :type x: float or tuple
 
-	Returns
-	-------
-	string representation of 'x'
+	:returns: `x` as a string.
 	"""
 	# np.void is the type of the tuples that appear in numpy
 	# structured arrays
@@ -29,17 +26,16 @@ def format_entry(x):
 
 def format_(x, n):
 	"""
-	Truncates 'x' given the length 'n'. If 'x' is a float 
+	Truncates `x` given the length `n`. If `x` is a float 
 	it returns floats formatted to 5 decimal points.
 
-	Parameters
-	----------
-	x : string or number
-	n : integer
+	:param x: Element to be truncated.
+    :type x: string or integer/float
+	
+    :param n: Length that we want `x` to be.
+    :type n: integer
 
-	Returns
-	-------
-	formatted 'x' given the length 'n'.
+	:returns: formatted `x` given the length `n`.
 	"""
 	if isint(x):
 		return x
@@ -97,51 +93,50 @@ class LabeledColumn(np.ndarray):
 	A subcolumn wraps the data found under a given field name. Each
 	subcolumn has a label and a display width.
 
-	Parameters
-	----------
-	input_array : 1-dimensional structured array
-	col_header : string, optional
-		The title of the object. For example, 'Words: logic'.
-		Default is 'None'.
-	subcol_headers : list, optional
-		List of labels that correspond to the fields of the structured
-		array. Default is 'None'.
-	subcol_widths : list, optional
-		List of widths for each subcolumn. If not provided, 'subcol_
-		widths' is calculated based on the data-type of the entries.
+	:param input_array: Array to be formatted into a LabeledColumn.
+    :type input_array: 1-dimensional structured array
+
+    :param col_header: The title of the object. For example, 'Words: logic'.
 		Default is `None`.
-	col_len : integer
-		Number of entries to display. If not provided, 'col_len' is set
-		to length of LabeledColumn. Default is 'None'.
+	:type col_header: string, optional
+	
+    :param subcol_headers: List of labels that correspond to the fields of 
+        the structured array. Default is `None`.
+    :type subcol_headers: list, optional
 
-   Attributes
-	----------
-	col_header : string, optional
-	The name of the header. For example, 'Words: logic'.
-	Default is 'None'.
-	subcol_headers : list, optional
-		List of labels that correspond to the fields of the structured
-	array. Default is 'None'.
-	subcol_widths : list, optional
-		List of widths for each subcolumn. If not provided, 'subcol_
-	widths' is calculated based on the data in 'input_array'.
-	Default is `None`.
-	col_len : integer
-	Number of entries to display. If not provided, 'col_len' is set
-	to length of LabeledColumn. Default is 'None'.
+	:param subcol_widths: List of widths for each subcolumn. If not provided, 
+        `subcol_widths` is calculated based on the data-type of the entries.
+	:type subcol_widths: list, optional
+	
+	:param col_len: Number of entries to display. If not provided, `col_len`
+        is set to length of LabeledColumn.
+    :type col_len: integer, optional
 
-	Methods
-	-------
-	__str__
-	Takes 'self' and returns a pretty printed string version of 
-	the object.
-	_repr_html_
-	Takes 'self' and returns a html table in ipython online session.
+	:attributes:
+        * **col_header** (string, optional)
+            The title of the object. For example, 'Words: logic'.
+		    Default is `None`.
+        * **subcol_headers** (list, optional)
+            List of labels that correspond to the fields of 
+            the structured array. Default is `None`.
 
-	Examples
-	--------
+	    * **subcol_widths** (list, optional)
+            List of widths for each subcolumn. If not provided, 
+            `subcol_widths` is calculated based on the data-type of the entries.
+	
+	    * **col_len** (integer, optional) 
+            Number of entries to display. If not provided, `col_len`
+            is set to length of LabeledColumn.
 
-	>>>  words = ['there','will','be','an','answer']
+	:methods:
+        * **__str__**
+	        Returns a pretty printed string version of the object.
+	    * **_repr_html_**
+	        Returns a html table in ipython online session.
+
+	**Examples**
+	
+    >>>  words = ['there','will','be','an','answer']
 	>>>  values = [random.random() for w in words]
 	>>>  arr = np.array(zip(words, values), 
 			dtype=[('i', np.array(words).dtype), 
@@ -331,7 +326,7 @@ class CompactTable(np.ndarray):
 
 	def __str__(self):
 		"""
-		Pretty prints the LabeledColumn when 'print' method is used.
+		Pretty prints the LabeledColumn when `print` method is used.
 		"""		
 		width = sum(self.subcol_widths)
 		line = '-' * width + '\n'
@@ -414,29 +409,25 @@ class DataTable(list):
 	A subcolumn wraps the data found under a given field name. Each
 	subcolumn has a label and a display width.
  
-	Parameters
-	----------
-	l : list
-	List of 1-dimensional structured arrays.
-	table_header : string, optional
-	The title of the object. Default is 'None'.
+	:param l: List of 1-dimensional structured arrays.
+	:type l: list
+	
+	:param table_header: The title of the object. Default is `None`.
+    :type table_header: string, optional
    
-	Attributes
-	----------
-	table_header : string
-	The title of the object. Default is 'None'.
+	:attributes:
+        * **table_header** (string)
+	        The title of the object. Default is `None`.
   
-	Methods
-	-------
-	__str__
-	Takes 'self' and returns a pretty print string version of 
-	the object.
-	_repr_html_
-	Takes 'self' and returns an html table in ipython online session.
+	:methods:
+        * **__str__**
+	        Returns a pretty printed string version of the object.
+	    * **_repr_html_**
+	        Returns an html table in ipython online session.
 
-	Examples
-	--------
-	>>>  words = ['there','will','be','an','answer']
+	**Examples**
+	
+    >>>  words = ['there','will','be','an','answer']
 	>>>  values = [random.random() for w in words]
 	>>>  arr = np.array(zip(words, values), 
 			dtype=[('i', np.array(words).dtype), 
@@ -479,13 +470,15 @@ class DataTable(list):
 
 
 	def __getslice__(self, i, j):
+        """
+        """
 		return DataTable(list.__getslice__(self, i, j), 
 					table_header=self.table_header)
 
 
 	def __str__(self):
 		"""
-		Pretty prints the DataTable when 'print' method is used.
+		Pretty prints the DataTable when `print` method is used.
 		"""
 		col_width = self[0].col_width
 

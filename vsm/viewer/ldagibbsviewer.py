@@ -400,8 +400,27 @@ class LDAGibbsViewer(object):
                     print_len=10, filter_nan=True):
         """
         Takes a topic or list of topics (by integer index) and returns
-        a list of topics sorted by the posterior probabilities of 
-        topics given the topic.
+        a list of topics sorted by the cosine values between a given
+        topic and every topic.
+        
+        :param topic_or_topics: Query topic(s) to which cosine values are calculated.
+        :type topic_or_topics: string or list of strings
+        
+        :param weights: Specify weights for each topic in `topic_or_topics`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+
+        :param print_len: Number of topics printed by pretty-pringing function
+            Default is 10.
+        :type print_len: int, optional       
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :returns: a LabeledColumn object
+            A 2-dim array containing topics and their cosine values to 
+            `topic_or_topics`. 
         """
         return _sim_top_top_(self.model.top_word, topic_or_topics, 
                              norms=self._topic_norms, weights=weights, 
@@ -416,7 +435,8 @@ class LDAGibbsViewer(object):
         list of documents sorted by the posterior probabilities of
         documents given the topic.
 
-        :param topic_or_topics: Query topic(s) to which cosine values are calculated
+        :param topic_or_topics: Query topic(s) to which posterior probabilities
+            are calculated.
         :type topic_or_topics: string or list of strings
         
         :param weights: Specify weights for each topic in `topic_or_topics`. 
@@ -443,11 +463,11 @@ class LDAGibbsViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :returns: w_arr : a LabeledColumn object
-            A 2-dim array containing words and their cosine values to 
-            `word_or_words`. 
+        :returns: d_arr : a LabeledColumn object
+            A 2-dim array containing documents and their posterior probabilities 
+            to `topic_or_topics`. 
 
-        :See Also: :meth: def_label_fn, :meth: word_topics
+        :See Also: :meth: def_label_fn
         """
         d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
                               self.model.context_type, weights=weights, 
@@ -571,7 +591,7 @@ class LDAGibbsViewer(object):
         weighted average of the words in the list. If weights are not 
         provided, the arithmetic mean is used.
 
-        :param word_or_words: Query word(s) to which cosine values are calculated
+        :param word_or_words: Query word(s) to which cosine values are calculated.
         :type word_or_words: string or list of strings
         
         :param weights: Specify weights for each query word in `word_or_words`. 
@@ -644,6 +664,15 @@ class LDAGibbsViewer(object):
 
     def simmat_words(self, word_list):
         """
+        Calculates the similarity matrix for a given list of words.
+
+        :param word_list: A list of words whose similarity matrix is to be
+            computed.
+        :type word_list: list
+
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of words
+            in `word_list`.
         """
         return _simmat_words_(self.corpus,
                               self.model.top_word.T,
@@ -662,7 +691,9 @@ class LDAGibbsViewer(object):
             computed. Default is all the topics in the model.
         :type k_indices: list
 
-        :returns: Array ...
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of documents.           
+            considered.
         """
 
         if len(docs) == 0:
@@ -686,7 +717,9 @@ class LDAGibbsViewer(object):
             computed. Default is all topics in the model.
         :type k_indices: list
 
-        :returns: simmat_topics object
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of topics
+            considered.
         """
 
         if len(k_indices) == 0:
