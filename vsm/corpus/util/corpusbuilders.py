@@ -206,6 +206,19 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
 
 def file_tokenize(text):
     """
+    `file_tokenize` is a helper function for `file_corpus`.
+    
+    Takes a string that is content in a file and returns words
+    and corpus data.
+
+    :param text: Content in a plain text file.
+    :type text: string
+
+    :returns: words : List of words.
+        Words in the `text` tokenized by :meth: word_tokenize.
+        corpus_data : Dictionary with context type as keys and
+        corresponding tokenizations as values. The tokenizations
+        are np.arrays.
     """
     words, par_tokens, sent_tokens = [], [], []
     sent_break, par_n, sent_n = 0, 0, 0
@@ -282,6 +295,33 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
 
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
     """
+    `dir_tokenize` is a helper function for :meth: dir_corpus.
+
+    Takes a list of files, `chunks` and `labels` for the `chunks` and
+    returns words and corpus data.
+
+    :param chunks: List of files. `chunk_name` indicates what a chunk
+        represents.
+    :type chunks: list
+
+    :param labels: List of filenames where files equal chunks.
+    :type labels: list
+
+    :param chunk_name: The name of the tokenization corresponding 
+        to individual files. For example, if the files are pages 
+        of a book, one might set `chunk_name` to `pages`. Default 
+        is `articles`.
+    :type chunk_name: string-like, optional
+    
+    :param paragraphs: If `True`, a paragraph-level tokenization 
+        is included. Defaults to `True`.
+    :type paragraphs: boolean, optional
+    
+    :returns: words : List of words.
+        words in the `chunks` tokenized by :meth: word_tokenize.
+        corpus_data : Dictionary with context type as keys and
+        corresponding tokenizations as values. The tokenizations
+        are np.arrays.
     """
     words, chk_tokens, sent_tokens = [], [], []
     sent_break, chk_n, sent_n = 0, 0, 0
@@ -412,6 +452,22 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
 
 def coll_tokenize(books, book_names):
     """
+    `coll_tokenize` is a helper function for :meth: coll_corpus.
+
+    Takes a list of books and `book_names`, and returns words 
+    and corpus data.
+
+    :param books: List of books.
+    :type books: list
+
+    :param book_names: List of book names.
+    :type book_names: list
+
+    :returns: words : List of words.
+        words in the `books` tokenized by :meth: word_tokenize.
+        corpus_data : Dictionary with context type as keys and
+        corresponding tokenizations as values. The tokenizations
+        are np.arrays.
     """
     words, book_tokens, page_tokens, sent_tokens = [], [], [], []
     sent_break, book_n, page_n, sent_n = 0, 0, 0, 0
