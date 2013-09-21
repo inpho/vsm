@@ -38,7 +38,7 @@ class TfIdfViewer(object):
         * **simmat_docs**
             Calculates the similarity matrix for a given list of documents.
 
-    :See Also: :class: TfIdf
+    :See Also: :class:`vsm.model.tfidf.TfIdf`
     """
     def __init__(self, corpus, model):
         """
@@ -165,8 +165,7 @@ class TfIdfViewer(object):
         :type docs: list, optional
         
         :returns: an IndexedSymmArray object
-            n x n matrix containing floats where n is the number of documents.           
-            considered.
+            n x n matrix containing floats where n is the number of documents.                 considered.
         """
         return _simmat_documents_(self.corpus, self.model.matrix,
                                   self.model.context_type, docs)

@@ -49,7 +49,7 @@ class TfViewer(object):
         * **coll_freq**
         * **coll_freqs**
 
-    :See Also: :class: TfSeq, :class: TfMulti
+    :See Also: :class:`vsm.model.tf.TfSeq`, :class:`vsm.model.tf.TfMulti`
     """
     def __init__(self, corpus, model):
         """
