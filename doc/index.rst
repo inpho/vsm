@@ -30,11 +30,11 @@ This documentation site is in its early days. We'll soon have
 documentation for :mod:`vsm` generated from docstrings and example
 IPython notebooks.
 
-.. .. toctree::
-..    :maxdepth: 2
+.. toctree::
+   :maxdepth: 2
 
-..    demos
-..    auto
+   demos
+   auto
    
 ..
    Indices and tables

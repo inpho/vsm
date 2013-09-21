@@ -270,6 +270,10 @@ def htrc_label_fn_1315(metadata):
 def htrc_find_duplicates(metadata, vol_list):
 
     record_ids = [metadata[vol].keys()[0] for vol in vol_list]
+    
+    print 'recordIDs', [metadata[vol].keys()[0] for vol in vol_list]
+    print 'isbns', [metadata[vol]['isbns'] for vol in vol_list]
+    
     mem, indices = [], []
 
     for i,r in enumerate(record_ids):

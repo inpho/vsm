@@ -12,7 +12,6 @@
 # serve to show the default.
 
 import sys, os
-#import ipython_directive
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -27,8 +26,8 @@ needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.coverage']
-                #'ipython_savefig_dir', 'ipython_rgxin', 'ipython_rgout']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 
+            'sphinx.ext.coverage', 'ipython_directive', 'ipython_console_highlighting']#, 'matplotlib.sphinxext.ipython_directive']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
