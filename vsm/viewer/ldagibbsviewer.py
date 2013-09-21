@@ -36,9 +36,9 @@ from similarity import (
 
 class LDAGibbsViewer(object):
     """
-    A class for viewing a topic model estimated by `LDAGibbs`
+    A class for viewing a topic model estimated by `LDAGibbs`.
 
-    :param corpus: Source of observed data
+    :param corpus: Source of observed data.
     :type corpus: Corpus
     
     :param model: A topic modeled fitted by `LDAGibbs`
@@ -399,6 +399,28 @@ class LDAGibbsViewer(object):
     def sim_top_top(self, topic_or_topics, weights=None, 
                     print_len=10, filter_nan=True):
         """
+        Takes a topic or list of topics (by integer index) and returns
+        a list of topics sorted by the cosine values between a given
+        topic and every topic.
+        
+        :param topic_or_topics: Query topic(s) to which cosine values are calculated.
+        :type topic_or_topics: string or list of strings
+        
+        :param weights: Specify weights for each topic in `topic_or_topics`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+
+        :param print_len: Number of topics printed by pretty-pringing function
+            Default is 10.
+        :type print_len: int, optional       
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :returns: a LabeledColumn object
+            A 2-dim array containing topics and their cosine values to 
+            `topic_or_topics`. 
         """
         return _sim_top_top_(self.model.top_word, topic_or_topics, 
                              norms=self._topic_norms, weights=weights, 
@@ -409,6 +431,43 @@ class LDAGibbsViewer(object):
                     print_len=10, as_strings=True, label_fn=_def_label_fn_, 
                     filter_nan=True):
         """
+        Takes a topic or list of topics (by integer index) and returns a 
+        list of documents sorted by the posterior probabilities of
+        documents given the topic.
+
+        :param topic_or_topics: Query topic(s) to which posterior probabilities
+            are calculated.
+        :type topic_or_topics: string or list of strings
+        
+        :param weights: Specify weights for each topic in `topic_or_topics`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+
+        :param filter_words: The topics that include these words are considered.
+            If not provided, by default all topics are considered.
+        :type filter_words: list of words, optional
+ 
+        :param print_len: Number of documents printed by pretty-pringing function
+            Default is 10.
+        :type print_len: int, optional       
+        
+        :param as_strings: If `True`, returns a list of documents as strings rather
+            than their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :param label_fn: A function that defines how documents are represented.
+            Default is def_label_fn which retrieves the labels from corpus metadata.
+        :type label_fn: string, optional
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :returns: d_arr : a LabeledColumn object
+            A 2-dim array containing documents and their posterior probabilities 
+            to `topic_or_topics`. 
+
+        :See Also: :meth: def_label_fn
         """
         d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
                               self.model.context_type, weights=weights, 
@@ -455,7 +514,7 @@ class LDAGibbsViewer(object):
         is assigned the provided weight.
         
         :param word_or_words: word(s) to which cosine values are calculated
-        :type word_or_words: string or list of string
+        :type word_or_words: string or list of strings
         
         :param weights: Specify weights for each query word in `word_or_words`. 
             Default uses equal weights.
@@ -532,8 +591,8 @@ class LDAGibbsViewer(object):
         weighted average of the words in the list. If weights are not 
         provided, the arithmetic mean is used.
 
-        :param word_or_words: Query word(s) to which cosine values are calculated
-        :type word_or_words: string or list of string
+        :param word_or_words: Query word(s) to which cosine values are calculated.
+        :type word_or_words: string or list of strings
         
         :param weights: Specify weights for each query word in `word_or_words`. 
             Default uses equal weights (i.e. arithmetic mean)
@@ -543,7 +602,7 @@ class LDAGibbsViewer(object):
             than their integer representations. Default is `True`.
         :type as_strings: boolean, optional
 
-        :param print_len: Number of words printed by pretty-pringing function
+        :param print_len: Number of words printed by pretty-printing function
             Default is 10.
         :type print_len: int, optional
 
@@ -567,18 +626,14 @@ class LDAGibbsViewer(object):
         Computes and sorts the cosine similarity values between a document 
         or list of documents and every document in the topic space. 
         
-        :param doc_or_documents: Query document(s) to which cosine values
+        :param doc_or_docs: Query document(s) to which cosine values
             are calculated
-        :type doc_or_documents: string/integer or list of string/integer
+        :type doc_or_docs: string/integer or list of strings/integers
         
         :param k_indices: A list of topics based on which similarity value is
             computed. Default is all the topics in the model.            
         :type k_indices: list of integers, optional
-        
-        :param as_strings: If `True`, returns a list of words rather than
-            their integer representations. Default is `True`.
-        :type as_strings: boolean, optional
-        
+       
         :param print_len: Number of words printed by pretty-printing function.
             Default is 10.
         :type print_len: int, optional
@@ -586,6 +641,15 @@ class LDAGibbsViewer(object):
         :param filter_nan: If `True` not a number entries are filtered.
             Default is `True`.
         :type filter_nan: boolean, optional
+
+        :param label_fn: A function that defines how documents are represented.
+            Default is def_label_fn which retrieves the labels from corpus metadata.
+        :type label_fn: string, optional
+
+        :param as_strings: If `True`, returns a list of words rather than
+            their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
+        
 
         :returns: w_arr : a LabeledColumn object
             A 2-dim array containing documents and their cosine values to 
@@ -611,7 +675,9 @@ class LDAGibbsViewer(object):
             computed.
         :type word_list: list
         
-        :returns: Similarity matrix.
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of words
+            in `word_list`.
         """
         return _simmat_words_(self.corpus,
                               self.model.top_word.T,
@@ -630,7 +696,8 @@ class LDAGibbsViewer(object):
             computed. Default is all the topics in the model.
         :type k_indices: list
 
-        :returns: Similarity matrix.
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of documents.                 considered.
         """
 
         if len(docs) == 0:
@@ -654,7 +721,9 @@ class LDAGibbsViewer(object):
             computed. Default is all topics in the model.
         :type k_indices: list, optional
 
-        :returns: simmat_topics object
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of topics
+            considered.
         """
 
         if len(k_indices) == 0:

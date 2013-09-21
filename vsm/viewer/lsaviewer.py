@@ -14,6 +14,33 @@ from similarity import (
 
 class LsaViewer(object):
     """
+    A class for viewing LSA model.
+
+    :param corpus: Source of observed data.
+    :type corpus: Corpus
+
+    :param model: An LSA model.
+    :type model: Lsa object.
+
+    :attributes:
+        * **corpus** (Corpus object) - `corpus`
+        * **model** (Tf object) - `model`
+        * **_words_norms_**
+        * **_doc_norms_**
+
+    :methods:
+        * **sim_word_word**
+            Returns words sorted by the cosine values between a word or list
+            of words and every word.
+        * **sim_doc_doc**
+            Computes and sorts the cosine similarity values between a
+            document or list of documents and every document.
+        * **simmat_words**
+            Calculates the similarity matrix for a given list of words.
+        * **simmat_docs**
+            Calculates the similarity matrix for a given list of documents.
+
+    :See Also: :class: TfIdf
     """
     def __init__(self, corpus, model):
         """
@@ -47,6 +74,30 @@ class LsaViewer(object):
     def sim_word_word(self, word_or_words, weights=None, 
                       filter_nan=True, print_len=10, as_strings=True):
         """
+        A wrapper of `sim_word_word` in similarity.py
+
+        :param word_or_words: Query word(s) to which cosine values are calculated.
+        :type word_or_words: string or list of strings
+        
+        :param weights: Specify weights for each query word in `word_or_words`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+        
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :param print_len: Number of words printed by pretty-printing function
+            Default is 10.
+        :type print_len: int, optional
+
+        :param as_strings: If `True`, returns a list of words as strings rather
+            than their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
+        
+        :returns: w_arr : a LabeledColumn object
+            A 2-dim array containing words and their cosine values to 
+            `word_or_words`. 
         """
         return _sim_word_word_(self.corpus, self.model.word_matrix, 
                                word_or_words, weights=weights, 
@@ -57,6 +108,33 @@ class LsaViewer(object):
     def sim_doc_doc(self, doc_or_docs, weights=None, print_len=10, 
                     filter_nan=True, label_fn=_def_label_fn_, as_strings=True):
         """
+        :param doc_or_docs: Query document(s) to which cosine values
+            are calculated
+        :type doc_or_docs: string/integer or list of strings/integers
+        
+        :param weights: Specify weights for each query doc in `doc_or_docs`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+        
+        :param print_len: Number of words printed by pretty-printing function.
+            Default is 10.
+        :type print_len: int, optional
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+ 
+        :param label_fn: A function that defines how documents are represented.
+            Default is def_label_fn which retrieves the labels from corpus metadata.
+        :type label_fn: string, optional
+        
+        :param as_strings: If `True`, returns a list of words rather than
+            their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :returns: w_arr : a LabeledColumn object
+            A 2-dim array containing documents and their cosine values to 
+            `doc_or_docs`. 
         """
         return _sim_doc_doc_(self.corpus, self.model.doc_matrix.T,
                              self.model.context_type, doc_or_docs, weights=weights,
@@ -67,12 +145,30 @@ class LsaViewer(object):
 
     def simmat_words(self, word_list):
         """
+        Calculates the similarity matrix for a given list of words.
+
+        :param word_list: A list of words whose similarity matrix is to be
+            computed.
+        :type word_list: list
+
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of words
+            in `word_list`.
         """
         return _simmat_words_(self.corpus, self.model.word_matrix, word_list)
 
 
     def simmat_docs(self, docs):
         """
+        Calculates the similarity matrix for a given list of documents.
+
+        :param docs: A list of documents whose similarity matrix is to be computed.
+            Default is all the documents in the model.
+        :type docs: list, optional
+        
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of documents.           
+            considered.
         """
         return _simmat_documents_(self.corpus, self.model.doc_matrix.T,
                                   self.model.context_type, docs)

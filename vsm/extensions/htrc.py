@@ -18,16 +18,15 @@ def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
     """
     Given a collection, cleans up plain page files for books in the collection.
 
-    Parameters
-    ----------
-    coll_dir : string
-        The path for collection.
-    ignore : list of strings, optional
-        List of file extensions to ignore in the directory.
+    :param coll_dir: The path for collection.
+    :type coll_dir: string
+    
+    :param ignore: List of file extensions to ignore in the directory.
+    :type ignore: list of strings, optional
 
-    See Also
-    --------
-    proc_htrc_book
+    :returns: None
+
+    :See Also: :meth: proc_htrc_book
     """
     books = os.listdir(coll_dir)
     books = filter_by_suffix(books, ignore)
@@ -46,19 +45,18 @@ def proc_htrc_book(book, coll_dir, ignore=['.json', '.log']):
     Cleans up page headers, line breaks, and hyphens for all plain pages in the book directory. 
     Creates a log file for debugging purposes.  
   
-    Parameters
-    ----------
-    book : string
-        The name of the book directory in coll_dir.
-    coll_dir : string
-        The path for collection.
-    ignore : list of strings, optional
-        List of file extensions to ignore in the directory.
+    :param book: The name of the book directory in coll_dir.
+    :type book: string
+    
+    :param coll_dir: The path for collection.
+    :type coll_dir: string
+    
+    :param ignore: List of file extensions to ignore in the directory.
+    :type ignore: list of strings, optional
 
-    See Also
-    --------
-    rm_pg_headers
-    rm_lb_hyphens
+    :returns: None
+
+    :See Also: :meth: rm_pg_headers, :meth: rm_lb_hyphens
     """
     book_root = os.path.join(coll_dir, book)
 
@@ -88,6 +86,18 @@ def rm_lb_hyphens(plain_root, logger, ignore=['.json', '.log']):
     Reconstructs word and checks to see if the result exists in either
     WordNet or the OS's default spellchecker dictionary. If so,
     replaces fragments with reconstructed word.
+    
+    :param plain_root: The name of the directory containing plain-text 
+        files.
+    :type plain_root: string
+    
+    :param logger: Logger that handles logging for the given directory.
+    :type logger: Logger
+    
+    :param ignore: List of file extensions to ignore in the directory.
+    :type ignore: list of strings, optional
+
+    :returns: None
     """
 
     d = enchant.Dict('en_US')
@@ -133,8 +143,24 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log']):
     of numbers and punctuation and computes frequencies. If frequency
     for the reduced string exceeds `bound`, the corresponding first
     lines are considered headers.
-    """
+    
+    :param plain_root: The name of the directory containing plain-text 
+        files.
+    :type plain_root: string
+    
+    :param logger: Logger that handles logging for the given directory.
+    :type logger: Logger
+    
+    :param bound: Number of frequency of a reduced string. If the string
+        appears more than `bound`, then the corresponding first lines are
+        considered headers. Default is 1.
+    :param bound: int, optional
 
+    :param ignore: List of file extensions to ignore in the directory.
+    :type ignore: list of strings, optional
+
+    :returns: None
+    """
     page_files = os.listdir(plain_root)
     page_files = filter_by_suffix(page_files, ignore)
 
@@ -195,7 +221,9 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log']):
 
 
 def htrc_load_metadata_1315():
-
+    """
+    Loads hathitrust metadata for the 1315 volumes.
+    """
     import os
     import json
 
@@ -209,7 +237,9 @@ def htrc_load_metadata_1315():
 
 
 def htrc_load_metadata_86():
-
+    """
+    Loads hathitrust metadata for the 86 volumes.
+    """
     import os
     import json
 
@@ -223,7 +253,10 @@ def htrc_load_metadata_86():
 
 
 def htrc_get_titles(metadata, vol_id):
-
+    """
+    Gets titles of the volume given the metadata from a json file
+    and volume id.
+    """
     try:
         md = metadata[vol_id]
         return md[md.keys()[0]]['titles']
@@ -235,6 +268,17 @@ def htrc_get_titles(metadata, vol_id):
 
 def htrc_label_fn_86(metadata):
     """
+    A customized label function for hathitrust 86 volumes.
+    It loads the metadata of htrc 86 and returns labels that consist of
+    file names which are pages and book titles.
+
+    :param metadata: Strucutred array that has 'file' and 'book_label' field.
+        Most likely the output of Corpus.view_metadata('page').
+    :type metadata: array
+
+    :returns: An array of labels that consist of file names and book titles.
+
+    :See Also: :meth: Corpus.view_metadata
     """
     md = htrc_load_metadata_86()
 
@@ -254,6 +298,16 @@ def htrc_label_fn_86(metadata):
 
 def htrc_label_fn_1315(metadata):
     """
+    A customized label function for hathitrust 1315 volumes.
+    It loads the metadata of htrc 86 and returns book title labels.
+
+    :param metadata: Strucutred array that has 'book_label' field.
+        Most likely the output of Corpus.view_metadata('book').
+    :type metadata: array
+
+    :returns: An array of labels that consist of book titles.
+
+    :See Also: :meth: Corpus.view_metadata
     """
     md = htrc_load_metadata_1315()
 
@@ -268,7 +322,23 @@ def htrc_label_fn_1315(metadata):
 
 
 def htrc_find_duplicates(metadata, vol_list):
+    """
+    Takes metadata and a list of volumes and finds duplicates
+    amongst the volumes.
 
+    :param metadata: Dictionary of metadata. Output of
+        htrc_load_metadata_86() or htrc_load_metadata_1315()
+        is acceptable.
+    :type metadata: dictionary
+
+    :param vol_list: List of volumes. An example of a volume is
+        'uc2.ark+=13960=t73t9h556'.
+    :type vol_list: list
+
+    :returns: indices : the indices of duplicates from `vol_list`.
+    
+    :See Also: :meth: htrc_load_metadata_86, :meth: htrc_load_metadata_1315
+    """
     record_ids = [metadata[vol].keys()[0] for vol in vol_list]
     
     print 'recordIDs', [metadata[vol].keys()[0] for vol in vol_list]
@@ -288,6 +358,7 @@ def htrc_find_duplicates(metadata, vol_list):
 
 def add_link(s):
     """
+    if `s` is a url, then adds anchor tags for html representation in ipynb.
     """
     if s.startswith('http'):
         a = '<a href="{0}" target="_blank">'.format(s)
@@ -297,6 +368,17 @@ def add_link(s):
 
 def htrc_label_link_fn_86(metadata):
     """
+    A customized label function for hathitrust 86 volumes.
+    It loads the metadata of htrc 86 and returns pages, book title labels, and page urls
+    that open up the page on hathitrust website.
+
+    :param metadata: Strucutred array that has 'file', and 'book_label' field.
+        Most likely the output of Corpus.view_metadata('page').
+    :type metadata: array
+
+    :returns: An array of labels for pages, books, and page urls.
+
+    :See Also: :meth: Corpus.view_metadata, :meth: htrc_label_fn_86
     """
     md = htrc_load_metadata_86()
 
@@ -317,6 +399,17 @@ def htrc_label_link_fn_86(metadata):
 
 def htrc_label_link_fn_1315(metadata):
     """
+    A customized label function for hathitrust 1315 volumes.
+    It loads the metadata of htrc 1315 and returns book title labels and their urls
+    that open up the book on hathitrust website.
+
+    :param metadata: Strucutred array that has 'book_label' field.
+        Most likely the output of Corpus.view_metadata('page').
+    :type metadata: array
+
+    :returns: An array of labels for books and book urls.
+
+    :See Also: :meth: Corpus.view_metadata, :meth: htrc_label_fn_1315
     """
     md = htrc_load_metadata_1315()
 
@@ -340,12 +433,27 @@ def url_metadata(corpus, ctx_type, coll_dir):
     Returns a list of urls whose order matches with the existing metadata.
     It creates url metadata that can be added to a Corpus object with
     add_metadata function in vsm.corpus.util.
+
+    :param corpus: Corpus to add url metadata to. Urls match with the existing
+        metadata of `corpus`.
+    :type corpus: Corpus
+
+    :param ctx_type: A type of tokenization.
+    :type ctx_type: string
+
+    :param coll_dir: Path for the collection directory. Either htrc 86 plain
+        or htrc 1315 plain directory.
+    :type coll_dir: string
+
+    :returns: md : List of urls to be added to corpus
+
+    :See Also: :meth: add_metadata
     """
 
     import json
     from vsm.viewer import doc_label_name
 
-    md = []
+    urls = []
     corp_md = corpus.view_metadata('book')
     book_labels = corp_md[doc_label_name('book')]
     
@@ -362,12 +470,12 @@ def url_metadata(corpus, ctx_type, coll_dir):
             url = li[-1]['itemURL']
 
             if ctx_type == 'book':
-                md.append( unidecode(url))
+                urls.append( unidecode(url))
             else:
                 for i in xrange(1, len(booklist)):
                     s = url + '?urlappend=%3Bseq={0}'.format(i)
-                    md.append( unidecode(s))
-    return md
+                    urls.append( unidecode(s))
+    return urls
 
 
 
