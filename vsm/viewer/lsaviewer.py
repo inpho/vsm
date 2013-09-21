@@ -40,7 +40,7 @@ class LsaViewer(object):
         * **simmat_docs**
             Calculates the similarity matrix for a given list of documents.
 
-    :See Also: :class: TfIdf
+    :See Also: :class:`vsm.model.lsa.Lsa`
     """
     def __init__(self, corpus, model):
         """

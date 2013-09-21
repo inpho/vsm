@@ -245,6 +245,8 @@ class LDAGibbsViewer(object):
 	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
 				 field_name='word')
 
+        print k_arr
+
         # without probabilities, just words
         if compact_view:
             sch = ['Topic', 'Words']
@@ -669,12 +671,12 @@ class LDAGibbsViewer(object):
 
     def simmat_words(self, word_list):
         """
-        Calculates the similarity matrix for a given list of words.
+        Calculates the similarity matrix for `word_list`.
 
         :param word_list: A list of words whose similarity matrix is to be
             computed.
         :type word_list: list
-
+        
         :returns: an IndexedSymmArray object
             n x n matrix containing floats where n is the number of words
             in `word_list`.
@@ -697,8 +699,7 @@ class LDAGibbsViewer(object):
         :type k_indices: list
 
         :returns: an IndexedSymmArray object
-            n x n matrix containing floats where n is the number of documents.           
-            considered.
+            n x n matrix containing floats where n is the number of documents.                 considered.
         """
 
         if len(docs) == 0:
@@ -720,7 +721,7 @@ class LDAGibbsViewer(object):
 
         :param k_indices: A list of topics whose similarity matrix is to be
             computed. Default is all topics in the model.
-        :type k_indices: list
+        :type k_indices: list, optional
 
         :returns: an IndexedSymmArray object
             n x n matrix containing floats where n is the number of topics
@@ -816,7 +817,7 @@ class LDAGibbsViewer(object):
             in addition to returning a plot object. Default is `True`.
         :type show: boolean, optional
 
-        :param grid: If `True` draw a grid. Default is True. 
+        :param grid: If `True` draw a grid. Default is `True`. 
         :type grid: boolean, optional
         
         :returns: plt : a matplotlib.pyplot object
