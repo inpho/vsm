@@ -48,6 +48,31 @@ class TestCore(unittest.TestCase):
                   dtype=[('i', '<i8'), ('value', '<i8')])).all())
 
 
+    def test_enum_array(self):
+        
+        arr1 = np.array([7,3,1,8,2])
+        ea1 = enum_array(arr1)
+        arr2 = np.array([6,3,7,2,0,4])
+        ea2 = enum_array(arr2)
+
+        self.assertTrue((ea1 == 
+            np.array([(0,7), (1,3), (2,1), (3,8), (4,2)],
+                    dtype=[('i', '<i8'), ('value', '<i8')])).all())
+        self.assertTrue((ea2 ==
+            np.array([(0,6), (1,3), (2,7), (3,2), (4,0), (5,4)],
+                    dtype=[('i', '<i8'), ('value', '<i8')])).all())
+        
+
+    def test_zip_arr(self):
+        
+        arr1 = np.array([[2,4], [6,8]])
+        arr2 = np.array([[1,3], [5,7]])
+
+        zipped = zip_arr(arr1, arr2, field_names=['even', 'odd'])
+        self.assertTrue((zipped == np.array([[(2,1), (4,3)], [(6,5), (8,7)]],
+                        dtype=[('even', '<i8'), ('odd', '<i8')])).all())
+
+
     def test_map_strarr(self):
 
         arr = np.array([(0, 1.), (1, 2.)], 
