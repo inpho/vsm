@@ -20,7 +20,17 @@ class TestCore(unittest.TestCase):
         self.assertTrue((new_arr==test_arr).all())
         self.assertTrue(new_arr.dtype==test_arr.dtype)
 
-    # def test_enum_matrix(self):
+    def test_enum_matrix(self):
+
+        arr = np.array([[6,3,7], [2,0,4]])
+        em1 = enum_matrix(arr)
+        em2 = enum_matrix(arr, indices=[10,20,30], field_name='tens')
+
+        self.assertTrue((em1 == np.array([[(2,7), (0,6), (1, 3)],[(2,4), (0,2), (1,0)]],
+                        dtype=[('i', '<i8'), ('value', '<i8')])).all())
+        self.assertTrue((em2 == np.array([[(30,7), (10,6), (20, 3)],[(30,4), (10,2), (20,0)]],
+                        dtype=[('tens', '<i8'), ('value', '<i8')])).all())
+        
 
 
     def test_enum_sort(self):
