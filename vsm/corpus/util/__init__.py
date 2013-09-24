@@ -61,7 +61,7 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
 
     :returns: Corpus with new metadata added to the existing metdata.
 
-    :See Also: :class: Corpus, :meth: arr_add_field
+    :See Also: :class:`Corpus`, :meth:`arr_add_field`
     """
     from vsm import arr_add_field
     i = corpus.context_types.index(ctx_type)
@@ -92,7 +92,7 @@ def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
 
     :returns: Corpus with words in the stoplist removed.
 
-    :See Also: :class: Corpus, :meth: Corpus.apply_stoplist
+    :See Also: :class:`Corpus`, :meth:`Corpus.apply_stoplist`
     """
     stoplist = set()
     if nltk_stop:

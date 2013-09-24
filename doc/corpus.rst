@@ -1,6 +1,16 @@
-==========
-vsm.corpus
-==========
+=================
+vsm.corpus.Corpus
+=================
 
-.. automodule:: vsm.corpus
-    :members:
+.. autoclass:: vsm.corpus.Corpus
+
+.. toctree::
+    :maxdepth: 2
+
+    view_contexts
+    tolist
+    load
+    save
+    apply_stoplist
+
+

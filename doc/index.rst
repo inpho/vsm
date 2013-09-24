@@ -36,13 +36,13 @@ IPython notebooks.
    demos
    auto
    
-..
-   Indices and tables
-   ==================
 
-   * :ref:`genindex`
-   * :ref:`modindex`
-   * :ref:`search`
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
 
 
 
