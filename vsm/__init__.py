@@ -29,22 +29,18 @@ def arr_add_field(arr, new_field, vals):
     This is a handy function for adding new metadata to 
     the original metadata array in Corpus object.
     
-    **Parameters**
-
-    arr : array
-        A structured array.
-    new_field : string
-        The dtype name for the values.
-    vals : list
-        A list of values. `vals` must have the same length as `arr`.
-
-    **Returns**
-
-    New array with the added values.
-
-    **See Also**
+    :param arr: A structured array.
+    :type arr: array
     
-    Corpus.view_metadata
+    :param new_field: The dtype name for the values.
+    :type new_field: string
+    
+    :param vals: A list of values. `vals` must have the same length as `arr`.
+    :type vals: list
+
+    :returns: new_arr : New array with the added values.
+
+    :See Also: :meth:`Corpus.view_metadata`
 
     **Examples**
 
@@ -76,25 +72,24 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     Takes a 1-dimensional or 2-dimensional array and returns a sorted
     structured array with indices.
 
-    **Parameters**
+    :param arr: 1-dimensional or 2-dimensional numpy array.
+    :type arr: array
+    
+    :param axis: Array axis 0 or 1. Default is 0.
+    :type axis: int, optional
+    
+    :param indices: List of indices. If 'indices' is empty, then `indices` 
+        is set to a range of indices for the length of `arr`. 
+        Default is an empty list.
+    :type indices: list, optional
+    
+    :param field_name: Name for indices in the structured array dtype. 
+        Default is 'i'.
+    :type field_name: string, optional
 
-    arr : array
-        1-dimensional or 2-dimensional numpy array.
-    axis : int, optional
-        Array axis 0 or 1. Default is 0.
-    indices : list, optional
-        List of indices. If 'indices' is empty, then `indices` is set to
-        a range of indices for the length of `arr`. Default is an empty list.
-    field_name : string, optional
-        Name for indices in the structured array dtype. Default is 'i'.
+    :returns: mt : A sorted structured array with indices.
 
-    **Returns**
-
-    A sorted structured array with indices.
-
-    **See Also**
-
-    zip_arr
+    :See Also: :meth:`zip_arr`
 
     **Examples**
 
@@ -142,21 +137,23 @@ def enum_sort(arr, indices=[], field_name='i', filter_nan=False):
     Takes a 1-dimensional array and returns a sorted array with matching
     indices from the original array.
 
-    **Parameters**
-
-    arr : array
-        A structured 1-dimensional array.
-    indices : list, optional
-        List of indices. If `indices` is empty, then `indices` is set to
-        a range of indices for the length of `arr`. Default is an empty list.
-    field_name : string, optional
-        Name for indices in the structured array dtype. Default is 'i'.
-    filter_nan : boolean, optional
-        If True, Not a Number values are filtered. Default is False.
-
-    **Returns**
+    :param arr: A structured 1-dimensional array.
+    :type arr: array
     
-    A sorted structured array.
+    :param indices: List of indices. If `indices` is empty, then `indices`
+        is set to a range of indices for the length of `arr`. 
+        Default is an empty list.
+    :type indices: list, optional
+    
+    :param field_name: Name for indices in the structured array dtype. 
+        Default is 'i'.
+    :type field_name: string, optional
+    
+    :param filter_nan: If `True`, Not a Number values are filtered. 
+        Default is `False`.
+    :type filter_nan: boolean, optional
+
+    :returns: A sorted structured array.
 
     **Examples**
 
@@ -189,23 +186,21 @@ def enum_array(arr, indices=[], field_name='i'):
     Takes an array and returns a structured array with indices
     and values as dtype names.
 
-    **Parameters**
+    :param arr: 1-dimensional array
+    :type arr: array
     
-    arr : array
-        1-dimensional array
-    indices : list, optional
-        List of indices. If `indices` is empty, then `indices` is set to
-        a range of indices for the length of `arr`. Default is an empty list.
-    field_name : string, optional 
-        Name for indices in the structured array dtype. Default is 'i'.
+    :param indices: List of indices. If `indices` is empty, then `indices` 
+        is set to a range of indices for the length of `arr`. 
+        Default is an empty list.
+    :type indices: list, optional
+    
+    :param field_name: Name for indices in the structured array dtype. 
+        Default is 'i'.
+    :type field_name: string, optional 
 
-    **Returns**
+    :returns: A structured array with indices and value fields.
 
-    A structured array with indices and value fields.
-
-    **See Also**
-
-    zip_arr
+    :See Also: :meth:`zip_arr`
 
     **Examples**
 
@@ -226,18 +221,16 @@ def zip_arr(arr_1, arr_2, field_names=['arr_1','arr_2']):
     """
     Takes two arrays with same shape and returns a zipped structured array.
 
-    **Parameters**
+    :param arr_1: 1-dimensional array.        
+    :type arr_1: array
+    
+    :param arr_2: 1-dimensional array.
+    :type arr_2: array
+    
+    :param field_names: List of numpy dtype names.
+    :type field_names: list, optional
 
-    arr_1 : array
-        1-dimensional array.        
-    arr_2 : array
-        1-dimensional array.
-    field_names : list, optional
-        List of numpy dtype names.
-
-    **Returns**
-
-    Zipped array of `arr_1` and `arr_2`.
+    :returns: new_arr : Zipped array of `arr_1` and `arr_2`.
 
     **Examples**
 
@@ -266,23 +259,20 @@ def map_strarr(arr, m, k, new_k=None):
     according to `m`. If `new_name` is given, the field name `k` is
     replaced with `new_name`.
 
-    **Parameters**
+    :param arr: A structured array.
+    :type arr: array
 
-    arr : array
-
-    m : iterable
-        An indexable array or list to retrieve the values from.
+    :type m: iterable
+    :param m: An indexable array or list to retrieve the values from.
         The iterable contains values to replace the original `k` values.
-    k : string
-        Field name with values to be replaced. arr[k] should be an integer
-        type.
-    new_k : string, optional
-        Field name for the new values. Default is None, which is then set to
-        `k`, the original field name.
+    :type k: string
+    :param k: Field name of `arr`. arr[k] are the values to be replaced. 
+        arr[k] should be an array of integers.
+    :type new_k: string, optional
+    :param new_k: Field name for the new values. If not provided, field name
+        is then set to `k`, the original field name. Default is `None`.
 
-    **Returns**
-    
-    A new array with `k` values replaced by values in `m`.
+    :returns: new_ arr : A new array with `k` values replaced by values in `m`.
 
     **Examples**
 
@@ -315,15 +305,13 @@ def mp_split_ls(ls, n):
     """
     Split list into an `n`-length list of arrays.
 
-    **Parameters**
+    :param ls: List to be split.
+    :type ls: list
 
-    ls : list
+    :param n: Number of splits.
+    :type n: int
 
-    n : int
-
-    **Returns**
-    
-    List of arrays whose length is 'n'.
+    :returns: List of arrays whose length is 'n'.
 
     **Examples**
     >>> ls = [1,5,6,8,2,8]
