@@ -3,4 +3,16 @@ vsm.viewer.tfidfviewer
 ======================
 
 .. automodule:: vsm.viewer.tfidfviewer
-    :members:
+
+.. autoclass:: TfIdfViewer
+
+Methods
+-------
+
+.. toctree::
+   :maxdepth: 2
+
+   tfidf_sim_word_word
+   tfidf_sim_doc_doc
+   tfidf_simmat_words
+   tfidf_simmat_docs

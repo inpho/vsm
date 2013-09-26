@@ -2,6 +2,8 @@
 vsm.corpus.util
 ===============
 
+needs some text!
+
 .. automodule:: vsm.corpus.util
 
 .. toctree::

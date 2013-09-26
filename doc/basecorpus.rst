@@ -4,6 +4,9 @@ vsm.corpus.BaseCorpus
 
 .. autoclass:: vsm.corpus.BaseCorpus
 
+Methods
+-------
+
 .. toctree::
     :maxdepth: 2
 

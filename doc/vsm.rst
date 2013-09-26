@@ -6,4 +6,3 @@
 :Date: |today|
 
 .. automodule:: vsm
-    :members:

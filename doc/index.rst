@@ -35,14 +35,14 @@ IPython notebooks.
 
    demos
    auto
-   
+   contents   
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
+.. * :ref:`search`
 
 
 
