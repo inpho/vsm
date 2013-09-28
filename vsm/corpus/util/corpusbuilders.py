@@ -20,7 +20,7 @@ def empty_corpus(context_type='context'):
 
     :returns: An empty Corpus with no words or context_data.
 
-    :See Also: :class: Corpus
+    :See Also: :class:`vsm.corpus.Corpus`
     """
     return Corpus([],
                   context_data=[np.array([], dtype=[('idx', np.int)])],
@@ -59,7 +59,7 @@ def random_corpus(corpus_len,
 
     :returns: Corpus object with random integers as its entries. 
 
-    :See Also: :class: Corpus
+    :See Also: :class:`vsm.corpus.Corpus`
     """
     corpus = np.random.randint(n_words, size=corpus_len)
 
@@ -97,7 +97,7 @@ def corpus_fromlist(ls, context_type='context'):
 
     :returns: A Corpus object built from `ls`.
 
-    :See Also: :class: Corpus
+    :See Also: :class:`vsm.corpus.Corpus`
 
     **Examples**
 
@@ -173,7 +173,9 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
 
-    :See Also: :class: Corpus, :meth: paragraph_tokenize, :meth: apply_stoplist
+    :See Also: :class:`vsm.corpus.Corpus`, 
+        :meth:`vsm.corpus.util.paragraph_tokenize`, 
+        :meth:`vsm.corpus.util.apply_stoplist`
     """
     if is_filename:
         with open(plain_corpus, 'r') as f:
@@ -277,7 +279,9 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
     
-    :See Also: :class: Corpus, :meth: file_tokenize, :meth: apply_stoplist
+    :See Also: :class:`vsm.corpus.Corpus`, 
+        :meth:`file_tokenize`, 
+        :meth:`vsm.corpus.util.apply_stoplist`
     """
     with open(filename, mode='r') as f:
         text = f.read()
@@ -427,7 +431,9 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
     
-    :See Also: :class: Corpus, :meth: dir_tokenize, :meth: apply_stoplist
+    :See Also: :class:`vsm.corpus.Corpus`, 
+            :meth:`dir_tokenize`, 
+            :meth:`vsm.corpus.util.apply_stoplist`
     """
     chunks = []
     filenames = os.listdir(plain_dir)

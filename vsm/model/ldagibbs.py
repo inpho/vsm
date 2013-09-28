@@ -18,76 +18,77 @@ class LDAGibbs(object):
     """
     An implementation of LDA using collapsed Gibbs sampling.
 
-    References
-    ----------    
+    **References**
+        
     Griffiths, Tom. Gibbs sampling in the generative model of Latent Dirichlet Allocation.
 
     Wang, Yi. Distributed Gibbs Sampling of Latent Topic Models: The Gritty Details.
 
-    Parameters
-    ----------
-    corpus : Corpus
-        Source of observed data
-    context_type : string
-        Name of tokenization stored in `corpus` whose tokens will be
+    :param corpus: Source of observed data.
+    :type corpus: Corpus
+    
+    :param context_type: Name of tokenization stored in `corpus` whose tokens will be
         treated as documents.
-    K : int
-        Number of topics. Default is `100`.
-    alpha : float
-        Parameter for the prior distribution of theta_d. Default is `0.01`.
-    beta : float
-        Parameter for the prior distribution of phi_d. Default is `0.01`.
-    log_prob : boolean
-        If `True`, compute the log probabilities of the corpus given
+    :type context_type: string
+
+    :param K: Number of topics. Default is `100`.
+    :type K: int
+    
+    :param alpha: Parameter for the prior distribution of theta_d. Default is `0.01`.
+    :type alpha: float
+    
+    :param beta: Parameter for the prior distribution of phi_d. Default is `0.01`.
+    :type beta: float
+    
+    :param log_prob: If `True`, compute the log probabilities of the corpus given
         the values of the latent variables at each iteration and
         records them in `log_prob`. Default is `True`.
+    :type log_prob: boolean
 
-    Attributes
-    ----------
-    W : list of integer arrays
-        List of documents, which are extracted from the input Corpus object
-    V : int
-        Number of unique words in the corpus
-    Z : list of integer arrays
-        Topic assignments for every word coordinate in the corpus
-    iterations : int
-        Number of past iterations of the update rule
-    doc_top : 2-dim floating point array
-        Stores the unnormalized estimated posterior distribution over
-        topics for each document in a D x K matrix
-    top_word : 2-dim floating point array
-        Stores the unnormalized estimated posterior distribution over
-        terms for each topic in a K x V matrix
-    sum_word_top : 1-dim floating point array
-        Stores the sum of words over topics
+    :Attributes:
+        * **W** (list of integer arrays)
+            List of documents, which are extracted from the input Corpus object.
+        * **V** (int)
+            Number of unique words in the corpus.
+        * **Z** (list of integer arrays)
+            Topic assignments for every word coordinate in the corpus.
+        * **iterations** (int)
+            Number of past iterations of the update rule.
+        * **doc_top** (2-dim floating point array)
+            Stores the unnormalized estimated posterior distribution over
+            topics for each document in a D x K matrix.
+        * **top_word** (2-dim floating point array)
+            Stores the unnormalized estimated posterior distribution over
+            terms for each topic in a K x V matrix.
+        * **sum_word_top** (1-dim floating point array)
+            Stores the sum of words over topics.
 
-    Methods
-    -------
-    train
-        Takes an optional argument `itr`, which defaults to 1000, and
-        updates the model `itr` times.
-    update_z
-        Takes a document index `d`, a word index `i` relative to that
-        document and a word `w` and updates the model.
-    z_dist
-        Takes a document index `d` and a word `w` and computes the
-        distribution over topics for `w` in `d`
-    phi_k
-        Takes a topic index `t` and returns the estimated posterior
-        distribution over words for `t`
-    phi_w
-        Takes a word `w` and returns the estimated posterior
-        distribution over topics for `w`
-    theta_d
-        Takes a document index `d` and returns the estimated posterior
-        distribution over topics for `d`
-    theta_k
-        Takes a topic index `t` and returns the estimated posterior
-        distribution over documents for `t`
-    logp
-        Compute the log probability of the corpus `W` given the
-        estimated values of the latent variables `phi`, `theta` and
-        `Z`
+    :Methods:
+        * **train**
+            Takes an optional argument `itr`, which defaults to 1000, and
+            updates the model `itr` times.
+        * **update_z**
+            Takes a document index `d`, a word index `i` relative to that
+            document and a word `w` and updates the model.
+        * **z_dist**
+            Takes a document index `d` and a word `w` and computes the
+            distribution over topics for `w` in `d`.
+        * **phi_k**
+            Takes a topic index `t` and returns the estimated posterior
+            distribution over words for `t`.
+        * ***phi_w**
+            Takes a word `w` and returns the estimated posterior
+            distribution over topics for `w`.
+        * **theta_d**
+            Takes a document index `d` and returns the estimated posterior
+            distribution over topics for `d`.
+        * **theta_k**
+            Takes a topic index `t` and returns the estimated posterior
+            distribution over documents for `t`.
+        * **logp**
+            Compute the log probability of the corpus `W` given the
+            estimated values of the latent variables `phi`, `theta` and
+            `Z`.
 
     """
     def __init__(self, corpus, context_type,
@@ -210,7 +211,8 @@ class LDAGibbs(object):
 
     @staticmethod
     def load(filename):
-
+        """
+        """
         from vsm.corpus import split_corpus
         from vsm.corpus.util.corpusbuilders import empty_corpus
 
@@ -239,7 +241,8 @@ class LDAGibbs(object):
 
     
     def save(self, filename):
-
+        """
+        """
         arrays_out = dict()
         arrays_out['W_corpus'] = np.array(np.hstack(self.W), dtype=np.int32)
         arrays_out['W_indices'] = np.cumsum([a.size for a in self.W])

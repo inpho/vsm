@@ -1,6 +1,16 @@
-======================
-vsm.viewer.labeleddata
-======================
+===========
+labeleddata
+===========
+
+needs text
 
 .. automodule:: vsm.viewer.labeleddata
-    :members:
+
+.. toctree::
+
+   :maxdepth: 2
+
+   labeledcolumn
+   compacttable
+   datatable
+   indexedsymmarray

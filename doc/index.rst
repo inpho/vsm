@@ -35,7 +35,7 @@ IPython notebooks.
 
    demos
    auto
-   contents   
+   workflow
 
 Indices and tables
 ==================

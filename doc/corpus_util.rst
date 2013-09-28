@@ -6,6 +6,9 @@ needs some text!
 
 .. automodule:: vsm.corpus.util
 
+Methods
+-------
+
 .. toctree::
     :maxdepth: 2
 

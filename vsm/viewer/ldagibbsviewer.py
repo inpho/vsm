@@ -423,6 +423,8 @@ class LDAGibbsViewer(object):
         :returns: a LabeledColumn object
             A 2-dim array containing topics and their cosine values to 
             `topic_or_topics`. 
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_top_top`
         """
         return _sim_top_top_(self.model.top_word, topic_or_topics, 
                              norms=self._topic_norms, weights=weights, 
@@ -469,7 +471,7 @@ class LDAGibbsViewer(object):
             A 2-dim array containing documents and their posterior probabilities 
             to `topic_or_topics`. 
 
-        :See Also: :meth: def_label_fn
+        :See Also: :meth:`def_label_fn`, :meth:`vsm.viewer.similarity.sim_top_doc`
         """
         d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
                               self.model.context_type, weights=weights, 
@@ -543,6 +545,8 @@ class LDAGibbsViewer(object):
         :returns: k_arr : a LabeledColumn object
             A structured array of topics sorted by their cosines values 
             with `word_or_words`.
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_word_top`
         """
         sim = _sim_word_top_(self.corpus, self.model.top_word, word_or_words,
                              weights=weights, norms=self._topic_norms, 
@@ -615,6 +619,8 @@ class LDAGibbsViewer(object):
         :returns: w_arr : a LabeledColumn object
             A 2-dim array containing words and their cosine values to 
             `word_or_words`. 
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_word_word`
         """
         return _sim_word_word_(self.corpus, self.model.top_word.T, 
                                word_or_words, weights=weights, 
@@ -652,10 +658,11 @@ class LDAGibbsViewer(object):
             their integer representations. Default is `True`.
         :type as_strings: boolean, optional
         
-
         :returns: w_arr : a LabeledColumn object
             A 2-dim array containing documents and their cosine values to 
             `doc_or_docs`. 
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_doc_doc`
         """
         
         if len(k_indices) == 0:
@@ -680,6 +687,8 @@ class LDAGibbsViewer(object):
         :returns: an IndexedSymmArray object
             n x n matrix containing floats where n is the number of words
             in `word_list`.
+       
+        :See Also: :meth:`vsm.viewer.similarity.simmat_words`
         """
         return _simmat_words_(self.corpus,
                               self.model.top_word.T,
@@ -700,6 +709,8 @@ class LDAGibbsViewer(object):
 
         :returns: an IndexedSymmArray object
             n x n matrix containing floats where n is the number of documents.                 considered.
+        
+        :See Also: :meth:`vsm.viewer.similarity.simmat_documents`
         """
 
         if len(docs) == 0:
@@ -726,6 +737,8 @@ class LDAGibbsViewer(object):
         :returns: an IndexedSymmArray object
             n x n matrix containing floats where n is the number of topics
             considered.
+        
+        :See Also: :meth:`vsm.viewer.similarity.simmat_topics`
         """
 
         if len(k_indices) == 0:

@@ -1,6 +1,6 @@
-=====================
-vsm.corpus.BaseCorpus
-=====================
+==========
+BaseCorpus
+==========
 
 .. autoclass:: vsm.corpus.BaseCorpus
 

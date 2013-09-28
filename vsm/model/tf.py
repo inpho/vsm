@@ -45,7 +45,7 @@ class TfSeq(BaseModel):
             Takes a filename or file object and loads it as an npz archive
             into a BaseModel object.
 
-    :See Also: :class: BaseModel, :class: Corpus, :class: scipy.sparse.coo_matrix
+    :See Also: :class:`vsm.model.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
     """
     def __init__(self, corpus=None, context_type=None):
 
@@ -108,7 +108,7 @@ class TfMulti(BaseModel):
             Takes a filename or file object and loads it as an npz archive
             into a BaseModel object.
 
-    :See Also: :class: BaseModel, :class: Corpus, :class: scipy.sparse.coo_matrix
+    :See Also: :class:`vsm.model.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
     """
     def __init__(self, corpus=None, context_type=None):
 
@@ -143,8 +143,6 @@ class TfMulti(BaseModel):
         :type n_procs: integer
 
         :returns: `None`
-
-        :See Also: :class: TfMulti
         """
         ctx_ls = mp_split_ls(self.contexts, n_procs)
 

@@ -1,6 +1,6 @@
-=======================
-vsm.viewer.beagleviewer
-=======================
+============
+beagleviewer
+============
 
 .. automodule:: vsm.viewer.beagleviewer
 

@@ -40,7 +40,7 @@ def arr_add_field(arr, new_field, vals):
 
     :returns: new_arr : New array with the added values.
 
-    :See Also: :meth:`Corpus.view_metadata`
+    :See Also: :meth:`view_metadata`
 
     **Examples**
 

@@ -37,10 +37,10 @@ class CorpusSent(Corpus):
 	    :param freq: A threshold where words of frequency <= 'freq' are 
             removed. Default is 0.
             
-        :retursn: Copy of corpus with words in the stoplist and words of
+        :returns: Copy of corpus with words in the stoplist and words of
             frequnecy <= 'freq' removed.
 
-        :See Also: :class: Corpus
+        :See Also: :class:`Corpus`
         """
         if freq:
             #TODO: Use the TF model instead

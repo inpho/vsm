@@ -1,6 +1,6 @@
-===================
-vsm.viewer.tfviewer
-===================
+========
+tfviewer
+========
 
 .. automodule:: vsm.viewer.tfviewer
 

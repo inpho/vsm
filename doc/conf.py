@@ -27,7 +27,8 @@ needs_sphinx = '1.0'
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 
-            'sphinx.ext.coverage', 'ipython_directive', 'ipython_console_highlighting']#, 'matplotlib.sphinxext.ipython_directive']
+            'sphinx.ext.coverage', 'sphinx.ext.intersphinx', 'ipython_directive', 
+            'ipython_console_highlighting']#, 'matplotlib.sphinxext.ipython_directive']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -306,6 +307,12 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
 
+# intersphinx configuration
+intersphinx_mapping = {'http://docs.scipy.org/doc/numpy': None }
+
+# numpy extensions
+# If we want to do a phantom import from an XML file for all autodocs
+phantom_import_file = 'dump.xml'
 
 # -- Options for Epub output ---------------------------------------------------
 

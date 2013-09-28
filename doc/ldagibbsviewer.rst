@@ -1,6 +1,6 @@
-=========================
-vsm.viewer.ldagibbsviewer
-=========================
+==============
+ldagibbsviewer
+==============
 
 .. automodule:: vsm.viewer.ldagibbsviewer
 

@@ -1,6 +1,6 @@
-====================
-vsm.viewer.lsaviewer
-====================
+=========
+lsaviewer
+=========
 
 .. automodule:: vsm.viewer.lsaviewer
 

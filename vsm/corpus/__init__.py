@@ -104,6 +104,8 @@ class BaseCorpus(object):
             of the tokenization.
         * **tolist**: Returns Corpus object as a list of lists.
 
+    :See Also: :class:`vsm.corpus.Corpus`
+
     **Examples**
 
     >>> corpus = ['the', 'dog', 'chased', 'the', 'cat',
@@ -218,14 +220,15 @@ class BaseCorpus(object):
     def view_metadata(self, ctx_type):
         """
         Displays the metadata corresponding to a tokenization of the
-        corpus.
+        corpus. This method can be used in :class:`Corpus` as well as
+        :class:`BaseCorpus`
 
         :param ctx_type: The type of a tokenization.
         :type ctx_type: string-like
 
         :returns: The metadata for a tokenization.
 
-        :See Also: :class:`BaseCorpus`
+        :See Also: :class:`BaseCorpus`, :class:`Corpus`
         """
         i = self.context_types.index(ctx_type)
         return self.context_data[i]
@@ -284,6 +287,7 @@ class BaseCorpus(object):
         """
         i = self.meta_int(ctx_type, query)
         return self.view_metadata(ctx_type)[i][field]
+
 
 
     def view_contexts(self, ctx_type, as_slices=False):
@@ -379,6 +383,9 @@ class Corpus(BaseCorpus):
             accordingly. The optional parameter `strings` takes a boolean value: 
             True to view string representations of words; False to view integer 
             representations of words. Default is `False`.
+       * **view_metadata**
+            Takes a type of tokenization and returns a view of the metadata
+            of the tokenization.
         * **save**
             Takes a filename and saves the data contained in a Corpus object to 
             a `npy` file using `numpy.savez`.
@@ -392,7 +399,7 @@ class Corpus(BaseCorpus):
             Returns Corpus object as a list of lists of either integers or strings, 
             according to `as_strings`.
         
-    :See Also: :class:`BaseCorpus`
+    :See Also: :class:`vsm.corpus.BaseCorpus`
 
     **Examples**
 
@@ -574,7 +581,7 @@ class Corpus(BaseCorpus):
             
         :returns: None
 
-        :See Also: :class:`Corpus`, :meth:`Corpus.load`, :meth:`numpy.savez`
+        :See Also: :class:`Corpus`, :meth:`Corpus.load`, :meth:`np.savez`
         """
         print 'Saving corpus as', file
         arrays_out = dict()

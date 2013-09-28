@@ -95,7 +95,9 @@ class TfIdfViewer(object):
         
         :returns: w_arr : a LabeledColumn object
             A 2-dim array containing words and their cosine values to 
-            `word_or_words`. 
+            `word_or_words`.
+
+        :See Also: :meth:`vsm.viewer.similarity.sim_word_word`
         """
         return _sim_word_word_(self.corpus, self.model.matrix, 
                                word_or_words, weights=weights, 
@@ -133,6 +135,8 @@ class TfIdfViewer(object):
         :returns: w_arr : a LabeledColumn object
             A 2-dim array containing documents and their cosine values to 
             `doc_or_docs`. 
+
+        :See Also: :meth:`vsm.viewer.similarity.sim_doc_doc`
         """
         return _sim_doc_doc_(self.corpus, self.model.matrix,
                              self.model.context_type, doc_or_docs, weights=weights,
@@ -152,6 +156,8 @@ class TfIdfViewer(object):
         :returns: an IndexedSymmArray object
             n x n matrix containing floats where n is the number of words
             in `word_list`.
+
+        :See Also: :meth:`vsm.viewer.similarity.simmat_words`
         """
         return _simmat_words_(self.corpus, self.model.matrix, word_list)
 
@@ -165,7 +171,9 @@ class TfIdfViewer(object):
         :type docs: list, optional
         
         :returns: an IndexedSymmArray object
-            n x n matrix containing floats where n is the number of documents.                 considered.
+            n x n matrix containing floats where n is the number of documents.
+
+        :See Also: :meth:`vsm.viewer.similarity.simmat_docs`
         """
         return _simmat_documents_(self.corpus, self.model.matrix,
                                   self.model.context_type, docs)

@@ -1,6 +1,6 @@
-=====================
-vsm.viewer.similarity
-=====================
+==========
+similarity
+==========
 
 .. automodule:: vsm.viewer.similarity
 

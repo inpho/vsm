@@ -17,7 +17,7 @@ def def_label_fn(metadata):
         metadata separated by ', '. For example, '<page_label>, <book_label>'
         can be an entry of the array.
 
-    :See Also: :meth: Corpus.view_metadata
+    :See Also: :meth:`vsm.corpus.Corpus.view_metadata`
 
     **Examples**
 

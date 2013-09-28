@@ -40,7 +40,7 @@ class LsaViewer(object):
         * **simmat_docs**
             Calculates the similarity matrix for a given list of documents.
 
-    :See Also: :class:`vsm.model.lsa.Lsa`
+    :See Also: :mod:`vsm.model.lsa`
     """
     def __init__(self, corpus, model):
         """
@@ -98,6 +98,8 @@ class LsaViewer(object):
         :returns: w_arr : a LabeledColumn object
             A 2-dim array containing words and their cosine values to 
             `word_or_words`. 
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_word_word`
         """
         return _sim_word_word_(self.corpus, self.model.word_matrix, 
                                word_or_words, weights=weights, 
@@ -135,6 +137,8 @@ class LsaViewer(object):
         :returns: w_arr : a LabeledColumn object
             A 2-dim array containing documents and their cosine values to 
             `doc_or_docs`. 
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_doc_doc`
         """
         return _sim_doc_doc_(self.corpus, self.model.doc_matrix.T,
                              self.model.context_type, doc_or_docs, weights=weights,
@@ -154,6 +158,8 @@ class LsaViewer(object):
         :returns: an IndexedSymmArray object
             n x n matrix containing floats where n is the number of words
             in `word_list`.
+        
+        :See Also: :meth:`vsm.viewer.similarity.simmat_words`
         """
         return _simmat_words_(self.corpus, self.model.word_matrix, word_list)
 
@@ -169,6 +175,8 @@ class LsaViewer(object):
         :returns: an IndexedSymmArray object
             n x n matrix containing floats where n is the number of documents.           
             considered.
+
+        :See Also: :meth:`vsm.viewer.similarity.simmat_docs`
         """
         return _simmat_documents_(self.corpus, self.model.doc_matrix.T,
                                   self.model.context_type, docs)

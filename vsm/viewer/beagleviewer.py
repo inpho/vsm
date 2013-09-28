@@ -70,6 +70,8 @@ class BeagleViewer(object):
         :returns: w_arr : a LabeledColumn object
             A 2-dim array containing words and their cosine values to 
             `word_or_words`. 
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_word_word`
         """
         return _sim_word_word_(self.corpus, self.model.matrix, 
                                word_or_words, weights=weights, 
@@ -93,7 +95,8 @@ class BeagleViewer(object):
         :returns: an IndexedSymmArray object
             n x n matrix containing floats where n is the number of words
             in `word_list`.
-
+        
+        :See Also: :meth:`vsm.viewer.similarity.simmat_words`
         """
         return _simmat_words_(self.corpus, self.model.matrix,
                               word_list, sim_fn=sim_fn)

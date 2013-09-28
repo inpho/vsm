@@ -7,25 +7,24 @@ and list them.
 
 .. automodule:: vsm.viewer
 
-.. currentmodule:: vsm.viewer
-
-.. autofunction:: def_label_fn
-                doc_label_name
-                res_doc_type
-                res_top_type
-                res_word_type
-
 .. toctree::
-
-   :maxdepth: 2
+   :maxdepth: 1
 
    beagleviewer
-   labelddata
+   labeleddata
    ldagibbsviewer
    lsaviewer
    tfidfviewer
    tfviewer
    plotting
    similarity
-   simwalks
+
+.. currentmodule:: vsm.viewer
+
+.. autofunction:: def_label_fn
+.. autofunction:: doc_label_name
+.. autofunction:: res_doc_type
+.. autofunction:: res_top_type
+.. autofunction:: res_word_type
+
 
