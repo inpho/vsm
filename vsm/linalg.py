@@ -186,7 +186,8 @@ def row_kld(row, mat, normalize=True, norms=None):
 
     old = np.seterr(divide='ignore') # Suppress division by zero errors
     logp = np.log2(row/mat)
-    np.seterr(**old) # Restore error settings
+    np.seterr(**old)                 # Restore error settings
+    logp[np.isinf(logp)] = 0         # replace inf with zeros
     KLD  = np.dot(logp, row.T)
     KLD  = np.ravel(KLD)
     return KLD
