@@ -104,6 +104,47 @@ def reduce_ngrams(fn, a, n, i, flat=True):
 
 
 class BeagleOrderSeq(BaseModel):
+    """
+
+    :param corpus:
+    :type corpus: Corpus object
+
+    :param env_matrix:
+    :type env_matrix: 2-D array
+
+    :param context_type: Name of tokenization stored in `corpus` whose
+        tokens will be treated as documents. Default is `sentence`.
+    :type context_type: string, optional
+
+    :param psi: ?
+    :type psi: int, optional
+
+    :param rand_perm: ?
+    :type rand_perm: ?, optional
+
+    :param lmda: ?
+    :type lmda: int, optional
+
+    :Attributes:
+        * **context_type** (string)
+            Name of tokenization whose tokens will be treated as documents.
+        * **sents** (list of arrays)
+            Tokens by `context_type` retrieved from `corpus`.
+        * **env_matrix** (2-D array)
+            Beagle environment matrix.
+        * **b_conv**
+
+        * **psi** (int)
+
+        * **lmda** 
+
+
+    :Methods:
+        * **train**
+            Trains the model.
+
+    :See Also: :class:`vsm.model.BaseModel`
+    """
 
     def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):

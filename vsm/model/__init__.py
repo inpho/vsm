@@ -6,12 +6,13 @@ class BaseModel(object):
     """
     Base class for models which store data in a single matrix.
 
-    :type matrix: numpy.ndarray, optional
     :param matrix: A two-dimensional numpy array storing the results
         of model training. Default is `None`.
-    :type context_type: string, optional
+    :type matrix: numpy.ndarray, optional
+    
     :param context_type: A string specifying the type of context over
         which the model trainer is applied. Default is `None`.
+    :type context_type: string, optional
 
     :attributes:
         Same as parameters.
@@ -54,10 +55,10 @@ class BaseModel(object):
         Takes a filename or file object and loads it as an npz archive
         into a BaseModel object.
 
-        :type file: str-like or file-like object
         :param file: Designates the file to read. If `file` is a string
             ending in `.gz`, the file is first gunzipped. See `numpy.load`
             for further details.
+        :type file: str-like or file-like object
 
         :returns: A dictionary storing the data found in `file`.
 

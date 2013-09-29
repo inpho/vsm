@@ -1,10 +1,19 @@
-===============
-vsm.corpus.util
-===============
+========================
+Corpus utility functions
+========================
 
-needs some text!
+Corpus utility functions in :mod:`vsm.corpus.util` module includes functions for
+corpus clean up, tokenization as well as convenience functions for building
+a corpus. 
+
+Below are the core methods we used to clean up various text files.
 
 .. automodule:: vsm.corpus.util
+
+Submodules
+----------
+
+:doc:`corpusbuilders`
 
 Methods
 -------

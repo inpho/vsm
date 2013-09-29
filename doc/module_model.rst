@@ -2,6 +2,8 @@
 vsm.model
 =========
 
+Here are all the available models.
+
 .. automodule:: vsm.model
 
 .. toctree::

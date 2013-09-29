@@ -1,8 +1,13 @@
-==============
-corpusbuilders
-==============
+========================
+Corpus builder functions
+========================
 
-needs some text!
+Corpus builder functions include convenience functions for building 
+:mod:`vsm.corpus.Corpus` from file or directory as well as methods 
+for making empty corpus, random corpus, and toy corpus for various
+experiments.
+
+Tutorials for using corpus builder functions will be here soon.
 
 .. automodule:: vsm.corpus.util.corpusbuilders
 

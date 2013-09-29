@@ -1,10 +1,12 @@
-=========
-vsm.model
-=========
+======
+Models
+======
 
-Here are our available models.
-Take your :class:`vsm.corpus.Corpus` and train it with one or as many
-model as you'd like!
+Here are the available models.
+
+Take your :class:`Corpus<vsm.corpus.Corpus>` and make any of the following model
+objects depending on the purpose of your data exploration.
+
 
 .. automodule:: vsm.model
 

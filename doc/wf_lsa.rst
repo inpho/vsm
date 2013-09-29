@@ -4,10 +4,9 @@ LSA Model
 
 Here are variations of Latent Semantic Analysis Model.
 
-link to `Blei's paper <h=ttp://www.cs.princeton.edu/~blei/papers/BleiNgJordan2003.pdf>`_.
+link to `Indexing by latent semantic analysis <http://onlinelibrary.wiley.com/doi/10.1002/%28SICI%291097-4571%28199009%2941:6%3C391::AID-ASI1%3E3.0.CO;2-9/abstract>`_.
 
-:class:`Lsa<vsm.model.lsa.Lsa>` - 
-Lsa.
+:class:`Lsa<vsm.model.lsa.Lsa>` - Lsa.
 
 
 .. .. toctree::

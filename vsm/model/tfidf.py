@@ -55,7 +55,7 @@ class TfIdf(BaseModel):
             Takes a filename or file object and loads it as an npz archive
             into a BaseModel object.
 
-    :See Also: :class:`vsm.model.tf.TfModel`, :class:`vsm.model.BaseModel`, :class:`scipy.sparse.coo_matrix`
+    :See Also: :class:`vsm.model.tf.TfSeq`, :class:`vsm.model.BaseModel`, :class:`scipy.sparse.coo_matrix`
 
     :notes:
         A zero in the matrix might arise in two ways: (1) the word type
