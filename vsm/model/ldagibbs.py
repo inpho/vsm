@@ -119,6 +119,15 @@ class LDAGibbs(object):
 
 
     def train(self, itr=1000, verbose=True):
+        """
+
+        :param itr: Number of iterations for training. Default is 1000.
+        :type itr: int, optional
+
+        :param verbose: If `True`, current number of iterations
+            are printed out to notify the user. Default is `True`.
+        :type verbose: boolean, optional
+        """
 
         for t in xrange(self.iterations, self.iterations + itr):
 
@@ -212,6 +221,14 @@ class LDAGibbs(object):
     @staticmethod
     def load(filename):
         """
+        A static method for loading a saved LDAGibbs model.
+
+        :param filename: Name of a saved model to be loaded.
+        :type filename: string
+
+        :returns: m : LDAGibbs object
+
+        :See Also: :class:`numpy.load`
         """
         from vsm.corpus import split_corpus
         from vsm.corpus.util.corpusbuilders import empty_corpus
@@ -242,6 +259,12 @@ class LDAGibbs(object):
     
     def save(self, filename):
         """
+        Saves the model in `.npz` file.
+
+        :param filename: Name of file to be saved.
+        :type filename: string
+
+        :See Also: :class:`numpy.savez`
         """
         arrays_out = dict()
         arrays_out['W_corpus'] = np.array(np.hstack(self.W), dtype=np.int32)
