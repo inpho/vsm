@@ -10,8 +10,8 @@ link to Tf paper?
 Tf Seq.
 
 :class:`Tf Multi<vsm.model.tf.TfMulti>` - 
-Tf Multi.
-
+Tf Multi provides a training function where the number of processors can be specified
+for more time efficient training.
 
 .. .. toctree::
     :maxdepth: 1

@@ -1,6 +1,6 @@
-=======================
-vsm.model.beaglecontext
-=======================
+=============
+BeagleContext
+=============
 
 .. automodule:: vsm.model.beaglecontext
 

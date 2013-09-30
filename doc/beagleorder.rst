@@ -1,6 +1,6 @@
-=====================
-vsm.model.beagleorder
-=====================
+===========
+BeagleOrder
+===========
 
 .. automodule:: vsm.model.beagleorder
 
