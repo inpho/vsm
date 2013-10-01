@@ -296,19 +296,19 @@ def htrc_label_link_fn_86(metadata):
     """
     md = htrc_load_metadata_86()
 
+    files = metadata['file'] 
     titles = []
     for v in metadata['book_label']:
         title = unidecode(htrc_get_titles(md, v)[0])
-        if len(title) > 60:
-            title = title[:60]
+        if len(title) > 1:
+            title = title[:15]
         titles.append(title)
     
     names = [name for name in metadata.dtype.names if name.endswith('_label')]
     links = [add_link(x[n]) for n in names if n.endswith('_url_label') for x in metadata]
 
-    arr = np.array(zip(titles, links), dtype=[('titles', '|S60'), ('links', '|S160')])
-    dtypes = ['titles', 'links']
-    return np.array([', '.join([x[n] for n in dtypes]) for x in arr])
+    labels = ['{0}, {1}, {2}'.format(t,f,l) for (t,f,l) in zip(titles, files, links)]
+    return np.array(labels)
 
 
 def htrc_label_link_fn_1315(metadata):
@@ -326,9 +326,8 @@ def htrc_label_link_fn_1315(metadata):
     names = [name for name in metadata.dtype.names if name.endswith('_label')]
     links = [add_link(x[n]) for n in names if n.endswith('_url_label') for x in metadata]
 
-    arr = np.array(zip(titles, links), dtype=[('titles', '|S60'), ('links', '|S160')])
-    dtypes = ['titles', 'links']
-    return np.array([', '.join([x[n] for n in dtypes]) for x in arr])
+    labels = ['{0}, {1}'.format(t,l) for (t,l) in zip(titles, links)]
+    return np.array(labels)
 
 
 
@@ -343,30 +342,27 @@ def url_metadata(corpus, ctx_type, coll_dir):
     from vsm.viewer import doc_label_name
 
     md = []
-    corp_md = corpus.view_metadata(ctx_type)
+    corp_md = corpus.view_metadata('book')
     book_labels = corp_md[doc_label_name('book')]
-
+    
     for book_label in book_labels:
         coll_path = os.path.join(coll_dir, book_label)
         booklist = os.listdir(coll_path)
         book = filter_by_suffix(booklist, ignore=['.txt', '.pickle'])
-       
+        
         book_path = os.path.join(coll_path, book[0])
         with open(book_path, 'r') as f:
             d = json.load(f)
-            for k in d.keys():
-                if k == 'items':
-                    li = sorted(d[k], key=lambda k: int(k['lastUpdate']))
-                    url = li[-1]['itemURL']
+            url = ''
+            li = sorted(d['items'], key=lambda k: int(k['lastUpdate']))
+            url = li[-1]['itemURL']
 
-                    if ctx_type == 'page' or ctx_type == 'sentence':
-                        for i in xrange(1, len(booklist)-1):
-                            s = url + '?urlappend=%3Bseq={0}'.format(i)
-                            md.append( unidecode(s) )
-                    else:
-                        md.append( unidecode(url))
+            if ctx_type == 'book':
+                md.append( unidecode(url))
+            else:
+                for i in xrange(1, len(booklist)):
+                    s = url + '?urlappend=%3Bseq={0}'.format(i)
+                    md.append( unidecode(s))
     return md
-
-
 
 
