@@ -7,7 +7,7 @@ Roadmap towards a first release
 * Revision of the LDA training code. LdaGibbs is a `first-generation`
   sequential trainer. LdaCgsMulti is a `second-generation` trainer
   that works reasonably well with the multiprocessing library but also
-  has a cleaner interface than LdaGibbs. Finally, there is an parallel
+  has a cleaner interface than LdaGibbs. Finally, there is a parallel
   CGS version that runs on an ipython cluster. It's the best of the
   bunch. All of these need to be consolidated to a single LdaCgs
   submodule.
@@ -30,6 +30,8 @@ Roadmap towards a first release
   * Metadata management (from tokenization to doc analysis).
 
 * Sphinx-generated documentation
+
+  * Getting Started page
 
   * Workflow
 
