@@ -1,0 +1,284 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>BaseCorpus &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="Corpus Objects" href="module_corpus.html" />
+    <link rel="next" title="remove_empty" href="remove_empty.html" />
+    <link rel="prev" title="Corpus Objects" href="module_corpus.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="remove_empty.html" title="remove_empty"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module_corpus.html" title="Corpus Objects"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" >vsm workflow</a> &raquo;</li>
+          <li><a href="module_corpus.html" accesskey="U">Corpus Objects</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="basecorpus">
+<h1>BaseCorpus<a class="headerlink" href="#basecorpus" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="vsm.corpus.BaseCorpus">
+<em class="property">class </em><tt class="descclassname">vsm.corpus.</tt><tt class="descname">BaseCorpus</tt><big>(</big><em>corpus</em>, <em>dtype=None</em>, <em>context_types=</em><span class="optional">[</span><span class="optional">]</span>, <em>context_data=</em><span class="optional">[</span><span class="optional">]</span>, <em>remove_empty=True</em><big>)</big><a class="headerlink" href="#vsm.corpus.BaseCorpus" title="Permalink to this definition">¶</a></dt>
+<dd><p>A BaseCorpus object stores a corpus along with its tokenizations
+(e.g., as sentences, paragraphs or documents).</p>
+<p>BaseCorpus aims to provide an efficient method for viewing the
+corpus in tokenized form (i.e., without copying). It currently
+achieves this by storing the corpus as a numpy <cite>ndarray</cite>. Viewing
+a tokenization is carried out using the <cite>view</cite> facilities of numpy
+ndarrays. See documentation on <cite>numpy.ndarray</cite> for further
+details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>corpus</strong> (<em>array-like</em>) &#8211; Array, typically of strings or integers, of atomic words
+(or tokens) making up the corpus.</li>
+<li><strong>dtype</strong> (<em>data-type, optional</em>) &#8211; The data-type used to interpret the corpus. If omitted, the
+data-type is determined by <cite>numpy.asarray</cite>. Default is <cite>None</cite>.</li>
+<li><strong>context_data</strong> (<em>list with 1-D array-like elements, optional</em>) &#8211; Each element in <cite>context_data</cite> is an array 
+containing the indices marking the context boundaries. 
+An element in <cite>context_data</cite> is intended for use as a value for 
+the <cite>indices_or_sections</cite> parameter in <cite>numpy.split</cite>. 
+Elements of <cite>context_data</cite> may also be 1-D arrays whose elements
+are pairs, where the first element is a context boundary and 
+the second element is metadata associated with that context preceding
+that boundary. For example, (250, &#8216;dogs&#8217;) might indicate that 
+the &#8216;article&#8217; context ending at the 250th word of the corpus is named 
+&#8216;dogs&#8217;. Default is <cite>None</cite>.</li>
+<li><strong>context_types</strong> (<em>array-like, optional</em>) &#8211; Each element in <cite>context_types</cite> is a type of a i
+tokenization in <cite>context_data</cite>.</li>
+<li><strong>remove_empty</strong> (<em>boolean, optional</em>) &#8211; If True, empty tokenizations are removed. Default it
+<cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes :</th><td class="field-body"><ul class="first">
+<li><dl class="first docutils">
+<dt><strong>corpus</strong>  (1-dimensional array)</dt>
+<dd><p class="first last">Stores the value of the <cite>corpus</cite> parameter after it has been cast
+to an array of data-type <cite>dtype</cite> (if provided).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>words</strong>  (1-dimensional array)</dt>
+<dd><p class="first last">The indexed set of atomic words appearing in <cite>corpus</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><strong>context_types</strong>  (1-dimensional array-like)</p>
+</li>
+<li><p class="first"><strong>context_data</strong>   (list of 1-D array-like)</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first">
+<li><dl class="first docutils">
+<dt><strong>meta_int</strong></dt>
+<dd><p class="first last">Takes a type of tokenization and a query and returns the index of
+the metadata found in the query.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>get_metadatum</strong></dt>
+<dd><p class="first last">Takes a type of tokenization and a query and returns the metadatum
+corresponding to the query and the field.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>view_contexts</strong></dt>
+<dd><p class="first last">Takes a type of tokenization and returns a view of the corpus
+tokenized accordingly.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>view_metadata</strong></dt>
+<dd><p class="first last">Takes a type of tokenization and returns a view of the metadata
+of the tokenization.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><strong>tolist</strong>: Returns Corpus object as a list of lists.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><a class="reference internal" href="corpus.html#vsm.corpus.Corpus" title="vsm.corpus.Corpus"><tt class="xref py py-class docutils literal"><span class="pre">vsm.corpus.Corpus</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">corpus</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;the&#39;</span><span class="p">,</span> <span class="s">&#39;dog&#39;</span><span class="p">,</span> <span class="s">&#39;chased&#39;</span><span class="p">,</span> <span class="s">&#39;the&#39;</span><span class="p">,</span> <span class="s">&#39;cat&#39;</span><span class="p">,</span>
+<span class="go">              &#39;the&#39;, &#39;cat&#39;, &#39;ran&#39;, &#39;away&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">context_types</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sentences&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">context_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="mi">5</span><span class="p">,</span> <span class="s">&#39;transitive&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="s">&#39;intransitive&#39;</span><span class="p">)],</span>
+<span class="go">                    dtype=[(&#39;idx&#39;, &#39;&lt;i8&#39;), (&#39;sent_label&#39;, &#39;|S16&#39;)])]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">vsm.corpus</span> <span class="kn">import</span> <span class="n">BaseCorpus</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">BaseCorpus</span><span class="p">(</span><span class="n">corpus</span><span class="p">,</span> <span class="n">context_types</span><span class="o">=</span><span class="n">context_types</span><span class="p">,</span> <span class="n">context_data</span><span class="o">=</span><span class="n">context_data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">corpus</span>
+<span class="go">array([&#39;the&#39;, &#39;dog&#39;, &#39;chased&#39;, &#39;the&#39;, &#39;cat&#39;, &#39;the&#39;, &#39;cat&#39;,</span>
+<span class="go">       &#39;ran&#39;, &#39;away&#39;], dtype=&#39;|S6&#39;)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">words</span>
+<span class="go">array([&#39;ran&#39;, &#39;away&#39;, &#39;chased&#39;, &#39;dog&#39;, &#39;cat&#39;, &#39;the&#39;],</span>
+<span class="go">      dtype=&#39;|S6&#39;)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">meta_int</span><span class="p">(</span><span class="s">&#39;sentences&#39;</span><span class="p">,{</span><span class="s">&#39;sent_label&#39;</span><span class="p">:</span> <span class="s">&#39;intransitive&#39;</span><span class="p">})</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">get_metadatum</span><span class="p">(</span><span class="s">&#39;sentences&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;sent_label&#39;</span><span class="p">:</span> <span class="s">&#39;intransitive&#39;</span><span class="p">},</span> <span class="s">&#39;sent_label&#39;</span><span class="p">)</span> 
+<span class="go">&#39;intransitive&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">view_contexts</span><span class="p">(</span><span class="s">&#39;sentences&#39;</span><span class="p">)</span>
+<span class="go">[array([&#39;the&#39;, &#39;dog&#39;, &#39;chased&#39;, &#39;the&#39;, &#39;cat&#39;],</span>
+<span class="go">      dtype=&#39;|S6&#39;),</span>
+<span class="go"> array([&#39;the&#39;, &#39;cat&#39;, &#39;ran&#39;, &#39;away&#39;],</span>
+<span class="go">      dtype=&#39;|S6&#39;)]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">view_metadata</span><span class="p">(</span><span class="s">&#39;sentences&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;sent_label&#39;</span><span class="p">]</span>
+<span class="go">&#39;transitive&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="remove_empty.html">remove_empty</a></li>
+<li class="toctree-l1"><a class="reference internal" href="view_metadata.html">view_metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meta_int.html">meta_int</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_metadatum.html">get_metadatum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bc_view_contexts.html">view_contexts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bc_tolist.html">tolist</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">BaseCorpus</a><ul>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module_corpus.html"
+                        title="previous chapter">Corpus Objects</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="remove_empty.html"
+                        title="next chapter">remove_empty</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/basecorpus.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="remove_empty.html" title="remove_empty"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module_corpus.html" title="Corpus Objects"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" >vsm workflow</a> &raquo;</li>
+          <li><a href="module_corpus.html" >Corpus Objects</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

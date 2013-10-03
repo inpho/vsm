@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LDAGibbs &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-vsm.model.ldagibbs">
+<span id="ldagibbs"></span><h1>LDAGibbs<a class="headerlink" href="#module-vsm.model.ldagibbs" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="vsm.model.ldagibbs.LDAGibbs">
+<em class="property">class </em><tt class="descclassname">vsm.model.ldagibbs.</tt><tt class="descname">LDAGibbs</tt><big>(</big><em>corpus</em>, <em>context_type</em>, <em>K=100</em>, <em>alpha=0.01</em>, <em>beta=0.01</em>, <em>log_prob=True</em><big>)</big><a class="headerlink" href="#vsm.model.ldagibbs.LDAGibbs" title="Permalink to this definition">¶</a></dt>
+<dd><p>An implementation of LDA using collapsed Gibbs sampling.</p>
+<p><strong>References</strong></p>
+<p>Griffiths, Tom. Gibbs sampling in the generative model of Latent Dirichlet Allocation.</p>
+<p>Wang, Yi. Distributed Gibbs Sampling of Latent Topic Models: The Gritty Details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>corpus</strong> (<em>Corpus</em>) &#8211; Source of observed data.</li>
+<li><strong>context_type</strong> (<em>string</em>) &#8211; Name of tokenization stored in <cite>corpus</cite> whose tokens will be
+treated as documents.</li>
+<li><strong>K</strong> (<em>int</em>) &#8211; Number of topics. Default is <cite>100</cite>.</li>
+<li><strong>alpha</strong> (<em>float</em>) &#8211; Parameter for the prior distribution of theta_d. Default is <cite>0.01</cite>.</li>
+<li><strong>beta</strong> (<em>float</em>) &#8211; Parameter for the prior distribution of phi_d. Default is <cite>0.01</cite>.</li>
+<li><strong>log_prob</strong> (<em>boolean</em>) &#8211; If <cite>True</cite>, compute the log probabilities of the corpus given
+the values of the latent variables at each iteration and
+records them in <cite>log_prob</cite>. Default is <cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes :</th><td class="field-body"><ul class="first">
+<li><dl class="first docutils">
+<dt><strong>W</strong> (list of integer arrays)</dt>
+<dd><p class="first last">List of documents, which are extracted from the input Corpus object.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>V</strong> (int)</dt>
+<dd><p class="first last">Number of unique words in the corpus.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>Z</strong> (list of integer arrays)</dt>
+<dd><p class="first last">Topic assignments for every word coordinate in the corpus.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>iterations</strong> (int)</dt>
+<dd><p class="first last">Number of past iterations of the update rule.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>doc_top</strong> (2-dim floating point array)</dt>
+<dd><p class="first last">Stores the unnormalized estimated posterior distribution over
+topics for each document in a D x K matrix.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>top_word</strong> (2-dim floating point array)</dt>
+<dd><p class="first last">Stores the unnormalized estimated posterior distribution over
+terms for each topic in a K x V matrix.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>sum_word_top</strong> (1-dim floating point array)</dt>
+<dd><p class="first last">Stores the sum of words over topics.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first last">
+<li><dl class="first docutils">
+<dt><strong>train</strong></dt>
+<dd><p class="first last">Takes an optional argument <cite>itr</cite>, which defaults to 1000, and
+updates the model <cite>itr</cite> times.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>update_z</strong></dt>
+<dd><p class="first last">Takes a document index <cite>d</cite>, a word index <cite>i</cite> relative to that
+document and a word <cite>w</cite> and updates the model.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>z_dist</strong></dt>
+<dd><p class="first last">Takes a document index <cite>d</cite> and a word <cite>w</cite> and computes the
+distribution over topics for <cite>w</cite> in <cite>d</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>phi_k</strong></dt>
+<dd><p class="first last">Takes a topic index <cite>t</cite> and returns the estimated posterior
+distribution over words for <cite>t</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>*phi_w</strong></dt>
+<dd><p class="first last">Takes a word <cite>w</cite> and returns the estimated posterior
+distribution over topics for <cite>w</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>theta_d</strong></dt>
+<dd><p class="first last">Takes a document index <cite>d</cite> and returns the estimated posterior
+distribution over topics for <cite>d</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>theta_k</strong></dt>
+<dd><p class="first last">Takes a topic index <cite>t</cite> and returns the estimated posterior
+distribution over documents for <cite>t</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>logp</strong></dt>
+<dd><p class="first last">Compute the log probability of the corpus <cite>W</cite> given the
+estimated values of the latent variables <cite>phi</cite>, <cite>theta</cite> and
+<cite>Z</cite>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="vsm.model.ldagibbs.LDAGibbs.load">
+<em class="property">static </em><tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#vsm.model.ldagibbs.LDAGibbs.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>A static method for loading a saved LDAGibbs model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>string</em>) &#8211; Name of a saved model to be loaded.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">m : LDAGibbs object</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">numpy.load</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.model.ldagibbs.LDAGibbs.logp">
+<tt class="descname">logp</tt><big>(</big><big>)</big><a class="headerlink" href="#vsm.model.ldagibbs.LDAGibbs.logp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vsm.model.ldagibbs.LDAGibbs.save">
+<tt class="descname">save</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#vsm.model.ldagibbs.LDAGibbs.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the model in <cite>.npz</cite> file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>string</em>) &#8211; Name of file to be saved.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">numpy.savez</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.model.ldagibbs.LDAGibbs.train">
+<tt class="descname">train</tt><big>(</big><em>itr=1000</em>, <em>verbose=True</em><big>)</big><a class="headerlink" href="#vsm.model.ldagibbs.LDAGibbs.train" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>itr</strong> (<em>int, optional</em>) &#8211; Number of iterations for training. Default is 1000.</li>
+<li><strong>verbose</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, current number of iterations
+are printed out to notify the user. Default is <cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ldagibbs.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

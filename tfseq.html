@@ -1,0 +1,181 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>TfSeq &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tfseq">
+<h1>TfSeq<a class="headerlink" href="#tfseq" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="vsm.model.tf.TfSeq">
+<em class="property">class </em><tt class="descclassname">vsm.model.tf.</tt><tt class="descname">TfSeq</tt><big>(</big><em>corpus=None</em>, <em>context_type=None</em><big>)</big><a class="headerlink" href="#vsm.model.tf.TfSeq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains a term-frequency model.</p>
+<p>In a term-frequency model, the number of occurrences of a word
+type in a context is counted for all word types and contexts. Word
+types correspond to matrix rows and contexts correspond to matrix
+columns.</p>
+<p>The data structure is a sparse integer matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>corpus</strong> (<em>Corpus</em>) &#8211; A Corpus object containing the training data.</li>
+<li><strong>context_type</strong> (<em>string</em>) &#8211; A string specifying the type of context over which
+the model trainer is applied.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes :</th><td class="field-body"><ul class="first">
+<li><dl class="first docutils">
+<dt><strong>corpus</strong> (Corpus)</dt>
+<dd><p class="first last">A Corpus object containing the training data.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>context_type</strong> (string)</dt>
+<dd><p class="first last">A string specifying the type of context over which the model
+trainer is applied.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>matrix</strong> (scipy.sparse.coo_matrix)</dt>
+<dd><p class="first last">A sparse matrix in &#8216;coordinate&#8217; format that contains the
+frequency counts.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first">
+<li><dl class="first docutils">
+<dt><strong>train</strong></dt>
+<dd><p class="first last">Counts word-type occurrences per context and stores the
+results in <cite>self.matrix</cite></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>save</strong></dt>
+<dd><p class="first last">Takes a filename or file object and saves <cite>self.matrix</cite> and
+<cite>self.context_type</cite> in an npz archive.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>load</strong></dt>
+<dd><p class="first last">Takes a filename or file object and loads it as an npz archive
+into a BaseModel object.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><a class="reference internal" href="basemodel.html#vsm.model.BaseModel" title="vsm.model.BaseModel"><tt class="xref py py-class docutils literal"><span class="pre">vsm.model.BaseModel</span></tt></a>, <a class="reference internal" href="corpus.html#vsm.corpus.Corpus" title="vsm.corpus.Corpus"><tt class="xref py py-class docutils literal"><span class="pre">vsm.corpus.Corpus</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">scipy.sparse.coo_matrix</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="vsm.model.tf.TfSeq.train">
+<tt class="descname">train</tt><big>(</big><big>)</big><a class="headerlink" href="#vsm.model.tf.TfSeq.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Counts word-type occurrences per context and stores the results in
+<cite>self.matrix</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tfseq.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

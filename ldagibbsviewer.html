@@ -1,0 +1,305 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldagibbsviewer &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="Viewers" href="wf_viewer.html" />
+    <link rel="next" title="topics" href="topics.html" />
+    <link rel="prev" title="isomap_words" href="beagle_isomap_words.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="topics.html" title="topics"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="beagle_isomap_words.html" title="isomap_words"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" >vsm workflow</a> &raquo;</li>
+          <li><a href="wf_viewer.html" accesskey="U">Viewers</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-vsm.viewer.ldagibbsviewer">
+<span id="ldagibbsviewer"></span><h1>ldagibbsviewer<a class="headerlink" href="#module-vsm.viewer.ldagibbsviewer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="vsm.viewer.ldagibbsviewer.LDAGibbsViewer">
+<em class="property">class </em><tt class="descclassname">vsm.viewer.ldagibbsviewer.</tt><tt class="descname">LDAGibbsViewer</tt><big>(</big><em>corpus</em>, <em>model</em><big>)</big><a class="headerlink" href="#vsm.viewer.ldagibbsviewer.LDAGibbsViewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for viewing a topic model estimated by <cite>LDAGibbs</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>corpus</strong> (<em>Corpus</em>) &#8211; Source of observed data.</li>
+<li><strong>model</strong> (<em>LDAGibbs object</em>) &#8211; A topic modeled fitted by <cite>LDAGibbs</cite></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes :</th><td class="field-body"><ul class="first simple">
+<li><strong>corpus</strong> (Corpus object) - <cite>corpus</cite></li>
+<li><strong>model</strong> (LDAGibbs object) - <cite>model</cite></li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first last">
+<li><dl class="first docutils">
+<dt><strong>topics</strong> </dt>
+<dd><p class="first last">Returns a list of topics estimated by <cite>LDAGibbs</cite>
+sampler. Each topic is represented by a set of words and the
+corresponding probabilities.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>topic_entropies</strong> </dt>
+<dd><p class="first last">Returns topics sorted according to the entropy of each topic. 
+The entropy of topic k is calculated by summing P(d|k) * log(P(d|k))
+over all document d, and is thought to measure how informative a
+given topic is to select documents.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>doc_topics</strong></dt>
+<dd><p class="first last">Returns distribution P(K|D=d) over topics K for document d.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>word_topics</strong></dt>
+<dd><p class="first last">Searches for every occurance of <cite>word</cite> in the entire corpus and
+returns a list each row of which contains the name or ID number of
+document, the relative position in the document, and the assigned
+topic number for each occurrence of <cite>word</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>sim_top_top</strong></dt>
+<dd><p class="first last">Returns topics sorted by the cosine similarity values between
+topic(s) and every topic.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>sim_top_doc</strong></dt>
+<dd><p class="first last">Returns documents sorted according to their relevance to topic(s).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>sim_words_top</strong></dt>
+<dd><p class="first last">Returns topics sorted according to their relevance to word(s).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>sim_word_word</strong></dt>
+<dd><p class="first last">Returns words sorted by the cosine values between a word or list
+of words and every word based on the topic distributions.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>sim_doc_doc</strong></dt>
+<dd><p class="first last">Computes and sorts the cosine similarity values between a
+document or list of documents and every document in the topic space.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>simmat_words</strong></dt>
+<dd><p class="first last">Calculates the similarity matrix for a given list of words.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>simmat_docs</strong></dt>
+<dd><p class="first last">Calculates the similarity matrix for a given list of documents.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>simmat_topics</strong></dt>
+<dd><p class="first last">Calculates the similarity matrix for a given list of topics.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>cluster_topics</strong></dt>
+<dd><p class="first last">Clusters topics by a spceificed clustering algorithm. 
+Currently it supports K-means, Spectral Clustering and Affinity
+Propagation algorithms. K-means and spectral clustering cluster
+topics into a given number of clusters, whereas affinity
+propagation does not require the fixed cluster number.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>logp_plot</strong></dt>
+<dd><p class="first last">Returns a plot of log probabilities for the specified range of 
+the MCMC chain used to fit a topic model by <cite>LDAGibbs</cite>.
+The function requires matplotlib package.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>isomap_topics</strong></dt>
+<dd><p class="first last">Plots an isomap of topics estimated LDA gibbs sampler.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>isomap_topics</strong></dt>
+<dd><p class="first last">Takes document(s) or topic(s) and plots an isomap for 
+the documents similar/relevant to the query. The function plots
+relevant documents or topics by using the isomap algorithm
+in <cite>sklearn</cite> package.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>plot_clusters</strong></dt>
+<dd><p class="first last">Plots clusters with distinct color for each cluster.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="topics.html">topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topic_entropies.html">topic_entropies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doc_topics.html">doc_topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="word_topics.html">word_topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lda_sim_top_top.html">sim_top_top</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lda_sim_top_doc.html">sim_top_doc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lda_sim_word_top.html">sim_word_top</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lda_sim_word_word.html">sim_word_word</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lda_sim_doc_doc.html">sim_doc_doc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lda_simmat_words.html">simmat_words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lda_simmat_docs.html">simmat_docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lda_simmat_topics.html">simmat_topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cluster_topics.html">cluster_topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logp_plot.html">logp_plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="isomap_topics.html">isomap_topics</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ldagibbsviewer</a><ul>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="beagle_isomap_words.html"
+                        title="previous chapter">isomap_words</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="topics.html"
+                        title="next chapter">topics</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ldagibbsviewer.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="topics.html" title="topics"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="beagle_isomap_words.html" title="isomap_words"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" >vsm workflow</a> &raquo;</li>
+          <li><a href="wf_viewer.html" >Viewers</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

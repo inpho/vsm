@@ -1,0 +1,151 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>filter_by_suffix &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="Corpus utility functions" href="corpus_util.html" />
+    <link rel="next" title="word_tokenize" href="word_tokenize.html" />
+    <link rel="prev" title="apply_stoplist" href="util_apply_stoplist.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="word_tokenize.html" title="word_tokenize"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="util_apply_stoplist.html" title="apply_stoplist"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" >vsm workflow</a> &raquo;</li>
+          <li><a href="corpus_util.html" accesskey="U">Corpus utility functions</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="filter-by-suffix">
+<h1>filter_by_suffix<a class="headerlink" href="#filter-by-suffix" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="vsm.corpus.util.filter_by_suffix">
+<tt class="descclassname">vsm.corpus.util.</tt><tt class="descname">filter_by_suffix</tt><big>(</big><em>l</em>, <em>ignore</em><big>)</big><a class="headerlink" href="#vsm.corpus.util.filter_by_suffix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns elements in <cite>l</cite> that does not end with elements in <cite>ignore</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>l</strong> (<em>list</em>) &#8211; List of strings to filter.</li>
+<li><strong>ignore</strong> (<em>list</em>) &#8211; List of suffix to be ignored or filtered out.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of elements in <cite>l</cite> whose suffix is not in <cite>ignore</cite>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;a.txt&#39;</span><span class="p">,</span> <span class="s">&#39;b.json&#39;</span><span class="p">,</span> <span class="s">&#39;c.txt&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ignore</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.txt&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filter_by_suffix</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">ignore</span><span class="p">)</span>
+<span class="go">[&#39;b.json&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="util_apply_stoplist.html"
+                        title="previous chapter">apply_stoplist</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="word_tokenize.html"
+                        title="next chapter">word_tokenize</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/filter_by_suffix.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="word_tokenize.html" title="word_tokenize"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="util_apply_stoplist.html" title="apply_stoplist"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" >vsm workflow</a> &raquo;</li>
+          <li><a href="corpus_util.html" >Corpus utility functions</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

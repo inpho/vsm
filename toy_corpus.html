@@ -1,0 +1,174 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>toy_corpus &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="Corpus builder functions" href="corpusbuilders.html" />
+    <link rel="next" title="corpus_fromlist" href="corpus_fromlist.html" />
+    <link rel="prev" title="random_corpus" href="random_corpus.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="corpus_fromlist.html" title="corpus_fromlist"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="random_corpus.html" title="random_corpus"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" >vsm workflow</a> &raquo;</li>
+          <li><a href="corpusbuilders.html" accesskey="U">Corpus builder functions</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="toy-corpus">
+<h1>toy_corpus<a class="headerlink" href="#toy-corpus" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="vsm.corpus.util.corpusbuilders.toy_corpus">
+<tt class="descclassname">vsm.corpus.util.corpusbuilders.</tt><tt class="descname">toy_corpus</tt><big>(</big><em>plain_corpus</em>, <em>is_filename=False</em>, <em>nltk_stop=False</em>, <em>stop_freq=0</em>, <em>add_stop=None</em>, <em>metadata=None</em><big>)</big><a class="headerlink" href="#vsm.corpus.util.corpusbuilders.toy_corpus" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>toy_corpus</cite> is a convenience function for generating Corpus
+objects from a given string or a single file.</p>
+<p><cite>toy_corpus</cite> will perform both word and document-level
+tokenization. It will also strip punctuation and arabic numerals
+outside the range 1-29. All letters are made lowercase.</p>
+<p>Document tokens are delimited by two or more line breaks. E.g.,</p>
+<blockquote>
+<div><p>&lt;document 0&gt;</p>
+<p>&lt;document 1&gt;</p>
+<p>...</p>
+<p>&lt;document n&gt;</p>
+</div></blockquote>
+<p>where &lt;document i&gt; is any chunk of text to be tokenized by word.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>plain_corpus</strong> (<em>string-like</em>) &#8211; String containing a plain-text corpus or a 
+filename of a file containing one.</li>
+<li><strong>is_filename</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite> then <cite>plain_corpus</cite> is treated like
+a filename. Otherwise, <cite>plain_corpus</cite> is presumed to contain 
+the corpus. Default is <cite>False</cite>.</li>
+<li><strong>nltk_stop</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite> then the corpus object is masked using
+the NLTK English stop words. Default is <cite>False</cite>.</li>
+<li><strong>stop_freq</strong> (<em>int, optional</em>) &#8211; The upper bound for a word to be masked on the basis of its
+collection frequency. Default is 0.</li>
+<li><strong>add_stop</strong> (<em>array-like, optional</em>) &#8211; A list of stop words. Default is <cite>None</cite>.</li>
+<li><strong>metadata</strong> (<em>array-like, optional</em>) &#8211; A list of strings providing metadata about the documents. If
+provided, must have length equal to the number of documents.
+Default is <cite>None</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">c : a Corpus object
+Contains the tokenized corpus built from the input plain-text
+corpus. Document tokens are named <cite>documents</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><a class="reference internal" href="corpus.html#vsm.corpus.Corpus" title="vsm.corpus.Corpus"><tt class="xref py py-class docutils literal"><span class="pre">vsm.corpus.Corpus</span></tt></a>, 
+<a class="reference internal" href="paragraph_tokenize.html#vsm.corpus.util.paragraph_tokenize" title="vsm.corpus.util.paragraph_tokenize"><tt class="xref py py-meth docutils literal"><span class="pre">vsm.corpus.util.paragraph_tokenize()</span></tt></a>, 
+<a class="reference internal" href="util_apply_stoplist.html#vsm.corpus.util.apply_stoplist" title="vsm.corpus.util.apply_stoplist"><tt class="xref py py-meth docutils literal"><span class="pre">vsm.corpus.util.apply_stoplist()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="random_corpus.html"
+                        title="previous chapter">random_corpus</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="corpus_fromlist.html"
+                        title="next chapter">corpus_fromlist</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/toy_corpus.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="corpus_fromlist.html" title="corpus_fromlist"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="random_corpus.html" title="random_corpus"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" >vsm workflow</a> &raquo;</li>
+          <li><a href="corpusbuilders.html" >Corpus builder functions</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
