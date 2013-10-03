@@ -49,60 +49,56 @@ class LDAGibbsViewer(object):
         * **model** (LDAGibbs object) - `model`
 
     :methods:
-        * **topics** 
+        * :doc:`topics` 
             Returns a list of topics estimated by `LDAGibbs`
             sampler. Each topic is represented by a set of words and the
             corresponding probabilities.
-        * **topic_entropies** 
+        * :doc:`topic_entropies` 
             Returns topics sorted according to the entropy of each topic. 
             The entropy of topic k is calculated by summing P(d|k) * log(P(d|k))
             over all document d, and is thought to measure how informative a
             given topic is to select documents.
-        * **doc_topics**
+        * :doc:`doc_topics`
             Returns distribution P(K|D=d) over topics K for document d.
-        * **word_topics**
+        * :doc:`word_topics`
             Searches for every occurance of `word` in the entire corpus and
             returns a list each row of which contains the name or ID number of
             document, the relative position in the document, and the assigned
             topic number for each occurrence of `word`.
-        * **sim_top_top**
+        * :doc:`lda_sim_top_top`
             Returns topics sorted by the cosine similarity values between
             topic(s) and every topic.
-        * **sim_top_doc**
+        * :doc:`lda_sim_top_doc`
             Returns documents sorted according to their relevance to topic(s).
-        * **sim_words_top**
+        * :doc:`lda_sim_words_top`
             Returns topics sorted according to their relevance to word(s).
-        * **sim_word_word**
+        * :doc:`lda_sim_word_word`
             Returns words sorted by the cosine values between a word or list
             of words and every word based on the topic distributions.
-        * **sim_doc_doc**
+        * :doc:`lda_sim_doc_doc`
             Computes and sorts the cosine similarity values between a
             document or list of documents and every document in the topic space.
-        * **simmat_words**
+        * :doc:`lda_simmat_words`
             Calculates the similarity matrix for a given list of words.
-        * **simmat_docs**
+        * :doc:`lda_simmat_docs`
             Calculates the similarity matrix for a given list of documents.
-        * **simmat_topics**
+        * :doc:`lda_simmat_topics`
             Calculates the similarity matrix for a given list of topics.
-        * **cluster_topics**
+        * :doc:`cluster_topics`
             Clusters topics by a spceificed clustering algorithm. 
             Currently it supports K-means, Spectral Clustering and Affinity
             Propagation algorithms. K-means and spectral clustering cluster
             topics into a given number of clusters, whereas affinity
             propagation does not require the fixed cluster number. 
-        * **logp_plot**
+        * :doc:`logp_plot`
             Returns a plot of log probabilities for the specified range of 
             the MCMC chain used to fit a topic model by `LDAGibbs`.
             The function requires matplotlib package.
-        * **isomap_topics**
-            Plots an isomap of topics estimated LDA gibbs sampler.
-        * **isomap_topics**
+        * :doc:`isomap_topics`
             Takes document(s) or topic(s) and plots an isomap for 
             the documents similar/relevant to the query. The function plots
             relevant documents or topics by using the isomap algorithm
             in `sklearn` package.
-        * **plot_clusters**
-            Plots clusters with distinct color for each cluster.
     """
     def __init__(self, corpus, model):
         """

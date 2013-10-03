@@ -40,9 +40,13 @@ class LdaCgsMulti(object):
             Number of iterations. Set to 0 when the object is made.
 
     :Methods:
-        * **train**
+        * :meth:`train`
             Takes an optional argument `itr`, which defaults to 1000, and
             updates the model `itr` times.
+        * :meth:`load`
+            A static method for loading a saved LdaCgsMulti model.
+        * :meth:`save`
+            Saves the model in an `.npz` file.
         * **update_z**
             Takes a document index `d`, a word index `i` relative to that
             document and a word `w` and updates the model.
@@ -52,7 +56,7 @@ class LdaCgsMulti(object):
         * **phi_k**
             Takes a topic index `t` and returns the estimated posterior
             distribution over words for `t`.
-        * ***phi_w**
+        * **phi_w**
             Takes a word `w` and returns the estimated posterior
             distribution over topics for `w`.
         * **theta_d**

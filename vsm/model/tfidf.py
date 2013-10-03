@@ -44,14 +44,14 @@ class TfIdf(BaseModel):
             zero document frequency (so which have an undefined idf).
 
     :methods:
-        * **train**
+        * :meth:`train`
             Computes the IDF values for the input term-frequency matrix,
             scales the rows by these values and stores the results in
             `self.matrix`.
-        * **save**
+        * :meth:`save`
             Takes a filename or file object and saves `self.matrix` and
             `self.context_type` in an npz archive.
-        * **load**
+        * :meth:`load`
             Takes a filename or file object and loads it as an npz archive
             into a BaseModel object.
 

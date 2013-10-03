@@ -29,15 +29,15 @@ class LsaViewer(object):
         * **_doc_norms_**
 
     :methods:
-        * **sim_word_word**
+        * :doc:`lsa_sim_word_word`
             Returns words sorted by the cosine values between a word or list
             of words and every word.
-        * **sim_doc_doc**
+        * :doc:`lsa_sim_doc_doc`
             Computes and sorts the cosine similarity values between a
             document or list of documents and every document.
-        * **simmat_words**
+        * :doc:`lsa_simmat_words`
             Calculates the similarity matrix for a given list of words.
-        * **simmat_docs**
+        * :doc:`lsa_simmat_docs`
             Calculates the similarity matrix for a given list of documents.
 
     :See Also: :mod:`vsm.model.lsa`

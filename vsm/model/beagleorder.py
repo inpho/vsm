@@ -140,7 +140,7 @@ class BeagleOrderSeq(BaseModel):
 
 
     :Methods:
-        * **train**
+        * :doc:`bos_train`
             Trains the model.
 
     :See Also: :class:`vsm.model.BaseModel`
@@ -166,6 +166,7 @@ class BeagleOrderSeq(BaseModel):
 
     def train(self):
         """
+        Trains the model.
         """
         self.matrix = np.zeros_like(self.env_matrix)
 
@@ -220,7 +221,7 @@ class BeagleOrderMulti(BaseModel):
 
 
     :Methods:
-        * **train**
+        * :doc:`bom_train`
             Trains the model.
 
     :See Also: :class:`vsm.model.BaseModel`

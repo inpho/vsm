@@ -35,13 +35,13 @@ class TfSeq(BaseModel):
             frequency counts.
 
     :methods:
-        * **train**
+        * :meth:`train`
             Counts word-type occurrences per context and stores the
             results in `self.matrix`
-        * **save**
+        * :meth:`save`
             Takes a filename or file object and saves `self.matrix` and
             `self.context_type` in an npz archive.
-        * **load**
+        * :meth:`load`
             Takes a filename or file object and loads it as an npz archive
             into a BaseModel object.
 
@@ -98,13 +98,13 @@ class TfMulti(BaseModel):
             frequency counts.
 
     :methods:
-        * **train**
+        * :meth:`train`
             Counts word-type occurrences per context and stores the
             results in `self.matrix`
-        * **save**
+        * :meth:`save`
             Takes a filename or file object and saves `self.matrix` and
             `self.context_type` in an npz archive.
-        * **load**
+        * :meth:`load`
             Takes a filename or file object and loads it as an npz archive
             into a BaseModel object.
 

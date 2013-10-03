@@ -65,6 +65,24 @@ class BaseLsaModel(object):
 
 class Lsa(BaseLsaModel):
     """
+
+    :param td_matrix: ? Default is an empty array.
+    :type td_matrix: np.array, optional
+
+    :param context_type: Name of tokenization whose tokens will be
+        treated as documents. Default is `None`.
+    :type context_type: string, optional
+
+    :Attributes:
+        * **td_matrix** (np.array)
+
+    :Methods:
+        * :meth:`train`
+           Trains the model. 
+        * :meth:`load`
+            Loads the saved model.
+        * :meth:`save`
+            Saves the model in an `.npz` file.
     """
     def __init__(self, td_matrix=np.array([]), context_type=None):
 
@@ -88,6 +106,8 @@ class Lsa(BaseLsaModel):
 
     def train(self, k_factors=300):
         """
+        Trains the model.
+
         :param k_factors: Default is 300.
         :type k_factors: int, optional
 

@@ -64,10 +64,14 @@ class LDAGibbs(object):
             Stores the sum of words over topics.
 
     :Methods:
-        * **train**
+        * :meth:`train`
             Takes an optional argument `itr`, which defaults to 1000, and
             updates the model `itr` times.
-        * **update_z**
+        * :meth:`load`
+            Static method to load a saved model.
+        * :meth:`save`
+            Saves the LDAGibbs model in an `.npz` file.
+        * **`update_z`**
             Takes a document index `d`, a word index `i` relative to that
             document and a word `w` and updates the model.
         * **z_dist**
@@ -76,7 +80,7 @@ class LDAGibbs(object):
         * **phi_k**
             Takes a topic index `t` and returns the estimated posterior
             distribution over words for `t`.
-        * ***phi_w**
+        * **phi_w**
             Takes a word `w` and returns the estimated posterior
             distribution over topics for `w`.
         * **theta_d**
@@ -201,8 +205,6 @@ class LDAGibbs(object):
 
 
     def logp(self):
-        """
-        """
         # This is slightly faster than distributing log over division
         log_kw = np.log(self.top_word / self.top_word.sum(1)[:, np.newaxis])
         log_dk = np.log(self.doc_top / self.doc_top.sum(1)[:, np.newaxis])

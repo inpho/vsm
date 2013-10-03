@@ -30,6 +30,10 @@ class BeagleEnvironment(BaseModel):
         * **matrix** (2-D array)
             ?
 
+    :Methods:
+        * :doc:`be_train`
+            Trains the model.
+
     :See Also: :class:`vsm.model.BaseModel`
     """
     def __init__(self, corpus, n_cols=2048, dtype=np.float64, 
@@ -43,6 +47,7 @@ class BeagleEnvironment(BaseModel):
 
     def train(self):
         """
+        Trains the model.
         """
         self.matrix = np.array(np.random.normal(size=self.shape),
                                dtype=self.dtype)

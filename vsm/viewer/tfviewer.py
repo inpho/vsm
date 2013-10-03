@@ -36,18 +36,18 @@ class TfViewer(object):
         * **_doc_norms_**
 
     :methods:
-        * **sim_word_word**
+        * :doc:`tf_sim_word_word`
             Returns words sorted by the cosine values between a word or list
             of words and every word.
-        * **sim_doc_doc**
+        * :doc:`tf_sim_doc_doc`
             Computes and sorts the cosine similarity values between a
             document or list of documents.
-        * **simmat_words**
+        * :doc:`tf_simmat_words`
             Calculates the similarity matrix for a given list of words.
-        * **simmat_docs**
+        * :doc:`tf_simmat_docs`
             Calculates the similarity matrix for a given list of documents.
-        * **coll_freq**
-        * **coll_freqs**
+        * :doc:`coll_freq`
+        * :doc:`coll_freqs`
 
     :See Also: :class:`vsm.model.tf.TfSeq`, :class:`vsm.model.tf.TfMulti`
     """
