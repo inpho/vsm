@@ -433,8 +433,7 @@ def test_LdaCgsMulti_IO():
 
 def test_continuation():
     """
-    Note
-    ----
+    :note:
     Disable reseeding in `update` before running this test and use
     sequential mapping
     """

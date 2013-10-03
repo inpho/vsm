@@ -10,7 +10,7 @@
 :Release: |version|
 :Date: |today|
 
-The :mod:`vsm` module provides tools and a work flow for producing
+The :mod:`vsm` module provides tools and a workflow for producing
 semantic models of textual corpora and analyzing and visualizing these
 models.
 

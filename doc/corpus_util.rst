@@ -2,7 +2,7 @@
 Corpus utility functions
 ========================
 
-Corpus utility functions in :mod:`vsm.corpus.util` module includes functions for
+Corpus utility functions in `vsm.corpus.util` module includes functions for
 corpus clean up, tokenization as well as convenience functions for building
 a corpus. 
 

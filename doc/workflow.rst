@@ -15,14 +15,5 @@ A :doc:`wf_tutorial` is also available.
     corpusbuilders
     module_corpus
     wf_model
-        wf_beagle
-        wf_lda
-        wf_lsa
-        wf_tf
-        wf_tfidf
     wf_viewer
-        beagleviewer
-        ldagibbsviewer
-        lsaviewer
-        tfviewer
-        tfidfviewer
+
