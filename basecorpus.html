@@ -57,8 +57,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="basecorpus">
-<h1>BaseCorpus<a class="headerlink" href="#basecorpus" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-vsm.corpus">
+<span id="basecorpus"></span><h1>BaseCorpus<a class="headerlink" href="#module-vsm.corpus" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="vsm.corpus.BaseCorpus">
 <em class="property">class </em><tt class="descclassname">vsm.corpus.</tt><tt class="descname">BaseCorpus</tt><big>(</big><em>corpus</em>, <em>dtype=None</em>, <em>context_types=</em><span class="optional">[</span><span class="optional">]</span>, <em>context_data=</em><span class="optional">[</span><span class="optional">]</span>, <em>remove_empty=True</em><big>)</big><a class="headerlink" href="#vsm.corpus.BaseCorpus" title="Permalink to this definition">¶</a></dt>
@@ -119,34 +119,44 @@ to an array of data-type <cite>dtype</cite> (if provided).</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first">
 <li><dl class="first docutils">
-<dt><strong>meta_int</strong></dt>
+<dt><a class="reference internal" href="meta_int.html"><em>meta_int</em></a></dt>
 <dd><p class="first last">Takes a type of tokenization and a query and returns the index of
 the metadata found in the query.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>get_metadatum</strong></dt>
+<dt><a class="reference internal" href="get_metadatum.html"><em>get_metadatum</em></a></dt>
 <dd><p class="first last">Takes a type of tokenization and a query and returns the metadatum
 corresponding to the query and the field.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>view_contexts</strong></dt>
+<dt><a class="reference internal" href="bc_view_contexts.html"><em>view_contexts</em></a></dt>
 <dd><p class="first last">Takes a type of tokenization and returns a view of the corpus
 tokenized accordingly.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>view_metadata</strong></dt>
+<dt><a class="reference internal" href="view_metadata.html"><em>view_metadata</em></a></dt>
 <dd><p class="first last">Takes a type of tokenization and returns a view of the metadata
 of the tokenization.</p>
 </dd>
 </dl>
 </li>
-<li><p class="first"><strong>tolist</strong>: Returns Corpus object as a list of lists.</p>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="bc_tolist.html"><em>tolist</em></a></dt>
+<dd><p class="first last">Returns Corpus object as a list of lists.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="remove_empty.html"><em>remove_empty</em></a></dt>
+<dd><p class="first last">Removes empty documents in the corpus.</p>
+</dd>
+</dl>
 </li>
 </ul>
 </td>
@@ -197,8 +207,6 @@ of the tokenization.</p>
 </div>
 </dd></dl>
 
-<div class="section" id="methods">
-<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="remove_empty.html">remove_empty</a></li>
@@ -210,7 +218,6 @@ of the tokenization.</p>
 </ul>
 </div>
 </div>
-</div>
 
 
           </div>
@@ -218,16 +225,6 @@ of the tokenization.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">BaseCorpus</a><ul>
-<li><a class="reference internal" href="#methods">Methods</a><ul>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
   <h4>Previous topic</h4>
   <p class="topless"><a href="module_corpus.html"
                         title="previous chapter">Corpus Objects</a></p>

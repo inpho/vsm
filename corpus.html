@@ -117,10 +117,16 @@ corresponding integers (i.e., indices in <cite>words</cite>).</p>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><blockquote class="first">
-<div><ul>
+<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first">
 <li><dl class="first docutils">
-<dt><strong>view_contexts</strong></dt>
+<dt><a class="reference internal" href="view_metadata.html"><em>view_metadata</em></a></dt>
+<dd><p class="first last">Takes a type of tokenization and returns a view of the metadata
+of the tokenization.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="view_contexts.html"><em>view_contexts</em></a></dt>
 <dd><p class="first last">Takes a type of tokenization and returns a view of the corpus tokenized
 accordingly. The optional parameter <cite>strings</cite> takes a boolean value: 
 True to view string representations of words; False to view integer 
@@ -128,49 +134,35 @@ representations of words. Default is <cite>False</cite>.</p>
 </dd>
 </dl>
 </li>
-</ul>
-</div></blockquote>
-<ul>
 <li><dl class="first docutils">
-<dt><strong>view_metadata</strong></dt>
-<dd><p class="first last">Takes a type of tokenization and returns a view of the metadata
-of the tokenization.</p>
-</dd>
-</dl>
-</li>
-</ul>
-<blockquote>
-<div><ul>
-<li><dl class="first docutils">
-<dt><strong>save</strong></dt>
+<dt><a class="reference internal" href="save.html"><em>save</em></a></dt>
 <dd><p class="first last">Takes a filename and saves the data contained in a Corpus object to 
 a <cite>npy</cite> file using <cite>numpy.savez</cite>.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>load</strong></dt>
+<dt><a class="reference internal" href="load.html"><em>load</em></a></dt>
 <dd><p class="first last">Static method. Takes a filename, loads the file data into a Corpus
 object and returns the object.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>apply_stoplist</strong></dt>
+<dt><a class="reference internal" href="apply_stoplist.html"><em>apply_stoplist</em></a></dt>
 <dd><p class="first last">Takes a list of stopwords and returns a copy of the corpus with 
 the stopwords removed.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>tolist</strong></dt>
+<dt><a class="reference internal" href="tolist.html"><em>tolist</em></a></dt>
 <dd><p class="first last">Returns Corpus object as a list of lists of either integers or strings, 
 according to <cite>as_strings</cite>.</p>
 </dd>
 </dl>
 </li>
 </ul>
-</div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><a class="reference internal" href="basecorpus.html#vsm.corpus.BaseCorpus" title="vsm.corpus.BaseCorpus"><tt class="xref py py-class docutils literal"><span class="pre">vsm.corpus.BaseCorpus</span></tt></a></p>
@@ -226,8 +218,6 @@ according to <cite>as_strings</cite>.</p>
 </div>
 </dd></dl>
 
-<div class="section" id="methods">
-<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="view_contexts.html">view_contexts</a></li>
@@ -239,7 +229,6 @@ according to <cite>as_strings</cite>.</p>
 </ul>
 </div>
 </div>
-</div>
 
 
           </div>
@@ -247,16 +236,6 @@ according to <cite>as_strings</cite>.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Corpus</a><ul>
-<li><a class="reference internal" href="#methods">Methods</a><ul>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
   <h4>Previous topic</h4>
   <p class="topless"><a href="bc_tolist.html"
                         title="previous chapter">tolist</a></p>

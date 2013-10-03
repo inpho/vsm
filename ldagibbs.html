@@ -122,14 +122,26 @@ terms for each topic in a K x V matrix.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first last">
 <li><dl class="first docutils">
-<dt><strong>train</strong></dt>
+<dt><a class="reference internal" href="#vsm.model.ldagibbs.LDAGibbs.train" title="vsm.model.ldagibbs.LDAGibbs.train"><tt class="xref py py-meth docutils literal"><span class="pre">train()</span></tt></a></dt>
 <dd><p class="first last">Takes an optional argument <cite>itr</cite>, which defaults to 1000, and
 updates the model <cite>itr</cite> times.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>update_z</strong></dt>
+<dt><a class="reference internal" href="#vsm.model.ldagibbs.LDAGibbs.load" title="vsm.model.ldagibbs.LDAGibbs.load"><tt class="xref py py-meth docutils literal"><span class="pre">load()</span></tt></a></dt>
+<dd><p class="first last">Static method to load a saved model.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="#vsm.model.ldagibbs.LDAGibbs.save" title="vsm.model.ldagibbs.LDAGibbs.save"><tt class="xref py py-meth docutils literal"><span class="pre">save()</span></tt></a></dt>
+<dd><p class="first last">Saves the LDAGibbs model in an <cite>.npz</cite> file.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>`update_z`</strong></dt>
 <dd><p class="first last">Takes a document index <cite>d</cite>, a word index <cite>i</cite> relative to that
 document and a word <cite>w</cite> and updates the model.</p>
 </dd>
@@ -150,7 +162,7 @@ distribution over words for <cite>t</cite>.</p>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>*phi_w</strong></dt>
+<dt><strong>phi_w</strong></dt>
 <dd><p class="first last">Takes a word <cite>w</cite> and returns the estimated posterior
 distribution over topics for <cite>w</cite>.</p>
 </dd>
@@ -200,11 +212,6 @@ estimated values of the latent variables <cite>phi</cite>, <cite>theta</cite> an
 </tbody>
 </table>
 </dd></dl>
-
-<dl class="method">
-<dt id="vsm.model.ldagibbs.LDAGibbs.logp">
-<tt class="descname">logp</tt><big>(</big><big>)</big><a class="headerlink" href="#vsm.model.ldagibbs.LDAGibbs.logp" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="vsm.model.ldagibbs.LDAGibbs.save">

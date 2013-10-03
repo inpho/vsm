@@ -108,7 +108,7 @@ zero document frequency (so which have an undefined idf).</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first">
 <li><dl class="first docutils">
-<dt><strong>train</strong></dt>
+<dt><a class="reference internal" href="#vsm.model.tfidf.TfIdf.train" title="vsm.model.tfidf.TfIdf.train"><tt class="xref py py-meth docutils literal"><span class="pre">train()</span></tt></a></dt>
 <dd><p class="first last">Computes the IDF values for the input term-frequency matrix,
 scales the rows by these values and stores the results in
 <cite>self.matrix</cite>.</p>
@@ -116,14 +116,14 @@ scales the rows by these values and stores the results in
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>save</strong></dt>
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">save()</span></tt></dt>
 <dd><p class="first last">Takes a filename or file object and saves <cite>self.matrix</cite> and
 <cite>self.context_type</cite> in an npz archive.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>load</strong></dt>
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">load()</span></tt></dt>
 <dd><p class="first last">Takes a filename or file object and loads it as an npz archive
 into a BaseModel object.</p>
 </dd>
@@ -132,7 +132,7 @@ into a BaseModel object.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><p class="first"><a class="reference internal" href="tfseq.html#vsm.model.tf.TfSeq" title="vsm.model.tf.TfSeq"><tt class="xref py py-class docutils literal"><span class="pre">vsm.model.tf.TfSeq</span></tt></a>, <a class="reference internal" href="basemodel.html#vsm.model.BaseModel" title="vsm.model.BaseModel"><tt class="xref py py-class docutils literal"><span class="pre">vsm.model.BaseModel</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">scipy.sparse.coo_matrix</span></tt></p>
+<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><p class="first"><a class="reference internal" href="tfseq.html#vsm.model.tf.TfSeq" title="vsm.model.tf.TfSeq"><tt class="xref py py-class docutils literal"><span class="pre">vsm.model.tf.TfSeq</span></tt></a>, <a class="reference internal" href="wf_model.html#vsm.model.BaseModel" title="vsm.model.BaseModel"><tt class="xref py py-class docutils literal"><span class="pre">vsm.model.BaseModel</span></tt></a>, <tt class="xref py py-class docutils literal"><span class="pre">scipy.sparse.coo_matrix</span></tt></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Notes :</th><td class="field-body"><p class="first last">A zero in the matrix might arise in two ways: (1) the word type

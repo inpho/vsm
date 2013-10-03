@@ -108,9 +108,21 @@ for all contexts.</li>
 </tr>
 <tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first last">
 <li><dl class="first docutils">
-<dt><strong>train</strong></dt>
+<dt><a class="reference internal" href="#vsm.model.ldacgsmulti.LdaCgsMulti.train" title="vsm.model.ldacgsmulti.LdaCgsMulti.train"><tt class="xref py py-meth docutils literal"><span class="pre">train()</span></tt></a></dt>
 <dd><p class="first last">Takes an optional argument <cite>itr</cite>, which defaults to 1000, and
 updates the model <cite>itr</cite> times.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="#vsm.model.ldacgsmulti.LdaCgsMulti.load" title="vsm.model.ldacgsmulti.LdaCgsMulti.load"><tt class="xref py py-meth docutils literal"><span class="pre">load()</span></tt></a></dt>
+<dd><p class="first last">A static method for loading a saved LdaCgsMulti model.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="#vsm.model.ldacgsmulti.LdaCgsMulti.save" title="vsm.model.ldacgsmulti.LdaCgsMulti.save"><tt class="xref py py-meth docutils literal"><span class="pre">save()</span></tt></a></dt>
+<dd><p class="first last">Saves the model in an <cite>.npz</cite> file.</p>
 </dd>
 </dl>
 </li>
@@ -136,7 +148,7 @@ distribution over words for <cite>t</cite>.</p>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>*phi_w</strong></dt>
+<dt><strong>phi_w</strong></dt>
 <dd><p class="first last">Takes a word <cite>w</cite> and returns the estimated posterior
 distribution over topics for <cite>w</cite>.</p>
 </dd>

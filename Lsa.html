@@ -51,10 +51,51 @@
 <dl class="class">
 <dt id="vsm.model.lsa.Lsa">
 <em class="property">class </em><tt class="descclassname">vsm.model.lsa.</tt><tt class="descname">Lsa</tt><big>(</big><em>td_matrix=array(</em><span class="optional">[</span><span class="optional">]</span>, <em>dtype=float64)</em>, <em>context_type=None</em><big>)</big><a class="headerlink" href="#vsm.model.lsa.Lsa" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>td_matrix</strong> (<em>np.array, optional</em>) &#8211; ? Default is an empty array.</li>
+<li><strong>context_type</strong> (<em>string, optional</em>) &#8211; Name of tokenization whose tokens will be
+treated as documents. Default is <cite>None</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes :</th><td class="field-body"><ul class="first simple">
+<li><strong>td_matrix</strong> (np.array)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first last">
+<li><dl class="first docutils">
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">train()</span></tt></dt>
+<dd><p class="first last">Trains the model.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">load()</span></tt></dt>
+<dd><p class="first last">Loads the saved model.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">save()</span></tt></dt>
+<dd><p class="first last">Saves the model in an <cite>.npz</cite> file.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
 <dt id="vsm.model.lsa.Lsa.train">
 <tt class="descname">train</tt><big>(</big><em>k_factors=300</em><big>)</big><a class="headerlink" href="#vsm.model.lsa.Lsa.train" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Trains the model.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">

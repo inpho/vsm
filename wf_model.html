@@ -61,7 +61,51 @@
 <p>Here are the available models.</p>
 <p>Take your <a class="reference internal" href="corpus.html#vsm.corpus.Corpus" title="vsm.corpus.Corpus"><tt class="xref py py-class docutils literal"><span class="pre">Corpus</span></tt></a> and make any of the following model
 objects depending on the purpose of your data exploration.</p>
-<span class="target" id="module-vsm.model"></span><div class="toctree-wrapper compound">
+<span class="target" id="module-vsm.model"></span><dl class="class">
+<dt id="vsm.model.BaseModel">
+<em class="property">class </em><tt class="descclassname">vsm.model.</tt><tt class="descname">BaseModel</tt><big>(</big><em>matrix=None</em>, <em>context_type=None</em><big>)</big><a class="headerlink" href="#vsm.model.BaseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for models which store data in a single matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>matrix</strong> (<em>numpy.ndarray, optional</em>) &#8211; A two-dimensional numpy array storing the results
+of model training. Default is <cite>None</cite>.</li>
+<li><strong>context_type</strong> (<em>string, optional</em>) &#8211; A string specifying the type of context over
+which the model trainer is applied. Default is <cite>None</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes :</th><td class="field-body"><p class="first">Same as parameters.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first">
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="model_save.html"><em>save</em></a></dt>
+<dd><p class="first last">Takes a filename or file object and saves <cite>self.matrix</cite> 
+in an npz archive.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="model_load.html"><em>load</em></a></dt>
+<dd><p class="first last">Takes a filename or file object and loads it as an npz
+archive into a BaseModel object.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><tt class="xref py py-meth docutils literal"><span class="pre">numpy.savez()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">numpy.load()</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="wf_beagle.html">Beagle Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wf_lda.html">LDA Model</a></li>

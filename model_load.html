@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>BeagleContextMulti &mdash; vsm 0.1 documentation</title>
+    <title>load &mdash; vsm 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -46,66 +46,24 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="beaglecontextmulti">
-<h1>BeagleContextMulti<a class="headerlink" href="#beaglecontextmulti" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="vsm.model.beaglecontext.BeagleContextMulti">
-<em class="property">class </em><tt class="descclassname">vsm.model.beaglecontext.</tt><tt class="descname">BeagleContextMulti</tt><big>(</big><em>corpus</em>, <em>env_corpus</em>, <em>env_matrix</em>, <em>context_type='sentence'</em><big>)</big><a class="headerlink" href="#vsm.model.beaglecontext.BeagleContextMulti" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+  <div class="section" id="load">
+<h1>load<a class="headerlink" href="#load" title="Permalink to this headline">¶</a></h1>
+<dl class="staticmethod">
+<dt id="vsm.model.BaseModel.load">
+<em class="property">static </em><tt class="descclassname">BaseModel.</tt><tt class="descname">load</tt><big>(</big><em>f</em><big>)</big><a class="headerlink" href="#vsm.model.BaseModel.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a filename or file object and loads it as an npz archive
+into a BaseModel object.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>corpus</strong> (<em>Corpus object</em>) &#8211; </li>
-<li><strong>env_corpus</strong> (<em>Corpus object</em>) &#8211; </li>
-<li><strong>env_matrix</strong> (<em>2-D array</em>) &#8211; </li>
-<li><strong>context_type</strong> (<em>string, optional</em>) &#8211; Name of tokenization stored in <cite>corpus</cite> whose
-tokens will be treated as documents. Default is <cite>sentence</cite>.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> (<em>str-like or file-like object</em>) &#8211; Designates the file to read. If <cite>file</cite> is a string
+ending in <cite>.gz</cite>, the file is first gunzipped. See <cite>numpy.load</cite>
+for further details.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Attributes :</th><td class="field-body"><ul class="first">
-<li><dl class="first docutils">
-<dt><strong>context_type</strong> (string)</dt>
-<dd><p class="first last">Name of tokenization where tokens will be treated as documents.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><strong>sents</strong> (list of arrays)</dt>
-<dd><p class="first last">Tokens by <cite>context_type</cite> retrieved from <cite>corpus</cite>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><strong>dtype</strong> (np.dtype)</dt>
-<dd><p class="first last">Numpy dtype of <cite>env_matrix</cite>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><strong>env_matrix</strong> (2-D array)</dt>
-<dd><p class="first last">Beagle environment matrix.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary storing the data found in <cite>file</cite>.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first">
-<li><dl class="first docutils">
-<dt><a class="reference internal" href="bcm_train.html"><em>train</em></a></dt>
-<dd><p class="first last">Takes an optional argument <cite>n_procs</cite>, number of processors,
-and trains the model on the number of processors. <cite>n_procs</cite>
-is 2 by default.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><a class="reference internal" href="wf_model.html#vsm.model.BaseModel" title="vsm.model.BaseModel"><tt class="xref py py-class docutils literal"><span class="pre">vsm.model.BaseModel</span></tt></a></p>
-</td>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><a class="reference internal" href="model_save.html#vsm.model.BaseModel.save" title="vsm.model.BaseModel.save"><tt class="xref py py-meth docutils literal"><span class="pre">BaseModel.save()</span></tt></a>, <tt class="xref py py-meth docutils literal"><span class="pre">numpy.load()</span></tt></td>
 </tr>
 </tbody>
 </table>
@@ -121,7 +79,7 @@ is 2 by default.</p>
         <div class="sphinxsidebarwrapper">
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/beaglecontextmulti.txt"
+    <li><a href="_sources/model_load.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
