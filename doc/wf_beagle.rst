@@ -11,13 +11,16 @@ combines Beagle Context and Beagle Order model in user-defined ratio.
 
 Beagle Context model has 2 convenient classes for training.
 
-:mod:`Beagle Context<vsm.model.beaglecontext>` - 
+:mod:`Beagle Context<vsm.model.beaglecontext>` - To get a better sense of a word, Beagle context model
+considers the co-occurring words.
 
 Beagle Order model has 2 convenient classes for training.
 
-:mod:`Beagle Order<vsm.model.beagleorder>` - 
+:mod:`Beagle Order<vsm.model.beagleorder>` - considers the order of a word in the sentence.
 
-:mod:`Bealge Environment<vsm.model.beagleenvironment>` - 
+:mod:`Bealge Environment<vsm.model.beagleenvironment>` - random environment vector model.
+
+Here is a blog entry about `BEAGLE model<https://inpho.cogs.indiana.edu/datablog/info/info-beagle/>`_ in the InPho DataBlog.
 
 .. .. toctree::
     :maxdepth: 1
