@@ -5,6 +5,7 @@ import numpy as np
 from vsm.corpus import Corpus
 from vsm.corpus.util import *
 
+
 __all__ = ['empty_corpus', 'random_corpus',
            'toy_corpus', 'corpus_fromlist',
            'file_corpus', 'dir_corpus', 'coll_corpus']

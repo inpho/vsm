@@ -1,0 +1,68 @@
+-------------------------------
+2013.09.30
+
+Roadmap towards a first release
+-------------------------------
+
+* Revision of the LDA training code. LdaGibbs is a `first-generation`
+  sequential trainer. LdaCgsMulti is a `second-generation` trainer
+  that works reasonably well with the multiprocessing library but also
+  has a cleaner interface than LdaGibbs. Finally, there is a parallel
+  CGS version that runs on an ipython cluster. It's the best of the
+  bunch. All of these need to be consolidated to a single LdaCgs
+  submodule.
+
+* Implement Beagle on IPython.parallel. Deprecate the multiprocessing
+  version.
+
+* Unit tests for vsm/beagle* and for vsm/lda*.
+
+* Unit tests for vsm/linalg.
+
+* Unit tests for vsm/viewer/*.
+
+* Functional tests
+
+  * Empty document issues
+
+  * Stoplisting
+
+  * Metadata management (from tokenization to doc analysis).
+
+* Sphinx-generated documentation
+
+  * Getting Started page
+
+  * Workflow
+
+  * Tutorials and demos
+
+* Complete transition from similarity `measures' to metric functions.
+  This involves ensuring that the defaults are appropriately set and
+  renaming a bunch of stuff from sim* to dist*.
+
+
+Wishlist
+--------
+
+* Projections into two space. Currently all of the distance functions
+  project onto a one-dimensional subspace determined by a single
+  query. It should be nice to be able to work with two and visualize
+  with matplotlib.
+
+* Better defaults for LDA priors.
+
+* More Bayesian models. There are several descendants of LDA with
+  highly desirable features (e.g., correlated topics, topic change
+  models) we have yet to implement.
+
+* Integration with the Hadoop-based training code developed by Guang
+  Chen.
+
+* Lazy-loading Corpus objects. Currently, corpus objects, whether to
+  be trained on or to be viewed are loaded fully into volatile memory.
+  This is completely unnecessary, practically speaking, and
+  unscalable.
+
+* Better automatic plotting options.
+

@@ -478,5 +478,3 @@ def url_metadata(corpus, ctx_type, coll_dir):
     return urls
 
 
-
-
