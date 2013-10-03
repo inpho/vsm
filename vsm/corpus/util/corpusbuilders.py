@@ -208,7 +208,7 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
 
 def file_tokenize(text):
     """
-    `file_tokenize` is a helper function for `file_corpus`.
+    `file_tokenize` is a helper function for :meth:`file_corpus`.
     
     Takes a string that is content in a file and returns words
     and corpus data.
@@ -217,7 +217,7 @@ def file_tokenize(text):
     :type text: string
 
     :returns: words : List of words.
-        Words in the `text` tokenized by :meth: word_tokenize.
+        Words in the `text` tokenized by :meth:`vsm.corpus.util.word_tokenize`.
         corpus_data : Dictionary with context type as keys and
         corresponding tokenizations as values. The tokenizations
         are np.arrays.
@@ -299,7 +299,7 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
 
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
     """
-    `dir_tokenize` is a helper function for :meth: dir_corpus.
+    `dir_tokenize` is a helper function for :meth:`dir_corpus`.
 
     Takes a list of files, `chunks` and `labels` for the `chunks` and
     returns words and corpus data.
@@ -458,7 +458,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
 
 def coll_tokenize(books, book_names):
     """
-    `coll_tokenize` is a helper function for :meth: coll_corpus.
+    `coll_tokenize` is a helper function for :meth:`coll_corpus`.
 
     Takes a list of books and `book_names`, and returns words 
     and corpus data.
@@ -470,7 +470,7 @@ def coll_tokenize(books, book_names):
     :type book_names: list
 
     :returns: words : List of words.
-        words in the `books` tokenized by :meth: word_tokenize.
+        words in the `books` tokenized by :meth:`word_tokenize`.
         corpus_data : Dictionary with context type as keys and
         corresponding tokenizations as values. The tokenizations
         are np.arrays.

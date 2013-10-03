@@ -61,7 +61,7 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
 
     :returns: Corpus with new metadata added to the existing metdata.
 
-    :See Also: :class:`vsm.corpus.Corpus`, :meth:`vsm.arr_add_field`
+    :See Also: :class:`vsm.corpus.Corpus`
     """
     from vsm import arr_add_field
     i = corpus.context_types.index(ctx_type)
@@ -134,6 +134,11 @@ def word_tokenize(text):
     for hyphens, removed.
 
     The core work is done by NLTK's Treebank Word Tokenizer.
+    
+    :param text: Text to be tokeized.
+    :type text: string
+
+    :returns: tokens : list of strings
     """
 
     text = rehyph(text)
@@ -153,6 +158,11 @@ def sentence_tokenize(text):
     sentences in this text.
 
     This is a wrapper for NLTK's pre-trained Punkt Tokenizer.
+     
+    :param text: Text to be tokeized.
+    :type text: string
+
+    :returns: tokens : list of strings
     """
     tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
@@ -165,6 +175,11 @@ def paragraph_tokenize(text):
     input string is English text and the output consists of the
     paragraphs in this text. It's expected that the text marks
     paragraphs with two consecutive line breaks.
+     
+    :param text: Text to be tokeized.
+    :type text: string
+
+    :returns: tokens : list of strings
     """
 
     par_break = re.compile(r'[\r\n]{2,}')

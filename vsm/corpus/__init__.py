@@ -104,7 +104,7 @@ class BaseCorpus(object):
             of the tokenization.
         * **tolist**: Returns Corpus object as a list of lists.
 
-    :See Also: :class:`vsm.corpus.Corpus`
+    :See Also: :class:`Corpus`
 
     **Examples**
 
@@ -399,7 +399,7 @@ class Corpus(BaseCorpus):
             Returns Corpus object as a list of lists of either integers or strings, 
             according to `as_strings`.
         
-    :See Also: :class:`vsm.corpus.BaseCorpus`
+    :See Also: :class:`BaseCorpus`
 
     **Examples**
 
