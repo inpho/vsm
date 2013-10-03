@@ -2,10 +2,11 @@
 BaseCorpus
 ==========
 
-.. autoclass:: vsm.corpus.BaseCorpus
+.. automodule:: vsm.corpus
 
-Methods
--------
+.. automethod:: split_corpus
+
+.. autoclass:: vsm.corpus.BaseCorpus
 
 .. toctree::
     :maxdepth: 2

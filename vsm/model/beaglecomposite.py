@@ -33,7 +33,7 @@ class BeagleComposite(BaseModel):
             Name of tokenization to be treated as documents.
 
     :Methods:
-        * **train**
+        * :doc:`beaglecomposite_train`
             Takes an optional argument `wgt` which is `.5` by default.
 
     :See Also: :class:`vsm.model.BaseModel`.

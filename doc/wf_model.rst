@@ -10,6 +10,8 @@ objects depending on the purpose of your data exploration.
 
 .. automodule:: vsm.model
 
+.. autoclass:: BaseModel
+
 .. toctree::
     :maxdepth: 2
 

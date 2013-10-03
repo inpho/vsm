@@ -10,5 +10,5 @@ Methods
 .. toctree::
     :maxdepth: 2
 
-    save
-    load
+    basemodel_save
+    basemodel_load

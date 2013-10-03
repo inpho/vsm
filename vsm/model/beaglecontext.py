@@ -44,7 +44,7 @@ class BeagleContextSeq(BaseModel):
             Beagle environment matrix.
 
     :Methods:
-        * **train**
+        * :doc:`bcs_train`
             Trains the model.
 
     :See Also: :class:`vsm.model.BaseModel`
@@ -60,6 +60,7 @@ class BeagleContextSeq(BaseModel):
 
     def train(self):
         """
+        Trains the model.
         """
         self.matrix = np.zeros_like(self.env_matrix)
 
@@ -112,7 +113,7 @@ class BeagleContextMulti(BaseModel):
             Beagle environment matrix.
 
     :Methods:
-        * **train**
+        * :doc:`bcm_train`
             Takes an optional argument `n_procs`, number of processors,
             and trains the model on the number of processors. `n_procs`
             is 2 by default.
@@ -141,6 +142,9 @@ class BeagleContextMulti(BaseModel):
 
     def train(self, n_procs=2):
         """
+        Takes an optional argument `n_procs`, number of processors,
+        and trains the model on the number of processors. `n_procs`
+        is 2 by default.
         """
         sent_lists = np.array_split(self.sents, n_procs-1)
         if len(sent_lists) != n_procs:

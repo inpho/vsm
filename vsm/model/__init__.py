@@ -18,14 +18,14 @@ class BaseModel(object):
         Same as parameters.
 
     :methods:
-        * **save**
+        * :doc:`model_save`
             Takes a filename or file object and saves `self.matrix` 
             in an npz archive.
-        * **load**
+        * :doc:`model_load`
             Takes a filename or file object and loads it as an npz
             archive into a BaseModel object.
 
-    :See Also: :meth: numpy.savez, :meth: numpy.load
+    :See Also: :meth:`numpy.savez`, :meth:`numpy.load`
     """
     def __init__(self, matrix=None, context_type=None):
         self.matrix = matrix
@@ -43,7 +43,7 @@ class BaseModel(object):
             
         :returns: `None`
 
-        :See Also: :meth: BaseModel.load, :meth: numpy.savez
+        :See Also: :meth:`BaseModel.load`, :meth:`numpy.savez`
         """
         print 'Saving model to', f
         np.savez(f, matrix=self.matrix, context_type=np.array(self.context_type))
@@ -62,7 +62,7 @@ class BaseModel(object):
 
         :returns: A dictionary storing the data found in `file`.
 
-        :See Also: :meth: BaseModel.save, :meth: numpy.load
+        :See Also: :meth:`BaseModel.save`, :meth:`numpy.load`
         """
         print 'Loading model from', f
         npz = np.load(f)
