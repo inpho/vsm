@@ -4,13 +4,9 @@ import numpy as np
 
 import nltk
 
-import corpusbuilders
-from corpusbuilders import *
-
 __all__ = ['strip_punc', 'rem_num', 'rehyph', 'add_metadata',
-         'apply_stoplist', 'filter_by_suffix', 'word_tokenize',
-         'sentence_tokenize', 'paragraph_tokenize']
-__all__ += corpusbuilders.__all__
+           'apply_stoplist', 'filter_by_suffix', 'word_tokenize',
+           'sentence_tokenize', 'paragraph_tokenize']
 
 
 
