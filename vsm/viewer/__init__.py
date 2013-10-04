@@ -19,6 +19,8 @@ def doc_label_name(context_type):
     """
     if context_type == 'sentence':
         return 'sent_label'
+    if context_type == 'paragraph':
+        return 'par_label'
     return context_type + '_label'
 
 
