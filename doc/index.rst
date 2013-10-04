@@ -34,7 +34,6 @@ IPython notebooks.
 .. toctree::
    :maxdepth: 2
 
-   demos
    workflow
 
 .. Indices and tables
