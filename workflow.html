@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,14 +6,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vsm workflow &mdash; vsm 0.1 documentation</title>
+    <title>vsm Workflow &mdash; vsm 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -26,7 +24,6 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="vsm 0.1 documentation" href="index.html" />
-    <link rel="next" title="Corpus utility functions" href="corpus_util.html" />
     <link rel="prev" title="vsm — Vector Space Modeling of Textual Semantics" href="index.html" /> 
   </head>
   <body>
@@ -40,9 +37,6 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="corpus_util.html" title="Corpus utility functions"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
           <a href="index.html" title="vsm — Vector Space Modeling of Textual Semantics"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
@@ -55,44 +49,63 @@
           <div class="body">
             
   <div class="section" id="vsm-workflow">
-<h1>vsm workflow<a class="headerlink" href="#vsm-workflow" title="Permalink to this headline">¶</a></h1>
-<p>New to <a class="reference internal" href="vsm.html#module-vsm" title="vsm"><tt class="xref py py-mod docutils literal"><span class="pre">vsm</span></tt></a>?
-Below links outline the basic workflow - From preparing the corpus, training the model, to exploring data with viewer functions.</p>
-<p>A <tt class="xref doc docutils literal"><span class="pre">wf_tutorial</span></tt> is also available.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="corpus_util.html">Corpus utility functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="corpus_util.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="corpus_util.html#methods">Methods</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="corpusbuilders.html">Corpus builder functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="corpusbuilders.html#methods">Methods</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_corpus.html">Corpus Objects</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="basecorpus.html">BaseCorpus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="corpus.html">Corpus</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="wf_model.html">Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="wf_beagle.html">Beagle Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="wf_lda.html">LDA Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="wf_lsa.html">LSA Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="wf_tf.html">Term Frequency Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="wf_tfidf.html">Term Frequency-Inverse Document Frequency Model</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="wf_viewer.html">Viewers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="beagleviewer.html">Beagle Viewer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ldagibbsviewer.html">ldagibbsviewer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsaviewer.html">lsaviewer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tfviewer.html">tfviewer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tfidfviewer.html">tfidfviewer</a></li>
-</ul>
-</li>
-</ul>
-</div>
+<h1><a class="reference internal" href="vsm.html#module-vsm" title="vsm"><tt class="xref py py-mod docutils literal"><span class="pre">vsm</span></tt></a> Workflow<a class="headerlink" href="#vsm-workflow" title="Permalink to this headline">¶</a></h1>
+<p>The basic stages in a <a class="reference internal" href="vsm.html#module-vsm" title="vsm"><tt class="xref py py-mod docutils literal"><span class="pre">vsm</span></tt></a> workflow are shown below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="35%" />
+<col width="65%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Raw-processing</td>
+<td>Converting a textual corpus into a
+plain text file or a directory tree
+whose leaves are plain text files</td>
+</tr>
+<tr class="row-even"><td>Tokenization and
+Metadata Collection</td>
+<td><em>words</em> and various types of <em>word</em>
+contexts such as <em>sentences</em>,
+<em>paragraphs</em>, <em>pages</em>, <em>articles</em>,
+<em>documents</em>, <em>abstracts</em> or <em>books</em>
+are identified; as well, labels and
+other metadata are gathered and
+associated to contexts</td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-class docutils literal"><span class="pre">Corpus</span></tt>
+Generation</td>
+<td>the tokenized plain-text corpus is
+encoded as an integer array; contexts
+are stored as indices into the corpus
+array and additional metadata are
+stored in records associated to the
+contexts; stoplists and low-frequency
+filters are also applied at this stage</td>
+</tr>
+<tr class="row-even"><td>Model training</td>
+<td>a <tt class="xref py py-class docutils literal"><span class="pre">Corpus</span></tt> object is given as
+input to a mathematical model for
+representing a corpus&#8217;s semantics;
+provisions for running a parallel
+implementation of a model (e.g.,
+initiating an <em class="xref std std-ref">IPython cluster</em>)
+may be made</td>
+</tr>
+<tr class="row-odd"><td>Viewing and
+Analyzing Results</td>
+<td>a <tt class="xref py py-class docutils literal"><span class="pre">Corpus</span></tt> object and an
+associated <tt class="xref py py-mod docutils literal"><span class="pre">model</span></tt> object are
+given to a <tt class="xref py py-mod docutils literal"><span class="pre">viewer</span></tt> class so that
+the user may, for example, examine the
+distances between semantic
+representations of words, contexts
+(documents) or topics; graphical
+display and notebook creation options
+are provided by
+<em class="xref std std-ref">IPython notebook server</em></td>
+</tr>
+</tbody>
+</table>
 </div>
 
 
@@ -103,10 +116,7 @@ Below links outline the basic workflow - From preparing the corpus, training the
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
-                        title="previous chapter"><tt class="docutils literal docutils literal docutils literal docutils literal"><span class="pre">vsm</span></tt> &#8212; Vector Space Modeling of Textual Semantics</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="corpus_util.html"
-                        title="next chapter">Corpus utility functions</a></p>
+                        title="previous chapter"><tt class="docutils literal"><span class="pre">vsm</span></tt> &#8212; Vector Space Modeling of Textual Semantics</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/workflow.txt"
@@ -139,9 +149,6 @@ Below links outline the basic workflow - From preparing the corpus, training the
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="corpus_util.html" title="Corpus utility functions"
-             >next</a> |</li>
-        <li class="right" >
           <a href="index.html" title="vsm — Vector Space Modeling of Textual Semantics"
              >previous</a> |</li>
         <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
@@ -149,7 +156,7 @@ Below links outline the basic workflow - From preparing the corpus, training the
     </div>
     <div class="footer">
         &copy; Copyright 2013, vsm development team.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
     </div>
   </body>
 </html>
