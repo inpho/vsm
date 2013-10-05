@@ -36,15 +36,69 @@ from similarity import (
 
 class LDAGibbsViewer(object):
     """
-    A class for viewing a topic model estimated by `LDAGibbs`
+    A class for viewing a topic model estimated by `LDAGibbs`.
 
-    Parameters
-    ----------
-    corpus : Corpus
-        Source of observed data
-    model : LDAGibbs object
-        A topic modeled fitted by `LDAGibbs`
+    :param corpus: Source of observed data.
+    :type corpus: Corpus
+    
+    :param model: A topic modeled fitted by `LDAGibbs`
+    :type model: LDAGibbs object
 
+    :attributes:
+        * **corpus** (Corpus object) - `corpus`
+        * **model** (LDAGibbs object) - `model`
+
+    :methods:
+        * :doc:`topics` 
+            Returns a list of topics estimated by `LDAGibbs`
+            sampler. Each topic is represented by a set of words and the
+            corresponding probabilities.
+        * :doc:`topic_entropies` 
+            Returns topics sorted according to the entropy of each topic. 
+            The entropy of topic k is calculated by summing P(d|k) * log(P(d|k))
+            over all document d, and is thought to measure how informative a
+            given topic is to select documents.
+        * :doc:`doc_topics`
+            Returns distribution P(K|D=d) over topics K for document d.
+        * :doc:`word_topics`
+            Searches for every occurance of `word` in the entire corpus and
+            returns a list each row of which contains the name or ID number of
+            document, the relative position in the document, and the assigned
+            topic number for each occurrence of `word`.
+        * :doc:`lda_sim_top_top`
+            Returns topics sorted by the cosine similarity values between
+            topic(s) and every topic.
+        * :doc:`lda_sim_top_doc`
+            Returns documents sorted according to their relevance to topic(s).
+        * :doc:`lda_sim_words_top`
+            Returns topics sorted according to their relevance to word(s).
+        * :doc:`lda_sim_word_word`
+            Returns words sorted by the cosine values between a word or list
+            of words and every word based on the topic distributions.
+        * :doc:`lda_sim_doc_doc`
+            Computes and sorts the cosine similarity values between a
+            document or list of documents and every document in the topic space.
+        * :doc:`lda_simmat_words`
+            Calculates the similarity matrix for a given list of words.
+        * :doc:`lda_simmat_docs`
+            Calculates the similarity matrix for a given list of documents.
+        * :doc:`lda_simmat_topics`
+            Calculates the similarity matrix for a given list of topics.
+        * :doc:`cluster_topics`
+            Clusters topics by a spceificed clustering algorithm. 
+            Currently it supports K-means, Spectral Clustering and Affinity
+            Propagation algorithms. K-means and spectral clustering cluster
+            topics into a given number of clusters, whereas affinity
+            propagation does not require the fixed cluster number. 
+        * :doc:`logp_plot`
+            Returns a plot of log probabilities for the specified range of 
+            the MCMC chain used to fit a topic model by `LDAGibbs`.
+            The function requires matplotlib package.
+        * :doc:`isomap_topics`
+            Takes document(s) or topic(s) and plots an isomap for 
+            the documents similar/relevant to the query. The function plots
+            relevant documents or topics by using the isomap algorithm
+            in `sklearn` package.
     """
     def __init__(self, corpus, model):
         """
@@ -157,25 +211,22 @@ class LDAGibbsViewer(object):
         Each topic is represented by a set of words and the corresponding 
         probabilities.
         
-        Parameters
-        ----------
-        k_indices : list of integers
-            Order of topics. For example, if k_indices = [3, 0, 2], 
+        :param k_indices: Order of topics. For example, if k_indices = [3, 0, 2], 
             the 4th, 1st and 3rd topics are printed in this order. 
             Default is ascending from 0 to K-1, where K is the 
             number of topics.
-        print_len : int
-            Number of words shown for each topic. If this is i, i top 
-            probability words are shown for each topic. Default is 10.
-        as_string : boolean
-            If true, each topic displays words rather than its ID numbers. 
-            Default is True.
+        :type k_indices: list of integers
         
-        Returns
-        ----------
-        table : a DataTable object.
-            A structured array of topics.
+        :param print_len: Number of words shown for each topic. If this is i,
+            i top probability words are shown for each topic. Default is 10.
+        :type print_len: int, optional
 
+        :param as_string: If `True`, each topic displays words rather than its
+            integer representation. Default is `True`.
+        :type as_string: boolean, optional
+        
+        :returns: table : a DataTable object.
+            A structured array of topics.
         """
         if len(k_indices) == 0:
             k_indices = np.arange(self.model.top_word.shape[0])
@@ -189,6 +240,8 @@ class LDAGibbsViewer(object):
         if as_strings:
 	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
 				 field_name='word')
+
+        print k_arr
 
         # without probabilities, just words
         if compact_view:
@@ -219,20 +272,16 @@ class LDAGibbsViewer(object):
         P(d|k) * log(P(d|k) over all document d, and is thought to 
         measure how informative a given topic is to select documents. 
         
-        Parameters
-        ----------
-        print_len : int
-            Number of words shown for each topic. If this is i, i top 
-            probability words are shown for each topic. Default is 10.
-        as_string : boolean
-            If true, each topic displays words rather than its ID 
-            numbers. Default is True.
-        
-        Returns
-        ----------
-        k_arr : a DataTable object.
-            A structured array of topics sorted by entropy.
+        :type print_len: int, optional
+        :param print_len: Number of words shown for each topic. If this is i,
+            i top probability words are shown for each topic. Default is 10.
 
+        :param as_string: If `True`, each topic displays words rather than its
+            integer representation. Default is `True`.
+        :type as_string: boolean, optional
+        
+        :returns: k_arr : a DataTable object.
+            A structured array of topics sorted by entropy.
         """
         if len(k_indices) == 0:
             k_indices = np.arange(self.model.top_word.shape[0])
@@ -270,22 +319,18 @@ class LDAGibbsViewer(object):
         """
         Returns distribution P(K|D=d) over topics K for document d. 
 
-        Parameters
-        ----------
-        doc : int or string
-             Specifies the document whose distribution over topics is 
+        :param doc: Specifies the document whose distribution over topics is 
              returned. It can either be the ID number (integer) or the 
              name (string) of the document.
-        print_len : int
-            Number of topics to be listed. If this is i, i top probability 
-            topics are shown.Default is 10.
+        :type doc: int or string
         
-        Returns
-        ----------
-        k_arr : a LabeledColumn object
+        :param print_len: Number of topics to be listed. If this is i,
+            i top probability topics are shown.Default is 10.
+        :type print_len: int, optional
+        
+        :returns: k_arr : a LabeledColumn object
             An array of topics (represented by their number) and the 
             corresponding probabilities.
-
         """
         d, label = self._res_doc_type(doc)
 
@@ -309,23 +354,19 @@ class LDAGibbsViewer(object):
         the relative position in the document, and the assined topic number 
         for each occurance of `word`.
         
-        Parameters
-        ----------
-        word : string 
-            The word for which the search is performed.  
-        as_strings : boolean 
-            If true, returns document names rather than ID numbers. 
-            Default is True.
+        :param word: The word for which the search is performed.  
+        :type word: string
 
-        Returns
-        ----------
-        Z_w : a LabeledColumn Object
+        :param as_strings: If `True`, returns document names rather than 
+            ID numbers. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :returns: Z_w : a LabeledColumn Object
             A structured array consisting of three columns. Each column 
             is a list of:
             (1) name/ID of document containing `word`
             (2) relative position of `word` in the document
             (3) Topic number assigned to the token.
-
         """
         w, word = self._res_word_type(word)
 
@@ -356,6 +397,30 @@ class LDAGibbsViewer(object):
     def sim_top_top(self, topic_or_topics, weights=None, 
                     print_len=10, filter_nan=True):
         """
+        Takes a topic or list of topics (by integer index) and returns
+        a list of topics sorted by the cosine values between a given
+        topic and every topic.
+        
+        :param topic_or_topics: Query topic(s) to which cosine values are calculated.
+        :type topic_or_topics: string or list of strings
+        
+        :param weights: Specify weights for each topic in `topic_or_topics`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+
+        :param print_len: Number of topics printed by pretty-pringing function
+            Default is 10.
+        :type print_len: int, optional       
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :returns: a LabeledColumn object
+            A 2-dim array containing topics and their cosine values to 
+            `topic_or_topics`. 
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_top_top`
         """
         return _sim_top_top_(self.model.top_word, topic_or_topics, 
                              norms=self._topic_norms, weights=weights, 
@@ -366,6 +431,43 @@ class LDAGibbsViewer(object):
                     print_len=10, as_strings=True, label_fn=_def_label_fn_, 
                     filter_nan=True):
         """
+        Takes a topic or list of topics (by integer index) and returns a 
+        list of documents sorted by the posterior probabilities of
+        documents given the topic.
+
+        :param topic_or_topics: Query topic(s) to which posterior probabilities
+            are calculated.
+        :type topic_or_topics: string or list of strings
+        
+        :param weights: Specify weights for each topic in `topic_or_topics`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+
+        :param filter_words: The topics that include these words are considered.
+            If not provided, by default all topics are considered.
+        :type filter_words: list of words, optional
+ 
+        :param print_len: Number of documents printed by pretty-pringing function
+            Default is 10.
+        :type print_len: int, optional       
+        
+        :param as_strings: If `True`, returns a list of documents as strings rather
+            than their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :param label_fn: A function that defines how documents are represented.
+            Default is def_label_fn which retrieves the labels from corpus metadata.
+        :type label_fn: string, optional
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :returns: d_arr : a LabeledColumn object
+            A 2-dim array containing documents and their posterior probabilities 
+            to `topic_or_topics`. 
+
+        :See Also: :meth:`def_label_fn`, :meth:`vsm.viewer.similarity.sim_top_doc`
         """
         d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
                               self.model.context_type, weights=weights, 
@@ -411,32 +513,36 @@ class LDAGibbsViewer(object):
         every other word in the corpus. Otherwise, each word in `words` 
         is assigned the provided weight.
         
-        Parameters
-        ----------
-        word_or_words : string or list of string
-            Query word(s) to which cosine values are calculated
-        weights : list of floating point
-            Specify weights for each query word in `word_or_words`. 
+        :param word_or_words: word(s) to which cosine values are calculated
+        :type word_or_words: string or list of strings
+        
+        :param weights: Specify weights for each query word in `word_or_words`. 
             Default uses equal weights.
-        filter_nan : boolean
-            ?
-        show_topics : boolean
-            If true, topics are represented by their number and 
-            distribution over words. Otherwise, only topic numbers
-            are shown. Default is true.            
-        print_len : int
-            Number of words printed by pretty-pringing function
+        :type weights: list of floating point, optional
+        
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+            
+        :param show_topics: If `True`, topics are represented by their number
+            and distribution over words. Otherwise, only topic numbers
+            are shown. Default is `True`. 
+        :type show_topics: boolean, optional
+
+        :param print_len: Number of words printed by pretty-printing function.
             Default is 10.
-        as_strings : boolean
-            If false, words of each topic are represented by 
-            their ID number. Default is true.
+        :type print_len: int, optional
 
-        Returns
-        ----------
-        k_arr : a LabeledColumn object
+        :param as_strings: If `True`, words of each topic are represented as
+            strings. Otherwise they are represented by their integer 
+            representation. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :returns: k_arr : a LabeledColumn object
             A structured array of topics sorted by their cosines values 
-            with the query word(s).
-
+            with `word_or_words`.
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_word_top`
         """
         sim = _sim_word_top_(self.corpus, self.model.top_word, word_or_words,
                              weights=weights, norms=self._topic_norms, 
@@ -487,28 +593,30 @@ class LDAGibbsViewer(object):
         weighted average of the words in the list. If weights are not 
         provided, the arithmetic mean is used.
 
-        Parameters
-        ----------
-        word_or_words : string or list of string
-            Query word(s) to which cosine values are calculated
-        weights : list of floating point
-            Specify weights for each query word in `word_or_words`. 
+        :param word_or_words: Query word(s) to which cosine values are calculated.
+        :type word_or_words: string or list of strings
+        
+        :param weights: Specify weights for each query word in `word_or_words`. 
             Default uses equal weights (i.e. arithmetic mean)
-        as_strings : boolean
-            If true, returns a list of words rather than IDs. 
-            Default is true.
-        print_len : int
-            Number of words printed by pretty-pringing function
-            Default is 10.
-        filter_nan : boolean
-            ?
+        :type weights: list of floating point, optional
+        
+        :param as_strings: If `True`, returns a list of words as strings rather
+            than their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
 
-        Returns
-        ----------
-        w_arr : a LabeledColumn object
+        :param print_len: Number of words printed by pretty-printing function
+            Default is 10.
+        :type print_len: int, optional
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :returns: w_arr : a LabeledColumn object
             A 2-dim array containing words and their cosine values to 
             `word_or_words`. 
-
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_word_word`
         """
         return _sim_word_word_(self.corpus, self.model.top_word.T, 
                                word_or_words, weights=weights, 
@@ -519,30 +627,38 @@ class LDAGibbsViewer(object):
     def sim_doc_doc(self, doc_or_docs, k_indices=[], print_len=10, filter_nan=True,
                     label_fn=_def_label_fn_, as_strings=True):
         """
-        Computes and sorts the cosine(similarity) values between a document 
-        or list of documents and every documents in the topic space. 
+        Computes and sorts the cosine similarity values between a document 
+        or list of documents and every document in the topic space. 
         
-        Parameters
-        ----------
-        doc_or_documents : string/integer or list of string/integer
-            Query document(s) to which cosine values are calculated
-        k_indices : list of integers
-            A list of topics based on which similarity value is computed.
-            Default is all the topics in the model.            
-        as_strings : boolean
-            If true, returns a list of words rather than IDs. 
-            Default is true.
-        print_len : int
-            Number of words printed by pretty-pringing function
+        :param doc_or_docs: Query document(s) to which cosine values
+            are calculated
+        :type doc_or_docs: string/integer or list of strings/integers
+        
+        :param k_indices: A list of topics based on which similarity value is
+            computed. Default is all the topics in the model.            
+        :type k_indices: list of integers, optional
+       
+        :param print_len: Number of words printed by pretty-printing function.
             Default is 10.
-        filter_nan : boolean
-            ?
+        :type print_len: int, optional
 
-        Returns
-        ----------
-        w_arr : a LabeledColumn object
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :param label_fn: A function that defines how documents are represented.
+            Default is def_label_fn which retrieves the labels from corpus metadata.
+        :type label_fn: string, optional
+
+        :param as_strings: If `True`, returns a list of words rather than
+            their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
+        
+        :returns: w_arr : a LabeledColumn object
             A 2-dim array containing documents and their cosine values to 
             `doc_or_docs`. 
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_doc_doc`
         """
         
         if len(k_indices) == 0:
@@ -557,7 +673,19 @@ class LDAGibbsViewer(object):
     
 
     def simmat_words(self, word_list):
+        """
+        Calculates the similarity matrix for `word_list`.
 
+        :param word_list: A list of words whose similarity matrix is to be
+            computed.
+        :type word_list: list
+        
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of words
+            in `word_list`.
+       
+        :See Also: :meth:`vsm.viewer.similarity.simmat_words`
+        """
         return _simmat_words_(self.corpus,
                               self.model.top_word.T,
                               word_list)
@@ -567,18 +695,18 @@ class LDAGibbsViewer(object):
         """
         Calculates the similarity matrix for a given list of documents.
 
-        Parameters
-        ----------
-        docs : list
-            A list of documents whose similarity matrix is to be computed.
+        :param docs: A list of documents whose similarity matrix is to be computed.
             Default is all the documents in the model.
-        k_indices : list
-            A list of topics based on which similarity matrix is computed.
-            Default is all the topics in the model.
+        :type docs: list, optional
+        
+        :param k_indices: A list of topics based on which similarity matrix is
+            computed. Default is all the topics in the model.
+        :type k_indices: list
 
-        Returns
-        ----------
-        simmat_documents object
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of documents.                 considered.
+        
+        :See Also: :meth:`vsm.viewer.similarity.simmat_documents`
         """
 
         if len(docs) == 0:
@@ -598,15 +726,15 @@ class LDAGibbsViewer(object):
         """
         Calculates the similarity matrix for a given list of topics.
 
-        Parameters
-        ----------
-        k_indices : list
-            A list of topics whose similarity matrix is to be computed.
-            Default is all the topics in the model.
+        :param k_indices: A list of topics whose similarity matrix is to be
+            computed. Default is all topics in the model.
+        :type k_indices: list, optional
 
-        Returns
-        ----------
-        simmat_topics object
+        :returns: an IndexedSymmArray object
+            n x n matrix containing floats where n is the number of topics
+            considered.
+        
+        :See Also: :meth:`vsm.viewer.similarity.simmat_topics`
         """
 
         if len(k_indices) == 0:
@@ -616,7 +744,7 @@ class LDAGibbsViewer(object):
 
 
 
-
+    #TODO: make it general to deal with documents?
     def cluster_topics(self, method='kmeans', k_indices=[],
                        n_clusters=10, by_cluster=True):
         """
@@ -626,43 +754,25 @@ class LDAGibbsViewer(object):
         topics into a given number of clusters, whereas affinity
         propagation does not require the fixed cluster number. 
 
-        To do: make it general to deal with documents?
-
-        Parameters
-        ----------
-        method : strings
-            Spceifies the algorithm used for clustring. Currently it 
-            supports 'kmeans', 'affinity' or 'spectral'. Default is 
+        :param method: Spceifies the algorithm used for clustring. Currently
+            it supports 'kmeans', 'affinity' or 'spectral'. Default is 
             'kmeans'.
-        k_indices : list
-        n_clusters : int
-            Number of clusters used as the parameter for K-means or
-            spectral clustering algorithms. Default is 10.
-        by_cluster : boolean
-            If True, returns a list of clusters. Otherwise a list that
-            indicates cluster numbers for each topic is returned.
-            Default is true.
+        :type method: string, optional
+        
+        :param k_indices: List of topics to be clustered. Default is all
+            topics in the model.
+        :type k_indices: list, optional
+        
+        :param n_clusters: Number of clusters used as the parameter for K-means
+            or spectral clustering algorithms. Default is 10.
+        :type n_clusters: int, optional
+        
+        :type by_cluster: boolean, optional
+        :param by_cluster: If `True`, returns a list of clusters. Otherwise a
+            list that indicates cluster numbers for each topic is returned.
+            Default is `True`.
 
-        Parameters
-        ----------
-        method : strings
-            Spceifies the algorithm used for clustring. Currently it 
-            supports 'kmeans', 'affinity' or 'spectral'. Default is 
-            'kmeans'.
-		k_indices : list
-			List of topics to be clustered. Default is all topics.
-        n_clusters : int
-            Number of clusters used as the parameter for K-means or
-            spectral clustering algorithms. Default is K/10 where K is
-            the number of topics in the model.
-        by_cluster : boolean
-            If True, returns a list of clusters. Otherwise a list that
-            indicates cluster numbers for each topic is returned.
-            Default is true.
-
-        Returns
-        ----------
-        labels : list or list of lists
+        :returns: labels : list or list of lists
             A list of clusters or list of cluster numbers.
         """
         # Default use all topics 
@@ -700,29 +810,27 @@ class LDAGibbsViewer(object):
         the MCMC chain used to fit a topic model by `LDAGibbs`.
         The function requires matplotlib package. 
 
-        Parameters
-        ----------
-        range : list of integer
-            Specifies the range of the MCMC chain whose log probabilites 
+        :param range: Specifies the range of the MCMC chain whose log probabilites 
             are to be plotted. For example, range = [0, 999] plots log 
             probabilities from the 1st to the 1000th iterations. 
             The length of the list must be exactly two, and the first 
             element must be smaller than the second which can not exceed 
             the total length of the MCMC chain.
             Default produces the plot for the entire chain.
-        step : int
-            Steps by which points are plotted. Default is 1.
-        show : boolean
-            If it is True, the function actually draws the plot in addition 
-            to returning a plot object. Default is True.
-        grid : boolean
-            Draw a grid. Default is True. 
+        :type range: list of integers, optional
         
-        Returns
-        ----------
-        plt : a matplotlib.pyplot object
-            Contains the log probability plot. 
+        :param step: Steps by which points are plotted. Default is 1.
+        :type step: int, optional
 
+        :param show: If `True`, the function actually draws the plot 
+            in addition to returning a plot object. Default is `True`.
+        :type show: boolean, optional
+
+        :param grid: If `True` draw a grid. Default is `True`. 
+        :type grid: boolean, optional
+        
+        :returns: plt : a matplotlib.pyplot object
+            Contains the log probability plot. 
         """
         import matplotlib.pyplot as plt
 
@@ -753,20 +861,23 @@ class LDAGibbsViewer(object):
         For isomap, see:
         Tenenbaum, J.B., De Silva, V., & Langford, J.C. Science 290(5500)
 
-        Parameters
-        ----------
-        k_indices : list
-            List or list of lists of topics to be plotted. If a list of lists
-            is provided, each sublist is shown with a different color. This can
-            be used to plot the result of `cluster_topics`.
+        :param k_indices: List or list of lists of topics to be plotted. 
+            If a list of lists is provided, each sublist is shown with a 
+            different color. This can be used to plot the result of 
+            `cluster_topics`.
             Default plots all topics in the model without any cluster.
-        n_neighbors : int
-            Used by isomap to determine the number of neighbors for each point.
-            Large neighbor size tends to produce a denser map. Default is 5.
+        :type k_indices: list, optional
+        
+        :param n_neighbors: Used by isomap to determine the number of neighbors
+            for each point. Large neighbor size tends to produce a denser map.
+            Default is 5.
+        :type n_neighbors: int, optional
 
-        Returns
-        ----------
-        basic_plot object
+        :param size: List of markersize for points where markersize can note 
+            the importance of the point. Default is a list of fixed markersize, 40 
+        :type size: list, optional
+        
+        :returns: matplotlit.pyplot
             A graph wish scatter plots
         """
         from sklearn import manifold
@@ -810,33 +921,36 @@ class LDAGibbsViewer(object):
         For isomap, see:
         Tenenbaum, J.B., De Silva, V., & Langford, J.C. Science 290(5500)
 
-        Parameters
-        ----------
-        docs : list
-            A list of documents used as a query.
-        toppics : list
-            A list of topics used as a query. 
-        k_indices : list
-            A list of topics based on which document similarity matrix is 
-            computed. Default is all the topics in the model.
-        thres : float
-            Threshhold t. If t<1, documents with similarity value >t are 
-            selected. Otherwise, the t' most similar documents are selected 
+        :param docs: A list of documents used as a query. Default is all
+            documents.
+        :type docs: list, optional
+        
+        :param topics: A list of topics used as a query. Default is all topics.
+        :type topics: list, optional
+
+        :param k_indices: A list of topics based on which document similarity
+            matrix is computed. Default is all the topics in the model.
+        :type k_indices: list, optional
+
+        :param thres: Threshhold t. If t<1, documents with similarity value >t
+            are selected. Otherwise, the t' most similar documents are selected 
             where t' is the smallest integer greater than t. Devault is 0.4.
-        n_neighbors : int
-            Used by isomap to determine the number of neighbors for each point.
-            Large neighbor size tends to produce a denser map. Default is 5.
-        scale : boolean
-            If true, points are scaled accoridng to its similarity to the query.
-            Default is true.
-        trim : int
-            Labels are trimmed to this value. Default is 20.
+        :type thres: float, optional
+        
+        :param n_neighbors: Used by isomap to determine the number of neighbors
+            for each point. Large neighbor size tends to produce a denser map.
+            Default is 5.
+        :type n_neighbors: int, optional
+        
+        :param scale: If `True`, points are scaled accoridng to its similarity
+            to the query. Default is `True`.
+        :type scale: boolean, optional
 
-        Returns
-        ----------
-        basic_plot object
+        :param trim;: Labels are trimmed to this value. Default is 20.
+        :type trim: int, optional
+
+        :returns: matplotlib.pyplot
             A graph wish scatter plots
-
         """
         from sklearn import manifold
         from math import ceil
@@ -878,15 +992,11 @@ class LDAGibbsViewer(object):
         """
         Takes 'clusters' and creates a list of colors so a cluster has a color.
 
-        Parameters
-        ----------
-        clusters : list
-            A flat list of integers where an integer represents which cluster
-            the information belongs to.
+        :param clusters: A flat list of integers where an integer represents
+            which cluster the information belongs to.
+        :type clusters: list
 
-        Returns
-        ----------
-        colorm : list
+        :returns: colorm : list
             A list of colors obtained from matplotlib colormap cm.hsv. 
             The length of 'colorm' is the same as the number of distinct clusters.
         """
@@ -904,26 +1014,24 @@ class LDAGibbsViewer(object):
         obtained from cluster_topics(by_cluster=False).
         Plots each clusters in different colors.
 
-        Parameters
-        ----------
-        arr : 2-dimensional array
-            Array has x, y coordinates to be plotted on a 2-dimensional space.
-        labels : list
-            List of labels to be displayed in the graph. 
-        clusters : list, optional
-            A flat list of integers where an integer represents which cluster
-            the information belongs to. If not given, it returns a basic plot
-            with no color variation. Default is an empty list.
-        size : list, optional
-            List of markersize for points where markersize can note the importance
-            of the point. If not given, 'size' is a list of fixed markersize, 40. 
-            Default is an empty list.
+        :param arr: Array has x, y coordinates to be plotted on 
+            a 2-dimensional space.
+        :type arr: 2-dimensional array
+        
+        :param labels: List of labels to be displayed in the graph. 
+        :type labels: list
+        
+        :param clusters: A flat list of integers where an integer represents
+            which cluster the information belongs to. If not given, it returns
+            a basic plot with no color variation. Default is an empty list.
+        :type clusters: list, optional
 
-        Returns
-        ----------
-        plt : maplotlit.pyplot object
-            A graph with scatter plots from 'arr'.
+        :param size: List of markersize for points where markersize can note 
+            the importance of the point. Default is a list of fixed markersize, 40 
+        :type size: list, optional
 
+        :returns: plt : maplotlit.pyplot object
+            A graph with scatter plots from `arr`.
         """
         import matplotlib.pyplot as plt
 

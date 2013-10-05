@@ -17,15 +17,19 @@ import sys, os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('..'))
 
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-#needs_sphinx = '1.0'
+needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.coverage']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 
+              'sphinx.ext.coverage', 'sphinx.ext.intersphinx',
+              # 'ipython_directive', 'ipython_console_highlighting'
+              ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -98,7 +102,8 @@ html_theme = 'default'
 # documentation.
 html_theme_options = {
     # (true or false): Don’t include the sidebar. Defaults to false.
-    'nosidebar': 'true',
+    # 'nosidebar': 'true',
+    'nosidebar': 'false',
     # (an integer): Width of the sidebar in pixels. (Do not include px
     # in the value.) Defaults to 230 pixels.
     # 'sidebarwidth': '230',
@@ -303,6 +308,12 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
 
+# intersphinx configuration
+intersphinx_mapping = {'http://docs.scipy.org/doc/numpy': None }
+
+# numpy extensions
+# If we want to do a phantom import from an XML file for all autodocs
+phantom_import_file = 'dump.xml'
 
 # -- Options for Epub output ---------------------------------------------------
 

@@ -20,7 +20,35 @@ def realign_env_mat(corpus, env_corpus, env_matrix):
 
 
 class BeagleContextSeq(BaseModel):
+    """
 
+    :param corpus:
+    :type corpus: Corpus object
+
+    :param env_corpus: 
+    :type env_corpus: Corpus object
+
+    :param env_matrix:
+    :type env_matrix: 2-D array
+
+    :param context_type: Name of tokenization stored in `corpus` whose
+        tokens will be treated as documents. Default is `sentence`.
+    :type context_type: string, optional
+
+    :Attributes:
+        * **context_type** (string)
+            Name of tokenization where tokens will be treated as documents.
+        * **sents** (list of arrays)
+            Tokens by `context_type` retrieved from `corpus`.
+        * **env_matrix** (2-D array)
+            Beagle environment matrix.
+
+    :Methods:
+        * :doc:`bcs_train`
+            Trains the model.
+
+    :See Also: :class:`vsm.model.BaseModel`
+    """
     def __init__(self, corpus, env_corpus, env_matrix, 
                 context_type='sentence'):
         """
@@ -32,6 +60,7 @@ class BeagleContextSeq(BaseModel):
 
     def train(self):
         """
+        Trains the model.
         """
         self.matrix = np.zeros_like(self.env_matrix)
 
@@ -58,6 +87,39 @@ class BeagleContextSeq(BaseModel):
 
 
 class BeagleContextMulti(BaseModel):
+    """
+
+    :param corpus:
+    :type corpus: Corpus object
+
+    :param env_corpus: 
+    :type env_corpus: Corpus object
+
+    :param env_matrix:
+    :type env_matrix: 2-D array
+
+    :param context_type: Name of tokenization stored in `corpus` whose
+        tokens will be treated as documents. Default is `sentence`.
+    :type context_type: string, optional
+
+    :Attributes:
+        * **context_type** (string)
+            Name of tokenization where tokens will be treated as documents.
+        * **sents** (list of arrays)
+            Tokens by `context_type` retrieved from `corpus`.
+        * **dtype** (np.dtype)
+            Numpy dtype of `env_matrix`.
+        * **env_matrix** (2-D array)
+            Beagle environment matrix.
+
+    :Methods:
+        * :doc:`bcm_train`
+            Takes an optional argument `n_procs`, number of processors,
+            and trains the model on the number of processors. `n_procs`
+            is 2 by default.
+
+    :See Also: :class:`vsm.model.BaseModel`
+    """
 
     def __init__(self, corpus, env_corpus, env_matrix, 
                  context_type='sentence'):
@@ -80,6 +142,9 @@ class BeagleContextMulti(BaseModel):
 
     def train(self, n_procs=2):
         """
+        Takes an optional argument `n_procs`, number of processors,
+        and trains the model on the number of processors. `n_procs`
+        is 2 by default.
         """
         sent_lists = np.array_split(self.sents, n_procs-1)
         if len(sent_lists) != n_procs:

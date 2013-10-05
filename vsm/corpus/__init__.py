@@ -7,6 +7,22 @@ from vsm.viewer import doc_label_name
 
 def split_corpus(arr, indices):
     """
+    Splits the given array by the indices into list of sub-arrays.
+    
+    :param arr: An array to be split.
+    :type arr: array
+    :param indices: 1-dimensional array of integers that indicates 
+        where the array is split.
+    :type indices: array
+   
+    :returns: A list of sub-arrays split at the indices.
+   
+    **Examples**
+
+    >>> arr = np.arange(8)
+    >>> indices = np.array([2,4,7])
+    >>> split_corpus(arr, indices)
+    [array([0,1]), array([2,3]), array([4,5,6]), array([7])]
     """
     if len(indices) == 0:
         return arr
@@ -15,7 +31,7 @@ def split_corpus(arr, indices):
         indices = np.array(indices)
 
     out = np.split(arr, indices)
-
+    
     if (indices >= arr.size).any():
         out = out[:-1]
 
@@ -24,7 +40,6 @@ def split_corpus(arr, indices):
             out[i] = np.array([], dtype=arr.dtype)
 
     return out
-
 
 
 
@@ -40,59 +55,64 @@ class BaseCorpus(object):
     ndarrays. See documentation on `numpy.ndarray` for further
     details.
 
-    Parameters
-    ----------
-    corpus : array-like
-        Array, typically of strings or integers, of atomic words (or
-        tokens) making up the corpus.
-    context_data : list with 1-D array-like elements, optional
-        Each element in `context_data` is an array containing the indices
-        marking the context boundaries. An element in `context_data` is
-        intended for use as a value for the `indices_or_sections`
-        parameter in `numpy.split`. Elements of `context_data` may also be
-        1-D arrays whose elements are pairs, where the first element
-        is a context boundary and the second element is metadata
-        associated with that context preceding that boundary. For
-        example, (250, 'dogs') might indicate that the 'article' context
-        ending at the 250th word of the corpus is named 'dogs'.
-        Default is `None`.
-    context_types : array-like, optional
-        Each element in `context_types` is a type of a tokenization in
-        `context_data`.
-    dtype : data-type, optional
-        The data-type used to interpret the corpus. If omitted, the
+    :param corpus: Array, typically of strings or integers, of atomic words
+        (or tokens) making up the corpus.
+    :type corpus: array-like
+
+    :param dtype: The data-type used to interpret the corpus. If omitted, the
         data-type is determined by `numpy.asarray`. Default is `None`.
+    :type dtype: data-type, optional
 
-    Attributes
-    ----------
-    corpus : 1-D array
-        Stores the value of the `corpus` parameter after it has been
-        cast to an array of data-type `dtype` (if provided).
-    words : 1-D array
-        The indexed set of atomic words appearing in `corpus`.
-    context_types: 1-D array-like
+    :param context_data: Each element in `context_data` is an array 
+        containing the indices marking the context boundaries. 
+        An element in `context_data` is intended for use as a value for 
+        the `indices_or_sections` parameter in `numpy.split`. 
+        Elements of `context_data` may also be 1-D arrays whose elements
+        are pairs, where the first element is a context boundary and 
+        the second element is metadata associated with that context preceding
+        that boundary. For example, (250, 'dogs') might indicate that 
+        the 'article' context ending at the 250th word of the corpus is named 
+        'dogs'. Default is `None`.
+    :type context_data:  list with 1-D array-like elements, optional
 
-    context_data: list of 1-D array-like
+    :param context_types: Each element in `context_types` is a type of a i
+        tokenization in `context_data`.
+    :type context_types: array-like, optional
 
-    Methods
-    -------
-    meta_int
-	Takes a type of tokenization and a query and returns the index
-	of the metadata found in the query.
-    get_metadatum
-        Takes a type of tokenization and a query and returns the
-	metadatum corresponding to the query and the field.
-    view_contexts
-        Takes a type of tokenization and returns a view of the corpus
-        tokenized accordingly.
-    view_metadata
-        Takes a type of tokenization and returns a view of the
-        metadata of the tokenization.
-    tolist
-        Returns Corpus object as a list of lists.
+    :param remove_empty: If True, empty tokenizations are removed. Default it
+        `True`.
+    :type remove_empty: boolean, optional
 
-    Examples
-    --------
+    :attributes: 
+        * **corpus**  (1-dimensional array)
+            Stores the value of the `corpus` parameter after it has been cast
+            to an array of data-type `dtype` (if provided).
+        * **words**  (1-dimensional array)
+            The indexed set of atomic words appearing in `corpus`.
+        * **context_types**  (1-dimensional array-like)
+        * **context_data**   (list of 1-D array-like)
+
+    :methods: 
+        * :doc:`meta_int`
+            Takes a type of tokenization and a query and returns the index of
+            the metadata found in the query.
+        * :doc:`get_metadatum`
+            Takes a type of tokenization and a query and returns the metadatum
+            corresponding to the query and the field.
+        * :doc:`bc_view_contexts`
+            Takes a type of tokenization and returns a view of the corpus
+            tokenized accordingly.
+        * :doc:`view_metadata`
+            Takes a type of tokenization and returns a view of the metadata
+            of the tokenization.
+        * :doc:`bc_tolist`
+            Returns Corpus object as a list of lists.
+        * :doc:`remove_empty`
+            Removes empty documents in the corpus.
+
+    :See Also: :class:`vsm.corpus.Corpus`
+
+    **Examples**
 
     >>> corpus = ['the', 'dog', 'chased', 'the', 'cat',
                   'the', 'cat', 'ran', 'away']
@@ -124,14 +144,13 @@ class BaseCorpus(object):
 
     >>> c.view_metadata('sentences')[0]['sent_label']
     'transitive'
-
     """
     def __init__(self,
                  corpus,
                  dtype=None,
                  context_types=[],
                  context_data=[],
-		 remove_empty=True):
+                 remove_empty=True):
 
 		self.corpus = np.asarray(corpus, dtype=dtype)
 		self.dtype = self.corpus.dtype
@@ -167,21 +186,14 @@ class BaseCorpus(object):
         that the list of indices are sorted and are in range. Ignores
         empty tokens.
 
-        Parameters
-        ----------
-        indices : 1-D integer array-like
+        :param indices: 
+        :type indices : 1-D integer array-like
 
-        Returns
-        -------
-        True if the indices are validated
+        :returns: `True` if the indices are validated
 
-        Raises
-        ------
-        Exception
+        :raises: Exception
 
-        See Also
-        --------
-        BaseCorpus
+        :See Also: :class:`BaseCorpus`
         """
         for i, j in enumerate(indices):
             if i < len(indices) - 1 and j > indices[i + 1]:
@@ -201,33 +213,28 @@ class BaseCorpus(object):
 
     
     def remove_empty(self):
-	"""
-	Removes empty tokenizations.
-	"""	
-	for j, t in enumerate(self.context_types):
-	    token_list = self.view_contexts(t)
-
-	    indices = np.array([ctx.size != 0 for ctx in token_list], dtype=np.bool)
-	    self.context_data[j] = self.context_data[j][indices]
+        """
+        Removes empty tokenizations.
+        """	
+        for j, t in enumerate(self.context_types):
+            token_list = self.view_contexts(t)
+            
+            indices = np.array([ctx.size != 0 for ctx in token_list], dtype=np.bool)
+            self.context_data[j] = self.context_data[j][indices]
 
 
     def view_metadata(self, ctx_type):
         """
         Displays the metadata corresponding to a tokenization of the
-        corpus.
+        corpus. This method can be used in :class:`Corpus` as well as
+        :class:`BaseCorpus`
 
-        Parameters
-        ----------
-        ctx_type : string-like
-            The type of a tokenization.
+        :param ctx_type: The type of a tokenization.
+        :type ctx_type: string-like
 
-        Returns
-        -------
-        The metadata for a tokenization.
+        :returns: The metadata for a tokenization.
 
-        See Also
-        --------
-        BaseCorpus
+        :See Also: :class:`BaseCorpus`, :class:`Corpus`
         """
         i = self.context_types.index(ctx_type)
         return self.context_data[i]
@@ -235,25 +242,21 @@ class BaseCorpus(object):
 
     def meta_int(self, ctx_type, query):
         """
-	Returns the index of the metadata found in the query.
+	    Returns the index of the metadata found in the query.
 
-	Parameters
-        ----------
-        ctx_type : string-like
-            The type of a tokenization.
-	query: dictionary-like
-	    Dictionary with a key, value being a field, label in metadata.
+        :param ctx_type: The type of a tokenization.
+        :type ctx_type: string-like
+        
+        :param query: Dictionary with a key, value being a field, label
+            in metadata.
+        :type query: dictionary-like
 
-        Returns
-        -------
-        The index of the metadata found in the query.
+        :returns: The index of the metadata found in the query.
 
-        See Also
-        --------
-        BaseCorpus
+        :See Also: :class:`BaseCorpus`
         """
 
-	tok = self.view_metadata(ctx_type)
+        tok = self.view_metadata(ctx_type)
 
         ind_set = np.ones(tok.size, dtype=bool)
         for k,v in query.iteritems():
@@ -272,68 +275,59 @@ class BaseCorpus(object):
 
     def get_metadatum(self, ctx_type, query, field):
         """
-	Returns the metadatum corresponding to the query and the field.
+	    Returns the metadatum corresponding to the query and the field.
 
-	Parameters
-        ----------
-        ctx_type : string-like
-            The type of a tokenization.
-	query : dictionary-like
-	    Dictionary with a key, value being a field, label in metadata.
-	field : string
-	    Field of the metadata
+        :param ctx_type: The type of a tokenization.
+        :type ctx_type: string-like
+        
+        :param query: Dictionary with a key, value being a field, label
+            in metadata.
+        :type query: dictionary-like
+        
+	    :param field: Field of the metadata
+        :type field: string
 
-        Returns
-        -------
-        The metadatum corresponding to the query and the field.
+        :returns: The metadatum corresponding to the query and the field.
 
-        See Also
-        --------
-        BaseCorpus
+        :See Also: :class:`BaseCorpus`
         """
         i = self.meta_int(ctx_type, query)
         return self.view_metadata(ctx_type)[i][field]
+
 
 
     def view_contexts(self, ctx_type, as_slices=False):
         """
         Displays a tokenization of the corpus.
 
-        Parameters
-        ----------
-        ctx_type : string-like
-           The type of a tokenization.
-	as_slices : Boolean, optional
-            If True, a list of slices corresponding to 'ctx_type' is 
-	    returned. Otherwise, integer representations are returned.
-	    Default is `False`.
+        :param ctx_type: The type of a tokenization.
+        :type ctx_type: string-like
 
-        Returns
-        -------
-        A tokenized view of `corpus`.
+        :param as_slices: If True, a list of slices corresponding to 
+            'ctx_type' is returned. Otherwise, integer representations
+            are returned. Default is `False`.
+        :type as_slices: Boolean, optional
 
-        See Also
-        --------
-        BaseCorpus
-        numpy.split
+        :Returns: A tokenized view of `corpus`.
 
+        :See Also: :class:`BaseCorpus`, :meth:`numpy.split`
         """
         i = self.context_types.index(ctx_type)
         indices = self.context_data[i]['idx']
-
-	if as_slices:
-	    meta_list = self.view_metadata(ctx_type)
-	    indices = meta_list['idx'] 
-	    
-	    if len(indices) == 0:
-		return [slice(0, 0)]
-
-	    slices = []
-	    slices.append(slice(0, indices[0]))
-	    for i in xrange(len(indices) - 1):
-		slices.append(slice(indices[i], indices[i+1]))
-	    return slices	    
-       
+        
+        if as_slices:
+            meta_list = self.view_metadata(ctx_type)
+            indices = meta_list['idx'] 
+            
+            if len(indices) == 0:
+                return [slice(0, 0)]
+                
+            slices = []
+            slices.append(slice(0, indices[0]))
+            for i in xrange(len(indices) - 1):
+                slices.append(slice(indices[i], indices[i+1]))
+            return slices	    
+            
         return split_corpus(self.corpus, indices)
 
 
@@ -359,14 +353,12 @@ class Corpus(BaseCorpus):
     tokenizations. This dictionary also stores metadata (e.g.,
     document names) associated with the available tokenizations.
 
-    Parameters
-    ----------
-    corpus : array-like
-        A string array representing the corpus as a sequence of atomic
-        words.
-    context_data : list-like with 1-D integer array-like elements, optional
-        Each element in `context_data` is an array containing the indices
-        marking the token boundaries. An element in `context_data` is
+    :param corpus: A string array representing the corpus as a sequence of
+        atomic words.
+    :type corpus: array-like
+
+    :param context_data: Each element in `context_data` is an array containing 
+        the indices marking the token boundaries. An element in `context_data` is
         intended for use as a value for the `indices_or_sections`
         parameter in `numpy.split`. Elements of `context_data` may also be
         1-D arrays whose elements are pairs, where the first element
@@ -375,49 +367,47 @@ class Corpus(BaseCorpus):
         example, (250, 'dogs') might indicate that the 'article' context
         ending at the 250th word of the corpus is named 'dogs'.
         Default is `None`.
-    context_types : array-like, optional
-        Each element in `context_types` is a type of a context in
-        `context_data`.
-
-    Attributes
-    ----------
-    corpus : 1-D 32-bit integer array
-        corpus is the integer representation of the input string
-        array-like value value of the corpus parameter
-    words : 1-D string array
-        The indexed set of strings occurring in corpus. It is a
-        string-typed array.
-    words_int : 1-D 32-bit integer dictionary
-        A dictionary whose keys are `words` and whose values are their
-        corresponding integers (i.e., indices in `words`).
-        
-    Methods
-    -------
-    view_contexts
-        Takes a type of tokenization and returns a view of the corpus
-        tokenized accordingly. The optional parameter `strings` takes
-        a boolean value: True to view string representations of words;
-        False to view integer representations of words. Default is
-        `False`.
-    save
-        Takes a filename and saves the data contained in a Corpus
-        object to a `npy` file using `numpy.savez`.
-    load
-        Static method. Takes a filename, loads the file data into a
-        Corpus object and returns the object.
-    apply_stoplist
-	Takes a list of stopwords and returns a copy of the corpus
-	with the stopwords removed.
-    tolist
-        Returns Corpus object as a list of lists of either integers or
-        strings, according to `as_strings`.
+    :type context_data: list-like with 1-D integer array-like elements, optional
     
-    See Also
-    --------
-    BaseCorpus
+    :param context_types: Each element in `context_types` is a type of a context
+        in `context_data`.
+    :type context_types: array-like, optional
 
-    Examples
-    --------
+    :attributes: 
+        * **corpus** (1-D 32-bit integer array)
+            corpus is the integer representation of the input string array-like
+            value of the corpus parameter
+        * **words** (1-D string array)
+            The indexed set of strings occurring in corpus. It is a string-typed array.
+        * **words_in** (1-D 32-bit integer dictionary)
+            A dictionary whose keys are `words` and whose values are their 
+            corresponding integers (i.e., indices in `words`).
+        
+    :methods:
+        * :doc:`view_metadata`
+            Takes a type of tokenization and returns a view of the metadata
+            of the tokenization.
+        * :doc:`view_contexts`
+            Takes a type of tokenization and returns a view of the corpus tokenized
+            accordingly. The optional parameter `strings` takes a boolean value: 
+            True to view string representations of words; False to view integer 
+            representations of words. Default is `False`.
+        * :doc:`save`
+            Takes a filename and saves the data contained in a Corpus object to 
+            a `npy` file using `numpy.savez`.
+        * :doc:`load`
+            Static method. Takes a filename, loads the file data into a Corpus
+            object and returns the object.
+        * :doc:`apply_stoplist`
+            Takes a list of stopwords and returns a copy of the corpus with 
+            the stopwords removed.
+        * :doc:`tolist`
+            Returns Corpus object as a list of lists of either integers or strings, 
+            according to `as_strings`.
+        
+    :See Also: :class:`vsm.corpus.BaseCorpus`
+
+    **Examples**
 
     >>> text = ['I', 'came', 'I', 'saw', 'I', 'conquered']
     >>> context_types = ['sentences']
@@ -462,7 +452,7 @@ class Corpus(BaseCorpus):
                  corpus,
                  context_types=[],
                  context_data=[],
-		 remove_empty=True):
+                 remove_empty=True):
 
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
@@ -490,27 +480,22 @@ class Corpus(BaseCorpus):
         """
         Displays a tokenization of the corpus.
 
-        Parameters
-        ----------
-        ctx_type : string-like
-           The type of a tokenization.
-        as_strings : Boolean, optional
-            If True, string representations of words are returned.
+        :param ctx_type: The type of a tokenization.
+        :type ctx_type: string-like
+
+        :param as_strings: If True, string representations of words are returned.
             Otherwise, integer representations are returned. Default
             is `False`.
-	as_slices : Boolean, optional
-            If True, a list of slices corresponding to 'ctx_type' is 
-	    returned. Otherwise, integer representations are returned.
-	    Default is `False`.
+        :type as_strings: Boolean, optional
 
-        Returns
-        -------
-        A tokenized view of `corpus`.
+        :param as_slices: If True, a list of slices corresponding to 'ctx_type'
+            is returned. Otherwise, integer representations are returned.
+            Default is `False`.
+        :type as_slices: Boolean, optional
 
-        See Also
-        --------
-        Corpus
-        BaseCorpus
+        :returns: A tokenized view of `corpus`.
+
+        :See Also: :class:`Corpus`, :class:`BaseCorpus`
         """
         token_list = super(Corpus, self).view_contexts(ctx_type)
 	 
@@ -521,20 +506,20 @@ class Corpus(BaseCorpus):
                 token_list_.append(token)
 
             return token_list_
-
-	if as_slices:
-	    meta_list = super(Corpus, self).view_metadata(ctx_type)
-	    indices = meta_list['idx'] 
-
-	    if len(indices) == 0:
-		return []
-
-	    slices = []
-	    slices.append(slice(0, indices[0]))
-	    for i in xrange(len(indices) - 1):
-		slices.append(slice(indices[i], indices[i+1]))
-
-	    return slices	    
+            
+        if as_slices:
+            meta_list = super(Corpus, self).view_metadata(ctx_type)
+            indices = meta_list['idx'] 
+            
+            if len(indices) == 0:
+                return []
+                
+            slices = []
+            slices.append(slice(0, indices[0]))
+            for i in xrange(len(indices) - 1):
+                slices.append(slice(indices[i], indices[i+1]))
+                
+            return slices	    
 
         return token_list
 	
@@ -543,6 +528,16 @@ class Corpus(BaseCorpus):
         """
         Returns Corpus object as a list of lists of either integers or
         strings, according to `as_strings`.
+
+        :param context_type: The type of tokenization.
+        :type context_type: string
+
+        :param as_strings: If True, string representations of words are returned.
+            Otherwise, integer representations are returned. Default
+            is `False`.
+        :type as_strings: Boolean, optional
+        
+        :returns: List of lists
         """
         ls = self.view_contexts(context_type, as_strings=as_strings)
         return [arr.tolist() for arr in ls]
@@ -550,26 +545,18 @@ class Corpus(BaseCorpus):
     
     @staticmethod
     def load(file):
-	"""
-	Loads data into a Corpus object that has been stored using
+        """
+	    Loads data into a Corpus object that has been stored using
         `save`.
         
-        Parameters
-        ----------
-        file : str-like or file-like object
-            Designates the file to read. If `file` is a string ending
+        :param file: Designates the file to read. If `file` is a string ending
             in `.gz`, the file is first gunzipped. See `numpy.load`
             for further details.
+        :type file: str-like or file-like object
 
-        Returns
-        -------
-        A Corpus object storing the data found in `file`.
+        :returns: A Corpus object storing the data found in `file`.
 
-        See Also
-        --------
-        Corpus
-        Corpus.save
-        numpy.load
+        :See Also: :class:`Corpus`, :meth:`Corpus.save`, :meth:`numpy.load`
         """
         print 'Loading corpus from', file
         arrays_in = np.load(file)
@@ -594,24 +581,15 @@ class Corpus(BaseCorpus):
         """
         Saves data from a Corpus object as an `npz` file.
         
-        Parameters
-        ----------
-        file : str-like or file-like object
-            Designates the file to which to save data. See
+        :param file: Designates the file to which to save data. See
             `numpy.savez` for further details.
+        :type file: str-like or file-like object
             
-        Returns
-        -------
-        None
+        :returns: None
 
-        See Also
-        --------
-        Corpus
-        Corpus.load
-        numpy.savez
+        :See Also: :class:`Corpus`, :meth:`Corpus.load`, :meth:`np.savez`
         """
-	
-	print 'Saving corpus as', file
+        print 'Saving corpus as', file
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
         arrays_out['words'] = self.words
@@ -628,26 +606,20 @@ class Corpus(BaseCorpus):
         """ 
         Takes a Corpus object and returns a copy of it with words in the
         stoplist removed and with words of frequency <= `freq` removed.
-
-        Parameters
-        ----------
-	stoplist : list
-	    The list of words to be removed.
-	freq : integer, optional
-	    A threshold where words of frequency <= 'freq' are removed. 
-	    Default is 0.
-            
-        Returns
-        -------
-	Copy of corpus with words in the stoplist and words of frequnecy
-	<= 'freq' removed.
-
-        See Also
-        --------
-        Corpus
-        """
         
-	if freq:
+        :param stoplist: The list of words to be removed.
+        :type stoplist: list
+
+        :param freq: A threshold where words of frequency <= 'freq' are
+            removed. Default is 0.
+        :type freq: integer, optional
+            
+        :returns: Copy of corpus with words in the stoplist and words
+            of frequnecy <= 'freq' removed.
+
+        :See Also: :class:`Corpus`
+        """
+        if freq:
             #TODO: Use the TF model instead
 
             print 'Computing collection frequencies'

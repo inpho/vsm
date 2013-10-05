@@ -17,42 +17,35 @@ class TfSeq(BaseModel):
 
     The data structure is a sparse integer matrix.
 
-    Parameters
-    ----------
-    corpus : Corpus
-        A Corpus object containing the training data
-    context_type : string
-        A string specifying the type of context over which the model
-        trainer is applied.
+    :param corpus: A Corpus object containing the training data.
+    :type corpus: Corpus
+    
+    :param context_type: A string specifying the type of context over which
+        the model trainer is applied.
+    :type context_type: string
 
-    Attributes
-    ----------
-    corpus : Corpus
-        A Corpus object containing the training data
-    context_type : string
-        A string specifying the type of context over which the model
-        trainer is applied.
-    matrix : scipy.sparse.coo_matrix
-        A sparse matrix in 'coordinate' format that contains the
-        frequency counts.
+    :attributes:
+        * **corpus** (Corpus)
+            A Corpus object containing the training data.
+        * **context_type** (string)
+            A string specifying the type of context over which the model
+            trainer is applied.
+        * **matrix** (scipy.sparse.coo_matrix)
+            A sparse matrix in 'coordinate' format that contains the
+            frequency counts.
 
-    Methods
-    -------
-    train
-        Counts word-type occurrences per context and stores the
-        results in `self.matrix`
-    save
-        Takes a filename or file object and saves `self.matrix` and
-        `self.context_type` in an npz archive.
-    load
-        Takes a filename or file object and loads it as an npz archive
-        into a BaseModel object.
+    :methods:
+        * :meth:`train`
+            Counts word-type occurrences per context and stores the
+            results in `self.matrix`
+        * :meth:`save`
+            Takes a filename or file object and saves `self.matrix` and
+            `self.context_type` in an npz archive.
+        * :meth:`load`
+            Takes a filename or file object and loads it as an npz archive
+            into a BaseModel object.
 
-    See Also
-    --------
-    BaseModel
-    vsm.corpus.Corpus
-    scipy.sparse.coo_matrix
+    :See Also: :class:`vsm.model.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
     """
     def __init__(self, corpus=None, context_type=None):
 
@@ -68,6 +61,10 @@ class TfSeq(BaseModel):
 
 
     def train(self):
+        """
+        Counts word-type occurrences per context and stores the results in
+        `self.matrix`.
+        """
         self.matrix = count_matrix(self.corpus, self.contexts, self.m_words)
 
 
@@ -83,42 +80,35 @@ class TfMulti(BaseModel):
 
     The data structure is a sparse integer matrix.
 
-    Parameters
-    ----------
-    corpus : Corpus
-        A Corpus object containing the training data
-    context_type : string
-        A string specifying the type of context over which the model
-        trainer is applied.
+    :param corpus: A Corpus object containing the training data
+    :type corpus: Corpus
+    
+    :param context_type: A string specifying the type of context over which
+        the model trainer is applied.
+    :type context_type: string
 
-    Attributes
-    ----------
-    corpus : Corpus
-        A Corpus object containing the training data
-    context_type : string
-        A string specifying the type of context over which the model
-        trainer is applied.
-    matrix : scipy.sparse.coo_matrix
-        A sparse matrix in 'coordinate' format that contains the
-        frequency counts.
+    :attributes:
+        * **corpus** (Corpus)
+            A Corpus object containing the training data.
+        * **context_type** (string)
+            A string specifying the type of context over which the model
+            trainer is applied.
+        * **matrix** (scipy.sparse.coo_matrix)
+            A sparse matrix in 'coordinate' format that contains the
+            frequency counts.
 
-    Methods
-    -------
-    train
-        Counts word-type occurrences per context and stores the
-        results in `self.matrix`
-    save
-        Takes a filename or file object and saves `self.matrix` and
-        `self.context_type` in an npz archive.
-    load
-        Takes a filename or file object and loads it as an npz archive
-        into a BaseModel object.
+    :methods:
+        * :meth:`train`
+            Counts word-type occurrences per context and stores the
+            results in `self.matrix`
+        * :meth:`save`
+            Takes a filename or file object and saves `self.matrix` and
+            `self.context_type` in an npz archive.
+        * :meth:`load`
+            Takes a filename or file object and loads it as an npz archive
+            into a BaseModel object.
 
-    See Also
-    --------
-    BaseModel
-    vsm.corpus.Corpus
-    scipy.sparse.coo_matrix
+    :See Also: :class:`vsm.model.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
     """
     def __init__(self, corpus=None, context_type=None):
 
@@ -149,9 +139,10 @@ class TfMulti(BaseModel):
         """
         Takes a number of processes `n_procs` over which to map and reduce.
 
-        See Also
-        --------
-        vsm.model.TfMulti
+        :param n_procs: Number of processes.
+        :type n_procs: integer
+
+        :returns: `None`
         """
         ctx_ls = mp_split_ls(self.contexts, n_procs)
 
@@ -170,6 +161,11 @@ def tf_fn(ctx_sbls):
     """
     The map function for vsm.model.TfMulti. Takes a list of contexts
     as slices and returns a count matrix.
+    
+    :param ctx_sbls: list of contexts as slices.
+    :type ctx_sbls: list of slices
+
+    :returns: a count matrix
     """
     offset = ctx_sbls[0].start
     corpus = _corpus[offset: ctx_sbls[-1].stop]

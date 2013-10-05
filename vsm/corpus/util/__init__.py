@@ -41,6 +41,23 @@ def rehyph(sent):
 
 def add_metadata(corpus, ctx_type, new_field, metadata):
     """
+    Returns a corpus with metadata added.
+
+    :param corpus: Corpus object to add new metadata to.
+    :type corpus: Corpus
+
+    :param ctx_type: A type of tokenization.
+    :type ctx_type: string
+
+    :param new_field: Field name of the new metadata.
+    :type new_field: string
+
+    :param metadata: List of values to be added to `corpus`.
+    :type metdata: list
+
+    :returns: Corpus with new metadata added to the existing metdata.
+
+    :See Also: :class:`vsm.corpus.Corpus`
     """
     from vsm import arr_add_field
     i = corpus.context_types.index(ctx_type)
@@ -52,6 +69,26 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
 
 def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
     """
+    Returns a Corpus object with stop words eliminated.
+
+    :param corp: Corpus object to apply stoplist to.
+    :type corp: Corpus
+
+    :param nltk_stop: If `True` English stopwords from nltk are included
+        in the stoplist. Default is `True`.
+    :type nltk_stop: boolean, optional
+    
+    :param add_stop: list of words to eliminate from `corp` words.
+        Default is `None`.
+    :type add_stop: List, optional
+
+    :param freq: Eliminates words that appear <= `freq` times. Default is
+        0.
+    :type freq: int
+
+    :returns: Corpus with words in the stoplist removed.
+
+    :See Also: :class:`vsm.corpus.Corpus`, :meth:`vsm.corpus.Corpus.apply_stoplist`
     """
     stoplist = set()
     if nltk_stop:
@@ -66,6 +103,22 @@ def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
 
 def filter_by_suffix(l, ignore):
     """
+    Returns elements in `l` that does not end with elements in `ignore`.
+
+    :param l: List of strings to filter.
+    :type l: list
+
+    :param ignore: List of suffix to be ignored or filtered out.
+    :type ignore: list
+
+    :returns: List of elements in `l` whose suffix is not in `ignore`.
+
+    **Examples**
+
+    >>> l = ['a.txt', 'b.json', 'c.txt']
+    >>> ignore = ['.txt']
+    >>> filter_by_suffix(l, ignore)
+    ['b.json']
     """
     return [e for e in l if not sum([e.endswith(s) for s in ignore])]
 
@@ -77,6 +130,11 @@ def word_tokenize(text):
     for hyphens, removed.
 
     The core work is done by NLTK's Treebank Word Tokenizer.
+    
+    :param text: Text to be tokeized.
+    :type text: string
+
+    :returns: tokens : list of strings
     """
 
     text = rehyph(text)
@@ -96,6 +154,11 @@ def sentence_tokenize(text):
     sentences in this text.
 
     This is a wrapper for NLTK's pre-trained Punkt Tokenizer.
+     
+    :param text: Text to be tokeized.
+    :type text: string
+
+    :returns: tokens : list of strings
     """
     tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
@@ -108,6 +171,11 @@ def paragraph_tokenize(text):
     input string is English text and the output consists of the
     paragraphs in this text. It's expected that the text marks
     paragraphs with two consecutive line breaks.
+     
+    :param text: Text to be tokeized.
+    :type text: string
+
+    :returns: tokens : list of strings
     """
 
     par_break = re.compile(r'[\r\n]{2,}')

@@ -25,29 +25,6 @@ def sim_word_word(corp, mat, word_or_words, weights=None,
     words and every word. If weights are provided, the word list is
     represented as the weighted average of the words in the list. If
     weights are not provided, the arithmetic mean is used.
-
-    Parameters
-    ----------
-    corp : Corpus
-        Source of observed data
-    mat : 2-dim floating point array
-        Similarity matrix based on which cosine values are calculated
-    word_or_words : string or list of string
-        Query word(s) to which cosine values are calculated
-    weights : list of floating point
-        Specify weights for each query word in `word_or_words`. 
-        Default uses equal weights (i.e. arithmetic mean)
-    norms : ?
-        ?
-    as_strings : boolean
-        If true, returns a list of words rather than IDs. 
-        Default is true.
-    print_len : int
-        Number of words printed by pretty-pringing function
-        Default is 20.
-    filter_nan : boolean
-        ?
-
     """
     # Resolve `word_or_words`
     if isstr(word_or_words):
@@ -186,6 +163,8 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
                 label_fn=def_label_fn, as_strings=True,
                 sim_fn=row_cosines, order='d'):
     """
+    Computes and sorts the cosine similarity values between a document 
+    or list of documents and every document in the topic space. 
     """
     # Resolve `doc_or_docs`
     label_name = doc_label_name(context_type)    
@@ -270,6 +249,7 @@ def sim_top_top(mat, topic_or_topics, weights=None,
 
 def simmat_words(corp, matrix, word_list, norms=None, sim_fn=row_cos_mat):
     """
+    Calculates the similarity matrix for a given list of words.
     """
     indices, words = zip(*[res_word_type(corp, word) 
                            for word in word_list])
@@ -286,6 +266,7 @@ def simmat_words(corp, matrix, word_list, norms=None, sim_fn=row_cos_mat):
 def simmat_documents(corp, matrix, context_type, doc_list,
                      norms=None, sim_fn=row_cos_mat):
     """
+    Calculates the similarity matrix for a given list of documents.
     """
     label_name = doc_label_name(context_type)
 
@@ -303,6 +284,7 @@ def simmat_documents(corp, matrix, context_type, doc_list,
 
 def simmat_topics(kw_mat, topics, norms=None, sim_fn=row_cos_mat):
     """
+    Calculates the similarity matrix for a given list of topics.
     """
     sm = sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
     sm = sm.view(IndexedSymmArray)

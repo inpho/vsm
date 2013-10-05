@@ -104,6 +104,47 @@ def reduce_ngrams(fn, a, n, i, flat=True):
 
 
 class BeagleOrderSeq(BaseModel):
+    """
+
+    :param corpus:
+    :type corpus: Corpus object
+
+    :param env_matrix:
+    :type env_matrix: 2-D array
+
+    :param context_type: Name of tokenization stored in `corpus` whose
+        tokens will be treated as documents. Default is `sentence`.
+    :type context_type: string, optional
+
+    :param psi: ?
+    :type psi: int, optional
+
+    :param rand_perm: ?
+    :type rand_perm: ?, optional
+
+    :param lmda: ?
+    :type lmda: int, optional
+
+    :Attributes:
+        * **context_type** (string)
+            Name of tokenization whose tokens will be treated as documents.
+        * **sents** (list of arrays)
+            Tokens by `context_type` retrieved from `corpus`.
+        * **env_matrix** (2-D array)
+            Beagle environment matrix.
+        * **b_conv**
+
+        * **psi** (int)
+
+        * **lmda** 
+
+
+    :Methods:
+        * :doc:`bos_train`
+            Trains the model.
+
+    :See Also: :class:`vsm.model.BaseModel`
+    """
 
     def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):
@@ -125,6 +166,7 @@ class BeagleOrderSeq(BaseModel):
 
     def train(self):
         """
+        Trains the model.
         """
         self.matrix = np.zeros_like(self.env_matrix)
 
@@ -143,6 +185,48 @@ class BeagleOrderSeq(BaseModel):
 
 
 class BeagleOrderMulti(BaseModel):
+    """
+
+    :param corpus:
+    :type corpus: Corpus object
+
+    :param env_matrix:
+    :type env_matrix: 2-D array
+
+    :param context_type: Name of tokenization stored in `corpus` whose
+        tokens will be treated as documents. Default is `sentence`.
+    :type context_type: string, optional
+
+    :param psi: ?
+    :type psi: int, optional
+
+    :param rand_perm: ?
+    :type rand_perm: ?, optional
+
+    :param lmda: ?
+    :type lmda: int, optional
+
+    :Attributes:
+        * **context_type** (string)
+            Name of tokenization whose tokens will be treated as documents.
+        * **sents** (list of arrays)
+            Tokens by `context_type` retrieved from `corpus`.
+        * **env_matrix** (2-D array)
+            Beagle environment matrix.
+        * **b_conv**
+
+        * **psi** (int)
+
+        * **lmda** 
+
+
+    :Methods:
+        * :doc:`bom_train`
+            Trains the model.
+
+    :See Also: :class:`vsm.model.BaseModel`
+    """
+
 
     def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):
@@ -178,7 +262,12 @@ class BeagleOrderMulti(BaseModel):
 
 
     def train(self, n_procs=2):
-                
+        """
+        Trains the model using `n_procs` processors<F4><F5>57<F7><F8><F9>.
+
+        :param n_procs: Number of processors. Default is 2.
+        :type n_procs: int, optional
+        """
         sent_lists = np.array_split(self.sents, n_procs-1)
         if len(sent_lists) != n_procs:
             sent_lists = np.array_split(self.sents, n_procs)
