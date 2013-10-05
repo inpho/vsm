@@ -2,6 +2,7 @@ import unittest2 as unittest
 
 from vsm.corpus import util
 from vsm.corpus.util.corpusbuilders import *
+from vsm.corpus.util.corpusbuilders import coll_tokenize, dir_tokenize, corpus_fromlist
 import numpy as np
 
 
@@ -19,12 +20,12 @@ class TestCorpusUtil(unittest.TestCase):
         l = [[],['Not','an','empty','document'],[],
              ['Another','non-empty','document'],[]]
 
-        c = util.corpus_fromlist(l, context_type='sent')
+        c = corpus_fromlist(l, context_type='sentence')
 
-        self.assertTrue(c.context_types == ['sent'])
+        self.assertTrue(c.context_types == ['sentence'])
         self.assertTrue((c.context_data[0]['idx'] == [4,7]).all())
-        self.assertTrue((c.context_data[0]['sent_label'] ==
-                         ['sent_1', 'sent_3']).all())
+        self.assertTrue((c.context_data[0]['sentence_label'] ==
+                         ['sentence_1', 'sentence_3']).all())
 
 
     def test_toy_corpus(self):
@@ -82,18 +83,18 @@ class TestCorpusUtil(unittest.TestCase):
         self.assertTrue((context_data['article']['article_label'] == 
                 ['0', '1', '2', '3']).all())
         self.assertTrue((context_data['paragraph']['idx'] == 
-                [3, 5, 9, 9, 10, 11]).all)()
+                [3, 5, 9, 9, 10, 11]).all())
         self.assertTrue((context_data['paragraph']['article_label'] == 
                  ['0', '0', '1', '2', '3', '3']).all())
-        self.assertTrue((context_data['paragraph']['par_label'] == 
+        self.assertTrue((context_data['paragraph']['paragraph_label'] == 
                  ['0', '1', '2', '3', '4', '5']).all())
         self.assertTrue((context_data['sentence']['idx'] == 
                 [3, 5, 7, 9, 9, 10, 11]).all())
         self.assertTrue((context_data['sentence']['article_label'] == 
                 ['0', '0', '1', '1', '2', '3', '3']).all())
-        self.assertTrue((context_data['sentence']['par_label'] == 
+        self.assertTrue((context_data['sentence']['paragraph_label'] == 
                 ['0', '1', '2', '2', '3', '4', '5']).all())
-        self.assertTrue((context_data['sentence']['sent_label'] == 
+        self.assertTrue((context_data['sentence']['sentence_label'] == 
                 ['0', '1', '2', '3', '4', '5', '6']).all())
 
 
@@ -121,7 +122,7 @@ class TestCorpusUtil(unittest.TestCase):
                             ['0', '0', '1', '1']).all())
         self.assertTrue((context_data['sentence']['idx'] == 
                             [3, 5, 7, 9, 9, 10, 11]).all())
-        self.assertTrue((context_data['sentence']['sent_label'] == 
+        self.assertTrue((context_data['sentence']['sentence_label'] == 
                 ['0', '1', '2', '3', '4', '5', '6']).all())
         self.assertTrue((context_data['sentence']['page_label'] == 
                ['0', '0', '1', '1', '2', '3', '3']).all())

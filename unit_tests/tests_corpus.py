@@ -28,8 +28,8 @@ class TestCorpus(unittest.TestCase):
         odd = split_corpus(self.bc.corpus, [1,3,5])
         even = split_corpus(self.bc.corpus, [0,2,4])
 
-        odd_split = (np.array([1,0,2,3,0,2,3,1,2,0]) == odd).any()
-        even_split = (np.array([0,3,2,3,0]) == even).any()
+        odd_split = np.array([1,0,2,3,0,2,3,1,2,0]) in odd
+        even_split = np.array([0,3,2,3,0]) in even
 
         self.assertTrue(odd, msg=None)
         self.assertEqual(even, msg=None)
