@@ -108,6 +108,9 @@ def corpus_fromlist(ls, context_type='context'):
     [array(['a', 'b'], dtype='|S1'),
      array(['c'], dtype='|S1'),
      array(['d', 'e'], dtype='|S1')]
+    >>> c.context_data
+    [array([(2, 'sentence_0'), (3, 'sentence_1'), (5, 'sentence_2')], 
+          dtype=[('idx', '<i8'), ('sentence_label', '|S10')])]
     """
     corpus = [w for ctx in ls for w in ctx]
 
