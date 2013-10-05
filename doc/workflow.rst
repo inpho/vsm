@@ -9,7 +9,7 @@ The basic stages in a :mod:`vsm` workflow are shown below.
 | Raw-processing      | plain text file or a directory tree   |
 |                     | whose leaves are plain text files     |
 +---------------------+---------------------------------------+
-|                     | *words* and various types of *word*   |
+|                     | *Words* and various types of *word*   |
 | Tokenization and    | contexts such as *sentences*,         |
 | Metadata Collection | *paragraphs*, *pages*, *articles*,    |
 |                     | *documents*, *abstracts* or *books*   |
@@ -17,7 +17,7 @@ The basic stages in a :mod:`vsm` workflow are shown below.
 |                     | other metadata are gathered and       |
 |                     | associated to contexts                |
 +---------------------+---------------------------------------+
-|                     | the tokenized plain-text corpus is    |
+|                     | A tokenized plain-text corpus is      |
 | :class:`Corpus`     | encoded as an integer array; contexts |
 | Generation          | are stored as indices into the corpus |
 |                     | array and additional metadata are     |
@@ -25,7 +25,7 @@ The basic stages in a :mod:`vsm` workflow are shown below.
 |                     | contexts; stoplists and low-frequency |
 |                     | filters are also applied at this stage|
 +---------------------+---------------------------------------+
-|                     | a :class:`Corpus` object is given as  |
+|                     | A :class:`Corpus` object is given as  |
 | Model training      | input to a mathematical model for     |
 |                     | representing a corpus's semantics;    |
 |                     | provisions for running a parallel     |
@@ -33,7 +33,7 @@ The basic stages in a :mod:`vsm` workflow are shown below.
 |                     | initiating an :ref:`IPython cluster`) |
 |                     | may be made                           |
 +---------------------+---------------------------------------+
-| Viewing and         | a :class:`Corpus` object and an       | 
+| Viewing and         | A :class:`Corpus` object and an       | 
 | Analyzing Results   | associated :mod:`model` object are    |
 |                     | given to a :mod:`viewer` class so that|
 |                     | the user may, for example, examine the|
