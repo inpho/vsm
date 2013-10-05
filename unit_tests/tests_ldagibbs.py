@@ -1,13 +1,13 @@
 import unittest2 as unittest
 import numpy as np
 
+from vsm.corpus.util.corpusbuilders import random_corpus
 from vsm.model.ldagibbs import LDAGibbs
 
 
 class TestLdagibbs(unittest.TestCase):
 
     def setUp(self):
-        from vsm.corpus.util import random_corpus
         self.c = random_corpus(500000, 10000, 0, 100)
         self.m = LDAGibbs(self.c, 'context', K=20)
 
@@ -33,7 +33,6 @@ class TestLdagibbs(unittest.TestCase):
 
     def test_LDAGibbs_IO(self):
 
-        from vsm.corpus.util import random_corpus
         from tempfile import NamedTemporaryFile
         import os
     

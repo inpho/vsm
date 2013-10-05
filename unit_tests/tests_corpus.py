@@ -25,14 +25,19 @@ class TestCorpus(unittest.TestCase):
         
                             
     def test_SplitCorpus(self): 
-        odd = split_corpus(self.bc.corpus, [1,3,5])
-        even = split_corpus(self.bc.corpus, [0,2,4])
+        odd = split_corpus(self.corpus.corpus, [1,3,5])
+        even = split_corpus(self.corpus.corpus, [2,4,6])
 
-        odd_split = np.array([1,0,2,3,0,2,3,1,2,0]) in odd
-        even_split = np.array([0,3,2,3,0]) in even
+        odd_expected = [np.array([0]), np.array([1, 0]),
+                np.array([3, 0]), np.array([2])]
+        even_expected = [np.array([0, 1]), np.array([0, 3]),
+                np.array([0, 2])]
 
-        self.assertTrue(odd, msg=None)
-        self.assertEqual(even, msg=None)
+        for i in xrange(len(odd)):
+            np.testing.assert_array_equal(odd[i], odd_expected[i])
+        for i in xrange(len(even)):
+            np.testing.assert_array_equal(even[i], even_expected[i])
+
 
     def test_ValidateIndices(self):
         for t in self.bc.context_data:
@@ -57,10 +62,6 @@ class TestCorpus(unittest.TestCase):
         for i in xrange(len(ctx)):
             np.testing.assert_array_equal(ctx[i], expected[i])
         
-        # self.assertListEqual([np.array([0,3,2]), np.array([1,0]), np.array([3,0]),
-        #    np.array([2,3,0,2]), np.array([3,1,2,0]), np.array([3,2,1]),
-        #    np.array([2,2])], ctx)
-
     
     def test_MetaInt(self):
         i = self.bc.meta_int('document', {'doc': 'doc3'})

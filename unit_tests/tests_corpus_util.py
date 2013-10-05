@@ -2,7 +2,7 @@ import unittest2 as unittest
 
 from vsm.corpus import util
 from vsm.corpus.util.corpusbuilders import *
-from vsm.corpus.util.corpusbuilders import coll_tokenize, dir_tokenize, corpus_fromlist
+from vsm.corpus.util.corpusbuilders import file_tokenize, coll_tokenize, dir_tokenize, corpus_fromlist
 import numpy as np
 
 
@@ -63,6 +63,47 @@ class TestCorpusUtil(unittest.TestCase):
 
         return c
 
+    
+    def test_file_tokenize(self):
+
+        text = 'foo foo foo\n\nfoo foo. Foo bar. Foo bar. foo\n\nfoo'
+
+        words, context_data = file_tokenize(text)
+
+        self.assertTrue(len(words) == 11)
+        self.assertTrue(len(context_data['paragraph']) == 3)
+        self.assertTrue(len(context_data['sentence']) == 6)
+    
+        self.assertTrue((context_data['paragraph']['idx'] == 
+                [3, 10, 11]).all())
+        self.assertTrue((context_data['paragraph']['paragraph_label'] == 
+                 ['0', '1', '2']).all())
+        self.assertTrue((context_data['sentence']['idx'] == 
+                [3, 5, 7, 9, 10, 11]).all())
+        self.assertTrue((context_data['sentence']['paragraph_label'] == 
+                ['0', '1', '1', '1', '1', '2']).all())
+        self.assertTrue((context_data['sentence']['sentence_label'] == 
+                ['0', '1', '2', '3', '4', '5']).all())
+
+    
+    def test_file_corpus(self):
+        
+        text = 'foo foo foo\n\nfoo foo. Foo bar. Foo bar. foo\n\nfoo'
+        
+        import os
+        from tempfile import NamedTemporaryFile as NFT
+
+        tmp = NFT(delete=False)
+        tmp.write(text)
+        tmp.close()
+
+        c = file_corpus(tmp.name)
+
+        self.assertTrue(c)
+        os.remove(tmp.name)
+
+        return c
+
 
     def test_dir_tokenize(self):
 
@@ -96,7 +137,6 @@ class TestCorpusUtil(unittest.TestCase):
                 ['0', '1', '2', '2', '3', '4', '5']).all())
         self.assertTrue((context_data['sentence']['sentence_label'] == 
                 ['0', '1', '2', '3', '4', '5', '6']).all())
-
 
 
     def test_coll_tokenize(self):
