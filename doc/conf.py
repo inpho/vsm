@@ -112,7 +112,7 @@ html_theme_options = {
     # (true or false): Make the sidebar “fixed” so that it doesn’t
     # scroll out of view for long body content. This may not work well
     # with all browsers. Defaults to false.
-    # 'stickysidebar': 'false',
+    'stickysidebar': 'false',
     # (true or false): Add an experimental JavaScript snippet that
     # makes the sidebar collapsible via a button on its side. Doesn’t
     # work together with “rightsidebar” or “stickysidebar”. Defaults
@@ -214,7 +214,7 @@ html_static_path = ['_static']
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 #html_show_sphinx = True
