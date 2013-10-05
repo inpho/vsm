@@ -23,7 +23,8 @@ The basic stages in a :mod:`vsm` workflow are shown below.
 |                     | array and additional metadata are     |
 |                     | stored in records associated to the   |
 |                     | contexts; stoplists and low-frequency |
-|                     | filters are also applied at this stage|
+|                     | filters are also applied at this      |
+|                     | stage.                                |
 +---------------------+---------------------------------------+
 |                     | A :class:`Corpus` object is given as  |
 | Model training      | input to a mathematical model for     |
@@ -31,9 +32,9 @@ The basic stages in a :mod:`vsm` workflow are shown below.
 |                     | provisions for running a parallel     |
 |                     | implementation of a model (e.g.,      |
 |                     | initiating an :ref:`IPython cluster`) |
-|                     | may be made                           |
-+---------------------+---------------------------------------+
-| Viewing and         | A :class:`Corpus` object and an       | 
+|                     | may be made.                          |
++---------------------+---------------------------------------+ 
+| Viewing and         | A :class:`Corpus` object and an       |
 | Analyzing Results   | associated :mod:`model` object are    |
 |                     | given to a :mod:`viewer` class so that|
 |                     | the user may, for example, examine the|
@@ -41,8 +42,8 @@ The basic stages in a :mod:`vsm` workflow are shown below.
 |                     | representations of words, contexts    |
 |                     | (documents) or topics; graphical      |
 |                     | display and notebook creation options |
-|                     | are provided by                       |
-|                     | :ref:`IPython notebook server`        |
+|                     | are provided by a                     |
+|                     | :ref:`IPython notebook` server.       |
 +---------------------+---------------------------------------+
 
 
