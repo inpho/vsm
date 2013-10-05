@@ -26,7 +26,10 @@ def split_corpus(arr, indices):
     """
     if len(indices) == 0:
         return arr
-    
+
+    if isinstance(indices, list):
+        indices = np.array(indices)
+
     out = np.split(arr, indices)
     
     if (indices >= arr.size).any():

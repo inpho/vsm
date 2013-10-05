@@ -245,8 +245,8 @@ def file_tokenize(text):
         par_n += 1
 
     idx_dt = ('idx', np.int32)
-    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
-    par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
 
     corpus_data = dict()
     dtype = [idx_dt, par_label_dt]
@@ -374,13 +374,13 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
     idx_dt = ('idx', np.int32)
     label_dt = (chunk_name + '_label', np.array(labels).dtype)
-    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
     corpus_data = dict()
     dtype = [idx_dt, label_dt]
     corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
 
     if paragraphs:
-        par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
+        par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
         dtype = [idx_dt, label_dt, par_label_dt]
         corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
         dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
@@ -504,7 +504,7 @@ def coll_tokenize(books, book_names):
     idx_dt = ('idx', np.int32)
     book_label_dt = ('book_label', np.array(book_names).dtype)
     page_label_dt = ('page_label', np.array(page_n, np.str_).dtype)
-    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
     files = [f for (a,b,c,f) in page_tokens]
     file_dt = ('file', np.array(files, np.str_).dtype)
 

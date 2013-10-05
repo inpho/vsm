@@ -48,8 +48,6 @@ def doc_label_name(context_type):
 
     :returns: label name for `context_type` as string.
     """
-    if context_type == 'sentence':
-        return 'sent_label'
     return context_type + '_label'
 
 
