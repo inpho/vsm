@@ -40,7 +40,6 @@ class TestBeagleContext(unittest.TestCase):
         finally:
             os.remove(tmp.name)
 
-        return self.ms.matrix
 
 
     def test_BeagleContextMulti(self):
@@ -58,7 +57,6 @@ class TestBeagleContext(unittest.TestCase):
         finally:
             os.remove(tmp.name)
 
-        return self.mm.matrix
 
 
     def test_compare(self):

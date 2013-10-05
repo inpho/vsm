@@ -37,9 +37,6 @@ class TestBeagleOrder(unittest.TestCase):
         finally:
             os.remove(tmp.name)
 
-        return self.ms.matrix
-
-
 
     def test_BeagleOrderMulti(self):
 
@@ -55,9 +52,6 @@ class TestBeagleOrder(unittest.TestCase):
     
         finally:
             os.remove(tmp.name)
-
-        return self.mm.matrix
-
 
 
     def test_compare(self):

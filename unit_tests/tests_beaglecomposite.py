@@ -27,6 +27,7 @@ class TestBeagleComposite(unittest.TestCase):
         self.m = BeagleComposite(cc, self.cm.matrix, ec, self.om.matrix)
         self.m.train()
 
+
     def test_BeagleCompositeIO(self):
         from tempfile import NamedTemporaryFile
         import os
@@ -41,7 +42,6 @@ class TestBeagleComposite(unittest.TestCase):
         finally:
             os.remove(tmp.name)
 
-        return self.m.matrix
 
 
         
