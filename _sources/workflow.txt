@@ -7,7 +7,7 @@ The basic stages in a :mod:`vsm` workflow are shown below.
 +---------------------+---------------------------------------+
 |                     | Converting a textual corpus into a    |
 | Raw-processing      | plain text file or a directory tree   |
-|                     | whose leaves are plain text files     |
+|                     | whose leaves are plain text files.    |
 +---------------------+---------------------------------------+
 |                     | *Words* and various types of *word*   |
 | Tokenization and    | contexts such as *sentences*,         |
@@ -15,7 +15,7 @@ The basic stages in a :mod:`vsm` workflow are shown below.
 |                     | *documents*, *abstracts* or *books*   |
 |                     | are identified; as well, labels and   |
 |                     | other metadata are gathered and       |
-|                     | associated to contexts                |
+|                     | associated to contexts.               |
 +---------------------+---------------------------------------+
 |                     | A tokenized plain-text corpus is      |
 | :class:`Corpus`     | encoded as an integer array; contexts |
