@@ -12,30 +12,22 @@ class TestBeagleComposite(unittest.TestCase):
         from vsm.model.beaglecontext import BeagleContextSeq
         from vsm.model.beagleorder import BeagleOrderSeq
 
-        ec = random_corpus(1000, 50, 0, 20, context_type='sentence')
-        self.cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,50,7)])
+        self.ec = random_corpus(1000, 50, 0, 20, context_type='sentence')
+        self.cc = self.ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,50,7)])
 
-        e = BeagleEnvironment(self.ec, n_cols=5)
-        e.train()
+        self.e = BeagleEnvironment(self.ec, n_cols=5)
+        self.e.train()
 
-        self.cm = BeagleContextSeq(self.cc, self.ec, e.matrix)
+        self.cm = BeagleContextSeq(self.cc, self.ec, self.e.matrix)
         self.cm.train()
 
-        self.om = BeagleOrderSeq(self.ec, e.matrix)
+        self.om = BeagleOrderSeq(self.ec, self.e.matrix)
         self.om.train()
 
         self.m = BeagleComposite(self.cc, self.cm.matrix, self.ec, self.om.matrix)
         self.m.train()
 
-    def test_BeagleComposite_train(self):
-        m = self.m
-        m.ctx_corpus = self.cc
-        m.ord_matrix = self.om.matrix
-        m.context_type = 'sentence'
-        m.train()
-        self.assertTrue((self.m.matrix == m.matrix.toarray()).all())
-
-
+   
     def test_BeagleCompositeIO(self):
         from tempfile import NamedTemporaryFile
         import os
