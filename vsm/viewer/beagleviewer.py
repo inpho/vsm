@@ -139,35 +139,3 @@ class BeagleViewer(object):
         
         return _plot_clusters_(pos, labels, size=size)
 
-
-
-
-def test_BeagleViewer():
-
-    from vsm.corpus.util import random_corpus
-    from vsm.model.beagleenvironment import BeagleEnvironment
-    from vsm.model.beaglecontext import BeagleContextSeq
-    from vsm.model.beagleorder import BeagleOrderSeq
-    from vsm.model.beaglecomposite import BeagleComposite
-
-    ec = random_corpus(1000, 50, 0, 20, context_type='sentence')
-    cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,50,7)])
-
-    e = BeagleEnvironment(ec, n_cols=5)
-    e.train()
-
-    cm = BeagleContextSeq(cc, ec, e.matrix)
-    cm.train()
-
-    om = BeagleOrderSeq(ec, e.matrix)
-    om.train()
-
-    m = BeagleComposite(cc, cm.matrix, ec, om.matrix)
-    m.train()
-
-    venv = BeagleViewer(ec, e)
-    vctx = BeagleViewer(cc, cm)
-    vord = BeagleViewer(ec, om)
-    vcom = BeagleViewer(cc, m)
-
-    return (venv, vctx, vord, vcom)

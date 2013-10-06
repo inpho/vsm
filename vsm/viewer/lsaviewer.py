@@ -182,24 +182,3 @@ class LsaViewer(object):
                                   self.model.context_type, docs)
 
 
-
-
-def test_LsaViewer():
-
-    from vsm.corpus.util import random_corpus
-    from vsm.model.tf import TfModel
-    from vsm.model.tfidf import TfIdfModel
-    from vsm.model.lsa import LsaModel
-
-    c = random_corpus(10000, 1000, 0, 30, context_type='document', metadata=True)
-
-    tf = TfModel(c, 'document')
-    tf.train()
-
-    tfidf = TfIdfModel(tf.matrix, 'document')
-    tfidf.train()
-
-    m = LsaModel(tfidf.matrix, 'document')
-    m.train()
-
-    return LsaViewer(c, m)
