@@ -1,7 +1,9 @@
-=================
-BeagleEnvironment
-=================
+.. _beagle_environment:
 
-.. automodule:: vsm.model.beagleenvironment
+========================
+BEAGLE Environment Model
+========================
+
+.. module:: vsm.model.beagleenvironment
 
 .. autoclass:: BeagleEnvironment

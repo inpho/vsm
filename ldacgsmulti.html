@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LdaCgsMulti &mdash; vsm 0.1 documentation</title>
+    <title>Latent Dirichlet Allocation – Collapsed Gibbs Sampling (Multiprocessing) &mdash; vsm 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,7 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="vsm 0.1 documentation" href="index.html" /> 
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="Latent Dirichlet Allocation" href="lda.html" />
+    <link rel="next" title="Latent Semantic Analysis" href="lsa.html" />
+    <link rel="prev" title="Latent Dirichlet Allocation – Collapsed Gibbs Sampling (Sequential)" href="ldagibbs.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +38,16 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="lsa.html" title="Latent Semantic Analysis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ldagibbs.html" title="Latent Dirichlet Allocation – Collapsed Gibbs Sampling (Sequential)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
+          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
+          <li><a href="lda.html" accesskey="U">Latent Dirichlet Allocation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -45,7 +57,7 @@
           <div class="body">
             
   <div class="section" id="module-vsm.model.ldacgsmulti">
-<span id="ldacgsmulti"></span><h1>LdaCgsMulti<a class="headerlink" href="#module-vsm.model.ldacgsmulti" title="Permalink to this headline">¶</a></h1>
+<span id="latent-dirichlet-allocation-collapsed-gibbs-sampling-multiprocessing"></span><span id="lda-cgs-multi"></span><h1>Latent Dirichlet Allocation &#8211; Collapsed Gibbs Sampling (Multiprocessing)<a class="headerlink" href="#module-vsm.model.ldacgsmulti" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="vsm.model.ldacgsmulti.LdaCgsMulti">
 <em class="property">class </em><tt class="descclassname">vsm.model.ldacgsmulti.</tt><tt class="descname">LdaCgsMulti</tt><big>(</big><em>corpus</em>, <em>context_type</em>, <em>K=100</em>, <em>top_prior=</em><span class="optional">[</span><span class="optional">]</span>, <em>ctx_prior=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#vsm.model.ldacgsmulti.LdaCgsMulti" title="Permalink to this definition">¶</a></dt>
@@ -106,20 +118,20 @@ for all contexts.</li>
 </tr>
 <tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first last">
 <li><dl class="first docutils">
-<dt><a class="reference internal" href="#vsm.model.ldacgsmulti.LdaCgsMulti.train" title="vsm.model.ldacgsmulti.LdaCgsMulti.train"><tt class="xref py py-meth docutils literal"><span class="pre">train()</span></tt></a></dt>
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">train()</span></tt></dt>
 <dd><p class="first last">Takes an optional argument <cite>itr</cite>, which defaults to 1000, and
 updates the model <cite>itr</cite> times.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><a class="reference internal" href="#vsm.model.ldacgsmulti.LdaCgsMulti.load" title="vsm.model.ldacgsmulti.LdaCgsMulti.load"><tt class="xref py py-meth docutils literal"><span class="pre">load()</span></tt></a></dt>
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">load()</span></tt></dt>
 <dd><p class="first last">A static method for loading a saved LdaCgsMulti model.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><a class="reference internal" href="#vsm.model.ldacgsmulti.LdaCgsMulti.save" title="vsm.model.ldacgsmulti.LdaCgsMulti.save"><tt class="xref py py-meth docutils literal"><span class="pre">save()</span></tt></a></dt>
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">save()</span></tt></dt>
 <dd><p class="first last">Saves the model in an <cite>.npz</cite> file.</p>
 </dd>
 </dl>
@@ -179,66 +191,6 @@ estimated values of the latent variables <cite>phi</cite>, <cite>theta</cite> an
 </tr>
 </tbody>
 </table>
-<dl class="staticmethod">
-<dt id="vsm.model.ldacgsmulti.LdaCgsMulti.load">
-<em class="property">static </em><tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#vsm.model.ldacgsmulti.LdaCgsMulti.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>A static method for loading a saved LdaCgsMulti model.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>string</em>) &#8211; Name of a saved model to be loaded.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">m : LdaCgsMulti object</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">numpy.load</span></tt></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="vsm.model.ldacgsmulti.LdaCgsMulti.save">
-<tt class="descname">save</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#vsm.model.ldacgsmulti.LdaCgsMulti.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves the model in <cite>.npz</cite> file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>string</em>) &#8211; Name of file to be saved.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">numpy.savez</span></tt></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="vsm.model.ldacgsmulti.LdaCgsMulti.train">
-<tt class="descname">train</tt><big>(</big><em>itr=500</em>, <em>verbose=True</em>, <em>n_proc=2</em><big>)</big><a class="headerlink" href="#vsm.model.ldacgsmulti.LdaCgsMulti.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>A time efficient training function where you can specify
-the number of processors used for training. For example,
-if <cite>itr</cite> is 500 and <cite>n_proc</cite> then the total number of iterations
-is 1000.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>itr</strong> (<em>int, optional</em>) &#8211; Number of iterations for each processor. Default is 500.</li>
-<li><strong>verbose</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, current number of iterations
-are printed out to notify the user. Default is <cite>True</cite>.</li>
-<li><strong>n_proc</strong> (<em>int, optional</em>) &#8211; Number of processors used for training. Default is
-2.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Training sessions can be continued only if the previous
-training session of completed.</p>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -249,6 +201,12 @@ training session of completed.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ldagibbs.html"
+                        title="previous chapter">Latent Dirichlet Allocation &#8211; Collapsed Gibbs Sampling (Sequential)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="lsa.html"
+                        title="next chapter">Latent Semantic Analysis</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/ldacgsmulti.txt"
@@ -280,7 +238,16 @@ training session of completed.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="lsa.html" title="Latent Semantic Analysis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ldagibbs.html" title="Latent Dirichlet Allocation – Collapsed Gibbs Sampling (Sequential)"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
+          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
+          <li><a href="lda.html" >Latent Dirichlet Allocation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

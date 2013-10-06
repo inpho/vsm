@@ -1,5 +1,9 @@
-==================
-BeagleContextMulti
-==================
+.. _beagle_context_multi:
 
-.. autoclass:: vsm.model.beaglecontext.BeagleContextMulti
+======================================
+BEAGLE Context Model (Multiprocessing)
+======================================
+
+.. currentmodule:: vsm.model.beaglecontext
+
+.. autoclass:: BeagleContextMulti

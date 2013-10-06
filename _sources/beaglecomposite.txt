@@ -1,7 +1,9 @@
-===============
-BeagleComposite
-===============
+.. _beagle_composite:
 
-.. automodule:: vsm.model.beaglecomposite
+======================
+BEAGLE Composite Model
+======================
+
+.. module:: vsm.model.beaglecomposite
 
 .. autoclass:: BeagleComposite

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Corpus builder functions &mdash; vsm 0.1 documentation</title>
+    <title>Tokenization and Metadata Collection &mdash; vsm 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,7 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="vsm 0.1 documentation" href="index.html" /> 
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="vsm Workflow" href="workflow.html" />
+    <link rel="next" title="empty_corpus" href="empty_corpus.html" />
+    <link rel="prev" title="vsm Workflow" href="workflow.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +38,14 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="empty_corpus.html" title="empty_corpus"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="workflow.html" title="vsm Workflow"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" accesskey="U"><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -44,26 +54,21 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="corpus-builder-functions">
-<h1>Corpus builder functions<a class="headerlink" href="#corpus-builder-functions" title="Permalink to this headline">¶</a></h1>
-<p>Corpus builder functions include convenience functions for building
-<a class="reference internal" href="corpus.html#vsm.corpus.Corpus" title="vsm.corpus.Corpus"><tt class="xref py py-mod docutils literal"><span class="pre">vsm.corpus.Corpus</span></tt></a> from file or directory as well as methods
-for making empty corpus, random corpus, and toy corpus for various
-experiments.</p>
-<p>Tutorials for using corpus builder functions will be here soon.</p>
-<span class="target" id="module-vsm.corpus.util.corpusbuilders"></span><div class="section" id="methods">
-<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="tokenization-and-metadata-collection">
+<span id="tokenization"></span><h1>Tokenization and Metadata Collection<a class="headerlink" href="#tokenization-and-metadata-collection" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="corpus-builder-functions">
+<h2>Corpus Builder functions<a class="headerlink" href="#corpus-builder-functions" title="Permalink to this headline">¶</a></h2>
+<p>Corpus builder functions are convenience functions for creating
+<tt class="xref py py-class docutils literal"><span class="pre">Corpus</span></tt> objects from strings, nested lists of strings, plain
+text files or directory structures containing plain text files.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="empty_corpus.html">empty_corpus</a></li>
 <li class="toctree-l1"><a class="reference internal" href="random_corpus.html">random_corpus</a></li>
 <li class="toctree-l1"><a class="reference internal" href="toy_corpus.html">toy_corpus</a></li>
 <li class="toctree-l1"><a class="reference internal" href="corpus_fromlist.html">corpus_fromlist</a></li>
-<li class="toctree-l1"><a class="reference internal" href="file_tokenize.html">file_tokenize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="file_corpus.html">file_corpus</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dir_tokenize.html">dir_tokenize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dir_corpus.html">dir_corpus</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coll_tokenize.html">coll_tokenize</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coll_corpus.html">coll_corpus</a></li>
 </ul>
 </div>
@@ -78,17 +83,23 @@ experiments.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Corpus builder functions</a><ul>
-<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#">Tokenization and Metadata Collection</a><ul>
+<li><a class="reference internal" href="#corpus-builder-functions">Corpus Builder functions</a><ul>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="workflow.html"
+                        title="previous chapter"><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="empty_corpus.html"
+                        title="next chapter">empty_corpus</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/corpusbuilders.txt"
+    <li><a href="_sources/tokenization.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -117,7 +128,14 @@ experiments.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="empty_corpus.html" title="empty_corpus"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="workflow.html" title="vsm Workflow"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

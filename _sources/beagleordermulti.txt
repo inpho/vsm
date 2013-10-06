@@ -1,5 +1,9 @@
-================
-BeagleOrderMulti
-================
+.. _beagle_order_multi:
 
-.. autoclass:: vsm.model.beagleorder.BeagleOrderMulti
+=============================
+BEAGLE Order (Multiprocessing)
+=============================
+
+.. currentmodule:: vsm.model.beagleorder
+
+.. autoclass:: BeagleOrderMulti

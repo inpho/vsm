@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>TfSeq &mdash; vsm 0.1 documentation</title>
+    <title>Term Frequency Model (Sequential) &mdash; vsm 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,7 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="vsm 0.1 documentation" href="index.html" /> 
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="Term Frequency Model" href="tf.html" />
+    <link rel="next" title="Term Frequency Model (Multiprocessing)" href="tfmulti.html" />
+    <link rel="prev" title="Term Frequency Model" href="tf.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +38,16 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="tfmulti.html" title="Term Frequency Model (Multiprocessing)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tf.html" title="Term Frequency Model"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
+          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
+          <li><a href="tf.html" accesskey="U">Term Frequency Model</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -44,8 +56,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="tfseq">
-<h1>TfSeq<a class="headerlink" href="#tfseq" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="term-frequency-model-sequential">
+<span id="tf-seq"></span><h1>Term Frequency Model (Sequential)<a class="headerlink" href="#term-frequency-model-sequential" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="vsm.model.tf.TfSeq">
 <em class="property">class </em><tt class="descclassname">vsm.model.tf.</tt><tt class="descname">TfSeq</tt><big>(</big><em>corpus=None</em>, <em>context_type=None</em><big>)</big><a class="headerlink" href="#vsm.model.tf.TfSeq" title="Permalink to this definition">¶</a></dt>
@@ -120,13 +132,6 @@ into a BaseModel object.</p>
 </tr>
 </tbody>
 </table>
-<dl class="method">
-<dt id="vsm.model.tf.TfSeq.train">
-<tt class="descname">train</tt><big>(</big><big>)</big><a class="headerlink" href="#vsm.model.tf.TfSeq.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Counts word-type occurrences per context and stores the results in
-<cite>self.matrix</cite>.</p>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -137,6 +142,12 @@ into a BaseModel object.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tf.html"
+                        title="previous chapter">Term Frequency Model</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tfmulti.html"
+                        title="next chapter">Term Frequency Model (Multiprocessing)</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/tfseq.txt"
@@ -168,7 +179,16 @@ into a BaseModel object.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="tfmulti.html" title="Term Frequency Model (Multiprocessing)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tf.html" title="Term Frequency Model"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
+          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
+          <li><a href="tf.html" >Term Frequency Model</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

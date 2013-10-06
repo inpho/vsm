@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>BEAGLE Order (Sequential) &mdash; vsm 0.1 documentation</title>
+    <title>Latent Semantic Analysis &mdash; vsm 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="vsm 0.1 documentation" href="index.html" />
-    <link rel="up" title="BEAGLE Order Model" href="beagleorder.html" />
-    <link rel="next" title="BEAGLE Order (Multiprocessing)" href="beagleordermulti.html" />
-    <link rel="prev" title="BEAGLE Order Model" href="beagleorder.html" /> 
+    <link rel="up" title="Model Training" href="model_training.html" />
+    <link rel="next" title="Term Frequency Model" href="tf.html" />
+    <link rel="prev" title="Latent Dirichlet Allocation – Collapsed Gibbs Sampling (Multiprocessing)" href="ldacgsmulti.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,16 +39,14 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="beagleordermulti.html" title="BEAGLE Order (Multiprocessing)"
+          <a href="tf.html" title="Term Frequency Model"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="beagleorder.html" title="BEAGLE Order Model"
+          <a href="ldacgsmulti.html" title="Latent Dirichlet Allocation – Collapsed Gibbs Sampling (Multiprocessing)"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
           <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
-          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
-          <li><a href="beagle.html" >BEAGLE Model</a> &raquo;</li>
-          <li><a href="beagleorder.html" accesskey="U">BEAGLE Order Model</a> &raquo;</li> 
+          <li><a href="model_training.html" accesskey="U">Model Training</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -57,65 +55,47 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="beagle-order-sequential">
-<span id="beagle-order-seq"></span><h1>BEAGLE Order (Sequential)<a class="headerlink" href="#beagle-order-sequential" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="latent-semantic-analysis">
+<span id="lsa"></span><h1>Latent Semantic Analysis<a class="headerlink" href="#latent-semantic-analysis" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="vsm.model.beagleorder.BeagleOrderSeq">
-<em class="property">class </em><tt class="descclassname">vsm.model.beagleorder.</tt><tt class="descname">BeagleOrderSeq</tt><big>(</big><em>corpus</em>, <em>env_matrix</em>, <em>context_type='sentence'</em>, <em>psi=None</em>, <em>rand_perm=None</em>, <em>lmda=7</em><big>)</big><a class="headerlink" href="#vsm.model.beagleorder.BeagleOrderSeq" title="Permalink to this definition">¶</a></dt>
+<dt id="vsm.model.lsa.Lsa">
+<em class="property">class </em><tt class="descclassname">vsm.model.lsa.</tt><tt class="descname">Lsa</tt><big>(</big><em>td_matrix=array(</em><span class="optional">[</span><span class="optional">]</span>, <em>dtype=float64)</em>, <em>context_type=None</em><big>)</big><a class="headerlink" href="#vsm.model.lsa.Lsa" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>corpus</strong> (<em>Corpus object</em>) &#8211; </li>
-<li><strong>env_matrix</strong> (<em>2-D array</em>) &#8211; </li>
-<li><strong>context_type</strong> (<em>string, optional</em>) &#8211; Name of tokenization stored in <cite>corpus</cite> whose
-tokens will be treated as documents. Default is <cite>sentence</cite>.</li>
-<li><strong>psi</strong> (<em>int, optional</em>) &#8211; </li>
-<li><strong>rand_perm</strong> (<em>, optional</em>) &#8211; </li>
-<li><strong>lmda</strong> (<em>int, optional</em>) &#8211; </li>
+<li><strong>td_matrix</strong> (<em>np.array, optional</em>) &#8211; ? Default is an empty array.</li>
+<li><strong>context_type</strong> (<em>string, optional</em>) &#8211; Name of tokenization whose tokens will be
+treated as documents. Default is <cite>None</cite>.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Attributes :</th><td class="field-body"><ul class="first">
-<li><dl class="first docutils">
-<dt><strong>context_type</strong> (string)</dt>
-<dd><p class="first last">Name of tokenization whose tokens will be treated as documents.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><strong>sents</strong> (list of arrays)</dt>
-<dd><p class="first last">Tokens by <cite>context_type</cite> retrieved from <cite>corpus</cite>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><strong>env_matrix</strong> (2-D array)</dt>
-<dd><p class="first last">Beagle environment matrix.</p>
-</dd>
-</dl>
-</li>
-<li><p class="first"><strong>b_conv</strong></p>
-</li>
-<li><p class="first"><strong>psi</strong> (int)</p>
-</li>
-<li><p class="first"><strong>lmda</strong></p>
-</li>
+<tr class="field-even field"><th class="field-name">Attributes :</th><td class="field-body"><ul class="first simple">
+<li><strong>td_matrix</strong> (np.array)</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first">
+<tr class="field-odd field"><th class="field-name">Methods :</th><td class="field-body"><ul class="first last">
 <li><dl class="first docutils">
-<dt><a class="reference internal" href="bos_train.html"><em>train</em></a></dt>
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">train()</span></tt></dt>
 <dd><p class="first last">Trains the model.</p>
 </dd>
 </dl>
 </li>
+<li><dl class="first docutils">
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">load()</span></tt></dt>
+<dd><p class="first last">Loads the saved model.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><tt class="xref py py-meth docutils literal"><span class="pre">save()</span></tt></dt>
+<dd><p class="first last">Saves the model in an <cite>.npz</cite> file.</p>
+</dd>
+</dl>
+</li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><a class="reference internal" href="wf_model.html#vsm.model.BaseModel" title="vsm.model.BaseModel"><tt class="xref py py-class docutils literal"><span class="pre">vsm.model.BaseModel</span></tt></a></p>
 </td>
 </tr>
 </tbody>
@@ -131,14 +111,14 @@ tokens will be treated as documents. Default is <cite>sentence</cite>.</li>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="beagleorder.html"
-                        title="previous chapter">BEAGLE Order Model</a></p>
+  <p class="topless"><a href="ldacgsmulti.html"
+                        title="previous chapter">Latent Dirichlet Allocation &#8211; Collapsed Gibbs Sampling (Multiprocessing)</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="beagleordermulti.html"
-                        title="next chapter">BEAGLE Order (Multiprocessing)</a></p>
+  <p class="topless"><a href="tf.html"
+                        title="next chapter">Term Frequency Model</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/beagleorderseq.txt"
+    <li><a href="_sources/lsa.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -168,16 +148,14 @@ tokens will be treated as documents. Default is <cite>sentence</cite>.</li>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="beagleordermulti.html" title="BEAGLE Order (Multiprocessing)"
+          <a href="tf.html" title="Term Frequency Model"
              >next</a> |</li>
         <li class="right" >
-          <a href="beagleorder.html" title="BEAGLE Order Model"
+          <a href="ldacgsmulti.html" title="Latent Dirichlet Allocation – Collapsed Gibbs Sampling (Multiprocessing)"
              >previous</a> |</li>
         <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
           <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
-          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
-          <li><a href="beagle.html" >BEAGLE Model</a> &raquo;</li>
-          <li><a href="beagleorder.html" >BEAGLE Order Model</a> &raquo;</li> 
+          <li><a href="model_training.html" >Model Training</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

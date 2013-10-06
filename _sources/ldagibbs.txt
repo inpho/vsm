@@ -1,8 +1,10 @@
-========
-LDAGibbs
-========
+.. _lda_cgs_seq:
 
-.. automodule:: vsm.model.ldagibbs
+====================================================================
+Latent Dirichlet Allocation -- Collapsed Gibbs Sampling (Sequential)
+====================================================================
+
+.. module:: vsm.model.ldagibbs
 
 .. autoclass:: LDAGibbs
-   :members:
+

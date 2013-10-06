@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>BeagleOrderMulti &mdash; vsm 0.1 documentation</title>
+    <title>BEAGLE Order (Multiprocessing) &mdash; vsm 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,7 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="vsm 0.1 documentation" href="index.html" /> 
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="BEAGLE Order Model" href="beagleorder.html" />
+    <link rel="next" title="BEAGLE Composite Model" href="beaglecomposite.html" />
+    <link rel="prev" title="BEAGLE Order (Sequential)" href="beagleorderseq.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +38,17 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="beaglecomposite.html" title="BEAGLE Composite Model"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="beagleorderseq.html" title="BEAGLE Order (Sequential)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
+          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
+          <li><a href="beagle.html" >BEAGLE Model</a> &raquo;</li>
+          <li><a href="beagleorder.html" accesskey="U">BEAGLE Order Model</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -44,8 +57,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="beagleordermulti">
-<h1>BeagleOrderMulti<a class="headerlink" href="#beagleordermulti" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="beagle-order-multiprocessing">
+<span id="beagle-order-multi"></span><h1>BEAGLE Order (Multiprocessing)<a class="headerlink" href="#beagle-order-multiprocessing" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="vsm.model.beagleorder.BeagleOrderMulti">
 <em class="property">class </em><tt class="descclassname">vsm.model.beagleorder.</tt><tt class="descname">BeagleOrderMulti</tt><big>(</big><em>corpus</em>, <em>env_matrix</em>, <em>context_type='sentence'</em>, <em>psi=None</em>, <em>rand_perm=None</em>, <em>lmda=7</em><big>)</big><a class="headerlink" href="#vsm.model.beagleorder.BeagleOrderMulti" title="Permalink to this definition">¶</a></dt>
@@ -58,12 +71,9 @@
 <li><strong>env_matrix</strong> (<em>2-D array</em>) &#8211; </li>
 <li><strong>context_type</strong> (<em>string, optional</em>) &#8211; Name of tokenization stored in <cite>corpus</cite> whose
 tokens will be treated as documents. Default is <cite>sentence</cite>.</li>
-<li><strong>psi</strong> (<em>int, optional</em>) &#8211; <p>?</p>
-</li>
-<li><strong>rand_perm</strong> (<em>?, optional</em>) &#8211; <p>?</p>
-</li>
-<li><strong>lmda</strong> (<em>int, optional</em>) &#8211; <p>?</p>
-</li>
+<li><strong>psi</strong> (<em>int, optional</em>) &#8211; </li>
+<li><strong>rand_perm</strong> (<em>, optional</em>) &#8211; </li>
+<li><strong>lmda</strong> (<em>int, optional</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -120,6 +130,12 @@ tokens will be treated as documents. Default is <cite>sentence</cite>.</li>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="beagleorderseq.html"
+                        title="previous chapter">BEAGLE Order (Sequential)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="beaglecomposite.html"
+                        title="next chapter">BEAGLE Composite Model</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/beagleordermulti.txt"
@@ -151,7 +167,17 @@ tokens will be treated as documents. Default is <cite>sentence</cite>.</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="beaglecomposite.html" title="BEAGLE Composite Model"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="beagleorderseq.html" title="BEAGLE Order (Sequential)"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
+          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
+          <li><a href="beagle.html" >BEAGLE Model</a> &raquo;</li>
+          <li><a href="beagleorder.html" >BEAGLE Order Model</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

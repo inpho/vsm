@@ -1,6 +1,8 @@
-=======
-TfMulti
-=======
+.. _tf_multi:
+
+======================================
+Term Frequency Model (Multiprocessing)
+======================================
 
 .. autoclass:: vsm.model.tf.TfMulti
-    :members:
+

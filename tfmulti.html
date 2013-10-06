@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>TfMulti &mdash; vsm 0.1 documentation</title>
+    <title>Term Frequency Model (Multiprocessing) &mdash; vsm 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,7 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="vsm 0.1 documentation" href="index.html" /> 
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="Term Frequency Model" href="tf.html" />
+    <link rel="next" title="Term Frequency Inverse Document Frequency Model" href="tfidf.html" />
+    <link rel="prev" title="Term Frequency Model (Sequential)" href="tfseq.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +38,16 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="tfidf.html" title="Term Frequency Inverse Document Frequency Model"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tfseq.html" title="Term Frequency Model (Sequential)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
+          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
+          <li><a href="tf.html" accesskey="U">Term Frequency Model</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -44,8 +56,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="tfmulti">
-<h1>TfMulti<a class="headerlink" href="#tfmulti" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="term-frequency-model-multiprocessing">
+<span id="tf-multi"></span><h1>Term Frequency Model (Multiprocessing)<a class="headerlink" href="#term-frequency-model-multiprocessing" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="vsm.model.tf.TfMulti">
 <em class="property">class </em><tt class="descclassname">vsm.model.tf.</tt><tt class="descname">TfMulti</tt><big>(</big><em>corpus=None</em>, <em>context_type=None</em><big>)</big><a class="headerlink" href="#vsm.model.tf.TfMulti" title="Permalink to this definition">¶</a></dt>
@@ -120,22 +132,6 @@ into a BaseModel object.</p>
 </tr>
 </tbody>
 </table>
-<dl class="method">
-<dt id="vsm.model.tf.TfMulti.train">
-<tt class="descname">train</tt><big>(</big><em>n_procs</em><big>)</big><a class="headerlink" href="#vsm.model.tf.TfMulti.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a number of processes <cite>n_procs</cite> over which to map and reduce.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n_procs</strong> (<em>integer</em>) &#8211; Number of processes.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><cite>None</cite></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -146,6 +142,12 @@ into a BaseModel object.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tfseq.html"
+                        title="previous chapter">Term Frequency Model (Sequential)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tfidf.html"
+                        title="next chapter">Term Frequency Inverse Document Frequency Model</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/tfmulti.txt"
@@ -177,7 +179,16 @@ into a BaseModel object.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="tfidf.html" title="Term Frequency Inverse Document Frequency Model"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tfseq.html" title="Term Frequency Model (Sequential)"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="workflow.html" ><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a> &raquo;</li>
+          <li><a href="model_training.html" >Model Training</a> &raquo;</li>
+          <li><a href="tf.html" >Term Frequency Model</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
