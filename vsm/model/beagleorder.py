@@ -116,13 +116,13 @@ class BeagleOrderSeq(BaseModel):
         tokens will be treated as documents. Default is `sentence`.
     :type context_type: string, optional
 
-    :param psi: ?
+    :param psi:  
     :type psi: int, optional
 
-    :param rand_perm: ?
-    :type rand_perm: ?, optional
+    :param rand_perm:  
+    :type rand_perm:  , optional
 
-    :param lmda: ?
+    :param lmda:  
     :type lmda: int, optional
 
     :Attributes:
@@ -197,13 +197,13 @@ class BeagleOrderMulti(BaseModel):
         tokens will be treated as documents. Default is `sentence`.
     :type context_type: string, optional
 
-    :param psi: ?
+    :param psi:  
     :type psi: int, optional
 
-    :param rand_perm: ?
-    :type rand_perm: ?, optional
+    :param rand_perm:  
+    :type rand_perm:  , optional
 
-    :param lmda: ?
+    :param lmda:  
     :type lmda: int, optional
 
     :Attributes:

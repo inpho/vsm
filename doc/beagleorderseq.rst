@@ -1,5 +1,9 @@
-==============
-BeagleOrderSeq
-==============
+.. _beagle_order_seq:
 
-.. autoclass:: vsm.model.beagleorder.BeagleOrderSeq
+=========================
+BEAGLE Order (Sequential)
+=========================
+
+.. currentmodule:: vsm.model.beagleorder
+
+.. autoclass:: BeagleOrderSeq

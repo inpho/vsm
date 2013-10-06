@@ -1,8 +1,9 @@
-===========
-LdaCgsMulti
-===========
+.. _lda_cgs_multi:
 
-.. automodule:: vsm.model.ldacgsmulti
+=========================================================================
+Latent Dirichlet Allocation -- Collapsed Gibbs Sampling (Multiprocessing)
+=========================================================================
+
+.. module:: vsm.model.ldacgsmulti
 
 .. autoclass:: LdaCgsMulti
-    :members:

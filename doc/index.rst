@@ -27,6 +27,7 @@ This documentation site is currently in a pre-alpha state.
 
 .. toctree::
    :maxdepth: 2
+   :includehidden:
 
    workflow
 

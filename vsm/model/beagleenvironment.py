@@ -28,7 +28,7 @@ class BeagleEnvironment(BaseModel):
         * **dtype** (np.dtype)
             Dtype for the matrix.
         * **matrix** (2-D array)
-            ?
+             
 
     :Methods:
         * :doc:`be_train`

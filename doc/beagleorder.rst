@@ -1,15 +1,13 @@
-===========
-BeagleOrder
-===========
+.. _beagle_order:
 
-.. automodule:: vsm.model.beagleorder
+==================
+BEAGLE Order Model
+==================
 
-Classes
--------
+.. .. automodule:: vsm.model.beagleorder
 
 .. toctree::
-
-   :maxdepth: 2
+   :maxdepth: 1
 
    beagleorderseq
    beagleordermulti

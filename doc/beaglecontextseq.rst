@@ -1,5 +1,9 @@
-================
-BeagleContextSeq
-================
+.. _beagle_context_seq:
 
-.. autoclass:: vsm.model.beaglecontext.BeagleContextSeq
+=================================
+BEAGLE Context Model (Sequential)
+=================================
+
+.. currentmodule:: vsm.model.beaglecontext
+
+.. autoclass:: BeagleContextSeq

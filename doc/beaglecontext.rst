@@ -1,15 +1,13 @@
-=============
-BeagleContext
-=============
+.. _beagle_context:
 
-.. automodule:: vsm.model.beaglecontext
+====================
+BEAGLE Context Model
+====================
 
-Classes
--------
+.. .. automodule:: vsm.model.beaglecontext
 
 .. toctree::
-
-   :maxdepth: 2
+   :maxdepth: 1
 
    beaglecontextseq
    beaglecontextmulti
