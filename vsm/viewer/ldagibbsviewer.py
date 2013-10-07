@@ -241,8 +241,6 @@ class LDAGibbsViewer(object):
 	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
 				 field_name='word')
 
-        print k_arr
-
         # without probabilities, just words
         if compact_view:
             sch = ['Topic', 'Words']
