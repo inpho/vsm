@@ -24,8 +24,13 @@ class TestLabeleddata(unittest.TestCase):
         arr.subcol_headers = ['Word', 'Value']
         arr.col_header = 'Song lets make this longer than subcol headers'
         arr.col_len = 10
+        arr1 = self.v.view(LabeledColumn)
 
         self.assertTrue(type(arr.__str__()) == str)
+        self.assertTrue(sum(arr.subcol_widths) < arr.col_width)
+        self.assertEqual(arr.shape[0], arr1.col_len)
+        self.assertFalse(arr1.col_header)
+        self.assertFalse(arr1.subcol_headers)
 
 
     def test_DataTable(self):
@@ -41,6 +46,7 @@ class TestLabeleddata(unittest.TestCase):
         t = DataTable(t, 'Song')
 
         self.assertTrue(type(t.__str__()) == str)
+        self.assertTrue('Song', t.table_header)
 
 
     def test_CompactTable(self):
@@ -58,11 +64,24 @@ class TestLabeleddata(unittest.TestCase):
                 subcol_headers=['Topic', 'Words'], num_words=4)
         
         self.assertTrue(type(ct.__str__() == str))
+        self.assertTrue([1 for s in ct.first_cols if s.startswith('Topic')])     
+        self.assertEqual(ct.num_words * (8 +2), ct.subcol_widths[1])
     
 
-    #def test_IndexedSymmArray(self):
-        
+    def test_IndexedSymmArray(self):
 
+        from vsm.corpus.util.corpusbuilders import random_corpus
+        from vsm.model.ldagibbs import LDAGibbs
+        from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
+
+        c = random_corpus(50000, 1000, 0, 50)
+        m = LDAGibbs(c, 'context', K=20)
+        viewer = LDAGibbsViewer(c, m)
+        
+        li = ['0', '1', '10']
+        isa = viewer.simmat_words(li)
+        
+        self.assertEqual(isa.shape[0], len(li))
         
 
   
