@@ -226,16 +226,3 @@ class TfViewer(object):
 
         return w_arr
 
-
-
-def test_TfViewer():
-
-    from vsm.corpus.util import random_corpus
-    from vsm.model.tf import TfModel
-
-    c = random_corpus(1000, 50, 0, 20, context_type='document', metadata=True)
-
-    m = TfModel(c, 'document')
-    m.train()
-
-    return TfViewer(c, m)

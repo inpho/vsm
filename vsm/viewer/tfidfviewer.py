@@ -178,21 +178,3 @@ class TfIdfViewer(object):
         return _simmat_documents_(self.corpus, self.model.matrix,
                                   self.model.context_type, docs)
 
-
-
-
-def test_TfIdfViewer():
-
-    from vsm.corpus.util import random_corpus
-    from vsm.model.tf import TfModel
-    from vsm.model.tfidf import TfIdfModel
-
-    c = random_corpus(1000, 100, 0, 20, context_type='document', metadata=True)
-
-    tf = TfModel(c, 'document')
-    tf.train()
-
-    m = TfIdfModel(tf.matrix, 'document')
-    m.train()
-
-    return TfIdfViewer(c, m)
