@@ -37,8 +37,6 @@ class TestBeagleViewer(unittest.TestCase):
 
     def test_BeagleViewer(self):
     
-        import matplotlib.pyplot as pyplot
-
         sww = self.venv.sim_word_word('1')        
         sww1 = self.vord.sim_word_word('0')
         self.assertTrue(type(sww) == LabeledColumn)
