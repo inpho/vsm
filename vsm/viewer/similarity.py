@@ -98,7 +98,7 @@ def sim_word_top(corp, mat, word_or_words, weights=[], norms=None,
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        k_arr = k_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
@@ -145,7 +145,7 @@ def sim_top_doc(corp, mat, topic_or_topics, context_type, weights=[],
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        d_arr = d_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
@@ -199,7 +199,7 @@ def sim_doc_doc(corp, mat, context_type, doc_or_docs, weights=None,
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        d_arr = d_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
@@ -233,7 +233,7 @@ def sim_top_top(mat, topic_or_topics, weights=None,
     if order=='d':
         pass
     elif order=='i':
-        w_arr = w_arr[::-1]
+        k_arr = k_arr[::-1]
     else:
         raise Exception('Invalid order parameter.')
 
