@@ -1,177 +1,75 @@
 import unittest2 as unittest
 
 from vsm.corpus import util
-from vsm.corpus.util.corpusbuilders import *
-from vsm.corpus.util.corpusbuilders import file_tokenize, coll_tokenize, dir_tokenize, corpus_fromlist
+from vsm.corpus.util import *
 import numpy as np
 
-
 class TestCorpusUtil(unittest.TestCase):
-
-    def test_empty_corpus(self):
+    
+    def test_strip_punc(self):
         
-        c = empty_corpus()
-        self.assertTrue((np.array([]) == c.corpus).all())
-        self.assertTrue(['context'] == c.context_types)
-        self.assertTrue((np.array([]) == c.view_contexts('context')).all())
-
-    def test_corpus_fromlist(self):
-
-        l = [[],['Not','an','empty','document'],[],
-             ['Another','non-empty','document'],[]]
-
-        c = corpus_fromlist(l, context_type='sentence')
-
-        self.assertTrue(c.context_types == ['sentence'])
-        self.assertTrue((c.context_data[0]['idx'] == [4,7]).all())
-        self.assertTrue((c.context_data[0]['sentence_label'] ==
-                         ['sentence_1', 'sentence_3']).all())
+        tsent = ['foo-foo',',','3','foo','bars','bar_foo','2to1','.']
+        out = strip_punc(tsent)
+        self.assertEqual(out, ['foo-foo','3','foo','bars','bar_foo','2to1'])
 
 
-    def test_toy_corpus(self):
+    def test_rem_num(self):
+ 
+        tsent = ['foo-foo',',','3','foo','bars','2-parts','2-to-1','3words','.']
+        out = rem_num(tsent)
+        self.assertEqual(out, ['foo-foo',',','3','foo','bars','2-parts','3words','.'])
+
+    def test_rehyph(self):
         
-        keats = ('She dwells with Beauty - Beauty that must die;\n\n'
-                 'And Joy, whose hand is ever at his lips\n\n'
-                 'Bidding adieu; and aching Pleasure nigh,\n\n'
-                 'Turning to poison while the bee-mouth sips:\n\n'
-                 'Ay, in the very temple of Delight\n\n'
-                 'Veil\'d Melancholy has her sovran shrine,\n\n'
-                 'Though seen of none save him whose strenuous tongue\n\n'
-                 'Can burst Joy\'s grape against his palate fine;\n\n'
-                 'His soul shall taste the sadness of her might,\n\n'
-                 'And be among her cloudy trophies hung.')
+        sent = 'foo foo 3 foo--bars barfoo -- 2to1.'
+        out = rehyph(sent)
+        self.assertEqual(out, 'foo foo 3 foo - bars barfoo  -  2to1.')
 
-        self.assertTrue(toy_corpus(keats))
-        self.assertTrue(toy_corpus(keats, nltk_stop=True))
-        self.assertTrue(toy_corpus(keats, stop_freq=1))
-        self.assertTrue(toy_corpus(keats, add_stop=['and', 'with']))
-        self.assertTrue(toy_corpus(keats, nltk_stop=True,
-                      stop_freq=1, add_stop=['ay']))
-
-        import os
-        from tempfile import NamedTemporaryFile as NFT
-
-        tmp = NFT(delete=False)
-        tmp.write(keats)
-        tmp.close()
-
-        c = toy_corpus(tmp.name, is_filename=True,
-                       nltk_stop=True, add_stop=['ay'])
-    
-        self.assertTrue(c)
-        os.remove(tmp.name)
-
-        return c
-
-    
-    def test_file_tokenize(self):
-
-        text = 'foo foo foo\n\nfoo foo. Foo bar. Foo bar. foo\n\nfoo'
-
-        words, context_data = file_tokenize(text)
-
-        self.assertTrue(len(words) == 11)
-        self.assertTrue(len(context_data['paragraph']) == 3)
-        self.assertTrue(len(context_data['sentence']) == 6)
-    
-        self.assertTrue((context_data['paragraph']['idx'] == 
-                [3, 10, 11]).all())
-        self.assertTrue((context_data['paragraph']['paragraph_label'] == 
-                 ['0', '1', '2']).all())
-        self.assertTrue((context_data['sentence']['idx'] == 
-                [3, 5, 7, 9, 10, 11]).all())
-        self.assertTrue((context_data['sentence']['paragraph_label'] == 
-                ['0', '1', '1', '1', '1', '2']).all())
-        self.assertTrue((context_data['sentence']['sentence_label'] == 
-                ['0', '1', '2', '3', '4', '5']).all())
-
-    
-    def test_file_corpus(self):
+    def test_add_metadata(self):
         
-        text = 'foo foo foo\n\nfoo foo. Foo bar. Foo bar. foo\n\nfoo'
+        from vsm.corpus.util.corpusbuilders import random_corpus
+
+        c = random_corpus(1000, 50, 0, 20, context_type='sentence', metadata=True)
+        n = c.view_metadata('sentence').size
+        meta = ['m_{0}'.format(i) for i in xrange(n)]
+        new_c = add_metadata(c, 'sentence', 'new_meta', meta)
+
+        self.assertEqual(new_c.view_metadata('sentence')['new_meta'].tolist(), meta)
+
+
+    def test_apply_stoplist(self):
         
-        import os
-        from tempfile import NamedTemporaryFile as NFT
+        from vsm.corpus.util.corpusbuilders import random_corpus, corpus_fromlist
 
-        tmp = NFT(delete=False)
-        tmp.write(text)
-        tmp.close()
+        c = random_corpus(1000, 50, 0, 20, context_type='sentence', metadata=True)
+        new_c = apply_stoplist(c, nltk_stop=False, add_stop=['0','1'], freq=0)
 
-        c = file_corpus(tmp.name)
+        li = [[],['he','said'],['he','said','bar'],['bar','ate'],['I','foo']]
+        wc = corpus_fromlist(li, context_type='sentence')
+        new_wc = apply_stoplist(wc, nltk_stop=True, freq=1)
+        
+        self.assertTrue('0' in c.words)
+        self.assertTrue('1' in c.words)
+        self.assertFalse('0' in new_c.words)
+        self.assertFalse('1' in new_c.words)
 
-        self.assertTrue(c)
-        os.remove(tmp.name)
-
-        return c
-
-
-    def test_dir_tokenize(self):
-
-        chunks = ['foo foo foo\n\nfoo foo',
-                 'Foo bar.  Foo bar.', 
-                 '',
-                'foo\n\nfoo']
-
-        labels = [str(i) for i in xrange(len(chunks))]
-        words, context_data = dir_tokenize(chunks, labels)
-
-        self.assertTrue(len(words) == 11)
-        self.assertTrue(len(context_data['article']) == 4)
-        self.assertTrue(len(context_data['paragraph']) == 6)
-        self.assertTrue(len(context_data['sentence']) == 7)
-    
-        self.assertTrue((context_data['article']['idx'] == [5, 9, 9, 11]).all())
-        self.assertTrue((context_data['article']['article_label'] == 
-                ['0', '1', '2', '3']).all())
-        self.assertTrue((context_data['paragraph']['idx'] == 
-                [3, 5, 9, 9, 10, 11]).all())
-        self.assertTrue((context_data['paragraph']['article_label'] == 
-                 ['0', '0', '1', '2', '3', '3']).all())
-        self.assertTrue((context_data['paragraph']['paragraph_label'] == 
-                 ['0', '1', '2', '3', '4', '5']).all())
-        self.assertTrue((context_data['sentence']['idx'] == 
-                [3, 5, 7, 9, 9, 10, 11]).all())
-        self.assertTrue((context_data['sentence']['article_label'] == 
-                ['0', '0', '1', '1', '2', '3', '3']).all())
-        self.assertTrue((context_data['sentence']['paragraph_label'] == 
-                ['0', '1', '2', '2', '3', '4', '5']).all())
-        self.assertTrue((context_data['sentence']['sentence_label'] == 
-                ['0', '1', '2', '3', '4', '5', '6']).all())
+        self.assertTrue('said' in new_wc.words)
+        self.assertTrue('bar' in new_wc.words)
+        self.assertFalse('he' in new_wc.words)
+        self.assertFalse('foo' in new_wc.words)
+        self.assertFalse('ate' in new_wc.words)
 
 
-    def test_coll_tokenize(self):
+    def test_filter_by_suffix(self):
 
-        books = [[('foo foo foo.\n\nfoo foo', '1'),
-                  ('Foo bar.  Foo bar.', '2')], 
-                 [('','3'),
-                ('foo.\n\nfoo', '4')]]
+        li = ['a.txt', 'b.json', 'c.txt']
+        filtered = filter_by_suffix(li, ['.txt'])
+        filtered1 = filter_by_suffix(li, ['.json'])
+        filtered2 = filter_by_suffix(li, ['.csv'])
 
-        book_names = [str(i) for i in xrange(len(books))]
-        words, context_data = coll_tokenize(books, book_names)
-
-        self.assertTrue(len(words) == 11)
-        self.assertTrue(len(context_data['book']) == 2)
-        self.assertTrue(len(context_data['page']) == 4)
-        self.assertTrue(len(context_data['sentence']) == 7)
-        self.assertTrue((context_data['book']['idx'] == [9, 11]).all())
-        self.assertTrue((context_data['book']['book_label'] == ['0', '1']).all())
-        self.assertTrue((context_data['page']['idx'] == [5, 9, 9, 11]).all())
-        self.assertTrue((context_data['page']['page_label'] == 
-                            ['0', '1', '2', '3']).all())
-        self.assertTrue((context_data['page']['book_label'] == 
-                            ['0', '0', '1', '1']).all())
-        self.assertTrue((context_data['sentence']['idx'] == 
-                            [3, 5, 7, 9, 9, 10, 11]).all())
-        self.assertTrue((context_data['sentence']['sentence_label'] == 
-                ['0', '1', '2', '3', '4', '5', '6']).all())
-        self.assertTrue((context_data['sentence']['page_label'] == 
-               ['0', '0', '1', '1', '2', '3', '3']).all())
-        self.assertTrue((context_data['sentence']['book_label'] == 
-                ['0', '0', '0', '0', '1', '1', '1']).all())
-        self.assertTrue((context_data['page']['file'] ==
-                ['1','2','3','4']).all())
-        self.assertTrue((context_data['sentence']['file'] ==
-                ['1','1','2','2','3','4','4']).all()) 
+        self.assertEqual(filtered, ['b.json'])
+        self.assertEqual(filtered1, ['a.txt','c.txt'])
+        self.assertEqual(filtered2, li)
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestCorpusUtil)
