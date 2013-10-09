@@ -3,6 +3,7 @@ import numpy as np
 
 from vsm.linalg import *
 
+#TODO: add tests for recently added methods.
 
 class TestLinalg(unittest.TestCase):
 
