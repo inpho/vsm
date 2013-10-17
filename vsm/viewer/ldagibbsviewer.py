@@ -99,6 +99,9 @@ class LDAGibbsViewer(object):
             the documents similar/relevant to the query. The function plots
             relevant documents or topics by using the isomap algorithm
             in `sklearn` package.
+        * :doc:`isomap_docs`
+            Takes document or topics and plots an isomap for the documents
+            similar/relevant to the query.
     """
     def __init__(self, corpus, model):
         """
@@ -944,7 +947,7 @@ class LDAGibbsViewer(object):
             to the query. Default is `True`.
         :type scale: boolean, optional
 
-        :param trim;: Labels are trimmed to this value. Default is 20.
+        :param trim: Labels are trimmed to this value. Default is 20.
         :type trim: int, optional
 
         :returns: matplotlib.pyplot

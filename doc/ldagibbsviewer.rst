@@ -6,10 +6,8 @@ ldagibbsviewer
 
 .. autoclass:: LDAGibbsViewer
 
-Methods
--------
-
 .. toctree::
+   :hidden:
    :maxdepth: 2
 
    topics
@@ -27,4 +25,4 @@ Methods
    cluster_topics
    logp_plot
    isomap_topics
-
+   isomap_docs
