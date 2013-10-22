@@ -61,7 +61,7 @@ class LDAGibbsViewer(object):
         * :doc:`doc_topics`
             Returns distribution P(K|D=d) over topics K for document d.
         * :doc:`word_topics`
-            Searches for every occurance of `word` in the entire corpus and
+            Searches for every occurrence of `word` in the entire corpus and
             returns a list each row of which contains the name or ID number of
             document, the relative position in the document, and the assigned
             topic number for each occurrence of `word`.
@@ -326,7 +326,7 @@ class LDAGibbsViewer(object):
         :type doc: int or string
         
         :param print_len: Number of topics to be listed. If this is i,
-            i top probability topics are shown.Default is 10.
+            i top probability topics are shown. Default is 10.
         :type print_len: int, optional
         
         :returns: k_arr : a LabeledColumn object
@@ -350,10 +350,10 @@ class LDAGibbsViewer(object):
 
     def word_topics(self, word, as_strings=True):
         """
-        Searches for every occurance of `word` in the entire corpus and returns 
+        Searches for every occurrence of `word` in the entire corpus and returns 
         a list each row of which contains the name or ID number of document, 
-        the relative position in the document, and the assined topic number 
-        for each occurance of `word`.
+        the relative position in the document, and the assigned topic number 
+        for each occurrence of `word`.
         
         :param word: The word for which the search is performed.  
         :type word: string
