@@ -6,10 +6,8 @@ tfviewer
 
 .. autoclass:: TfViewer
 
-Methods
--------
-
 .. toctree::
+   :hidden:
    :maxdepth: 2
 
    tf_sim_word_word

@@ -6,10 +6,8 @@ Beagle Viewer
 
 .. autoclass:: BeagleViewer
 
-Methods
--------
-
 .. toctree::
+    :hidden:
     :maxdepth: 2
 
     beagle_sim_word_word

@@ -6,10 +6,8 @@ lsaviewer
 
 .. autoclass:: LsaViewer
 
-Methods
--------
-
 .. toctree::
+   :hidden:
    :maxdepth: 2
    
    lsa_sim_word_word

@@ -47,7 +47,8 @@ class BeagleEnvironment(BaseModel):
 
     def train(self):
         """
-        Trains the model.
+        Sets the environment matrix as randomly generated then normalized
+        vectors.
         """
         self.matrix = np.array(np.random.normal(size=self.shape),
                                dtype=self.dtype)
