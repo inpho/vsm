@@ -7,17 +7,20 @@ from vsm.model.beaglecontext import realign_env_mat as _realign_env_mat
 
 class BeagleComposite(BaseModel):
     """
-    
-    :param ctx_corp: Beagle context corpus object.
+    `BeagleComposite` combines the BEAGLE order and context model
+    with a user defined ratio. Default ratio is .5 which weighs
+    order and context matrices equally.
+
+    :param ctx_corp: Corpus from BEAGLE context model.
     :type ctx_corp: Corpus object
 
-    :param ctx_matrix: Matrix
+    :param ctx_matrix: BEAGLE context matrix.
     :type ctx_matrix: np.ndarray matrix
 
-    :param ord_corp: Beagle order corpus object.
+    :param ord_corp: Corpus from BEAGLE order model.
     :type ord_corp: Corpus object
 
-    :param ord_matrix: Matrix
+    :param ord_matrix: BEAGLE order matrix.
     :type ord_matrix: np.ndarray matrix
 
     :param context_type: Name of tokenization stored in `corpus` whose
@@ -31,10 +34,11 @@ class BeagleComposite(BaseModel):
            Matrix that stores normalized beagle order matrix. 
         * **context_type** (string)
             Name of tokenization to be treated as documents.
-
+        * **matrix** (2-D array)
+            
     :Methods:
         * :doc:`beaglecomposite_train`
-            Takes an optional argument `wgt` which is `.5` by default.
+            Combines context and order model with user-defined `wgt`.
 
     :See Also: :class:`vsm.model.BaseModel`.
     """
@@ -54,9 +58,11 @@ class BeagleComposite(BaseModel):
 
     def train(self, wgt=.5):
         """
-        `wgt` should be a value in [0,1].
+        :param wgt: The weight of context model. If `wgt` is .7 then
+            the ratio of context and order model is 7:3. `wgt` should be 
+            a value in [0,1]. Default is .5.
+        :type wgt: float, optional
         """
         print 'Summing context and order vectors'        
         self.matrix = wgt * self.ctx_matrix + (1 - wgt) * self.ord_matrix
-
 

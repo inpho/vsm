@@ -25,10 +25,10 @@ class BeagleContextSeq(BaseModel):
     :param corpus:
     :type corpus: Corpus object
 
-    :param env_corpus: 
+    :param env_corpus: BEAGLE environment corpus.
     :type env_corpus: Corpus object
 
-    :param env_matrix:
+    :param env_matrix: Matrix from BEAGLE environment model.
     :type env_matrix: 2-D array
 
     :param context_type: Name of tokenization stored in `corpus` whose
@@ -41,7 +41,9 @@ class BeagleContextSeq(BaseModel):
         * **sents** (list of arrays)
             Tokens by `context_type` retrieved from `corpus`.
         * **env_matrix** (2-D array)
-            Beagle environment matrix.
+            BEAGLE environment matrix.
+        * **matrix** (2-D array)
+            Matrix after the model is trained.
 
     :Methods:
         * :doc:`bcs_train`
@@ -89,13 +91,13 @@ class BeagleContextSeq(BaseModel):
 class BeagleContextMulti(BaseModel):
     """
 
-    :param corpus:
+    :param corpus:  
     :type corpus: Corpus object
 
-    :param env_corpus: 
+    :param env_corpus: BEAGLE environment corpus. 
     :type env_corpus: Corpus object
 
-    :param env_matrix:
+    :param env_matrix: Matrix from BEAGLE environment model.
     :type env_matrix: 2-D array
 
     :param context_type: Name of tokenization stored in `corpus` whose
@@ -109,8 +111,8 @@ class BeagleContextMulti(BaseModel):
             Tokens by `context_type` retrieved from `corpus`.
         * **dtype** (np.dtype)
             Numpy dtype of `env_matrix`.
-        * **env_matrix** (2-D array)
-            Beagle environment matrix.
+        * **matrix** (2-D array)
+            Matrix after model is trained.
 
     :Methods:
         * :doc:`bcm_train`

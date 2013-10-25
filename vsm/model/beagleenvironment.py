@@ -6,8 +6,10 @@ from vsm.model import BaseModel
 
 class BeagleEnvironment(BaseModel):
     """
+    `BeagleEnvironment` is a randomly generated fixed vectors
+    representing the environment.
 
-    :param corpus: 
+    :param corpus: Source of observed data.
     :type corpus: Corpus object
 
     :param n_cols: Number of columns. Default is 2048.
@@ -28,12 +30,13 @@ class BeagleEnvironment(BaseModel):
         * **dtype** (np.dtype)
             Dtype for the matrix.
         * **matrix** (2-D array)
-             
+            Randomly generated environment matrix.             
 
     :Methods:
         * :doc:`be_train`
-            Trains the model.
-
+            Sets the environment matrix to randomly generated then 
+            normalized vectors.
+            
     :See Also: :class:`vsm.model.BaseModel`
     """
     def __init__(self, corpus, n_cols=2048, dtype=np.float64, 
@@ -47,8 +50,9 @@ class BeagleEnvironment(BaseModel):
 
     def train(self):
         """
-        Sets the environment matrix as randomly generated then normalized
-        vectors.
+        Sets a m x n environment matrix where m is the number of words in
+        `corpus` and n is `n_cols`. The matrix consists of randomly generated
+        vectors. 
         """
         self.matrix = np.array(np.random.normal(size=self.shape),
                                dtype=self.dtype)

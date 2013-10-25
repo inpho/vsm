@@ -105,11 +105,12 @@ def reduce_ngrams(fn, a, n, i, flat=True):
 
 class BeagleOrderSeq(BaseModel):
     """
+    `BeagleOrderSeq` stores word order information in the context.
 
-    :param corpus:
+    :param corpus: Soure of observed data.
     :type corpus: Corpus object
 
-    :param env_matrix:
+    :param env_matrix: BEAGLE environment matrix.
     :type env_matrix: 2-D array
 
     :param context_type: Name of tokenization stored in `corpus` whose
@@ -131,13 +132,14 @@ class BeagleOrderSeq(BaseModel):
         * **sents** (list of arrays)
             Tokens by `context_type` retrieved from `corpus`.
         * **env_matrix** (2-D array)
-            Beagle environment matrix.
+            BEAGLE environment matrix.
         * **b_conv**
 
-        * **psi** (int)
+        * **psi** 
 
-        * **lmda** 
-
+        * **lmda** (int)
+        
+        * **matrix**
 
     :Methods:
         * :doc:`bos_train`
@@ -186,11 +188,12 @@ class BeagleOrderSeq(BaseModel):
 
 class BeagleOrderMulti(BaseModel):
     """
-
-    :param corpus:
+    `BeagleOrderSeq` stores word order information in the context.
+    
+    :param corpus: Source of observed data.
     :type corpus: Corpus object
 
-    :param env_matrix:
+    :param env_matrix: BEAGLE environement matrix.
     :type env_matrix: 2-D array
 
     :param context_type: Name of tokenization stored in `corpus` whose
@@ -198,10 +201,10 @@ class BeagleOrderMulti(BaseModel):
     :type context_type: string, optional
 
     :param psi:  
-    :type psi: int, optional
+    :type psi: optional
 
     :param rand_perm:  
-    :type rand_perm:  , optional
+    :type rand_perm: optional
 
     :param lmda:  
     :type lmda: int, optional
@@ -217,9 +220,10 @@ class BeagleOrderMulti(BaseModel):
 
         * **psi** (int)
 
-        * **lmda** 
+        * **lmda** (int)
 
-
+        * **matrix**
+            
     :Methods:
         * :doc:`bom_train`
             Trains the model.
@@ -263,7 +267,7 @@ class BeagleOrderMulti(BaseModel):
 
     def train(self, n_procs=2):
         """
-        Trains the model using `n_procs` processors<F4><F5>57<F7><F8><F9>.
+        Trains the model using `n_procs` processors.
 
         :param n_procs: Number of processors. Default is 2.
         :type n_procs: int, optional
