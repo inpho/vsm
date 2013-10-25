@@ -66,3 +66,7 @@ Wishlist
 
 * Better automatic plotting options.
 
+* Enrich Corpus structure so that documents can have associated info-
+  mation, such as year or type. This is the first step for doing time 
+  series analyses (such as topic evolution).
+  
