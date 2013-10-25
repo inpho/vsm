@@ -1,17 +1,19 @@
+import numpy as np
 from sklearn.cluster import KMeans, AffinityPropagation, SpectralClustering
 from sklearn.manifold import Isomap, MDS
-
 from plotting import plot_clusters
 
-from labeleddata import IndexedSymmArray
 
-
-class Manifold(IndexedSymmArray):
+class Manifold(object):
     def __init__(self, dismat, labels=None, cls=[], pos=[]):
-        self.dismat = dismat
+        self.dismat = np.asarray(dismat)
         self.labels = labels
         self._cls = cls     # Clusters info
         self.pos = pos
+
+
+    def __str__(self):
+        return self.dismat.__str__()
 
 
     @property
@@ -74,8 +76,8 @@ class Manifold(IndexedSymmArray):
 
 
 
-    def plot(self):
+    def plot(self, x=0, y=1):
         """
         Outputs 2d embeded plot based on the first two coordinates of `pos`
         """
-        return plot_clusters(self.pos[:,[0,1]], self.labels, clusters=self._cls)
+        return plot_clusters(self.pos[:,[x,y]], self.labels, clusters=self._cls)
