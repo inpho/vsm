@@ -70,7 +70,7 @@ class LDAGibbsViewer(object):
             topic(s) and every topic.
         * :doc:`lda_sim_top_doc`
             Returns documents sorted according to their relevance to topic(s).
-        * :doc:`lda_sim_words_top`
+        * :doc:`lda_sim_word_top`
             Returns topics sorted according to their relevance to word(s).
         * :doc:`lda_sim_word_word`
             Returns words sorted by the cosine values between a word or list
@@ -329,7 +329,7 @@ class LDAGibbsViewer(object):
             i top probability topics are shown. Default is 10.
         :type print_len: int, optional
         
-        :returns: k_arr : a LabeledColumn object
+        :returns: k_arr : a LabeledColumn object.
             An array of topics (represented by their number) and the 
             corresponding probabilities.
         """
@@ -362,7 +362,7 @@ class LDAGibbsViewer(object):
             ID numbers. Default is `True`.
         :type as_strings: boolean, optional
 
-        :returns: Z_w : a LabeledColumn Object
+        :returns: Z_w : a LabeledColumn Object.
             A structured array consisting of three columns. Each column 
             is a list of:
             (1) name/ID of document containing `word`
@@ -417,7 +417,7 @@ class LDAGibbsViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :returns: a LabeledColumn object
+        :returns: a LabeledColumn object.
             A 2-dim array containing topics and their cosine values to 
             `topic_or_topics`. 
         
@@ -464,7 +464,7 @@ class LDAGibbsViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :returns: d_arr : a LabeledColumn object
+        :returns: a LabeledColumn object.
             A 2-dim array containing documents and their posterior probabilities 
             to `topic_or_topics`. 
 
@@ -539,7 +539,7 @@ class LDAGibbsViewer(object):
             representation. Default is `True`.
         :type as_strings: boolean, optional
 
-        :returns: k_arr : a LabeledColumn object
+        :returns: a LabeledColumn object.
             A structured array of topics sorted by their cosines values 
             with `word_or_words`.
         
@@ -613,7 +613,7 @@ class LDAGibbsViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :returns: w_arr : a LabeledColumn object
+        :returns: a LabeledColumn object.
             A 2-dim array containing words and their cosine values to 
             `word_or_words`. 
         
@@ -655,7 +655,7 @@ class LDAGibbsViewer(object):
             their integer representations. Default is `True`.
         :type as_strings: boolean, optional
         
-        :returns: w_arr : a LabeledColumn object
+        :returns: a LabeledColumn object.
             A 2-dim array containing documents and their cosine values to 
             `doc_or_docs`. 
         
@@ -681,7 +681,7 @@ class LDAGibbsViewer(object):
             computed.
         :type word_list: list
         
-        :returns: an IndexedSymmArray object
+        :returns: an IndexedSymmArray object.
             n x n matrix containing floats where n is the number of words
             in `word_list`.
        
@@ -704,9 +704,9 @@ class LDAGibbsViewer(object):
             computed. Default is all the topics in the model.
         :type k_indices: list
 
-        :returns: an IndexedSymmArray object
-            n x n matrix containing floats where n is the number of documents.                 considered.
-        
+        :returns: an IndexedSymmArray object.
+            n x n matrix containing floats where n is the number of documents.
+
         :See Also: :meth:`vsm.viewer.similarity.simmat_documents`
         """
 
@@ -731,7 +731,7 @@ class LDAGibbsViewer(object):
             computed. Default is all topics in the model.
         :type k_indices: list, optional
 
-        :returns: an IndexedSymmArray object
+        :returns: an IndexedSymmArray object.
             n x n matrix containing floats where n is the number of topics
             considered.
         
@@ -773,7 +773,7 @@ class LDAGibbsViewer(object):
             list that indicates cluster numbers for each topic is returned.
             Default is `True`.
 
-        :returns: labels : list or list of lists
+        :returns: a list or list of lists.
             A list of clusters or list of cluster numbers.
         """
         # Default use all topics 
@@ -830,7 +830,7 @@ class LDAGibbsViewer(object):
         :param grid: If `True` draw a grid. Default is `True`. 
         :type grid: boolean, optional
         
-        :returns: plt : a matplotlib.pyplot object
+        :returns: a matplotlib.pyplot object.
             Contains the log probability plot. 
         """
         import matplotlib.pyplot as plt
@@ -878,7 +878,7 @@ class LDAGibbsViewer(object):
             the importance of the point. Default is a list of fixed markersize, 40 
         :type size: list, optional
         
-        :returns: matplotlit.pyplot
+        :returns: a matplotlit.pyplot object.
             A graph wish scatter plots
         """
         from sklearn import manifold
@@ -950,8 +950,8 @@ class LDAGibbsViewer(object):
         :param trim: Labels are trimmed to this value. Default is 20.
         :type trim: int, optional
 
-        :returns: matplotlib.pyplot
-            A graph wish scatter plots
+        :returns: a matplotlib.pyplot object.
+            A graph with scatter plots
         """
         from sklearn import manifold
         from math import ceil
@@ -997,7 +997,7 @@ class LDAGibbsViewer(object):
             which cluster the information belongs to.
         :type clusters: list
 
-        :returns: colorm : list
+        :returns: list.
             A list of colors obtained from matplotlib colormap cm.hsv. 
             The length of 'colorm' is the same as the number of distinct clusters.
         """
@@ -1031,7 +1031,7 @@ class LDAGibbsViewer(object):
             the importance of the point. Default is a list of fixed markersize, 40 
         :type size: list, optional
 
-        :returns: plt : maplotlit.pyplot object
+        :returns: maplotlit.pyplot object.
             A graph with scatter plots from `arr`.
         """
         import matplotlib.pyplot as plt

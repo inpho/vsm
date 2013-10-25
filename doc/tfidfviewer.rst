@@ -6,10 +6,8 @@ tfidfviewer
 
 .. autoclass:: TfIdfViewer
 
-Methods
--------
-
 .. toctree::
+   :hidden:
    :maxdepth: 2
 
    tfidf_sim_word_word

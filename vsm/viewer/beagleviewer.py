@@ -16,6 +16,25 @@ from plotting import (
 
 class BeagleViewer(object):
     """
+    A class for viewing BEAGLE models.
+
+    :param corpus: Source of observed data.
+    :type corpus: Corpus
+    
+    :param model: One of the Beagle objects.
+    :type model: Beagle object
+
+    :attributes:
+        * **corpus** (Corpus object) - `corpus`
+        * **model** (Beagle object) - `model`
+
+    :methods:
+        * :doc:`beagle_sim_word_word`
+            Returns words sorted by the cosine similarity values between
+            word(s) and every word.
+        * :doc:`beagle_simmat_words`
+            Calculates the similarity matrix for a given list of words.
+        * :doc:`beagle_isomap_words`
     """
     def __init__(self, corpus, model):
         """
@@ -67,7 +86,7 @@ class BeagleViewer(object):
         :param order: Default is 'i'.
         :type order: string, optional
 
-        :returns: w_arr : a LabeledColumn object
+        :returns: w_arr : a LabeledColumn object.
             A 2-dim array containing words and their cosine values to 
             `word_or_words`. 
         
@@ -92,7 +111,7 @@ class BeagleViewer(object):
             Default is :meth: row_acos_mat.
         :type sim_fn: string, optional
 
-        :returns: an IndexedSymmArray object
+        :returns: an IndexedSymmArray object.
             n x n matrix containing floats where n is the number of words
             in `word_list`.
         

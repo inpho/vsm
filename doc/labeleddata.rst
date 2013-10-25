@@ -3,9 +3,9 @@ labeleddata
 ===========
 
 labeleddata contains four classes to pretty print results from viewer functions.
-They have string representations of the results, so "print object" returns a 
+They have string representations of the results, so "print object" returns
 readable results.
-They also have html representations that are used in IPython notebook sessions.
+The results are shown as html tables in IPython notebook sessions.
 
 .. automodule:: vsm.viewer.labeleddata
 
