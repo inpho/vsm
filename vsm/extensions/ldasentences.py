@@ -144,6 +144,98 @@ class CorpusSent(Corpus):
         np.savez(file, **arrays_out)
 
 
+def file_tokenize(text):
+    """
+    `file_tokenize` is a helper function for :meth:`file_corpus`.
+    
+    Takes a string that is content in a file and returns words
+    and corpus data.
+
+    :param text: Content in a plain text file.
+    :type text: string
+
+    :returns: words : List of words.
+        Words in the `text` tokenized by :meth:`vsm.corpus.util.word_tokenize`.
+        corpus_data : Dictionary with context type as keys and
+        corresponding tokenizations as values. The tokenizations
+        are np.arrays.
+    """
+    words, par_tokens, sent_tokens, sent_orig = [], [], [], []
+    sent_break, par_n, sent_n = 0, 0, 0
+
+    pars = paragraph_tokenize(text)
+
+    for par in pars:
+        sents = sentence_tokenize(par)
+
+        for sent in sents:
+            w = word_tokenize(sent)
+            words.extend(w)
+            sent_break += len(w)
+            sent_tokens.append((sent_break, par_n, sent_n))
+            sent_orig.append(sent)
+            sent_n += 1
+
+        par_tokens.append((sent_break, par_n))
+        par_n += 1
+
+    idx_dt = ('idx', np.int32)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
+
+    corpus_data = dict()
+    dtype = [idx_dt, par_label_dt]
+    corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
+    dtype = [idx_dt, par_label_dt, sent_label_dt]
+    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+
+    return words, corpus_data, sent_orig
+
+
+def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
+    """
+    `file_corpus` is a convenience function for generating Corpus
+    objects from a a plain text corpus contained in a single string
+    `file_corpus` will strip punctuation and arabic numerals outside
+    the range 1-29. All letters are made lowercase.
+
+    :param filename: File name of the plain text file.
+    :type plain_dir: string-like
+    
+    :param nltk_stop: If `True` then the corpus object is masked 
+        using the NLTK English stop words. Default is `False`.
+    :type nltk_stop: boolean, optional
+    
+    :param stop_freq: The upper bound for a word to be masked on 
+        the basis of its collection frequency. Default is 1.
+    :type stop_freq: int, optional
+    
+    :param add_stop: A list of stop words. Default is `None`.
+    :type add_stop: array-like, optional
+
+    :returns: c : a Corpus object
+        Contains the tokenized corpus built from the input plain-text
+        corpus. Document tokens are named `documents`.
+    
+    :See Also: :class:`vsm.corpus.Corpus`, 
+        :meth:`file_tokenize`, 
+        :meth:`vsm.corpus.util.apply_stoplist`
+    """
+    with open(filename, mode='r') as f:
+        text = f.read()
+
+    words, tok, sent = file_tokenize(text)
+    names, data = zip(*tok.items())
+    
+    c = CorpusSent(words, sent, context_data=data, context_types=names,
+                    remove_empty=False)
+    c = apply_stoplist(c, nltk_stop=nltk_stop,
+                       freq=stop_freq, add_stop=add_stop)
+
+    return c
+
+
+
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
     """
     """
@@ -184,7 +276,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
                 words.extend(w)
                 sent_break += len(w)
                 sent_tokens.append((sent_break, label, sent_n))
-		sent_orig.append(sent)
+		        sent_orig.append(sent)
                 sent_n += 1
 
             chk_tokens.append((sent_break, label))
