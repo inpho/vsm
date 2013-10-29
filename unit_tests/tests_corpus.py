@@ -90,10 +90,11 @@ class TestCorpus(unittest.TestCase):
             tmp.close()
             c_reloaded = self.corpus.load(tmp.name)
 
-            assert (self.corpus.corpus == c_reloaded.corpus).all()
-            assert (self.corpus.words == c_reloaded.words).all()
-            assert self.corpus.words_int == c_reloaded.words_int
-            assert self.corpus.context_types == c_reloaded.context_types
+            self.assertTrue((self.corpus.corpus == c_reloaded.corpus).all())
+            self.assertTrue((self.corpus.words == c_reloaded.words).all())
+            self.assertTrue(self.corpus.words_int == c_reloaded.words_int)
+            self.assertTrue(self.corpus.context_types == c_reloaded.context_types)
+            
             for i in xrange(len(self.corpus.context_data)):
                 self.assertTrue((self.corpus.context_data[i] == 
                         c_reloaded.context_data[i]).all(), msg=None)
