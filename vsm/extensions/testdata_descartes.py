@@ -983,9 +983,13 @@ evidence of reason.
 End of Project Gutenberg's The Principles of Philosophy, by Rene Descartes
 """
 
-def corpus_descartes():
+import os
+import tempfile
+
+
+def toycorpus():
     """
-    Returns a Corpus with descartes text.
+    Returns a toy corpus with descartes text.
     """
     from vsm.corpus.util.corpusbuilders import toy_corpus
 
@@ -993,6 +997,61 @@ def corpus_descartes():
     c = toy_corpus(descartes, nltk_stop=True, stop_freq=2, metadata=metadata)
 
     return c
+
+
+def filecorpus():
+    """
+    Creates a temporary file to make corpus.
+    Context types are 'paragraph', 'sentence'. 
+    """
+    from vsm.corpus.util.corpusbuilders import file_corpus
+    from tempfile import NamedTemporaryFile as NTF
+    
+    tmp = NTF(delete=False, suffix='.txt')
+    tmp.write(descartes)
+    c = file_corpus(tmp.name, nltk_stop=True)
+    tmp.close()
+    os.remove(tmp.name)
+
+    return c
+
+def dircorpus():
+    """
+    Creates a temporary directory of plain text files to make corpus.
+    """
+    from tempfile import NamedTemporaryFile as NTF
+    from vsm.corpus.util import paragraph_tokenize
+    from vsm.corpus.util.corpusbuilders import dir_corpus
+
+    td = tempfile.mkdtemp()
+    # set dir
+    tempfile.tempdir = td
+    
+    paragraphs = paragraph_tokenize(descartes)
+    paragraphs = [p + '\n\n' for p in paragraphs]
+    tfnames = [NTF(delete=False) for i in xrange(4)]
+
+    #TODO: 4 files, only 3 articles in metadata.
+    for i in xrange(4):
+        chunk = paragraphs[i*13 : (i*13)+13]    
+        tfnames[i].writelines(chunk)
+    c = dir_corpus(td, chunk_name='article')
+    
+    # delete temp folders/files
+    for tf in tfnames:
+        os.remove(tf.name)
+    os.removedirs(td)
+
+    return c
+
+
+def collcorpus():
+    """
+    Creates a temporary directory of directories to make corpus.
+    """
+            
+
+
 
 def corpus_no_stoplist():
     """
@@ -1008,7 +1067,7 @@ def corpus_no_stoplist():
 
 
 
-def lda_descartes(c, K=100):
+def lda(c, K=100):
     """
     :param c: Corpus
     :type c: Corpus object
@@ -1026,20 +1085,20 @@ def lda_descartes(c, K=100):
     return m
 
 
-def ldaviewer_descartes():
+def ldaviewer():
     """
     Returns an LDAGibbsViewer with descartes text.
     """
     from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
 
-    c = corpus_descartes()
-    m = lda_descartes(c)
+    c = toycorpus()
+    m = lda(c)
     v = LDAGibbsViewer(c, m)
 
     return v
 
 
-def tf_descartes(c):
+def tf(c):
     """
     :param c: Corpus
     :type c: Corpus object
@@ -1054,71 +1113,71 @@ def tf_descartes(c):
     return m
 
 
-def tfviewer_descartes():
+def tfviewer():
     """
     Returns a TfViewer object.
     """
     from vsm.viewer.tfviewer import TfViewer
 
-    c = corpus_descartes()
-    m = tf_descartes(c)
+    c = toycorpus()
+    m = tf(c)
     v = TfViewer(c, m)
 
     return v
 
 
-def tfidf_descartes(c):
+def tfidf(c):
     """
     Returns a TfIdf model with descartes text.
     """
     from vsm.model.tfidf import TfIdf
 
-    tf_matrix = tf_descartes(c).matrix
+    tf_matrix = tf(c).matrix
     m = TfIdf(tf_matrix, 'document')
     m.train()
 
     return m
 
 
-def tfidfviewer_descartes():
+def tfidfviewer():
     """
     Returns a TfIdfViewer object.
     """
     from vsm.viewer.tfidfviewer import TfIdfViewer
 
-    c = corpus_descartes()
-    m = tfidf_descartes(c)
+    c = toycorpus()
+    m = tfidf(c)
     v = TfIdfViewer(c, m)
 
     return v
 
 
-def lsa_descartes(c):
+def lsa(c):
     """
     Returns a Lsa model with descartes text.
     """
     from vsm.model.lsa import Lsa
 
-    td_matrix = tfidf_descartes(c).matrix
+    td_matrix = tfidf(c).matrix
     m = Lsa(td_matrix, context_type='document')
     m.train()
 
     return m
 
-def lsaviewer_descartes():
+def lsaviewer():
     """
     Returns a LsaViewer object.
     """
     from vsm.viewer.lsaviewer import LsaViewer
 
-    c = corpus_descartes()
-    m = lsa_descartes(c)
+    c = toycorpus()
+    m = lsa(c)
     v = LsaViewer(c, m)
 
     return v
 
 
-def beagleenvironment_descartes(c):
+def beagleenvironment(c):
     """
     """
     from vsm.model.beagleenvironment import BeagleEnvironment
@@ -1128,13 +1187,13 @@ def beagleenvironment_descartes(c):
 
     return m
 
-def beagleorder_descartes(c):
+def beagleorder(c):
     """
     with training, takes little under 2 minutes.
     """
     from vsm.model.beagleorder import BeagleOrderSeq
 
-    em = beagleenvironment_descartes(c).matrix
+    em = beagleenvironment(c).matrix
     m = BeagleOrderSeq(c, em, context_type='document')
     m.train()
 
@@ -1143,28 +1202,28 @@ def beagleorder_descartes(c):
 # Should beagle model take 'sentence' as its context? should self.sents be 
 # self.contexts?
 
-def beaglecontext_descartes(c, envc):
+def beaglecontext(c, envc):
     """
     """
     from vsm.model.beaglecontext import BeagleContextSeq
 
-    env = beagleenvironment_descartes(envc)
+    env = beagleenvironment(envc)
     m = BeagleContextSeq(c, envc, env.matrix, context_type='document')
     m.train()
 
     return m
 
 
-def beaglecomposite_descartes():
+def beaglecomposite():
     """
     with training, takes a little under 2 minutes.
     """
     from vsm.model.beaglecomposite import BeagleComposite
 
-    ctx_corpus = corpus_descartes()
+    ctx_corpus = toycorpus()
     ord_corpus = corpus_no_stoplist()
-    ctxm = beaglecontext_descartes(ctx_corpus, ord_corpus)
-    ordm = beagleorder_descartes(ord_corpus)
+    ctxm = beaglecontext(ctx_corpus, ord_corpus)
+    ordm = beagleorder(ord_corpus)
 
     m = BeagleComposite(ctx_corpus, ctxm.matrix, ord_corpus,
                         ordm.matrix, context_type='document')
@@ -1173,7 +1232,7 @@ def beaglecomposite_descartes():
     return m
 
 
-def beagleviewer_descartes(c, m):
+def beagleviewer(c, m):
     """
     """
     from vsm.viewer.beagleviewer import BeagleViewer

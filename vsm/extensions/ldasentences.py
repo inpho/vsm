@@ -276,7 +276,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
                 words.extend(w)
                 sent_break += len(w)
                 sent_tokens.append((sent_break, label, sent_n))
-		        sent_orig.append(sent)
+                sent_orig.append(sent)
                 sent_n += 1
 
             chk_tokens.append((sent_break, label))
