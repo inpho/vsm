@@ -228,7 +228,7 @@ class LDAGibbsViewer(object):
             integer representation. Default is `True`.
         :type as_string: boolean, optional
         
-        :returns: table : a DataTable object.
+        :returns: table : :class:`DataTable`.
             A structured array of topics.
         """
         if len(k_indices) == 0:
@@ -281,7 +281,7 @@ class LDAGibbsViewer(object):
             integer representation. Default is `True`.
         :type as_string: boolean, optional
         
-        :returns: k_arr : a DataTable object.
+        :returns: k_arr : :class:`DataTable`.
             A structured array of topics sorted by entropy.
         """
         if len(k_indices) == 0:
@@ -329,7 +329,7 @@ class LDAGibbsViewer(object):
             i top probability topics are shown. Default is 10.
         :type print_len: int, optional
         
-        :returns: k_arr : a LabeledColumn object.
+        :returns: k_arr : :class:`LabeledColumn`.
             An array of topics (represented by their number) and the 
             corresponding probabilities.
         """
@@ -362,7 +362,7 @@ class LDAGibbsViewer(object):
             ID numbers. Default is `True`.
         :type as_strings: boolean, optional
 
-        :returns: Z_w : a LabeledColumn Object.
+        :returns: Z_w : :class:`LabeledColumn`.
             A structured array consisting of three columns. Each column 
             is a list of:
             (1) name/ID of document containing `word`
@@ -417,7 +417,7 @@ class LDAGibbsViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :returns: a LabeledColumn object.
+        :returns: :class:`LabeledColumn`.
             A 2-dim array containing topics and their cosine values to 
             `topic_or_topics`. 
         
@@ -464,7 +464,7 @@ class LDAGibbsViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :returns: a LabeledColumn object.
+        :returns: :class:`LabeledColumn`.
             A 2-dim array containing documents and their posterior probabilities 
             to `topic_or_topics`. 
 
@@ -539,7 +539,7 @@ class LDAGibbsViewer(object):
             representation. Default is `True`.
         :type as_strings: boolean, optional
 
-        :returns: a LabeledColumn object.
+        :returns: :class:`LabeledColumn`.
             A structured array of topics sorted by their cosines values 
             with `word_or_words`.
         
@@ -613,7 +613,7 @@ class LDAGibbsViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :returns: a LabeledColumn object.
+        :returns: :class:`LabeledColumn`.
             A 2-dim array containing words and their cosine values to 
             `word_or_words`. 
         
@@ -655,7 +655,7 @@ class LDAGibbsViewer(object):
             their integer representations. Default is `True`.
         :type as_strings: boolean, optional
         
-        :returns: a LabeledColumn object.
+        :returns: `LabeledColumn`.
             A 2-dim array containing documents and their cosine values to 
             `doc_or_docs`. 
         
@@ -681,7 +681,7 @@ class LDAGibbsViewer(object):
             computed.
         :type word_list: list
         
-        :returns: an IndexedSymmArray object.
+        :returns: :class:`IndexedSymmArray`.
             n x n matrix containing floats where n is the number of words
             in `word_list`.
        
@@ -704,7 +704,7 @@ class LDAGibbsViewer(object):
             computed. Default is all the topics in the model.
         :type k_indices: list
 
-        :returns: an IndexedSymmArray object.
+        :returns: :class:`IndexedSymmArray`.
             n x n matrix containing floats where n is the number of documents.
 
         :See Also: :meth:`vsm.viewer.similarity.simmat_documents`
@@ -731,7 +731,7 @@ class LDAGibbsViewer(object):
             computed. Default is all topics in the model.
         :type k_indices: list, optional
 
-        :returns: an IndexedSymmArray object.
+        :returns: :class:`IndexedSymmArray`.
             n x n matrix containing floats where n is the number of topics
             considered.
         

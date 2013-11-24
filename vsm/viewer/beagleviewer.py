@@ -86,7 +86,7 @@ class BeagleViewer(object):
         :param order: Default is 'i'.
         :type order: string, optional
 
-        :returns: w_arr : a LabeledColumn object.
+        :returns: w_arr : :class:`LabeledColumn`.
             A 2-dim array containing words and their cosine values to 
             `word_or_words`. 
         
@@ -111,7 +111,7 @@ class BeagleViewer(object):
             Default is :meth: row_acos_mat.
         :type sim_fn: string, optional
 
-        :returns: an IndexedSymmArray object.
+        :returns: :class:`IndexedSymmArray`.
             n x n matrix containing floats where n is the number of words
             in `word_list`.
         

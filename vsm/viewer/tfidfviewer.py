@@ -93,7 +93,7 @@ class TfIdfViewer(object):
             than their integer representations. Default is `True`.
         :type as_strings: boolean, optional
         
-        :returns: w_arr : a LabeledColumn object.
+        :returns: w_arr : :class:`LabeledColumn`.
             A 2-dim array containing words and their cosine values to 
             `word_or_words`.
 
@@ -132,7 +132,7 @@ class TfIdfViewer(object):
             their integer representations. Default is `True`.
         :type as_strings: boolean, optional
 
-        :returns: w_arr : a LabeledColumn object
+        :returns: w_arr : :class:`LabeledColumn`.
             A 2-dim array containing documents and their cosine values to 
             `doc_or_docs`. 
 
@@ -153,7 +153,7 @@ class TfIdfViewer(object):
             computed.
         :type word_list: list
 
-        :returns: an IndexedSymmArray object.
+        :returns: :class:`IndexedSymmArray`.
             n x n matrix containing floats where n is the number of words
             in `word_list`.
 
@@ -170,7 +170,7 @@ class TfIdfViewer(object):
             Default is all the documents in the model.
         :type docs: list, optional
         
-        :returns: an IndexedSymmArray object.
+        :returns: :class:`IndexedSymmArray`.
             n x n matrix containing floats where n is the number of documents.
 
         :See Also: :meth:`vsm.viewer.similarity.simmat_docs`
