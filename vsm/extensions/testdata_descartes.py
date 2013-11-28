@@ -1015,6 +1015,7 @@ def filecorpus():
 
     return c
 
+
 def dircorpus():
     """
     Creates a temporary directory of plain text files to make corpus.
@@ -1029,11 +1030,10 @@ def dircorpus():
     
     paragraphs = paragraph_tokenize(descartes)
     paragraphs = [p + '\n\n' for p in paragraphs]
-    tfnames = [NTF(delete=False) for i in xrange(4)]
+    tfnames = [NTF(delete=False) for i in xrange(2)]
 
-    #TODO: 4 files, only 3 articles in metadata.
-    for i in xrange(4):
-        chunk = paragraphs[i*13 : (i*13)+13]    
+    for i in xrange(2):
+        chunk = paragraphs[i*26 : (i*26)+26]    
         tfnames[i].writelines(chunk)
     c = dir_corpus(td, chunk_name='article')
     
@@ -1049,7 +1049,38 @@ def collcorpus():
     """
     Creates a temporary directory of directories to make corpus.
     """
-            
+    from tempfile import NamedTemporaryFile as NTF
+    from vsm.corpus.util import paragraph_tokenize
+    from vsm.corpus.util.corpusbuilders import coll_corpus
+
+    td = tempfile.mkdtemp()
+    # set dir
+    tempfile.tempdir = td
+    subtd = [tempfile.mkdtemp() for i in xrange(2)]
+
+    paragraphs = paragraph_tokenize(descartes)
+    paragraphs = [p + '\n\n' for p in paragraphs]
+    
+    allf = []
+    for sub in subtd:
+        tempfile.tempdir = sub
+        tfnames = [NTF(delete=False) for i in xrange(2)]
+
+        for i in xrange(2):
+            chunk = paragraphs[i*26 : (i*26)+26]    
+            tfnames[i].writelines(chunk)
+            allf.append(tfnames[i])
+    
+    tempfile.tempdir = td
+    c = coll_corpus(td)
+    
+    # delete temp folders/files
+    for f in allf:
+        os.remove(f.name)
+    for sub in subtd:
+        os.removedirs(sub)
+    
+    return c 
 
 
 
