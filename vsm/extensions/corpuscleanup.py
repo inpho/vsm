@@ -1,6 +1,5 @@
 import nltk
 from vsm.corpus import Corpus
-from vsm.corpus.util.corpusbuilders import coll_tokenize
 from vsm.corpus.util import *
 
 
