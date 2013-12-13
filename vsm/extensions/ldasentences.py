@@ -142,6 +142,61 @@ class CorpusSent(Corpus):
             arrays_out[key] = t
 
         np.savez(file, **arrays_out)
+        
+    
+    def sent_int(self, sent):
+        """
+        sent : list of strings
+            List of sentence tokenization.
+            The list could be a subset of existing sentence tokenization.
+        """
+        tok = self.view_contexts('sentence', as_strings=True)
+        sent_li = []
+        for i in xrange(len(tok)):
+            sent_li.append(sent)
+        keys = [i for i in xrange(len(tok)) 
+                if set(sent_li[i]).issubset(tok[i].tolist())]
+        
+        n = len(keys)
+        if n == 0:
+            raise Exception('No token fits that description.')
+        elif n > 1:
+            return keys
+        return keys[0] 
+
+
+
+def sim_sent_sent(ldaviewer, sent, print_len=10):
+    """
+    ldaviewer : ldaviewer object
+    sent : sentence index or sentence as a list of words
+
+    Returns
+    -------
+    sim_sents : numpy array
+        (sentence index, probability) as (i, value) pair.
+    tokenized_sents : list of arrays
+        List containing tokenized sentences as arrays.
+    orig_sents : list of strings
+        List containing original sentences as strings.
+    """
+    from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
+
+    corp = ldaviewer.corpus
+    ind = sent
+    if isinstance(sent, list) and isinstance(sent[0], str):
+        ind = corp.sent_int(sent)
+    sim_sents = ldaviewer.sim_doc_doc(ind, print_len=print_len, as_strings=False)
+    lc = sim_sents['i'][:print_len]
+    
+    # only returns print_len length
+    tokenized_sents, orig_sents = [], []
+    for i in lc:
+        tokenized_sents.append(corp.view_contexts('sentence', as_strings=True)[i])
+        orig_sents.append(corp.sentences[i])
+
+    return tokenized_sents, orig_sents, sim_sents
+
 
 
 def file_tokenize(text):
