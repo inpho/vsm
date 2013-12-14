@@ -987,7 +987,7 @@ import os
 import tempfile
 
 
-def toycorpus():
+def create_toycorpus():
     """
     Returns a toy corpus with descartes text.
     """
@@ -999,7 +999,7 @@ def toycorpus():
     return c
 
 
-def filecorpus():
+def create_filecorpus():
     """
     Creates a temporary file to make corpus.
     Context types are 'paragraph', 'sentence'. 
@@ -1016,7 +1016,7 @@ def filecorpus():
     return c
 
 
-def dircorpus():
+def create_dircorpus():
     """
     Creates a temporary directory of plain text files to make corpus.
     """
@@ -1045,7 +1045,7 @@ def dircorpus():
     return c
 
 
-def collcorpus():
+def create_collcorpus():
     """
     Creates a temporary directory of directories to make corpus.
     """
@@ -1097,7 +1097,6 @@ def corpus_no_stoplist():
     return c
 
 
-
 def lda(c, K=100):
     """
     :param c: Corpus
@@ -1122,7 +1121,7 @@ def ldaviewer():
     """
     from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
 
-    c = toycorpus()
+    c =create_toycorpus()
     m = lda(c)
     v = LDAGibbsViewer(c, m)
 
@@ -1150,7 +1149,7 @@ def tfviewer():
     """
     from vsm.viewer.tfviewer import TfViewer
 
-    c = toycorpus()
+    c =create_toycorpus()
     m = tf(c)
     v = TfViewer(c, m)
 
@@ -1176,7 +1175,7 @@ def tfidfviewer():
     """
     from vsm.viewer.tfidfviewer import TfIdfViewer
 
-    c = toycorpus()
+    c =create_toycorpus()
     m = tfidf(c)
     v = TfIdfViewer(c, m)
 
@@ -1201,7 +1200,7 @@ def lsaviewer():
     """
     from vsm.viewer.lsaviewer import LsaViewer
 
-    c = toycorpus()
+    c =create_toycorpus()
     m = lsa(c)
     v = LsaViewer(c, m)
 
@@ -1251,7 +1250,7 @@ def beaglecomposite():
     """
     from vsm.model.beaglecomposite import BeagleComposite
 
-    ctx_corpus = toycorpus()
+    ctx_corpus =create_toycorpus()
     ord_corpus = corpus_no_stoplist()
     ctxm = beaglecontext(ctx_corpus, ord_corpus)
     ordm = beagleorder(ord_corpus)
