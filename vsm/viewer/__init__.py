@@ -6,6 +6,29 @@ from vsm import isstr, isint
 
 def def_label_fn(metadata):
     """
+    Takes metadata and returns an array of strings that are 
+    strings constructed with all "labels" in the metdata.
+
+    :param metadata: Metadata most likely retrieved from
+        Corpus.view_metadata(ctx_type).
+    :type metadata: array
+
+    :returns: Array of strings. Each entry is a string with different
+        metadata separated by ', '. For example, '<page_label>, <book_label>'
+        can be an entry of the array.
+
+    :See Also: :meth:`vsm.corpus.Corpus.view_metadata`
+
+    **Examples**
+
+    >>> c = random_corpus(5, 5, 1, 3, context_type='ctx', metadata=True) 
+    >>> meta = c.view_metadata('ctx')
+    >>> meta
+    array([(2, 'ctx_0'), (3, 'ctx_1'), (4, 'ctx_2'), (5, 'ctx_3')], 
+          dtype=[('idx', '<i8'), ('ctx_label', '|S5')])
+    >>> def_label_fn(meta)
+    array(['ctx_0', 'ctx_1', 'ctx_2', 'ctx_3'], 
+          dtype='|S5')
     """
     names = [name for name in metadata.dtype.names if name.endswith('_label')]
     labels = [', '.join([x[n] for n in names]) for x in metadata]
@@ -16,9 +39,15 @@ def def_label_fn(metadata):
 
 def doc_label_name(context_type):
     """
+    Takes a string `context_type` and makes that a standard 'label' string.
+    This functions is useful for figuring out the specific label name in 
+    metadata given the context_type.
+
+    :param context_type: A type of tokenization.
+    :type context_type: string
+
+    :returns: label name for `context_type` as string.
     """
-    if context_type == 'sentence':
-        return 'sent_label'
     return context_type + '_label'
 
 
@@ -64,6 +93,7 @@ def res_word_type(corp, word):
 
 def res_top_type(topic_or_topics):
     """
+    If `topic_or_topics` is an int, then returns it in a list.
     """
     if isint(topic_or_topics):
         topic_or_topics = [topic_or_topics]

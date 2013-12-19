@@ -6,32 +6,26 @@ class BaseModel(object):
     """
     Base class for models which store data in a single matrix.
 
-    Parameters
-    ----------
-    matrix : numpy.ndarray
-        A two-dimensional numpy array storing the results of model
-        training. Default is `None`.
-    context_type : string
-        A string specifying the type of context over which the model
-        trainer is applied. Default is `None`.
+    :param matrix: A two-dimensional numpy array storing the results
+        of model training. Default is `None`.
+    :type matrix: numpy.ndarray, optional
+    
+    :param context_type: A string specifying the type of context over
+        which the model trainer is applied. Default is `None`.
+    :type context_type: string, optional
 
-    Attributes
-    ----------
-    Same as parameters.
+    :attributes:
+        Same as parameters.
 
-    Methods
-    -------
-    save
-        Takes a filename or file object and saves `self.matrix` in an
-        npz archive.
-    load
-        Takes a filename or file object and loads it as an npz archive
-        into a BaseModel object.
+    :methods:
+        * :doc:`model_save`
+            Takes a filename or file object and saves `self.matrix` 
+            in an npz archive.
+        * :doc:`model_load`
+            Takes a filename or file object and loads it as an npz
+            archive into a BaseModel object.
 
-    See Also
-    --------
-    numpy.savez
-    numpy.load
+    :See Also: :meth:`numpy.savez`, :meth:`numpy.load`
     """
     def __init__(self, matrix=None, context_type=None):
         self.matrix = matrix
@@ -43,20 +37,13 @@ class BaseModel(object):
         Takes a filename or file object and saves `self.matrix` in an
         npz archive.
         
-        Parameters
-        ----------
-        file : str-like or file-like object
-            Designates the file to which to save data. See
+        :param file: Designates the file to which to save data. See
             `numpy.savez` for further details.
+        :type file: str-like or file-like object
             
-        Returns
-        -------
-        None
+        :returns: `None`
 
-        See Also
-        --------
-        BaseModel.load
-        numpy.savez
+        :See Also: :meth:`BaseModel.load`, :meth:`numpy.savez`
         """
         print 'Saving model to', f
         np.savez(f, matrix=self.matrix, context_type=np.array(self.context_type))
@@ -68,21 +55,14 @@ class BaseModel(object):
         Takes a filename or file object and loads it as an npz archive
         into a BaseModel object.
 
-        Parameters
-        ----------
-        file : str-like or file-like object
-            Designates the file to read. If `file` is a string ending
-            in `.gz`, the file is first gunzipped. See `numpy.load`
+        :param file: Designates the file to read. If `file` is a string
+            ending in `.gz`, the file is first gunzipped. See `numpy.load`
             for further details.
+        :type file: str-like or file-like object
 
-        Returns
-        -------
-        A dictionary storing the data found in `file`.
+        :returns: A dictionary storing the data found in `file`.
 
-        See Also
-        --------
-        BaseModel.save
-        numpy.load
+        :See Also: :meth:`BaseModel.save`, :meth:`numpy.load`
         """
         print 'Loading model from', f
         npz = np.load(f)

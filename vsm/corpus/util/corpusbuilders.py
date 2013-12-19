@@ -5,6 +5,7 @@ import numpy as np
 from vsm.corpus import Corpus
 from vsm.corpus.util import *
 
+
 __all__ = ['empty_corpus', 'random_corpus',
            'toy_corpus', 'corpus_fromlist',
            'file_corpus', 'dir_corpus', 'coll_corpus']
@@ -13,6 +14,14 @@ __all__ = ['empty_corpus', 'random_corpus',
 
 def empty_corpus(context_type='context'):
     """
+    Creates an empty Corpus with defined context_type.
+
+    :param context_type: A type of tokenization. Default is 'context'.
+    :type context_type: string
+
+    :returns: An empty Corpus with no words or context_data.
+
+    :See Also: :class:`vsm.corpus.Corpus`
     """
     return Corpus([],
                   context_data=[np.array([], dtype=[('idx', np.int)])],
@@ -26,7 +35,32 @@ def random_corpus(corpus_len,
                   context_type='context',
                   metadata=False):
     """
-    Generate a random integer corpus.
+    Generates a random integer corpus.
+
+    :param corpus_len: Size of the Corpus.
+    :type corpus_len: int
+
+    :param n_words: Number of words to draw random integers from.
+    :type n_words: int
+
+    :param min_token_len: minimum token length used to create indices
+        for corpus.
+    :type min_token_len: int
+
+    :param max_token_len: maximum token length used to create indices
+        for corpus.
+    :type max_token_len: int
+
+    :param context_type: A type of tokenization. Default is 'context'.
+    :type context_type: string, optional
+
+    :param metadata: If `True` generates metadata. If `False` the only
+        metadata for the corpus is the index information.
+    :type metadata: boolean, optional
+
+    :returns: Corpus object with random integers as its entries. 
+
+    :See Also: :class:`vsm.corpus.Corpus`
     """
     corpus = np.random.randint(n_words, size=corpus_len)
 
@@ -55,6 +89,28 @@ def corpus_fromlist(ls, context_type='context'):
     Takes a list of lists or arrays containing strings or integers and
     returns a Corpus object. The label associated to a given context
     is `context_type` prepended to the context index.
+    
+    :param ls: List of lists or List of arrays containing strings or integers.
+    :type ls: list
+
+    :param context_type: A type of tokenization.
+    :type context_type: string, optional
+
+    :returns: A Corpus object built from `ls`.
+
+    :See Also: :class:`vsm.corpus.Corpus`
+
+    **Examples**
+
+    >>> ls = [['a', 'b'], ['c'], ['d', 'e']]
+    >>> c = corpus_fromlist(ls, context_type='sentence')
+    >>> c.view_contexts('sentence', as_strings=True)
+    [array(['a', 'b'], dtype='|S1'),
+     array(['c'], dtype='|S1'),
+     array(['d', 'e'], dtype='|S1')]
+    >>> c.context_data
+    [array([(2, 'sentence_0'), (3, 'sentence_1'), (5, 'sentence_2')], 
+          dtype=[('idx', '<i8'), ('sentence_label', '|S10')])]
     """
     corpus = [w for ctx in ls for w in ctx]
 
@@ -92,33 +148,38 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
 
     where <document i> is any chunk of text to be tokenized by word.
 
-    Parameters
-    ----------
-    plain_corpus : string-like
-        String containing a plain-text corpus or a filename of a file
-        containing one.
-    is_filename : boolean
-        If `True` then `plain_corpus` is treated like a filename.
-        Otherwise, `plain_corpus` is presumed to contain the corpus.
-        Default is `False`.
-    nltk_stop : boolean
-        If `True` then the corpus object is masked using the NLTK
-        English stop words. Default is `False`.
-    stop_freq : int
-        The upper bound for a word to be masked on the basis of its
+    :param plain_corpus: String containing a plain-text corpus or a 
+        filename of a file containing one.
+    :type plain_corpus: string-like
+    
+    :param is_filename: If `True` then `plain_corpus` is treated like
+        a filename. Otherwise, `plain_corpus` is presumed to contain 
+        the corpus. Default is `False`.
+    :type is_filename: boolean, optional
+    
+    :param nltk_stop: If `True` then the corpus object is masked using
+        the NLTK English stop words. Default is `False`.
+    :type nltk_stop: boolean, optional
+
+    :param stop_freq: The upper bound for a word to be masked on the basis of its
         collection frequency. Default is 0.
-    add_stop : array-like
-        A list of stop words. Default is `None`.
-    metadata : array-like
-        A list of strings providing metadata about the documents. If
+    :type stop_freq: int, optional
+
+    :param add_stop: A list of stop words. Default is `None`.
+    :type add_stop: array-like, optional
+
+    :param metadata: A list of strings providing metadata about the documents. If
         provided, must have length equal to the number of documents.
         Default is `None`.
-    Returns
-    -------
-    c : a Corpus object
+    :type metadata: array-like, optional
+    
+    :returns: c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
 
+    :See Also: :class:`vsm.corpus.Corpus`, 
+        :meth:`vsm.corpus.util.paragraph_tokenize`, 
+        :meth:`vsm.corpus.util.apply_stoplist`
     """
     if is_filename:
         with open(plain_corpus, 'r') as f:
@@ -149,46 +210,21 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
 
     return c
 
-
-def test_toy_corpus():
-
-    keats = ('She dwells with Beauty - Beauty that must die;\n\n'
-             'And Joy, whose hand is ever at his lips\n\n' 
-             'Bidding adieu; and aching Pleasure nigh,\n\n'
-             'Turning to poison while the bee-mouth sips:\n\n'
-             'Ay, in the very temple of Delight\n\n'
-             'Veil\'d Melancholy has her sovran shrine,\n\n'
-             'Though seen of none save him whose strenuous tongue\n\n'
-             'Can burst Joy\'s grape against his palate fine;\n\n'
-             'His soul shall taste the sadness of her might,\n\n'
-             'And be among her cloudy trophies hung.')
-
-    assert toy_corpus(keats)
-    assert toy_corpus(keats, nltk_stop=True)
-    assert toy_corpus(keats, stop_freq=1)
-    assert toy_corpus(keats, add_stop=['and', 'with'])
-    assert toy_corpus(keats, nltk_stop=True,
-                      stop_freq=1, add_stop=['ay'])
-
-    import os
-    from tempfile import NamedTemporaryFile as NFT
-
-    tmp = NFT(delete=False)
-    tmp.write(keats)
-    tmp.close()
-
-    c = toy_corpus(tmp.name, is_filename=True, 
-                   nltk_stop=True, add_stop=['ay'])
-    
-    assert c
-    os.remove(tmp.name)
-
-    return c
-
-
-
 def file_tokenize(text):
     """
+    `file_tokenize` is a helper function for :meth:`file_corpus`.
+    
+    Takes a string that is content in a file and returns words
+    and corpus data.
+
+    :param text: Content in a plain text file.
+    :type text: string
+
+    :returns: words : List of words.
+        Words in the `text` tokenized by :meth:`vsm.corpus.util.word_tokenize`.
+        corpus_data : Dictionary with context type as keys and
+        corresponding tokenizations as values. The tokenizations
+        are np.arrays.
     """
     words, par_tokens, sent_tokens = [], [], []
     sent_break, par_n, sent_n = 0, 0, 0
@@ -209,8 +245,8 @@ def file_tokenize(text):
         par_n += 1
 
     idx_dt = ('idx', np.int32)
-    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
-    par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
 
     corpus_data = dict()
     dtype = [idx_dt, par_label_dt]
@@ -223,7 +259,33 @@ def file_tokenize(text):
 
 def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     """
-    For use with a plain text corpus contained in a single string.
+    `file_corpus` is a convenience function for generating Corpus
+    objects from a a plain text corpus contained in a single string.
+
+    `file_corpus` will strip punctuation and arabic numerals outside
+    the range 1-29. All letters are made lowercase.
+
+    :param filename: File name of the plain text file.
+    :type plain_dir: string-like
+    
+    :param nltk_stop: If `True` then the corpus object is masked 
+        using the NLTK English stop words. Default is `False`.
+    :type nltk_stop: boolean, optional
+    
+    :param stop_freq: The upper bound for a word to be masked on 
+        the basis of its collection frequency. Default is 1.
+    :type stop_freq: int, optional
+    
+    :param add_stop: A list of stop words. Default is `None`.
+    :type add_stop: array-like, optional
+
+    :returns: c : a Corpus object
+        Contains the tokenized corpus built from the input plain-text
+        corpus. Document tokens are named `documents`.
+    
+    :See Also: :class:`vsm.corpus.Corpus`, 
+        :meth:`file_tokenize`, 
+        :meth:`vsm.corpus.util.apply_stoplist`
     """
     with open(filename, mode='r') as f:
         text = f.read()
@@ -241,6 +303,33 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
 
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
     """
+    `dir_tokenize` is a helper function for :meth:`dir_corpus`.
+
+    Takes a list of files, `chunks` and `labels` for the `chunks` and
+    returns words and corpus data.
+
+    :param chunks: List of files. `chunk_name` indicates what a chunk
+        represents.
+    :type chunks: list
+
+    :param labels: List of filenames where files equal chunks.
+    :type labels: list
+
+    :param chunk_name: The name of the tokenization corresponding 
+        to individual files. For example, if the files are pages 
+        of a book, one might set `chunk_name` to `pages`. Default 
+        is `articles`.
+    :type chunk_name: string-like, optional
+    
+    :param paragraphs: If `True`, a paragraph-level tokenization 
+        is included. Defaults to `True`.
+    :type paragraphs: boolean, optional
+    
+    :returns: words : List of words.
+        words in the `chunks` tokenized by :meth: word_tokenize.
+        corpus_data : Dictionary with context type as keys and
+        corresponding tokenizations as values. The tokenizations
+        are np.arrays.
     """
     words, chk_tokens, sent_tokens = [], [], []
     sent_break, chk_n, sent_n = 0, 0, 0
@@ -285,13 +374,13 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
     idx_dt = ('idx', np.int32)
     label_dt = (chunk_name + '_label', np.array(labels).dtype)
-    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
     corpus_data = dict()
     dtype = [idx_dt, label_dt]
     corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
 
     if paragraphs:
-        par_label_dt = ('par_label', np.array(par_n, np.str_).dtype)
+        par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
         dtype = [idx_dt, label_dt, par_label_dt]
         corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
         dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
@@ -317,32 +406,38 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     It will also strip punctuation and arabic numerals outside the
     range 1-29. All letters are made lowercase.
 
-    Parameters
-    ----------
-    plain_dir : string-like
-        String containing directory containing a plain-text corpus.
-    chunk_name : string-line
-        The name of the tokenization corresponding to individual
-        files. For example, if the files are pages of a book, one
-        might set `chunk_name` to `pages`. Default is `articles`.
-    paragraphs : boolean
-        If `True`, a paragraph-level tokenization is included.
-        Defaults to `True`.
-    nltk_stop : boolean
-        If `True` then the corpus object is masked using the NLTK
-        English stop words. Default is `False`.
-    stop_freq : int
-        The upper bound for a word to be masked on the basis of its
-        collection frequency. Default is 0.
-    add_stop : array-like
-        A list of stop words. Default is `None`.
+    :param plain_dir: String containing directory containing a 
+        plain-text corpus.
+    :type plain_dir: string-like
+    
+    :param chunk_name: The name of the tokenization corresponding 
+        to individual files. For example, if the files are pages 
+        of a book, one might set `chunk_name` to `pages`. Default 
+        is `articles`.
+    :type chunk_name: string-like, optional
+    
+    :param paragraphs: If `True`, a paragraph-level tokenization 
+        is included. Defaults to `True`.
+    :type paragraphs: boolean, optional
+    
+    :param nltk_stop: If `True` then the corpus object is masked 
+        using the NLTK English stop words. Default is `False`.
+    :type nltk_stop: boolean, optional
+    
+    :param stop_freq: The upper bound for a word to be masked on 
+        the basis of its collection frequency. Default is 1.
+    :type stop_freq: int, optional
+    
+    :param add_stop: A list of stop words. Default is `None`.
+    :type add_stop: array-like, optional
 
-    Returns
-    -------
-    c : a Corpus object
+    :returns: c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
-
+    
+    :See Also: :class:`vsm.corpus.Corpus`, 
+            :meth:`dir_tokenize`, 
+            :meth:`vsm.corpus.util.apply_stoplist`
     """
     chunks = []
     filenames = os.listdir(plain_dir)
@@ -360,6 +455,170 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     c = Corpus(words, context_data=data, context_types=names)
     c = apply_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
+
+    return c
+
+
+
+def coll_tokenize(books, book_names):
+    """
+    `coll_tokenize` is a helper function for :meth:`coll_corpus`.
+
+    Takes a list of books and `book_names`, and returns words 
+    and corpus data.
+
+    :param books: List of books.
+    :type books: list
+
+    :param book_names: List of book names.
+    :type book_names: list
+
+    :returns: words : List of words.
+        words in the `books` tokenized by :meth:`word_tokenize`.
+        corpus_data : Dictionary with context type as keys and
+        corresponding tokenizations as values. The tokenizations
+        are np.arrays.
+    """
+    words, book_tokens, page_tokens, sent_tokens = [], [], [], []
+    sent_break, book_n, page_n, sent_n = 0, 0, 0, 0
+
+    for book, book_label in zip(books, book_names):
+        print 'Tokenizing', book_label
+        for page, page_file in book:
+            sents = sentence_tokenize(page)
+
+            for sent in sents:
+                w = word_tokenize(sent)
+                words.extend(w)
+                sent_break += len(w)
+                sent_tokens.append((sent_break, sent_n,
+                                    page_n, book_label, page_file))
+                sent_n += 1
+
+            page_tokens.append((sent_break, page_n, book_label, page_file))
+            page_n += 1
+            
+        book_tokens.append((sent_break, book_label))
+        book_n += 1
+
+    idx_dt = ('idx', np.int32)
+    book_label_dt = ('book_label', np.array(book_names).dtype)
+    page_label_dt = ('page_label', np.array(page_n, np.str_).dtype)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    files = [f for (a,b,c,f) in page_tokens]
+    file_dt = ('file', np.array(files, np.str_).dtype)
+
+    corpus_data = dict()
+    dtype = [idx_dt, book_label_dt]
+    corpus_data['book'] = np.array(book_tokens, dtype=dtype)
+    dtype = [idx_dt, page_label_dt, book_label_dt, file_dt]
+    corpus_data['page'] = np.array(page_tokens, dtype=dtype)
+    dtype = [idx_dt, sent_label_dt, page_label_dt, book_label_dt, file_dt]
+    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+
+    return words, corpus_data
+
+
+#TODO: This should be a whitelist not a blacklist
+def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
+                nltk_stop=True, stop_freq=1, add_stop=None):
+    """
+    `coll_corpus` is a convenience function for generating Corpus
+    objects from a directory of plain text files.
+
+    It will also strip punctuation and arabic numerals outside the
+    range 1-29. All letters are made lowercase.
+
+    :param coll_dir: Directory containing a collections of books
+        which contain pages as plain-text files.
+    :type coll_dir: string-like
+    
+    :param ignore: The list containing suffixes to ignore when getting
+        the pages. The suffix strings are normally the file type. 
+        Default is ['.json', '.log', '.pickle].
+    :type ignore: list of strings, optional
+    
+    :param nltk_stop: If `True` then the corpus object is masked 
+        using the NLTK English stop words. Default is `False`.
+    :type nltk_stop: boolean, optional
+    
+    :param stop_freq: The upper bound for a word to be masked on 
+        the basis of its collection frequency. Default is 1.
+    :type stop_freq: int, optional
+    
+    :param add_stop: A list of stop words. Default is `None`.
+    :type add_stop: array-like, optional
+
+    :returns: c : a Corpus object
+        Contains the tokenized corpus built from the plain-text files
+        in `coll_dir` corpus. Document tokens are named `documents`.
+    """
+    books = []
+    book_names = os.listdir(coll_dir)
+    book_names = filter_by_suffix(book_names, ignore)
+    book_names.sort()
+
+    for book_name in book_names:
+        pages = []
+        book_path = os.path.join(coll_dir, book_name)
+        page_names = os.listdir(book_path)
+        page_names = filter_by_suffix(page_names, ignore)
+        page_names.sort()
+
+        for page_name in page_names:
+            page_file = book_name + '/' + page_name
+            page_name = os.path.join(book_path, page_name)
+            with open(page_name, mode='r') as f:
+                pages.append((f.read(), page_file))
+
+        books.append(pages)
+
+    words, tok = coll_tokenize(books, book_names)
+    names, data = zip(*tok.items())
+    
+    c = Corpus(words, context_data=data, context_types=names)
+    c = apply_stoplist(c, nltk_stop=nltk_stop,
+                       freq=stop_freq, add_stop=add_stop)
+
+    return c
+
+
+###########
+# Testing #
+###########
+
+def test_toy_corpus():
+
+    keats = ('She dwells with Beauty - Beauty that must die;\n\n'
+             'And Joy, whose hand is ever at his lips\n\n' 
+             'Bidding adieu; and aching Pleasure nigh,\n\n'
+             'Turning to poison while the bee-mouth sips:\n\n'
+             'Ay, in the very temple of Delight\n\n'
+             'Veil\'d Melancholy has her sovran shrine,\n\n'
+             'Though seen of none save him whose strenuous tongue\n\n'
+             'Can burst Joy\'s grape against his palate fine;\n\n'
+             'His soul shall taste the sadness of her might,\n\n'
+             'And be among her cloudy trophies hung.')
+
+    assert toy_corpus(keats)
+    assert toy_corpus(keats, nltk_stop=True)
+    assert toy_corpus(keats, stop_freq=1)
+    assert toy_corpus(keats, add_stop=['and', 'with'])
+    assert toy_corpus(keats, nltk_stop=True,
+                      stop_freq=1, add_stop=['ay'])
+
+    import os
+    from tempfile import NamedTemporaryFile as NFT
+
+    tmp = NFT(delete=False)
+    tmp.write(keats)
+    tmp.close()
+
+    c = toy_corpus(tmp.name, is_filename=True, 
+                   nltk_stop=True, add_stop=['ay'])
+    
+    assert c
+    os.remove(tmp.name)
 
     return c
 
@@ -393,85 +652,6 @@ def test_dir_tokenize():
             ['0', '1', '2', '2', '3', '4', '5']).all()
     assert (context_data['sentence']['sent_label'] == 
             ['0', '1', '2', '3', '4', '5', '6']).all()
-
-
-
-def coll_tokenize(books, book_names):
-    """
-    """
-    words, book_tokens, page_tokens, sent_tokens = [], [], [], []
-    sent_break, book_n, page_n, sent_n = 0, 0, 0, 0
-
-    for book, book_label in zip(books, book_names):
-        print 'Tokenizing', book_label
-        for page, page_file in book:
-            sents = sentence_tokenize(page)
-
-            for sent in sents:
-                w = word_tokenize(sent)
-                words.extend(w)
-                sent_break += len(w)
-                sent_tokens.append((sent_break, sent_n,
-                                    page_n, book_label, page_file))
-                sent_n += 1
-
-            page_tokens.append((sent_break, page_n, book_label, page_file))
-            page_n += 1
-            
-        book_tokens.append((sent_break, book_label))
-        book_n += 1
-
-    idx_dt = ('idx', np.int32)
-    book_label_dt = ('book_label', np.array(book_names).dtype)
-    page_label_dt = ('page_label', np.array(page_n, np.str_).dtype)
-    sent_label_dt = ('sent_label', np.array(sent_n, np.str_).dtype)
-    files = [f for (a,b,c,f) in page_tokens]
-    file_dt = ('file', np.array(files, np.str_).dtype)
-
-    corpus_data = dict()
-    dtype = [idx_dt, book_label_dt]
-    corpus_data['book'] = np.array(book_tokens, dtype=dtype)
-    dtype = [idx_dt, page_label_dt, book_label_dt, file_dt]
-    corpus_data['page'] = np.array(page_tokens, dtype=dtype)
-    dtype = [idx_dt, sent_label_dt, page_label_dt, book_label_dt, file_dt]
-    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
-
-    return words, corpus_data
-
-
-#TODO: This should be a whitelist not a blacklist
-def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
-                nltk_stop=True, stop_freq=1, add_stop=None):
-    """
-    """
-    books = []
-    book_names = os.listdir(coll_dir)
-    book_names = filter_by_suffix(book_names, ignore)
-    book_names.sort()
-
-    for book_name in book_names:
-        pages = []
-        book_path = os.path.join(coll_dir, book_name)
-        page_names = os.listdir(book_path)
-        page_names = filter_by_suffix(page_names, ignore)
-        page_names.sort()
-
-        for page_name in page_names:
-            page_file = book_name + '/' + page_name
-            page_name = os.path.join(book_path, page_name)
-            with open(page_name, mode='r') as f:
-                pages.append((f.read(), page_file))
-
-        books.append(pages)
-
-    words, tok = coll_tokenize(books, book_names)
-    names, data = zip(*tok.items())
-    
-    c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
-    return c
 
 
 def test_coll_tokenize():

@@ -21,20 +21,13 @@ class BaseLsaModel(object):
         The keys for the component matrices are `word_matrix`,
         `eigenvalues` and `doc_matrix`.
         
-        Parameters
-        ----------
-        f : str-like or file-like object
-            Designates the file to which to save data. See
+        :param f: Designates the file to which to save data. See
             `numpy.savez` for further details.
+        :type f: str-like or file-like object
             
-        Returns
-        -------
-        None
+        :returns: None
 
-        See Also
-        --------
-        LsaModel.load
-        numpy.savez
+        :See Also: :meth: LsaModel.load, :meth: numpy.savez
         """
         print 'Saving model as', f
         arrays_out = dict()
@@ -52,20 +45,13 @@ class BaseLsaModel(object):
         `npz`. The expected keys for the component matrices are
         `word_matrix`, `eigenvalues` and `doc_matrix`.
         
-        Parameters
-        ----------
-        f : str-like or file-like object
-            Designates the file from which to load data. See
+        :param f: Designates the file from which to load data. See
             `numpy.load` for further details.
+        :type f: str-like or file-like object
             
-        Returns
-        -------
-        None
+        :returns: None
 
-        See Also
-        --------
-        LsaModel.save
-        numpy.load
+        :See Also: :meth: LsaModel.save, :meth: numpy.load
         """
         print 'Loading model from', f
         arrays_in = np.load(f)
@@ -79,6 +65,24 @@ class BaseLsaModel(object):
 
 class Lsa(BaseLsaModel):
     """
+
+    :param td_matrix: ? Default is an empty array.
+    :type td_matrix: np.array, optional
+
+    :param context_type: Name of tokenization whose tokens will be
+        treated as documents. Default is `None`.
+    :type context_type: string, optional
+
+    :Attributes:
+        * **td_matrix** (np.array)
+
+    :Methods:
+        * :meth:`train`
+           Trains the model. 
+        * :meth:`load`
+            Loads the saved model.
+        * :meth:`save`
+            Saves the model in an `.npz` file.
     """
     def __init__(self, td_matrix=np.array([]), context_type=None):
 
@@ -101,6 +105,15 @@ class Lsa(BaseLsaModel):
 
 
     def train(self, k_factors=300):
+        """
+        Trains the model.
+
+        :param k_factors: Default is 300.
+        :type k_factors: int, optional
+
+        :returns: None
+
+        """
 
         u,s,v = np.array([]), np.array([]), np.array([])
 

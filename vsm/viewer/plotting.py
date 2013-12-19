@@ -4,15 +4,11 @@ def gen_colors(clusters):
     """
     Takes 'clusters' and creates a list of colors so a cluster has a color.
     
-    Parameters
-    ----------
-    clusters : list
-        A flat list of integers where an integer represents which
+    :param clusters: A flat list of integers where an integer represents which
         cluster the information belongs to.
+    :type clusters: list
     
-    Returns
-    ----------
-    colorm : list
+    :returns: colorm : list
         A list of colors obtained from matplotlib colormap cm.hsv. The
         length of 'colorm' is the same as the number of distinct
         clusters.
@@ -31,27 +27,25 @@ def plot_clusters(arr, labels, clusters=[], size=[]):
     obtained from cluster_topics(by_cluster=False).
     Plots each clusters in different colors.
     
-    Parameters
-    ----------
-    arr : 2-dimensional array
-        Array has x, y coordinates to be plotted on a 2-dimensional
+    :type arr: 2-dimensional array
+    :param arr: Array has x, y coordinates to be plotted on a 2-dimensional
         space.
-    labels : list
-        List of labels to be displayed in the graph. 
-    clusters : list, optional
-        A flat list of integers where an integer represents which
+    
+    :param labels: List of labels to be displayed in the graph. 
+    :type labels: list
+    
+    :param clusters: A flat list of integers where an integer represents which
         cluster the information belongs to. If not given, it returns a
         basic plot with no color variation. Default is an empty list.
-    size : list, optional
-        List of markersize for points where markersize can note the
+    :type clusters: list, optional
+    
+    :param size: List of markersize for points where markersize can note the
         importance of the point. If not given, 'size' is a list of
         fixed markersize, 40. Default is an empty list.
+    :type size: list, optional
 
-    Returns
-    ----------
-    plt : maplotlit.pyplot object
+    :returns: plt : maplotlit.pyplot object
         A graph with scatter plots from 'arr'.
-        
     """
     import matplotlib.pyplot as plt
 

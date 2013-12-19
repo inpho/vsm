@@ -8,6 +8,67 @@ from ldagibbs import smpl_cat
 
 class LdaCgsMulti(object):
     """
+    :param corpus: Source of observed data.
+    :type corpus: Corpus
+    
+    :param context_type: Name of tokenization stored in `corpus` whose tokens
+        will be treated as documents.
+    :type context_type: string
+
+    :param K: Number of topics. Default is `100`.
+    :type K: int
+    
+    :param top_prior: Topic priors. Default is 0.01 for all topics.
+    :type top_prior: list, optional
+    
+    :param ctx_prior: Context priors. Default is a flat prior of 0.01 
+        for all contexts.
+    :type ctx_prior: list, optional
+
+    :Attributes:
+        * **K** (int)
+            Number of topics.
+        * **contexts** (list of arrays)
+            Tokens tokenized by `context_type` retrieved from `corpus`.
+        * **context_type** (string)
+            Name of tokenization whose tokens are treated as documents.            
+        * **top_prior** (array)
+            Topic priors.
+        * **ctx_prior** (array)
+            Context priors.
+        * **iteration** (int)
+            Number of iterations. Set to 0 when the object is made.
+
+    :Methods:
+        * :meth:`train`
+            Takes an optional argument `itr`, which defaults to 1000, and
+            updates the model `itr` times.
+        * :meth:`load`
+            A static method for loading a saved LdaCgsMulti model.
+        * :meth:`save`
+            Saves the model in an `.npz` file.
+        * **update_z**
+            Takes a document index `d`, a word index `i` relative to that
+            document and a word `w` and updates the model.
+        * **z_dist**
+            Takes a document index `d` and a word `w` and computes the
+            distribution over topics for `w` in `d`.
+        * **phi_k**
+            Takes a topic index `t` and returns the estimated posterior
+            distribution over words for `t`.
+        * **phi_w**
+            Takes a word `w` and returns the estimated posterior
+            distribution over topics for `w`.
+        * **theta_d**
+            Takes a document index `d` and returns the estimated posterior
+            distribution over topics for `d`.
+        * **theta_k**
+            Takes a topic index `t` and returns the estimated posterior
+            distribution over documents for `t`.
+        * **logp**
+            Compute the log probability of the corpus `W` given the
+            estimated values of the latent variables `phi`, `theta` and
+            `Z`.
     """
     def __init__(self, corpus, context_type,
                  K=100, top_prior = [], ctx_prior = []):
@@ -84,6 +145,22 @@ class LdaCgsMulti(object):
 
     def train(self, itr=500, verbose=True, n_proc=2):
         """
+        A time efficient training function where you can specify
+        the number of processors used for training. For example,
+        if `itr` is 500 and `n_proc` then the total number of iterations
+        is 1000.
+
+        :param itr: Number of iterations for each processor. Default is 500.
+        :type itr: int, optional
+
+        :param verbose: If `True`, current number of iterations
+            are printed out to notify the user. Default is `True`.
+        :type verbose: boolean, optional
+
+        :param n_proc: Number of processors used for training. Default is
+            2.
+        :type n_proc: int, optional
+
         Note
         ----
         Training sessions can be continued only if the previous
@@ -190,7 +267,16 @@ class LdaCgsMulti(object):
 
     @staticmethod
     def load(filename):
+        """
+        A static method for loading a saved LdaCgsMulti model.
 
+        :param filename: Name of a saved model to be loaded.
+        :type filename: string
+
+        :returns: m : LdaCgsMulti object
+
+        :See Also: :class:`numpy.load`
+        """
         from vsm.corpus import BaseCorpus
 
         print 'Loading LdaCgsMulti data from', filename
@@ -220,7 +306,14 @@ class LdaCgsMulti(object):
 
     
     def save(self, filename):
+        """
+        Saves the model in `.npz` file.
 
+        :param filename: Name of file to be saved.
+        :type filename: string
+
+        :See Also: :class:`numpy.savez`
+        """
         arrays_out = dict()
         arrays_out['corpus'] = np.frombuffer(_corpus, np.int32)
         arrays_out['iteration'] = self.iteration
@@ -344,8 +437,7 @@ def test_LdaCgsMulti_IO():
 
 def test_continuation():
     """
-    Note
-    ----
+    :note:
     Disable reseeding in `update` before running this test and use
     sequential mapping
     """

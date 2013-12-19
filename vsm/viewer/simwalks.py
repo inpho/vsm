@@ -98,23 +98,3 @@ def test_sim_fn(c):
 
     return data[c]
 
-
-
-
-def test_bf_sim_walk():
-
-    go_list = ['a', 'b', 'c', 'd']
-
-    results = bf_sim_walk(test_sim_fn, 'd', go_list, 4)
-
-    assert(set(go_list) == set(results))
-
-
-def test_df_sim_walk():
-
-    go_list = ['a', 'b', 'c', 'd']
-
-    results = df_sim_walk(test_sim_fn, 'd', go_list, 5, 4)
-
-    assert(set(go_list) == set(results))
-    

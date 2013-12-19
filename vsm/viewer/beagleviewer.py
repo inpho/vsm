@@ -16,6 +16,25 @@ from plotting import (
 
 class BeagleViewer(object):
     """
+    A class for viewing BEAGLE models.
+
+    :param corpus: Source of observed data.
+    :type corpus: Corpus
+    
+    :param model: One of the Beagle objects.
+    :type model: Beagle object
+
+    :attributes:
+        * **corpus** (Corpus object) - `corpus`
+        * **model** (Beagle object) - `model`
+
+    :methods:
+        * :doc:`beagle_sim_word_word`
+            Returns words sorted by the cosine similarity values between
+            word(s) and every word.
+        * :doc:`beagle_simmat_words`
+            Calculates the similarity matrix for a given list of words.
+        * :doc:`beagle_isomap_words`
     """
     def __init__(self, corpus, model):
         """
@@ -39,6 +58,39 @@ class BeagleViewer(object):
                       filter_nan=True, print_len=10, as_strings=True,
                       sim_fn=_row_acos_, order='i'):
         """
+        A wrapper of `sim_word_word` in similarity.py
+
+        :param word_or_words: Query word(s) to which similarity values are calculated.
+        :type word_or_words: string or list of strings
+        
+        :param weights: Specify weights for each query word in `word_or_words`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+        
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+
+        :param print_len: Number of words printed by pretty-printing function
+            Default is 10.
+        :type print_len: int, optional
+
+        :param as_strings: If `True`, returns a list of words as strings rather
+            than their integer representations. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :param sim_fn: A similarity function from functions in vsm.linalg. 
+            Default is :meth: row_acos.
+        :type sim_fn: string, optional
+
+        :param order: Default is 'i'.
+        :type order: string, optional
+
+        :returns: w_arr : :class:`LabeledColumn`.
+            A 2-dim array containing words and their cosine values to 
+            `word_or_words`. 
+        
+        :See Also: :meth:`vsm.viewer.similarity.sim_word_word`
         """
         return _sim_word_word_(self.corpus, self.model.matrix, 
                                word_or_words, weights=weights, 
@@ -48,7 +100,23 @@ class BeagleViewer(object):
 
 
     def simmat_words(self, word_list, sim_fn=_row_acos_mat_):
+        """
+        Calculates the similarity matrix for a given list of words.
 
+        :param word_list: A list of words whose similarity matrix is to be
+            computed.
+        :type word_list: list
+
+        :param sim_fn: A similarity function from functions in vsm.linalg. 
+            Default is :meth: row_acos_mat.
+        :type sim_fn: string, optional
+
+        :returns: :class:`IndexedSymmArray`.
+            n x n matrix containing floats where n is the number of words
+            in `word_list`.
+        
+        :See Also: :meth:`vsm.viewer.similarity.simmat_words`
+        """
         return _simmat_words_(self.corpus, self.model.matrix,
                               word_list, sim_fn=sim_fn)
 
@@ -92,35 +160,3 @@ class BeagleViewer(object):
         
         return _plot_clusters_(pos, labels, size=size)
 
-
-
-
-def test_BeagleViewer():
-
-    from vsm.corpus.util import random_corpus
-    from vsm.model.beagleenvironment import BeagleEnvironment
-    from vsm.model.beaglecontext import BeagleContextSeq
-    from vsm.model.beagleorder import BeagleOrderSeq
-    from vsm.model.beaglecomposite import BeagleComposite
-
-    ec = random_corpus(1000, 50, 0, 20, context_type='sentence')
-    cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,50,7)])
-
-    e = BeagleEnvironment(ec, n_cols=5)
-    e.train()
-
-    cm = BeagleContextSeq(cc, ec, e.matrix)
-    cm.train()
-
-    om = BeagleOrderSeq(ec, e.matrix)
-    om.train()
-
-    m = BeagleComposite(cc, cm.matrix, ec, om.matrix)
-    m.train()
-
-    venv = BeagleViewer(ec, e)
-    vctx = BeagleViewer(cc, cm)
-    vord = BeagleViewer(ec, om)
-    vcom = BeagleViewer(cc, m)
-
-    return (venv, vctx, vord, vcom)
