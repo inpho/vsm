@@ -394,7 +394,8 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
-               nltk_stop=True, stop_freq=1, add_stop=None):
+               ignore=['.json','.log','.pickle'], nltk_stop=True, stop_freq=1, 
+               add_stop=None):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -420,6 +421,11 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
         is included. Defaults to `True`.
     :type paragraphs: boolean, optional
     
+    :param ignore: The list containing suffixes of files to be filtered.
+        The suffix strings are normally file types. Default is ['.json',
+        '.log','.pickle'].
+    :type ignore: list of strings, optional
+
     :param nltk_stop: If `True` then the corpus object is masked 
         using the NLTK English stop words. Default is `False`.
     :type nltk_stop: boolean, optional
@@ -441,6 +447,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     """
     chunks = []
     filenames = os.listdir(plain_dir)
+    filenames = filter_by_suffix(filenames, ignore)
     filenames.sort()
 
     for filename in filenames:
@@ -533,11 +540,11 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
         which contain pages as plain-text files.
     :type coll_dir: string-like
     
-    :param ignore: The list containing suffixes to ignore when getting
-        the pages. The suffix strings are normally the file type. 
-        Default is ['.json', '.log', '.pickle].
+    :param ignore: The list containing suffixes of files to be filtered.
+        The suffix strings are normally file types. Default is ['.json',
+        '.log','.pickle'].
     :type ignore: list of strings, optional
-    
+
     :param nltk_stop: If `True` then the corpus object is masked 
         using the NLTK English stop words. Default is `False`.
     :type nltk_stop: boolean, optional
