@@ -65,6 +65,13 @@ def default_col_widths(dtype):
     return col_widths
 
 
+def calc_col_num(li, max_width):
+    """
+    Calculates the total width given subcol_widths.
+    """
+    w = sum(li)
+    return max_width/w
+
 def compact_col_widths(dtype, n):
     """
     Assigns second column width CompactList based on the dtype. 
@@ -161,7 +168,7 @@ class LabeledColumn(np.ndarray):
 
     """
     def __new__(cls, input_array, col_header=None, subcol_headers=None,
-                subcol_widths=None, col_len=None):
+             subcol_widths=None, col_len=None, col_num=None, multi_col=False):
         """
         """
         obj = np.asarray(input_array).view(cls)
@@ -169,6 +176,7 @@ class LabeledColumn(np.ndarray):
         obj._col_len = col_len
         obj.subcol_headers = subcol_headers
         obj._subcol_widths = subcol_widths     
+        obj._col_num = col_num
         
         return obj
 
@@ -182,7 +190,17 @@ class LabeledColumn(np.ndarray):
         self._col_len = getattr(obj, '_col_len', None)
         self.subcol_headers = getattr(obj, 'subcol_headers', None)
         self._subcol_widths = getattr(obj, '_subcol_widths', None)
+        self._col_num = getattr(obj, '_col_num', None)
+    
+    @property
+    def col_num(self):
+        if not hasattr(self, '_col_num') or not self._col_num:
+            self._col_num = calc_col_num(self._subcol_widths, 120)
+        return self._col_num
 
+    @col_num.setter
+    def col_num(self, w):
+        self._col_num = w
 
     @property
     def subcol_widths(self):
@@ -242,25 +260,54 @@ class LabeledColumn(np.ndarray):
         Returns an html table in ipython online session.
         """ 
         s = '<table style="margin: 0">'
+        print len(self.dtype), self.dtype
+        if self.multi_col and self.col_len >10:
+            if self.col_header:
+                s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
+                    ="{0}">{1}</th></tr>'.format(len(self.subcol_widths)*self.col_num, 
+                    self.col_header)
 
-        if self.col_header:
-            s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
-                ="{0}">{1}</th></tr>'.format(len(self.subcol_widths), self.col_header)
+            if self.subcol_headers:
+                s += '<tr>'
+                subcol = ''
+                for sch in self.subcol_headers:
+                    subcol += '<th style="text-align: center; background: #EFF2FB; ">{0}\
+                        </th>'.format(sch)
+                s += subcol * self.col_len
+                s += '</tr>'
+            
+            last_row = mod(self.col_len, self.col_num)
+            rows = self.col_len / self.col_num
+            li = [rows] * self.col_num
+            li = [li[i]+1 if i<last_row else li[i] for i in xrange(self.col_num)]
+            # li ~ [7, 6, 6, 6] when last_row=1
+            for i in xrange(li[0]):
+                
+                s += '<tr>'
+                for j in xrange(len(self.dtype)):
+                    w = self.subcol_widths[j]
+                    n = self.dtype.names[j]
+                    s += '<td>{0:<{1}}</td>'.format(format_(self[n][i*6], w), w)
+                s += '</tr>' 
+        else:
+            if self.col_header:
+                s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
+                    ="{0}">{1}</th></tr>'.format(len(self.subcol_widths), self.col_header)
 
-        if self.subcol_headers:
-            s += '<tr>'
-            for sch in self.subcol_headers:
-                s += '<th style="text-align: center; background: #EFF2FB; ">{0}\
-            </th>'.format(sch)
-            s += '</tr>'
+            if self.subcol_headers:
+                s += '<tr>'
+                for sch in self.subcol_headers:
+                    s += '<th style="text-align: center; background: #EFF2FB; ">{0}\
+                          </th>'.format(sch)
+                s += '</tr>'
         
-        for i in xrange(self.col_len):
-            s += '<tr>'
-            for j in xrange(len(self.dtype)):
-                w = self.subcol_widths[j]
-                n = self.dtype.names[j]
-                s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
-            s += '</tr>'
+            for i in xrange(self.col_len):
+                s += '<tr>'
+                for j in xrange(len(self.dtype)):
+                    w = self.subcol_widths[j]
+                    n = self.dtype.names[j]
+                    s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
+                s += '</tr>'
         
         s += '</table>'
  
