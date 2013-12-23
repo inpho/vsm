@@ -168,7 +168,7 @@ class LabeledColumn(np.ndarray):
 
     """
     def __new__(cls, input_array, col_header=None, subcol_headers=None,
-             subcol_widths=None, col_len=None, col_num=None, multi_col=False):
+             subcol_widths=None, col_len=None, col_num=None, multi_col=True):
         """
         """
         obj = np.asarray(input_array).view(cls)
@@ -177,7 +177,8 @@ class LabeledColumn(np.ndarray):
         obj.subcol_headers = subcol_headers
         obj._subcol_widths = subcol_widths     
         obj._col_num = col_num
-        
+        obj.multi_col = multi_col
+
         return obj
 
 
@@ -191,11 +192,12 @@ class LabeledColumn(np.ndarray):
         self.subcol_headers = getattr(obj, 'subcol_headers', None)
         self._subcol_widths = getattr(obj, '_subcol_widths', None)
         self._col_num = getattr(obj, '_col_num', None)
-    
+        self.multi_col = getattr(obj, 'multi_col', True)
+
     @property
     def col_num(self):
         if not hasattr(self, '_col_num') or not self._col_num:
-            self._col_num = calc_col_num(self._subcol_widths, 120)
+            self._col_num = calc_col_num(self.subcol_widths, 120)
         return self._col_num
 
     @col_num.setter
@@ -260,35 +262,41 @@ class LabeledColumn(np.ndarray):
         Returns an html table in ipython online session.
         """ 
         s = '<table style="margin: 0">'
-        print len(self.dtype), self.dtype
+        print self.col_num, self.multi_col
+        # multi_col happens only when there are more than 10 to display.
         if self.multi_col and self.col_len >10:
+            print 'multicol!!'
             if self.col_header:
                 s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
                     ="{0}">{1}</th></tr>'.format(len(self.subcol_widths)*self.col_num, 
                     self.col_header)
-
+            
             if self.subcol_headers:
                 s += '<tr>'
                 subcol = ''
                 for sch in self.subcol_headers:
                     subcol += '<th style="text-align: center; background: #EFF2FB; ">{0}\
-                        </th>'.format(sch)
-                s += subcol * self.col_len
+                    </th>'.format(sch)
+                s += subcol * self.col_num
                 s += '</tr>'
             
-            last_row = mod(self.col_len, self.col_num)
+            last_row = self.col_len % self.col_num
             rows = self.col_len / self.col_num
+            rows += last_row
             li = [rows] * self.col_num
             li = [li[i]+1 if i<last_row else li[i] for i in xrange(self.col_num)]
-            # li ~ [7, 6, 6, 6] when last_row=1
-            for i in xrange(li[0]):
-                
+            li = [0] + li[:-1]
+            # li ~ [0, 7, 6, 6] when last_row=1
+            for k in xrange(rows):
                 s += '<tr>'
-                for j in xrange(len(self.dtype)):
-                    w = self.subcol_widths[j]
-                    n = self.dtype.names[j]
-                    s += '<td>{0:<{1}}</td>'.format(format_(self[n][i*6], w), w)
-                s += '</tr>' 
+                ind = k
+                for i in xrange(self.col_num):
+                    ind = ind + li[i]
+                    for j in xrange(len(self.dtype)):
+                        w = self.subcol_widths[j]
+                        n = self.dtype.names[j]
+                        s += '<td>{0:<{1}}</td>'.format(format_(self[n][ind],w), w)
+                s += '</tr>'
         else:
             if self.col_header:
                 s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
@@ -310,7 +318,6 @@ class LabeledColumn(np.ndarray):
                 s += '</tr>'
         
         s += '</table>'
- 
         return s
 
 
