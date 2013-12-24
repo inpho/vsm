@@ -2,6 +2,7 @@ import numpy as np
 
 from vsm.corpus import Corpus
 from vsm.corpus.util import *
+from vsm.extensions.corpuscleanup import apply_stoplist_len
 import os
 
 
@@ -359,8 +360,9 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 
 
-def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
-               nltk_stop=True, stop_freq=1, add_stop=None, corpus_sent=True):
+def dir_corpus(plain_dir, chunk_name='article', paragraphs=True, word_len=2,
+               nltk_stop=True, stop_freq=1, add_stop=None, corpus_sent=True,
+               ignore=['.log', '.pickle', '.xml']):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -386,6 +388,10 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
         is included. Defaults to `True`.
     :type paragraphs: boolean, optional
     
+    :param word_len: Filters words whose lengths are <= word_len.
+        Default is 2.
+    :type word_len: int, optional
+
     :param nltk_stop: If `True` then the corpus object is masked 
         using the NLTK English stop words. Default is `False`.
     :type nltk_stop: boolean, optional
@@ -401,6 +407,11 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     :param add_stop: A list of stop words. Default is `None`.
     :type add_stop: array-like, optional
 
+    :param ignore: The list containing suffixes of files to be filtered.
+        The suffix strings are normally file types. Default is ['.json',
+        '.log', '.pickle'].
+    :type ignore: list of strings, optional
+
     :returns: c : Corpus or CorpusSent
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
@@ -410,6 +421,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     """
     chunks = []
     filenames = os.listdir(plain_dir)
+    filenames = filter_by_suffix(filenames, ignore)
     filenames.sort()
 
     for filename in filenames:
@@ -426,7 +438,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
 			remove_empty=False)
     else:
         c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
+    c = apply_stoplist_len(c, nltk_stop=nltk_stop, add_stop=add_stop,
+                       word_len=word_len, freq=stop_freq)
 
     return c
