@@ -161,11 +161,10 @@ class CorpusSent(Corpus):
         
         n = len(keys)
         if n == 0:
-            raise Exception('No token fits that description.')
+            raise Exception('No token fits {0}.'.format(sent))
         elif n > 1:
             return keys
         return keys[0] 
-
 
 
 def sim_sent_sent(ldaviewer, sent, print_len=10):
@@ -191,6 +190,80 @@ def sim_sent_sent(ldaviewer, sent, print_len=10):
     sim_sents = ldaviewer.sim_doc_doc(ind, print_len=print_len, as_strings=False)
     lc = sim_sents['i'][:print_len]
     
+    # only returns print_len length
+    tokenized_sents, orig_sents = [], []
+    for i in lc:
+        tokenized_sents.append(corp.view_contexts('sentence', as_strings=True)[i])
+        orig_sents.append(corp.sentences[i])
+
+    return tokenized_sents, orig_sents, sim_sents
+
+
+def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10):
+    """
+    ldavFrom : ldaviewer object where the sentence is from.
+    ldavTo : ldaviewer object to find similar sentences
+    beagleviewer : beagleviewer object is used to find
+        similar words for words that don't exist in a different corpus.
+    sent : sentence index or sentence as a list of words
+
+    Returns
+    -------
+    sim_sents : numpy array
+        (sentence index, probability) as (i, value) pair.
+    tokenized_sents : list of arrays
+        List containing tokenized sentences as arrays.
+    orig_sents : list of strings
+        List containing original sentences as strings.
+    """
+    from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
+    from vsm.viewer.beagleviewer import BeagleViewer
+
+    def first_in_corp(corp, wordlist):
+        """
+        Goes down the list to find a word that's in `corp`. 
+        Assumes there is a word in the `wordlist` that's in `corp`.
+        """
+        for w in wordlist:
+            if w in corp.words:
+                return w
+
+    corp = ldavFrom.corpus # to get sent ind
+    ind = sent
+    word_list = []
+    if isinstance(sent, list) and isinstance(sent[0], str):
+        ind = corp.sent_int(sent)
+        word_list = sent
+    else: # if sent is an int index
+        word_list = ldavFrom.corpus.sentences[sent]
+
+    # Before trying ldavTo.sim_word_word, make sure all words
+    # in the list exist in ldavTo.corpus.
+    for w in word_list:
+        if w not in ldavTo.corpus.words:
+            words = beagleviewer.sim_word_word(w)['word']
+            replacement = first_in_corp(ldavTo.corpus, words)
+            word_list.remove(w)
+            word_list.append(replacement)
+            print 'BEAGLE composite model {0} replaced by {1}'.format(w, 
+                                                        replacement)
+    
+    # has to be lda of all corpora, or another lda/corp.
+    # To make use of the wordlist, we need to use sim_word_top,
+    # or sim_word_word, that takes a wordlist. can't use it with
+    # sim_doc_doc, since the newly made sent won't have an ind.
+   
+    # from ldavFrom:sent -> ldavTo:topics -> ldavTo:sent(doc)
+    tops = ldavTo.sim_word_top(word_list).first_cols[:(ldavTo.model.K/3)]
+    tops = [int(t) for t in tops]
+    sim_sents = ldavTo.sim_top_doc(tops)
+    
+    #return sim_sents 
+    #sim_sents = ldavTo.sim_doc_doc(ind, print_len=print_len, as_strings=False)
+    lc = sim_sents[:print_len]['doc']
+    lc = [s.split(', ') for s in lc]
+    lc = [int(a[2]) for a in lc]
+    print lc
     # only returns print_len length
     tokenized_sents, orig_sents = [], []
     for i in lc:
