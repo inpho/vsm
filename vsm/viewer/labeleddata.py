@@ -197,7 +197,7 @@ class LabeledColumn(np.ndarray):
     @property
     def col_num(self):
         if not hasattr(self, '_col_num') or not self._col_num:
-            self._col_num = calc_col_num(self.subcol_widths, 120)
+            self._col_num = calc_col_num(self.subcol_widths, 180)
         return self._col_num
 
     @col_num.setter
@@ -286,7 +286,6 @@ class LabeledColumn(np.ndarray):
             li = [0] + li[:-1]
             if last_row > 0:
                 rows += 1            
-            
             for k in xrange(rows):
                 s += '<tr>'
                 ind = k
