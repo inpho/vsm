@@ -262,10 +262,8 @@ class LabeledColumn(np.ndarray):
         Returns an html table in ipython online session.
         """ 
         s = '<table style="margin: 0">'
-        print self.col_num, self.multi_col
         # multi_col happens only when there are more than 10 to display.
         if self.multi_col and self.col_len >10:
-            print 'multicol!!'
             if self.col_header:
                 s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
                     ="{0}">{1}</th></tr>'.format(len(self.subcol_widths)*self.col_num, 
@@ -279,14 +277,16 @@ class LabeledColumn(np.ndarray):
                     </th>'.format(sch)
                 s += subcol * self.col_num
                 s += '</tr>'
-            
+           
+            count = self.col_len
             last_row = self.col_len % self.col_num
             rows = self.col_len / self.col_num
-            rows += last_row
             li = [rows] * self.col_num
             li = [li[i]+1 if i<last_row else li[i] for i in xrange(self.col_num)]
             li = [0] + li[:-1]
-            # li ~ [0, 7, 6, 6] when last_row=1
+            if last_row > 0:
+                rows += 1            
+            
             for k in xrange(rows):
                 s += '<tr>'
                 ind = k
@@ -295,7 +295,12 @@ class LabeledColumn(np.ndarray):
                     for j in xrange(len(self.dtype)):
                         w = self.subcol_widths[j]
                         n = self.dtype.names[j]
-                        s += '<td>{0:<{1}}</td>'.format(format_(self[n][ind],w), w)
+                        if count > 0:
+                            s += '<td>{0:<{1}}</td>'.format(format_(self[n][ind],w), w)
+                        else:
+                            s += '<td style="border-color: #EFF2FB; background: #EEF2FB;">\
+                             {0}</td>'.format(' '* w)
+                    count -= 1    
                 s += '</tr>'
         else:
             if self.col_header:
