@@ -235,7 +235,8 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10):
         ind = corp.sent_int(sent)
         word_list = sent
     else: # if sent is an int index
-        word_list = ldavFrom.corpus.sentences[sent]
+        word_list = ldavFrom.corpus.view_contexts('sentence',
+                    as_strings=True)[ind].tolist()
 
     # Before trying ldavTo.sim_word_word, make sure all words
     # in the list exist in ldavTo.corpus.
@@ -245,10 +246,9 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10):
             replacement = first_in_corp(ldavTo.corpus, words)
             word_list.remove(w)
             word_list.append(replacement)
-            print 'BEAGLE composite model {0} replaced by {1}'.format(w, 
+            print 'BEAGLE composite model replaced {0} by {1}'.format(w, 
                                                         replacement)
     
-    # has to be lda of all corpora, or another lda/corp.
     # To make use of the wordlist, we need to use sim_word_top,
     # or sim_word_word, that takes a wordlist. can't use it with
     # sim_doc_doc, since the newly made sent won't have an ind.
@@ -256,15 +256,9 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10):
     # from ldavFrom:sent -> ldavTo:topics -> ldavTo:sent(doc)
     tops = ldavTo.sim_word_top(word_list).first_cols[:(ldavTo.model.K/3)]
     tops = [int(t) for t in tops]
-    sim_sents = ldavTo.sim_top_doc(tops)
+    sim_sents = ldavTo.sim_top_doc(tops, print_len=print_len, as_strings=False)
+    lc = sim_sents['i'][:print_len]
     
-    #return sim_sents 
-    #sim_sents = ldavTo.sim_doc_doc(ind, print_len=print_len, as_strings=False)
-    lc = sim_sents[:print_len]['doc']
-    lc = [s.split(', ') for s in lc]
-    lc = [int(a[2]) for a in lc]
-    print lc
-    # only returns print_len length
     tokenized_sents, orig_sents = [], []
     for i in lc:
         tokenized_sents.append(corp.view_contexts('sentence', as_strings=True)[i])
