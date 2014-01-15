@@ -449,6 +449,7 @@ def url_metadata(corpus, ctx_type, coll_dir):
 
     import json
     from vsm.viewer import doc_label_name
+    import re
 
     urls = []
     corp_md = corpus.view_metadata('book')
@@ -468,8 +469,11 @@ def url_metadata(corpus, ctx_type, coll_dir):
 
             if ctx_type == 'book':
                 urls.append( unidecode(url))
-            else:
-                for i in xrange(1, len(booklist)):
+            else: # urls for pages
+                page_md = corpus.view_metadata('page')
+                files = [a for a in page_md['file'] if a.startswith(book_label)]
+                nums = [re.findall('[1-9][0-9]*', a)[-1] for a in files]
+                for i in nums: 
                     s = url + '?urlappend=%3Bseq={0}'.format(i)
                     urls.append( unidecode(s))
     return urls
