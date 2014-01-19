@@ -67,6 +67,24 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
     return corpus
 
 
+def change_label(c_path, oldlabel, newlabel, new_path=''):
+    """
+    modify metadata label in context_data.
+    """
+    from vsm.corpus import Corpus
+    
+    if not new_path:
+        new_path  = c_path
+        
+    c = Corpus.load(c_path)
+    for ctx in c.context_data:
+        names = [a  if a != oldlabel else newlabel for a in ctx.dtype.names]
+        tup = tuple(names)
+        ctx.dtype.names = tup   
+    
+    c.save(new_path)
+
+
 def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
     """
     Returns a Corpus object with stop words eliminated.
