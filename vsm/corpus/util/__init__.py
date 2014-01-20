@@ -67,16 +67,20 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
     return corpus
 
 
-def change_label(c_path, oldlabel, newlabel, new_path=''):
+def change_label(c_path, oldlabel, newlabel, new_path='', corpussent=False):
     """
     modify metadata label in context_data.
     """
     from vsm.corpus import Corpus
-    
+    from vsm.extensions.ldasentences import CorpusSent
+
     if not new_path:
         new_path  = c_path
         
     c = Corpus.load(c_path)
+    if corpussent:
+        c = CorpusSent.load(c_path)
+        
     for ctx in c.context_data:
         names = [a  if a != oldlabel else newlabel for a in ctx.dtype.names]
         tup = tuple(names)
