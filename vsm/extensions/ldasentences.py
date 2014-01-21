@@ -4,6 +4,7 @@ from vsm.corpus import Corpus
 from vsm.corpus.util import *
 from vsm.extensions.corpuscleanup import apply_stoplist_len
 import os
+import re
 
 
 class CorpusSent(Corpus):
@@ -15,8 +16,11 @@ class CorpusSent(Corpus):
     """
     def __init__(self, corpus, sentences, context_types=[], context_data=[], 
 		remove_empty=False):
+       
        super(CorpusSent, self).__init__(corpus, context_types=context_types,
 		 context_data=context_data, remove_empty=remove_empty)
+       
+       sentences = [re.sub('\n', '', s) for s in sentences]
        self.sentences = np.array(sentences)
 
 
@@ -249,20 +253,16 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10):
             print 'BEAGLE composite model replaced {0} by {1}'.format(w, 
                                                         replacement)
     
-    # To make use of the wordlist, we need to use sim_word_top,
-    # or sim_word_word, that takes a wordlist. can't use it with
-    # sim_doc_doc, since the newly made sent won't have an ind.
-   
     # from ldavFrom:sent -> ldavTo:topics -> ldavTo:sent(doc)
-    tops = ldavTo.sim_word_top(word_list).first_cols[:(ldavTo.model.K/3)]
+    tops = ldavTo.sim_word_top(word_list).first_cols[:(ldavTo.model.K/6)]
     tops = [int(t) for t in tops]
     sim_sents = ldavTo.sim_top_doc(tops, print_len=print_len, as_strings=False)
     lc = sim_sents['i'][:print_len]
     
     tokenized_sents, orig_sents = [], []
     for i in lc:
-        tokenized_sents.append(corp.view_contexts('sentence', as_strings=True)[i])
-        orig_sents.append(corp.sentences[i])
+        tokenized_sents.append(ldavTo.corpus.view_contexts('sentence', as_strings=True)[i])
+        orig_sents.append(ldavTo.corpus.sentences[i])
 
     return tokenized_sents, orig_sents, sim_sents
 
