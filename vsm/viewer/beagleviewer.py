@@ -136,16 +136,18 @@ class BeagleViewer(object):
 
         # cut down the list by the threshold
         labels, size = zip(*[(w,s) for (w,s) in word_list if s < thres])
-
+        print size
         # calculate coordinates
         simmat = self.simmat_words(labels)
-        simmat = np.clip(simmat, 0, 2)     # cut off values outside [0, 1]
+        simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
         pos  = imap.fit(simmat).embedding_
 
         # set graphic parameters
         # - scale point size
         if scale:
+            size = [s+0.5 if s == 0 else s for s in size] # for given word which has 0.0
+            # value to be visible.
             size = [s**2*150 for s in size] 
         else:
             size = np.ones_like(size) * 50
