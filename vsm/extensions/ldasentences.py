@@ -209,7 +209,8 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10):
     ldavTo : ldaviewer object to find similar sentences
     beagleviewer : beagleviewer object is used to find
         similar words for words that don't exist in a different corpus.
-    sent : sentence index or sentence as a list of words
+    sent : sentence index of the corpus that corresponds to ldavFrom,
+        or sentence as a list of words
 
     Returns
     -------
