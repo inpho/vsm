@@ -20,7 +20,7 @@ class CorpusSent(Corpus):
        super(CorpusSent, self).__init__(corpus, context_types=context_types,
 		 context_data=context_data, remove_empty=remove_empty)
        
-       sentences = [re.sub('\n', '', s) for s in sentences]
+       sentences = [re.sub('\n', ' ', s) for s in sentences]
        self.sentences = np.array(sentences)
 
 
