@@ -227,6 +227,11 @@ class LDAGibbsViewer(object):
         :param as_string: If `True`, each topic displays words rather than its
             integer representation. Default is `True`.
         :type as_string: boolean, optional
+ 
+        :param compact_view: If `True`, topics are represented with their
+            words and their probabilities. Otherwise, topics are represented
+            as their top `print_len` words.
+        :type compact_view: boolean, optional       
         
         :returns: table : :class:`DataTable`.
             A structured array of topics.
@@ -284,6 +289,11 @@ class LDAGibbsViewer(object):
         :param as_string: If `True`, each topic displays words rather than its
             integer representation. Default is `True`.
         :type as_string: boolean, optional
+        
+        :param compact_view: If `True`, topics are represented with their
+            words and their probabilities. Otherwise, topics are represented
+            as their top `print_len` words.
+        :type compact_view: boolean, optional
         
         :returns: k_arr : :class:`DataTable`.
             A structured array of topics sorted by entropy.
@@ -413,6 +423,11 @@ class LDAGibbsViewer(object):
             Default uses equal weights (i.e. arithmetic mean)
         :type weights: list of floating point, optional
 
+        :param show_topics: If `True`, topics are represented by their number
+            and distribution over words. Otherwise only topic numbers
+            are shown. Default is `True`.
+         :type show_topics: boolean, optional
+
         :param print_len: Number of topics printed by pretty-pringing function
             Default is 10.
         :type print_len: int, optional       
@@ -420,6 +435,16 @@ class LDAGibbsViewer(object):
         :param filter_nan: If `True` not a number entries are filtered.
             Default is `True`.
         :type filter_nan: boolean, optional
+
+        :param as_strings: If `True`, words of each topic are represented as
+            strings. Otherwise they are represented by their integer
+            representation. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :param compact_view: If `True`, topics are represented with their
+            words and their probabilities. Otherwise, topics are represented
+            as their top `print_len` words.
+        :type compact_view: boolean, optional
 
         :returns: :class:`LabeledColumn`.
             A 2-dim array containing topics and their cosine values to 
@@ -567,6 +592,11 @@ class LDAGibbsViewer(object):
             representation. Default is `True`.
         :type as_strings: boolean, optional
 
+        :param compact_view: If `True`, topics are represented with their
+            words and their probabilities. Otherwise, topics are represented
+            as their top `print_len` words.
+        :type compact_view: boolean, optional
+        
         :returns: :class:`LabeledColumn`.
             A structured array of topics sorted by their cosines values 
             with `word_or_words`.
