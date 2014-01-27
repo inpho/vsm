@@ -6,6 +6,9 @@ from vsm.extensions.corpuscleanup import apply_stoplist_len
 import os
 import re
 
+__all__ = ['CorpusSent', 'sim_sent_sent', 'sim_sent_sent_across',
+        'file_tokenize', 'file_corpus', 'dir_tokenize', 'dir_corpus']
+
 
 class CorpusSent(Corpus):
     """
