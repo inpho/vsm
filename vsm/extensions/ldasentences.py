@@ -191,8 +191,10 @@ def sim_sent_sent(ldaviewer, sent, print_len=10):
     ind = sent
     if isinstance(sent, list) and isinstance(sent[0], str):
         ind = corp.sent_int(sent)
-    sim_sents = ldaviewer.sim_doc_doc(ind, print_len=print_len, as_strings=False)
-    lc = sim_sents['i'][:print_len]
+    sim_sents = ldaviewer.sim_doc_doc(ind, print_len=print_len)
+    lc = sim_sents['doc'][:print_len]
+    lc = [s.split(', ') for s in lc]
+    lc = [int(s[-1]) for s in lc]
     
     # only returns print_len length
     tokenized_sents, orig_sents = [], []
