@@ -7,8 +7,8 @@ from vsm.viewer import def_label_fn as _def_label_fn_
 from similarity import (
     sim_word_word as _sim_word_word_,
     sim_doc_doc as _sim_doc_doc_,
-    simmat_words as _simmat_words_,
-    simmat_documents as _simmat_documents_)
+    dismat_words as _dismat_words_,
+    dismat_documents as _dismat_documents_)
 
 
 
@@ -147,7 +147,7 @@ class LsaViewer(object):
                              label_fn=label_fn, as_strings=True)
     
 
-    def simmat_words(self, word_list):
+    def dismat_words(self, word_list):
         """
         Calculates the similarity matrix for a given list of words.
 
@@ -161,10 +161,10 @@ class LsaViewer(object):
         
         :See Also: :meth:`vsm.viewer.similarity.simmat_words`
         """
-        return _simmat_words_(self.corpus, self.model.word_matrix, word_list)
+        return _dismat_words_(self.corpus, self.model.word_matrix, word_list)
 
 
-    def simmat_docs(self, docs):
+    def dismat_docs(self, docs):
         """
         Calculates the similarity matrix for a given list of documents.
 
@@ -177,7 +177,7 @@ class LsaViewer(object):
 
         :See Also: :meth:`vsm.viewer.similarity.simmat_docs`
         """
-        return _simmat_documents_(self.corpus, self.model.doc_matrix.T,
+        return _dismat_documents_(self.corpus, self.model.doc_matrix.T,
                                   self.model.context_type, docs)
 
 

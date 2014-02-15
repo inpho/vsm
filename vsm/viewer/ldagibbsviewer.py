@@ -34,9 +34,9 @@ from similarity import (
     sim_top_top as _sim_top_top_,
     sim_top_doc as _sim_top_doc_,
     sim_word_top as _sim_word_top_,
-    simmat_words as _simmat_words_,
-    simmat_documents as _simmat_documents_,
-    simmat_topics as _simmat_topics_)
+    dismat_words as _dismat_words_,
+    dismat_documents as _dismat_documents_,
+    dismat_topics as _dismat_topics_)
 
 from manifold import Manifold
 
@@ -685,13 +685,11 @@ class LDAGibbsViewer(object):
 
     def dismat_words(self, word_list):
 
-        sm =  _simmat_words_(self.corpus,
+        dm =  _dismat_words_(self.corpus,
                              self.model.top_word.T,
                              word_list)
 
-        dismat = Manifold(1-sm, sm.labels)
-
-        return dismat
+        return Manifold(dm, dm.labels)
 
 
     def simmat_words(self, word_list):
@@ -739,13 +737,11 @@ class LDAGibbsViewer(object):
         else:
             mat = self.model.doc_top[:,k_indices].T
 
-        sm =  _simmat_documents_(self.corpus, mat,
+        dm =  _dismat_documents_(self.corpus, mat,
                                  self.model.context_type,
                                  docs, sim_fn=sim_fn)
 
-        dismat = Manifold(1-sm, sm.labels)
-
-        return dismat
+        return Manifold(dm, dm.labels)
 
 
 
@@ -767,11 +763,9 @@ class LDAGibbsViewer(object):
         if len(k_indices) == 0:
             k_indices = range(self.model.K)
 
-        sm = _simmat_topics_(self.model.top_word, k_indices, sim_fn=sim_fn)
+        dm = _dismat_topics_(self.model.top_word, k_indices, sim_fn=sim_fn)
 
-        dismat = Manifold(1-sm, sm.labels)
-
-        return dismat
+        return Manifold(dm, dm.labels)
 
     #TODO: make it general to deal with documents?
     def cluster_topics(self, method='kmeans', k_indices=[],

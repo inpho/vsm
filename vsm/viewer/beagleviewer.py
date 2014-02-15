@@ -7,7 +7,7 @@ from vsm.linalg import (
 
 from similarity import (
     sim_word_word as _sim_word_word_,
-    simmat_words as _simmat_words_)
+    dismat_words as _dismat_words_)
 
 from plotting import (
     gen_colors as _gen_colors_,
@@ -99,9 +99,10 @@ class BeagleViewer(object):
                                sim_fn=sim_fn, order=order)
 
 
-    def simmat_words(self, word_list, sim_fn=_row_acos_mat_):
+
+    def dismat_words(self, word_list, sim_fn=_row_acos_mat_):        
         """
-        Calculates the similarity matrix for a given list of words.
+        Calculates the distance matrix for a given list of words.
 
         :param word_list: A list of words whose similarity matrix is to be
             computed.
@@ -117,8 +118,10 @@ class BeagleViewer(object):
         
         :See Also: :meth:`vsm.viewer.similarity.simmat_words`
         """
-        return _simmat_words_(self.corpus, self.model.matrix,
+
+        return _dismat_words_(self.corpus, self.model.matrix,
                               word_list, sim_fn=sim_fn)
+
 
 
     # This is a quick adaptation of the isomap_docs function from
@@ -138,10 +141,10 @@ class BeagleViewer(object):
         labels, size = zip(*[(w,s) for (w,s) in word_list if s < thres])
         print size
         # calculate coordinates
-        simmat = self.simmat_words(labels)
-        simmat = np.clip(simmat, 0, 1)     # cut off values outside [0, 1]
+        dismat = self.dismat_words(labels)
+        dismat = np.clip(dismat, 0, 2)     # cut off values outside [0, 1]
         imap = manifold.Isomap(n_components=2, n_neighbors=n_neighbors)
-        pos  = imap.fit(simmat).embedding_
+        pos  = imap.fit(dismat).embedding_
 
         # set graphic parameters
         # - scale point size
