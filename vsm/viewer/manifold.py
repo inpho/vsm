@@ -29,7 +29,7 @@ class Manifold(object):
 # Clustering methods
 #
     def KMeans(self, n_clusters=10, init='k-means++', max_iter=100,
-               n_init=1, verbose=1):
+               n_init=1, verbose=1, show=True):
 
         if len(self.pos)==0:
             raise Exception('K-Means requires low dimentional coordinates. Try mds() or isomap() first.')
@@ -37,20 +37,28 @@ class Manifold(object):
         model = KMeans(n_clusters=n_clusters, init=init, max_iter=max_iter, 
                        n_init=n_init,verbose=verbose).fit(self.pos)
         self._cls = model.labels_
-        return self.cls
+
+        if show:
+            return self.cls
         
+
 
     def AffinityPropagation(self):
         model = AffinityPropagation(affinity='precomputed').fit(self.dismat)
         self._cls = model.labels_
-        return self.cls
+        
+        if show:
+            return self.cls
+
 
 
     def SpectralClustering(self, n_clusters=10):
         model = SpectralClustering(n_clusters=n_clusters, 
                                    affinity='precomputed').fit(self.dismat)
         self._cls = model.labels_
-        return self.cls
+
+        if show:
+            return self.cls
 
 
 

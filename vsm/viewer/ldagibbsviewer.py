@@ -753,7 +753,7 @@ class LDAGibbsViewer(object):
             computed. Default is all topics in the model.
         :type k_indices: list, optional
 
-        :returns: :class:`IndexedSymmArray`.
+        :returns: :class:`Manifold`.
             n x n matrix containing floats where n is the number of topics
             considered.
         
@@ -765,7 +765,12 @@ class LDAGibbsViewer(object):
 
         dm = _dismat_topics_(self.model.top_word, k_indices, sim_fn=sim_fn)
 
-        return Manifold(dm, dm.labels)
+        # convert strings to integer labels
+        labels = [int(x) for x in dm.labels]
+
+        return Manifold(dm, labels)
+
+
 
     #TODO: make it general to deal with documents?
     def cluster_topics(self, method='kmeans', k_indices=[],
