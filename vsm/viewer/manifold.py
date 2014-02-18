@@ -66,21 +66,24 @@ class Manifold(object):
 # Manifold learning methods
 #
 
-    def mds(self, n_components=2, dissimilarity='precomputed'): 
+    def mds(self, n_components=2, dissimilarity='precomputed', show=False): 
         """
         This requires sklearn ver 0.14 due to dissimilarity argument.
         """
         model = MDS(n_components=n_components, dissimilarity=dissimilarity, max_iter=100)
         self.pos = model.fit_transform(self.dismat)
 
-        return self.pos
+        if show:
+            return self.pos
 
 
 
-    def isomap(self, n_components=2, n_neighbors=3):
+    def isomap(self, n_components=2, n_neighbors=3, show=False):
         model = Isomap(n_components=n_components, n_neighbors=n_neighbors)
         self.pos  = model.fit(self.dismat).embedding_
-        return self.pos
+
+        if show:
+            return self.pos
 
 
 
