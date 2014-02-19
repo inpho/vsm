@@ -692,7 +692,7 @@ class LDAGibbsViewer(object):
         :type word_list: list
         
         :returns: :class:`Manifold`.
-            n x n matrix containing floats where n is the number of words
+            contains n x n matrix containing floats where n is the number of words
             in `word_list`.
        
         :See Also: :meth:`vsm.viewer.similarity.dismat_words`
@@ -718,10 +718,11 @@ class LDAGibbsViewer(object):
             computed. Default is all the topics in the model.
         :type k_indices: list
 
-        :returns: :class:`IndexedSymmArray`.
-            n x n matrix containing floats where n is the number of documents.
+        :returns: :class:`Manifold`.
+            contains n x n matrix containing floats where n is the number of 
+            documents.
 
-        :See Also: :meth:`vsm.viewer.similarity.simmat_documents`
+        :See Also: :meth:`vsm.viewer.similarity.dusmat_documents`
         """
 
         if len(docs) == 0:
@@ -749,10 +750,10 @@ class LDAGibbsViewer(object):
         :type k_indices: list, optional
 
         :returns: :class:`Manifold`.
-            n x n matrix containing floats where n is the number of topics
+            contains n x n matrix containing floats where n is the number of topics
             considered.
         
-        :See Also: :meth:`vsm.viewer.similarity.simmat_topics`
+        :See Also: :meth:`vsm.viewer.similarity.dismat_topics`
         """
 
         if len(k_indices) == 0:
