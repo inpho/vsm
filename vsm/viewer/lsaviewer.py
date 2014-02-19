@@ -10,6 +10,7 @@ from similarity import (
     dismat_words as _dismat_words_,
     dismat_documents as _dismat_documents_)
 
+from manifold import Manifold
 
 
 class LsaViewer(object):
@@ -19,7 +20,7 @@ class LsaViewer(object):
     :param corpus: Source of observed data.
     :type corpus: Corpus
 
-    :param model: An LSA model.
+    :param model: An LSA mode.
     :type model: Lsa object.
 
     :attributes:
@@ -149,35 +150,39 @@ class LsaViewer(object):
 
     def dismat_words(self, word_list):
         """
-        Calculates the similarity matrix for a given list of words.
+        Calculates a distance matrix for a given list of words.
 
         :param word_list: A list of words whose similarity matrix is to be
             computed.
         :type word_list: list
 
-        :returns: :class:`IndexedSymmArray`.
-            n x n matrix containing floats where n is the number of words
-            in `word_list`.
+        :returns: :class:`Manifold`.
+            contains n x n matrix containing floats where n is the number 
+            of words in `word_list`.
         
-        :See Also: :meth:`vsm.viewer.similarity.simmat_words`
+        :See Also: :meth:`vsm.viewer.similarity.dismat_words`
         """
-        return _dismat_words_(self.corpus, self.model.word_matrix, word_list)
+        dm = _dismat_words_(self.corpus, self.model.word_matrix, word_list)
+        
+        return Manifold(dm, dm.labels)
 
 
     def dismat_docs(self, docs):
         """
-        Calculates the similarity matrix for a given list of documents.
+        Calculates a distance matrix for a given list of documents.
 
         :param docs: A list of documents whose similarity matrix is to be computed.
             Default is all the documents in the model.
         :type docs: list, optional
         
-        :returns: :class:`IndexedSymmArray`.
-            n x n matrix containing floats where n is the number of documents. 
+        :returns: :class:`Manifold`.
+            contains n x n matrix containing floats where n is the number of documents. 
 
-        :See Also: :meth:`vsm.viewer.similarity.simmat_docs`
+        :See Also: :meth:`vsm.viewer.similarity.dismat_docs`
         """
-        return _dismat_documents_(self.corpus, self.model.doc_matrix.T,
+        dm = _dismat_documents_(self.corpus, self.model.doc_matrix.T,
                                   self.model.context_type, docs)
+        
+        return Manifold(dm, dm.labels)
 
 

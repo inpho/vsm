@@ -246,7 +246,7 @@ def sim_top_top(mat, topic_or_topics, weights=None,
 
 def dismat_words(corp, matrix, word_list, norms=None, sim_fn=row_acos_mat):
     """
-    Calculates the similarity matrix for a given list of words.
+    Calculates a distance matrix for a given list of words.
     """
     indices, words = zip(*[res_word_type(corp, word) 
                            for word in word_list])
@@ -263,7 +263,7 @@ def dismat_words(corp, matrix, word_list, norms=None, sim_fn=row_acos_mat):
 def dismat_documents(corp, matrix, context_type, doc_list,
                      norms=None, sim_fn=row_js_mat):
     """
-    Calculates the similarity matrix for a given list of documents.
+    Calculates a distance matrix for a given list of documents.
     """
 
     label_name = doc_label_name(context_type)
@@ -282,7 +282,7 @@ def dismat_documents(corp, matrix, context_type, doc_list,
 
 def dismat_topics(kw_mat, topics, norms=None, sim_fn=row_js_mat):
     """
-    Calculates the similarity matrix for a given list of topics.
+    Calculates a distance matrix for a given list of topics.
     """
     dm = sim_fn(topics, kw_mat, norms=norms, fill_tril=True)
     dm = dm.view(IndexedSymmArray)

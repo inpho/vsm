@@ -13,6 +13,8 @@ from plotting import (
     gen_colors as _gen_colors_,
     plot_clusters as _plot_clusters_)
 
+from manifold import Manifold
+
 
 class BeagleViewer(object):
     """
@@ -112,15 +114,17 @@ class BeagleViewer(object):
             Default is :meth: row_acos_mat.
         :type sim_fn: string, optional
 
-        :returns: :class:`IndexedSymmArray`.
-            n x n matrix containing floats where n is the number of words
+        :returns: :class:`Manifold`.
+            contains n x n matrix containing floats where n is the number of words
             in `word_list`.
         
-        :See Also: :meth:`vsm.viewer.similarity.simmat_words`
+        :See Also: :meth:`vsm.viewer.similarity.dismat_words`
         """
 
-        return _dismat_words_(self.corpus, self.model.matrix,
+        dm = _dismat_words_(self.corpus, self.model.matrix,
                               word_list, sim_fn=sim_fn)
+
+        return Manifold(dm, dm.labels)
 
 
 

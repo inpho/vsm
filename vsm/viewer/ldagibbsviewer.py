@@ -684,6 +684,19 @@ class LDAGibbsViewer(object):
     
 
     def dismat_words(self, word_list):
+        """
+        Calculates the distance matrix for `word_list`.
+
+        :param word_list: A list of words whose distance matrix is to be
+            computed.
+        :type word_list: list
+        
+        :returns: :class:`Manifold`.
+            n x n matrix containing floats where n is the number of words
+            in `word_list`.
+       
+        :See Also: :meth:`vsm.viewer.similarity.dismat_words`
+        """
 
         dm =  _dismat_words_(self.corpus,
                              self.model.top_word.T,
@@ -692,24 +705,6 @@ class LDAGibbsViewer(object):
         return Manifold(dm, dm.labels)
 
 
-    def simmat_words(self, word_list):
-        """
-        Calculates the similarity matrix for `word_list`.
-
-        :param word_list: A list of words whose similarity matrix is to be
-            computed.
-        :type word_list: list
-        
-        :returns: :class:`IndexedSymmArray`.
-            n x n matrix containing floats where n is the number of words
-            in `word_list`.
-       
-        :See Also: :meth:`vsm.viewer.similarity.simmat_words`
-        """
-        return _simmat_words_(self.corpus,
-                              self.model.top_word.T,
-                              word_list)
-    
 
     def dismat_docs(self, docs=[], k_indices=[], sim_fn=_row_js_mat_):
         """
