@@ -12,8 +12,20 @@ blobs =  datasets.make_blobs(n_samples=n_samples, random_state=8)
 # S = noisy_circles[0]
 S = blobs[0]
 
+def multi_k(S, N=30, D_max=30):
+    import matplotlib.pyplot as plt
 
-def multik_proto(S, N=10, D_max=30):
+    M = connection_matrix(S=S, N=N, D_max=D_max)
+    c = cutplot(M=M, N=N)
+
+    x, y = zip(*c)
+    plt.plot(x,y)
+#    plt.show()
+
+    return plt, c
+
+
+def connection_matrix(S, N=10, D_max=30):
     """
     S : set S of r points in Rn.
     N : number N of clusterings to perform.
@@ -53,7 +65,7 @@ def multik_proto(S, N=10, D_max=30):
 
 
 
-def cutplot(S, M, N=10):
+def cutplot(M, N=10):
     from scipy.sparse import csgraph as cs
 
     # build Weight matrix, W.
