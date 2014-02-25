@@ -56,7 +56,7 @@ class Manifold(object):
         
 
 
-    def AffinityPropagation(self, show=True)
+    def AffinityPropagation(self, show=True):
         """
         Clusters objects in `dismat` using affinity propagation algorithm.
 
