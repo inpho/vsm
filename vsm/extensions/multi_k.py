@@ -14,10 +14,10 @@ blobs =  datasets.make_blobs(n_samples=n_samples, random_state=8)
 # S = noisy_circles[0]
 S = blobs[0]
 
-def multi_k(S, N=30, D_max=30, C=0.5):
+def multi_k(S, N=30, D=(10,30), C=0.5):
     import matplotlib.pyplot as plt
 
-    M = connection_matrix(S=S, N=N, D_max=D_max)
+    M = connection_matrix(S=S, N=N, D=D)
     c = cutplot(M=M, N=N)
     category_func = categories(S, M, c, C=C)
 
@@ -28,7 +28,7 @@ def multi_k(S, N=30, D_max=30, C=0.5):
     return plt, c, category_func
 
 
-def connection_matrix(S, N=10, D_max=30):
+def connection_matrix(S, N=10, D=(10,30)):
     """
     S : set S of r points in Rn.
     N : number N of clusterings to perform.
@@ -48,10 +48,10 @@ def connection_matrix(S, N=10, D_max=30):
     M = np.zeros((r, r))
     
     for n in xrange(N):
-        # select integer d from (1, 2,..., D_max) 
-        d = randrange(D_max) + 1
+        # select integer d from D[0] to D[1] 
+        d = randrange(D[0],D[1]+1)
         km = KMeans(n_clusters=d, init='k-means++',
-                    max_iter=100, n_init=1,verbose=1)
+                    max_iter=100, n_init=1,verbose=False)
         km.fit(S)
         labels = km.labels_
 
