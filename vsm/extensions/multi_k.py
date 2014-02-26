@@ -14,18 +14,20 @@ blobs =  datasets.make_blobs(n_samples=n_samples, random_state=8)
 # S = noisy_circles[0]
 S = blobs[0]
 
-def multi_k(S, N=30, D=(10,30), C=0.5):
+def multi_k(S, N=30, D=(10,30), C=None):
     import matplotlib.pyplot as plt
 
-    M = connection_matrix(S=S, N=N, D=D)
-    c = cutplot(M=M, N=N)
-    category_func = categories(S, M, c, C=C)
+    M, cutplot = connection_matrix(S=S, N=N, D=D)
 
-    x, y = zip(*c)
+    if C == None:
+        C = find_cutoff(cutplot)
+    print "Weight cutoff is set to ", C
+    category_func = category_mat(S, M, cutplot, C=C)
+
+    x, y = zip(*cutplot)
     plt.plot(x,y)
-#    plt.show()
 
-    return plt, c, category_func
+    return plt, cutplot, category_func
 
 
 def connection_matrix(S, N=10, D=(10,30)):
@@ -39,9 +41,8 @@ def connection_matrix(S, N=10, D=(10,30)):
     
     could make N,D,C optional by setting default values.
     
-    Output : 1. A category function 
-                C : S -> Z
-            2. A cut plot
+    :returns: M : connection matrix 
+             cutplot :  A cut plot
                 f : [0,1] -> Z
     """
     r = len(S)
@@ -64,34 +65,43 @@ def connection_matrix(S, N=10, D=(10,30)):
     # normalize M[i][j] 
     M /= N
 
-    return M
-
-
-
-def cutplot(M, N=10):
-    # Build Weight matrix, W. 
-    # Q. what's the purpose of the Weight matrix?
-    W = M
-    cutplot = []
+    cutplot = np.zeros((N+1 ,2), dtype='f2<')
     for l in xrange(N+1):
         # Construct graph G for which M[i][j] > l/N
         G = M > 1.0 * l /N
         
         n_comp, labels = cs.cs_graph_components(G)
-        cutplot.append((l * 1.0 /N, n_comp))
-    return cutplot
+        cutplot[l][0] = l * 1.0 /N
+        cutplot[l][1] = n_comp
+    return M, cutplot
 
 
-def categories(S, M, cutplot, C=0.5):
+def find_cutoff(cutplot):
+    """
+    Finds the weight cutoff based on the cutplot.
+    """
+    from itertools import groupby
+
+    group = groupby(cutplot[:,1])
+    val = max(group, key=lambda k: len(list(k[1])))[0]
+    
+    for c in cutplot:
+        if c[1] == val:
+            return c[0] + 0.1
+
+
+def category_mat(S, M, cutplot, C=None):
     """
     Returns a dictionary with indices in S as keys
     and category labels as values.
     """ 
+    if C == None:
+        C = find_cutoff(cutplot)
     # Build a new graph on S with edges M[i][j] > C
     newG = M > C
     n_comp, labels = cs.cs_graph_components(newG)
     
-    categories = {}
+    categories = np.zeros(len(S))
     for i in xrange(len(S)):
         categories[i] = labels[i]
 
