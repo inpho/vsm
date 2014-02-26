@@ -60,9 +60,8 @@ def connection_matrix(S, N=10, D=(10,30)):
             for j in range(i,r):
                 if labels[i] == labels[j]:
                     M[i][j] += 1
-                    M[j][i] += 1
-                    
-    # normalize M[i][j] 
+        
+    M = M + M.T
     M /= N
 
     cutplot = np.zeros((N+1 ,2), dtype='f2<')
@@ -92,8 +91,7 @@ def find_cutoff(cutplot):
 
 def category_mat(S, M, cutplot, C=None):
     """
-    Returns a dictionary with indices in S as keys
-    and category labels as values.
+    Predicts the category for each data point
     """ 
     if C == None:
         C = find_cutoff(cutplot)
@@ -101,9 +99,5 @@ def category_mat(S, M, cutplot, C=None):
     newG = M > C
     n_comp, labels = cs.cs_graph_components(newG)
     
-    categories = np.zeros(len(S))
-    for i in xrange(len(S)):
-        categories[i] = labels[i]
-
-    return categories 
+    return labels
    
