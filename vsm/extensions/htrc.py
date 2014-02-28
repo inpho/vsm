@@ -478,4 +478,28 @@ def url_metadata(corpus, ctx_type, coll_dir):
                     urls.append( unidecode(s))
     return urls
 
+def add_link_(s, addee):
+    """
+    Returns <a href="s">addee</a> 
+    For example, <a href="page_url">page_label</a>
+    """
+    if s.startswith('http'):
+        a = '<a href="{0}" target="_blank">'.format(s)
+        a += addee
+        a += '</a>'
+        return a
 
+def vol_link_fn(md): 
+    """
+    Not a generalized function for individual htrc volume with page links
+    and sentence labels. 'sentences_label' is CorpusSent.sentences which
+    is an array or original sentences.
+
+    :ref: vsm.extensions.ldasentences CorpusSent
+    """
+    # md == corpus.view_metadata('sentence')
+    links = [add_link_(x['page_urls'], x['page_label']) for x in md]
+    labels = ['{0}, {1}, {2}'.format(l, i, s) for (l,i,s) in
+             zip(links, md['sentence_label'], md['sentences_label'])]
+
+    return np.array(labels)
