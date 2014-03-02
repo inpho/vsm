@@ -3,6 +3,7 @@ import numpy as np
 from vsm.corpus import Corpus
 from vsm.corpus.util import *
 from vsm.extensions.corpuscleanup import apply_stoplist_len
+from vsm.extensions.htrc import vol_link_fn, add_link_
 import os
 import re
 
@@ -208,7 +209,8 @@ def sim_sent_sent(ldaviewer, sent, print_len=10):
     return tokenized_sents, orig_sents, sim_sents
 
 
-def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10):
+def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10,
+                         label_fn=vol_link_fn):
     """
     ldavFrom : ldaviewer object where the sentence is from.
     ldavTo : ldaviewer object to find similar sentences
@@ -244,10 +246,18 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10):
     if isinstance(sent, list) and isinstance(sent[0], str):
         ind = corp.sent_int(sent)
         word_list = sent
+    elif isinstance(sent, list):
+        word_list = set()
+        for i in sent:
+            li = set(ldavFrom.corpus.view_contexts('sentence', 
+                    as_strings=True)[i])
+            word_list.update(li)       
+
     else: # if sent is an int index
         word_list = ldavFrom.corpus.view_contexts('sentence',
                     as_strings=True)[ind].tolist()
 
+    word_list = list(word_list)
     # Before trying ldavTo.sim_word_word, make sure all words
     # in the list exist in ldavTo.corpus.
     for w in word_list:
@@ -258,19 +268,21 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10):
             word_list.append(replacement)
             print 'BEAGLE composite model replaced {0} by {1}'.format(w, 
                                                         replacement)
-    
+   
     # from ldavFrom:sent -> ldavTo:topics -> ldavTo:sent(doc)
     tops = ldavTo.sim_word_top(word_list).first_cols[:(ldavTo.model.K/6)]
     tops = [int(t) for t in tops]
-    sim_sents = ldavTo.sim_top_doc(tops, print_len=print_len, as_strings=False)
-    lc = sim_sents['i'][:print_len]
-    
-    tokenized_sents, orig_sents = [], []
-    for i in lc:
-        tokenized_sents.append(ldavTo.corpus.view_contexts('sentence', as_strings=True)[i])
-        orig_sents.append(ldavTo.corpus.sentences[i])
-
-    return tokenized_sents, orig_sents, sim_sents
+    print "Related topics: ", tops 
+    # sim_sents = ldavTo.sim_top_doc(tops, print_len=print_len, 
+    #                                as_strings=False)
+    # lc = sim_sents['i'][:print_len]
+    # tokenized_sents, orig_sents = [], []
+    # for i in lc:
+    #    tokenized_sents.append(ldavTo.corpus.view_contexts('sentence', as_strings=True)[i])
+    #   orig_sents.append(ldavTo.corpus.sentences[i])
+    sim_sents = ldavTo.sim_top_doc(tops, print_len=print_len,
+                                    label_fn=label_fn)
+    return sim_sents
 
 
 

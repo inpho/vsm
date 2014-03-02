@@ -478,6 +478,37 @@ def url_metadata(corpus, ctx_type, coll_dir):
                     urls.append( unidecode(s))
     return urls
 
+def page_url(corpus, ctx_type, book_path, book_id, jsonfile):
+    """
+    Modified htrc_*_label_fn. The individual volumes don't have 'book' as a context type.
+    """
+    import json
+    from vsm.viewer import doc_label_name
+    import re
+
+    urls = []
+    corp_md = corpus.view_metadata('page')
+
+    jsonpath = os.path.join(book_path, jsonfile)
+    with open(jsonpath, 'r') as f:
+        md = json.load(f)
+        url = ''
+        li = sorted(md['items'], key=lambda k: int(k['lastUpdate']))
+        url = li[-1]['itemURL']
+            
+        if ctx_type == 'book':
+            urls.append( unidecode(url))
+        else: # urls for pages
+            page_md = corpus.view_metadata('page')
+            files = page_md[doc_label_name('page')] 
+            
+            nums = [re.findall('[1-9][0-9]*', a)[-1] for a in files]
+            for i in nums:
+                s = url + '?urlappend=%3Bseq={0}'.format(i)
+                urls.append( unidecode(s))
+    return urls
+
+
 def add_link_(s, addee):
     """
     Returns <a href="s">addee</a> 
