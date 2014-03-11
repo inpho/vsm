@@ -1,5 +1,4 @@
 import numpy as np
-
 from vsm.corpus import Corpus
 from vsm.corpus.util import *
 from vsm.extensions.corpuscleanup import apply_stoplist_len
@@ -8,7 +7,8 @@ import os
 import re
 
 __all__ = ['CorpusSent', 'sim_sent_sent', 'sim_sent_sent_across',
-        'file_tokenize', 'file_corpus', 'dir_tokenize', 'dir_corpus']
+        'file_tokenize', 'file_corpus', 'dir_tokenize', 'dir_corpus',
+        'extend_sdd', 'extend_across']
 
 
 class CorpusSent(Corpus):
@@ -284,6 +284,105 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10,
                                     label_fn=label_fn)
     return sim_sents
 
+
+def extend_sdd(args, v):
+    """
+    Extend table resulting from sim_doc_doc with 
+    label_fn = vol_link_fn. Adds an ArgumentMap column.
+    """
+    from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
+
+    sdd = v.sim_doc_doc(args, label_fn=vol_link_fn)
+    table_str = sdd._repr_html_()
+    rows = table_str.split('</tr>') 
+
+    rows[0] = re.sub("2", "3", rows[0]) + '</tr>'
+    rows[1] += '<th style="text-align: center; background: #EFF2FB;">Argument\
+                Map</th></tr>'
+    
+    for i in xrange(2,len(rows)-1):
+        a = rows[i].split('</a>, ')
+        arg = a[1].split(',')[0]
+
+        arg_map = find_arg(arg) 
+        rows[i] += '<td>{0}</td></tr>'.format(arg_map)
+
+    return ''.join(rows)
+
+
+def extend_across(vFrom, vTo, beagle_v, args, txtFrom, txtTo):
+    """
+    Extend table resulting from sim_sent_sent_across with
+    the label_fn= vol_link_fn. Adds ArgumentMap and Novelty columns.
+    """
+    across = sim_sent_sent_across(vFrom, vTo, beagle_v, args)
+    table_str = across._repr_html_()
+    rows = table_str.split('</tr>') 
+
+    rows[0] = re.sub("2", "4", rows[0]) + '</tr>'
+    rows[1] += '<th style="text-align: center; background: #EFF2FB;">\
+                Argument Map</th><th style="text-align: center; background: \
+                #EFF2FB;">Novelty</th></tr>'
+    
+    for i in xrange(2,len(rows)-1):
+        a = rows[i].split('</a>, ')
+        arg = a[1].split(',')[0]
+
+        novelty = in_ed1(arg, txtTo, txtFrom)
+        arg_map = find_arg(novelty)
+        
+        rows[i] += '<td>{0}</td><td>{1}</td></tr>'.format(arg_map, novelty)
+
+    return ''.join(rows)
+
+  
+def in_ed1(idx, difftxt, ed1txt):
+    """
+    Only for sim_sent_sent_across.
+    Return ind from ed1txt if i has a equal match.
+    Else return 'i'th entry in difftxt.
+    
+    """
+    path = '/var/inphosemantics/data/20131214/Washburn/vsm-data/'
+    
+    with open(path + ed1txt, 'r') as f1:
+        ed1 = f1.read()
+        ed1 = ed1.split(',') 
+        
+        with open(path + difftxt, 'r') as f:
+            txt = f.read() 
+            entries = txt.split(',')
+            
+            for i in xrange(len(entries)): 
+                if entries[i].startswith(str(idx) + ' '):
+                    if '=' in entries[i]:
+                        return ed1[i]
+                    else:
+                        prob = entries[i].split(' ')[1]
+                        return ed1[i] + ' ' + prob
+            # didn't find idx in the table.
+            return 'new'
+
+def find_arg(i):
+    """
+    Find the arg (e.g. '422')  if i is one of the analyzed args,
+    otherwise return ''
+    """
+    import json
+
+    path = '/var/inphosemantics/data/20131214/Washburn/vsm-data/'
+    
+    if i == 'new' or '(' in i:
+        return ''
+
+    i = int(i)
+    with open(path + 'arg_indices.json', 'r') as jsonf:
+        indices = json.load(jsonf)
+        
+        for k in indices:
+            if i in indices[k]:
+                return str(k)
+        return ''
 
 
 def file_tokenize(text):
