@@ -90,30 +90,16 @@ class LDAGibbsViewer(object):
         * :doc:`lda_sim_doc_doc`
             Computes and sorts the cosine similarity values between a
             document or list of documents and every document in the topic space.
-        * :doc:`lda_simmat_words`
-            Calculates the similarity matrix for a given list of words.
-        * :doc:`lda_simmat_docs`
-            Calculates the similarity matrix for a given list of documents.
-        * :doc:`lda_simmat_topics`
-            Calculates the similarity matrix for a given list of topics.
-        * :doc:`cluster_topics`
-            Clusters topics by a spceificed clustering algorithm. 
-            Currently it supports K-means, Spectral Clustering and Affinity
-            Propagation algorithms. K-means and spectral clustering cluster
-            topics into a given number of clusters, whereas affinity
-            propagation does not require the fixed cluster number. 
+        * :doc:`lda_dismat_words`
+            Calculates the distance matrix for a given list of words.
+        * :doc:`lda_dismat_docs`
+            Calculates the distance matrix for a given list of documents.
+        * :doc:`lda_dismat_topics`
+            Calculates the distance matrix for a given list of topics.
         * :doc:`logp_plot`
             Returns a plot of log probabilities for the specified range of 
             the MCMC chain used to fit a topic model by `LDAGibbs`.
             The function requires matplotlib package.
-        * :doc:`isomap_topics`
-            Takes document(s) or topic(s) and plots an isomap for 
-            the documents similar/relevant to the query. The function plots
-            relevant documents or topics by using the isomap algorithm
-            in `sklearn` package.
-        * :doc:`isomap_docs`
-            Takes document or topics and plots an isomap for the documents
-            similar/relevant to the query.
     """
     def __init__(self, corpus, model):
         """
@@ -344,7 +330,8 @@ class LDAGibbsViewer(object):
         :param show: shows plot if true.
         :type d_indices: boolean
         
-        :returns: plt : matplotlib.pyplot object.
+        :returns: a matplotlib.pyplot object.
+             Contains the topic proportion histogram.
         """
 
         if len(d_indices) == 0:
