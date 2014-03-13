@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from vsm import (
     map_strarr as _map_strarr_,
@@ -66,6 +67,9 @@ class LDAGibbsViewer(object):
             The entropy of topic k is calculated by summing P(d|k) * log(P(d|k))
             over all document d, and is thought to measure how informative a
             given topic is to select documents.
+        * :doc:`topic_hist`
+            Draws a histogram showing the proportions of topics within a 
+            selected set of documents. 
         * :doc:`doc_topics`
             Returns distribution P(K|D=d) over topics K for document d.
         * :doc:`word_topics`
@@ -322,6 +326,50 @@ class LDAGibbsViewer(object):
             k_arr[i].col_header += ' ({0:.5f})'.format(ent[k_indices[i]])
  
         return k_arr
+
+
+    def topic_hist(self, k_indices=[], d_indices=[], show=True):
+        """
+        Draw a histogram showing the proportion of topics within a set of
+        documents specified by d_indices. 
+
+        :param k_indices: Specifies the topics for which proportions are 
+             calculated.
+        :type doc: list of int
+        
+        :param d_indices: Specifies the document in which topic proportions
+             are culculated. 
+        :type d_indices: list of int
+
+        :param show: shows plot if true.
+        :type d_indices: boolean
+        
+        :returns: plt : matplotlib.pyplot object.
+        """
+
+        if len(d_indices) == 0:
+            d_indices = xrange(len(self.model.W))
+
+        arr = self.model.theta_d(d_indices).sum(axis=0)
+
+        if len(k_indices) != 0:
+            arr = arr[k_indices]
+
+        l = _enum_sort_(arr)
+        rank, prob = zip(*l)
+
+        y_pos = np.arange(len(rank))
+        fig = plt.figure(figsize=(10,10))
+
+        plt.barh(y_pos, list(prob))
+        plt.yticks(y_pos, rank)
+        plt.xlabel('Frequencies')
+        plt.title('Topic Proportions')
+
+        if show:
+            plt.show()
+
+        return plt
 
 
     def doc_topics(self, doc, print_len=10):
@@ -796,7 +844,6 @@ class LDAGibbsViewer(object):
         :returns: a matplotlib.pyplot object.
             Contains the log probability plot. 
         """
-        import matplotlib.pyplot as plt
 
         # If range is not specified, include the whole chain.
         if len(range) == 0:
