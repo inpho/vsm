@@ -285,14 +285,14 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10,
     return sim_sents
 
 
-def extend_sdd(args, v):
+def extend_sdd(args, v, print_len=10):
     """
     Extend table resulting from sim_doc_doc with 
     label_fn = vol_link_fn. Adds an ArgumentMap column.
     """
     from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
 
-    sdd = v.sim_doc_doc(args, label_fn=vol_link_fn)
+    sdd = v.sim_doc_doc(args, label_fn=vol_link_fn, print_len=print_len)
     table_str = sdd._repr_html_()
     rows = table_str.split('</tr>') 
 
@@ -310,12 +310,14 @@ def extend_sdd(args, v):
     return ''.join(rows)
 
 
-def extend_across(vFrom, vTo, beagle_v, args, txtFrom, txtTo):
+def extend_across(vFrom, vTo, beagle_v, args, txtFrom, txtTo, print_len=10):
     """
     Extend table resulting from sim_sent_sent_across with
     the label_fn= vol_link_fn. Adds ArgumentMap and Novelty columns.
     """
-    across = sim_sent_sent_across(vFrom, vTo, beagle_v, args)
+    from vsm.extensions.htrc import add_link_
+
+    across = sim_sent_sent_across(vFrom, vTo, beagle_v, args, print_len=print_len)
     table_str = across._repr_html_()
     rows = table_str.split('</tr>') 
 
@@ -330,7 +332,16 @@ def extend_across(vFrom, vTo, beagle_v, args, txtFrom, txtTo):
 
         novelty = in_ed1(arg, txtTo, txtFrom)
         arg_map = find_arg(novelty)
-        
+       
+        # add link to novelty when it's found in the corpusFrom.
+        if not novelty == 'new':
+            li = novelty.split(' ')
+            idx = int(li[0])
+            md = vFrom.corpus.view_metadata('sentence')[idx]
+            link = add_link_(md['page_urls'], md['sentence_label'])
+            li[0] = link
+            novelty = ' '.join(li)
+
         rows[i] += '<td>{0}</td><td>{1}</td></tr>'.format(arg_map, novelty)
 
     return ''.join(rows)

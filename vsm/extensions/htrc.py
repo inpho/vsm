@@ -478,6 +478,7 @@ def url_metadata(corpus, ctx_type, coll_dir):
                     urls.append( unidecode(s))
     return urls
 
+
 def page_url(corpus, ctx_type, book_path, book_id, jsonfile):
     """
     Modified htrc_*_label_fn. The individual volumes don't have 'book' as a context type.
