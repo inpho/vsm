@@ -15,6 +15,10 @@ blobs =  datasets.make_blobs(n_samples=n_samples, random_state=8)
 S = blobs[0]
 
 def multi_k(samples, n=30, distr=(10,30), cutoff=None):
+    """
+    Oveall procedure run. Returns cutplot and category_func.
+    """
+    
     import matplotlib.pyplot as plt
 
     mat, cutplot = connection_matrix(samples=samples, n=n, distr=distr)
