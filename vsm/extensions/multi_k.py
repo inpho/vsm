@@ -14,7 +14,7 @@ blobs =  datasets.make_blobs(n_samples=n_samples, random_state=8)
 # S = noisy_circles[0]
 S = blobs[0]
 
-def multi_k(samples, n=30, distr=(10,30), cutoff=None):
+def multi_k(samples, n=30, distr=(10,30), cutoff=None, n_cls=None):
     """
     Oveall procedure run. Returns cutplot and category_func.
     """
@@ -24,7 +24,7 @@ def multi_k(samples, n=30, distr=(10,30), cutoff=None):
     mat, cutplot = connection_matrix(samples=samples, n=n, distr=distr)
 
     if cutoff == None:
-        cutoff = find_cutoff(cutplot)
+        cutoff = find_cutoff(cutplot, n_cls=n_cls)
     print "Weight cutoff is set to ", cutoff
     category_func = category_mat(samples, mat, cutplot, cutoff=cutoff)
 
@@ -79,18 +79,24 @@ def connection_matrix(samples, n=10, distr=(10,30)):
     return mat, cutplot
 
 
-def find_cutoff(cutplot):
+def find_cutoff(cutplot, n_cls=None):
     """
-    Finds the weight cutoff based on the cutplot.
-    """
+    Finds the weight cutoff based on the longest run in cutplot.
+    If n_cls is provided, finds the cutoff point where n_cls
+    clusters are formed."""
     from itertools import groupby
+
+    if n_cls != None:
+        for c in cutplot:
+            if c[1] == n_cls:
+                return c[0]
 
     group = groupby(cutplot[:,1])
     val = max(group, key=lambda k: len(list(k[1])))[0]
     
     for c in cutplot:
         if c[1] == val:
-            return c[0] + 0.1
+            return c[0] + 0.01
 
 
 def category_mat(samples, mat, cutplot, cutoff=None):
