@@ -300,6 +300,70 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     return c
 
 
+def json_corpus(json_file, doc_key, nltk_stop=False,
+               stop_freq=0, add_stop=None, metadata=None):
+    """
+    `json_corpus` is a convenience function for generating Corpus
+    objects from a json file.
+
+    `json_corpus` will perform word-level tokenization. 
+    It will also strip punctuation and arabic numerals
+    outside the range 1-29. All letters are made lowercase.
+
+    :param json_file: Json file name containing documents and metadata.
+    :type json_file: string-like
+    
+    :param doc_key: Name of the key that indicates a document in each entry.
+    :type doc_key: string-like
+    
+    :param nltk_stop: If `True` then the corpus object is masked using
+        the NLTK English stop words. Default is `False`.
+    :type nltk_stop: boolean, optional
+
+    :param stop_freq: The upper bound for a word to be masked on the basis of its
+        collection frequency. Default is 0.
+    :type stop_freq: int, optional
+
+    :param add_stop: A list of stop words. Default is `None`.
+    :type add_stop: array-like, optional
+
+    :returns: c : a Corpus object
+        Contains the tokenized corpus built from the input plain-text
+        corpus. Document tokens are named `documents`.
+
+    :See Also: :class:`vsm.corpus.Corpus`, 
+        :meth:`vsm.corpus.util.paragraph_tokenize`, 
+        :meth:`vsm.corpus.util.apply_stoplist`
+    """
+    import json
+
+    with open(json_file, 'r') as f:
+        json_data = json.load(f)
+
+    docs = []
+    metadata = []
+    for i in json_data:
+        docs.append(i.pop(doc_key, None).encode('ascii','ignore'))
+        metadata.append(i)
+
+    docs = [word_tokenize(d) for d in docs]
+
+    corpus = sum(docs, [])
+    tok = np.cumsum(np.array([len(d) for d in docs]))
+
+    # add metadata
+    dtype = [('idx', np.array(tok).dtype),
+             ('document_label', np.array(metadata).dtype)]
+    tok = np.array(zip(tok, metadata), dtype=dtype)
+
+    
+    c = Corpus(corpus, context_data=[tok], context_types=['document'])
+    c = apply_stoplist(c, nltk_stop=nltk_stop,
+                       freq=stop_freq, add_stop=add_stop)
+
+    return c
+
+
 
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
     """
