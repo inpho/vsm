@@ -220,37 +220,34 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log']):
                 f.write(page)
 
 
-def htrc_load_metadata_1315():
-    """
-    Loads hathitrust metadata for the 1315 volumes.
-    """
+def htrc_load_metadata(filename):
     import os
     import json
-
-    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-1315/'
-                'htrc-1315-metadata.json')
-
+    
     with open(filename) as f:
         metadata = json.load(f)
 
     return metadata
+
+def htrc_load_metadata_1315():
+    """
+    Loads hathitrust metadata for the 1315 volumes.
+    """
+
+    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-1315/'
+                'htrc-1315-metadata.json')
+
+    return htrc_load_metadata(filename)
 
 
 def htrc_load_metadata_86():
     """
     Loads hathitrust metadata for the 86 volumes.
     """
-    import os
-    import json
-
     filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-86/'
                 'htrc-anthropomorphism-86-metadata.json')
 
-    with open(filename) as f:
-        metadata = json.load(f)
-
-    return metadata
-
+    return htrc_load_metadata(filename)
 
 def htrc_get_titles(metadata, vol_id):
     """
@@ -265,6 +262,32 @@ def htrc_get_titles(metadata, vol_id):
         print 'Volume ID not found:', vol_id
         raise
 
+def htrc_label_fn(metadata):
+    """
+    This function takes a metadata and returns labels that consist of 
+    file names which are pages and book titles.
+
+    :param metadata: Strucutred array that has 'file' and 'book_label' field.
+        Most likely the output of Corpus.view_metadata('page').
+    :type metadata: array
+
+    :returns: An array of labels that consist of file names and book titles.
+
+    :See Also: :meth: Corpus.view_metadata
+    """
+    #TODO: Complete this function
+    #TODO: Figure out the difference between metadata and md objects
+    md = htrc_load_metadata(path)
+
+    # TODO: figure out why htrc_get_titles takes both md and a v from metadata
+    titles = []
+    for v in metadata['book_label']:
+        title = unidecode(htrc_get_titles(md, v)[0])
+        if len(title) > 60:
+            title = title[:60]
+        titles.append(title)
+
+    return np.array(titles)
 
 def htrc_label_fn_86(metadata):
     """
@@ -299,7 +322,7 @@ def htrc_label_fn_86(metadata):
 def htrc_label_fn_1315(metadata):
     """
     A customized label function for hathitrust 1315 volumes.
-    It loads the metadata of htrc 86 and returns book title labels.
+    It loads the metadata of htrc 1315 and returns book title labels.
 
     :param metadata: Strucutred array that has 'book_label' field.
         Most likely the output of Corpus.view_metadata('book').
@@ -362,6 +385,14 @@ def add_link(s):
         a += s
         a += '</a>'
         return a
+
+def htrc_label_link_fn(metadata):
+    """
+    A label function which includes links to the volumes to open on the
+    hathitrust website.
+    """
+    # TODO: complete this function
+    return None
 
 def htrc_label_link_fn_86(metadata):
     """
