@@ -527,7 +527,7 @@ def coll_tokenize(books, book_names):
 
 
 #TODO: This should be a whitelist not a blacklist
-def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
+def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle', '.err'],
                 nltk_stop=True, stop_freq=1, add_stop=None):
     """
     `coll_corpus` is a convenience function for generating Corpus
