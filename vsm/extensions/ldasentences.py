@@ -260,17 +260,19 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10,
     word_list = list(word_list)
     # Before trying ldavTo.sim_word_word, make sure all words
     # in the list exist in ldavTo.corpus.
+    wl = []
     for w in word_list:
         if w not in ldavTo.corpus.words:
             words = beagleviewer.sim_word_word(w)['word']
             replacement = first_in_corp(ldavTo.corpus, words)
-            word_list.remove(w)
-            word_list.append(replacement)
+            wl.append(replacement)
             print 'BEAGLE composite model replaced {0} by {1}'.format(w, 
                                                         replacement)
-   
+        else:
+            wl.append(w)
+    
     # from ldavFrom:sent -> ldavTo:topics -> ldavTo:sent(doc)
-    tops = ldavTo.sim_word_top(word_list).first_cols[:(ldavTo.model.K/6)]
+    tops = ldavTo.sim_word_top(wl).first_cols[:(ldavTo.model.K/6)]
     tops = [int(t) for t in tops]
     print "Related topics: ", tops 
     # sim_sents = ldavTo.sim_top_doc(tops, print_len=print_len, 
