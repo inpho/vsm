@@ -300,11 +300,12 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     return c
 
 
-def json_corpus(json_file, doc_key, nltk_stop=False,
-               stop_freq=0, add_stop=None, metadata=None):
+def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
+               stop_freq=0, add_stop=None):
     """
     `json_corpus` is a convenience function for generating Corpus
-    objects from a json file.
+    objects from a json file. It construct a corpus, document labels
+    and metadata respectively from the specified fields in the json file.
 
     `json_corpus` will perform word-level tokenization. 
     It will also strip punctuation and arabic numerals
@@ -315,6 +316,11 @@ def json_corpus(json_file, doc_key, nltk_stop=False,
     
     :param doc_key: Name of the key that indicates a document in each entry.
     :type doc_key: string-like
+
+    :param label_key: Name of the key used for document labels. Labels are 
+    used when a viewer function outputs a list of documents. Any field other
+    than `doc_key` and `label_key` is stored as metadata.
+    :type label_key: string-like
     
     :param nltk_stop: If `True` then the corpus object is masked using
         the NLTK English stop words. Default is `False`.
@@ -341,20 +347,23 @@ def json_corpus(json_file, doc_key, nltk_stop=False,
         json_data = json.load(f)
 
     docs = []
+    label = []
     metadata = []
     for i in json_data:
         docs.append(i.pop(doc_key, None).encode('ascii','ignore'))
-        metadata.append(i)
+        label.append(i.pop(label_key, None))
+        metadata.append(i)   # metadata are all the rest
 
     docs = [word_tokenize(d) for d in docs]
 
     corpus = sum(docs, [])
     tok = np.cumsum(np.array([len(d) for d in docs]))
 
-    # add metadata
+    # add document label and metadata
     dtype = [('idx', np.array(tok).dtype),
-             ('document_label', np.array(metadata).dtype)]
-    tok = np.array(zip(tok, metadata), dtype=dtype)
+             ('document_label', np.array(label).dtype),
+             ('metadata', np.array(metadata).dtype)]
+    tok = np.array(zip(tok, label, metadata), dtype=dtype)
 
     
     c = Corpus(corpus, context_data=[tok], context_types=['document'])
