@@ -225,6 +225,11 @@ class LDAGibbsViewer(object):
         :param as_string: If `True`, each topic displays words rather than its
             integer representation. Default is `True`.
         :type as_string: boolean, optional
+ 
+        :param compact_view: If `True`, topics are represented with their
+            words and their probabilities. Otherwise, topics are represented
+            as their top `print_len` words.
+        :type compact_view: boolean, optional       
         
         :returns: table : :class:`DataTable`.
             A structured array of topics.
@@ -241,6 +246,10 @@ class LDAGibbsViewer(object):
         if as_strings:
 	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
 				 field_name='word')
+        else:
+            ind = [self.corpus.words_int[word] for word in self.corpus.words]
+            k_arr = _enum_matrix_(phi, indices=ind, field_name='word')
+
 
         # without probabilities, just words
         if compact_view:
@@ -278,6 +287,11 @@ class LDAGibbsViewer(object):
         :param as_string: If `True`, each topic displays words rather than its
             integer representation. Default is `True`.
         :type as_string: boolean, optional
+        
+        :param compact_view: If `True`, topics are represented with their
+            words and their probabilities. Otherwise, topics are represented
+            as their top `print_len` words.
+        :type compact_view: boolean, optional
         
         :returns: k_arr : :class:`DataTable`.
             A structured array of topics sorted by entropy.
@@ -438,8 +452,9 @@ class LDAGibbsViewer(object):
         return Z_w
 
 
-    def sim_top_top(self, topic_or_topics, weights=None, 
-                    print_len=10, filter_nan=True, sim_fn=_row_kld_):
+    def sim_top_top(self, topic_or_topics, weights=None, sim_fn=_row_kld_, 
+                    show_topics=True, print_len=10, filter_nan=True, 
+                    as_strings=True, compact_view=True):
         """
         Takes a topic or list of topics (by integer index) and returns
         a list of topics sorted by the cosine values between a given
@@ -452,6 +467,11 @@ class LDAGibbsViewer(object):
             Default uses equal weights (i.e. arithmetic mean)
         :type weights: list of floating point, optional
 
+        :param show_topics: If `True`, topics are represented by their number
+            and distribution over words. Otherwise only topic numbers
+            are shown. Default is `True`.
+         :type show_topics: boolean, optional
+
         :param print_len: Number of topics printed by pretty-pringing function
             Default is 10.
         :type print_len: int, optional       
@@ -460,15 +480,49 @@ class LDAGibbsViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
+        :param as_strings: If `True`, words of each topic are represented as
+            strings. Otherwise they are represented by their integer
+            representation. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :param compact_view: If `True`, topics are represented with their
+            words and their probabilities. Otherwise, topics are represented
+            as their top `print_len` words.
+        :type compact_view: boolean, optional
+
         :returns: :class:`LabeledColumn`.
             A 2-dim array containing topics and their cosine values to 
             `topic_or_topics`. 
         
         :See Also: :meth:`vsm.viewer.similarity.sim_top_top`
         """
-        return _sim_top_top_(self.model.top_word, topic_or_topics, 
+        sim = _sim_top_top_(self.model.top_word, topic_or_topics, 
                              norms=self._topic_norms, weights=weights, 
                              print_len=print_len, filter_nan=filter_nan, sim_fn=sim_fn)
+
+        if show_topics:
+            topic_or_topics = [topic_or_topics]
+            k_indices = sim[sim.dtype.names[0]]
+
+            # Retrieve topics
+            if compact_view:
+                k_arr = self.topics(print_len=print_len, k_indices=k_indices,
+                    as_strings=as_strings, compact_view=compact_view)
+                k_arr.table_header = 'Sorted by Topic Similarity'
+                return k_arr
+
+            k_arr = self.topics(k_indices=k_indices, print_len=print_len,
+                                as_strings=as_strings, compact_view=compact_view)
+
+            # Relabel results
+            k_arr.table_header = 'Sorted by Word Similarity'
+            for i in xrange(sim.size):
+                k_arr[i].col_header += ' ({0:.5f})'.format(sim[i][1])
+
+            return k_arr
+
+        return sim 
+
 
 
     def sim_top_doc(self, topic_or_topics, weights=[], filter_words=[],
@@ -583,6 +637,11 @@ class LDAGibbsViewer(object):
             representation. Default is `True`.
         :type as_strings: boolean, optional
 
+        :param compact_view: If `True`, topics are represented with their
+            words and their probabilities. Otherwise, topics are represented
+            as their top `print_len` words.
+        :type compact_view: boolean, optional
+        
         :returns: :class:`LabeledColumn`.
             A structured array of topics sorted by their cosines values 
             with `word_or_words`.

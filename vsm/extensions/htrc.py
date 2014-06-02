@@ -449,6 +449,7 @@ def url_metadata(corpus, ctx_type, coll_dir):
 
     import json
     from vsm.viewer import doc_label_name
+    import re
 
     urls = []
     corp_md = corpus.view_metadata('book')
@@ -468,10 +469,69 @@ def url_metadata(corpus, ctx_type, coll_dir):
 
             if ctx_type == 'book':
                 urls.append( unidecode(url))
-            else:
-                for i in xrange(1, len(booklist)):
+            else: # urls for pages
+                page_md = corpus.view_metadata('page')
+                files = [a for a in page_md['file'] if a.startswith(book_label)]
+                nums = [re.findall('[1-9][0-9]*', a)[-1] for a in files]
+                for i in nums: 
                     s = url + '?urlappend=%3Bseq={0}'.format(i)
                     urls.append( unidecode(s))
     return urls
 
 
+def page_url(corpus, ctx_type, book_path, book_id, jsonfile):
+    """
+    Modified htrc_*_label_fn. The individual volumes don't have 'book' as a context type.
+    """
+    import json
+    from vsm.viewer import doc_label_name
+    import re
+
+    urls = []
+    corp_md = corpus.view_metadata('page')
+
+    jsonpath = os.path.join(book_path, jsonfile)
+    with open(jsonpath, 'r') as f:
+        md = json.load(f)
+        url = ''
+        li = sorted(md['items'], key=lambda k: int(k['lastUpdate']))
+        url = li[-1]['itemURL']
+            
+        if ctx_type == 'book':
+            urls.append( unidecode(url))
+        else: # urls for pages
+            page_md = corpus.view_metadata('page')
+            files = page_md[doc_label_name('page')] 
+            
+            nums = [re.findall('[1-9][0-9]*', a)[-1] for a in files]
+            for i in nums:
+                s = url + '?urlappend=%3Bseq={0}'.format(i)
+                urls.append( unidecode(s))
+    return urls
+
+
+def add_link_(s, addee):
+    """
+    Returns <a href="s">addee</a> 
+    For example, <a href="page_url">page_label</a>
+    """
+    if s.startswith('http'):
+        a = '<a href="{0}" target="_blank">'.format(s)
+        a += addee
+        a += '</a>'
+        return a
+
+def vol_link_fn(md): 
+    """
+    Not a generalized function for individual htrc volume with page links
+    and sentence labels. 'sentences_label' is CorpusSent.sentences which
+    is an array or original sentences.
+
+    :ref: vsm.extensions.ldasentences CorpusSent
+    """
+    # md == corpus.view_metadata('sentence')
+    links = [add_link_(x['page_urls'], x['page_label']) for x in md]
+    labels = ['{0}, {1}, {2}'.format(l, i, s) for (l,i,s) in
+             zip(links, md['sentence_label'], md['sentences_label'])]
+
+    return np.array(labels)

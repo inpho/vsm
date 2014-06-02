@@ -70,7 +70,11 @@ def calc_col_num(li, max_width):
     Calculates the total width given subcol_widths.
     """
     w = sum(li)
-    return max_width/w
+    num = max_width/w
+    if num == 0:
+        return 1
+    return num
+
 
 def compact_col_widths(dtype, n):
     """
