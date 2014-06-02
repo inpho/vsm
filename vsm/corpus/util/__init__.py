@@ -6,7 +6,7 @@ import nltk
 
 __all__ = ['strip_punc', 'rem_num', 'rehyph', 'add_metadata',
            'apply_stoplist', 'filter_by_suffix', 'word_tokenize',
-           'sentence_tokenize', 'paragraph_tokenize']
+           'sentence_tokenize', 'paragraph_tokenize', 'change_label']
 
 
 
@@ -65,6 +65,18 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
     corpus.context_data[i] = arr_add_field(md, new_field, metadata)
 
     return corpus
+
+
+def change_label(corp, oldlabel, newlabel):
+    """
+    Returns a `Corpus` with modified metadata label in context_data.
+    """
+    for ctx in corp.context_data:
+        names = [a  if a != oldlabel else newlabel for a in ctx.dtype.names]
+        tup = tuple(names)
+        ctx.dtype.names = tup   
+    
+    return corp
 
 
 def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
