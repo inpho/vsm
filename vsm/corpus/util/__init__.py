@@ -6,7 +6,7 @@ import nltk
 
 __all__ = ['strip_punc', 'rem_num', 'rehyph', 'add_metadata',
            'apply_stoplist', 'filter_by_suffix', 'word_tokenize',
-           'sentence_tokenize', 'paragraph_tokenize']
+           'sentence_tokenize', 'paragraph_tokenize', 'change_label']
 
 
 
@@ -67,26 +67,16 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
     return corpus
 
 
-def change_label(c_path, oldlabel, newlabel, new_path='', corpussent=False):
+def change_label(corp, oldlabel, newlabel):
     """
-    modify metadata label in context_data.
+    Returns a `Corpus` with modified metadata label in context_data.
     """
-    from vsm.corpus import Corpus
-    from vsm.extensions.ldasentences import CorpusSent
-
-    if not new_path:
-        new_path  = c_path
-        
-    c = Corpus.load(c_path)
-    if corpussent:
-        c = CorpusSent.load(c_path)
-        
-    for ctx in c.context_data:
+    for ctx in corp.context_data:
         names = [a  if a != oldlabel else newlabel for a in ctx.dtype.names]
         tup = tuple(names)
         ctx.dtype.names = tup   
     
-    c.save(new_path)
+    return corp
 
 
 def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
