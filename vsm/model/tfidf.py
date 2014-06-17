@@ -63,16 +63,17 @@ class TfIdf(BaseModel):
         the word type occurs in no document at all, in which case the IDF
         value is undefined.
     """
-    def __init__(self, tf_matrix=None, context_type=None):
+    def __init__(self, tf_matrix=np.array([]), context_type=None):
 
-        #`context_type` here is purely for bookkeeping purposes
         self.context_type = context_type
-        if tf_matrix:
+
+        if tf_matrix.size > 0:
             self.matrix = tf_matrix.copy()
             self.matrix = self.matrix.tocsr()
             self.matrix = self.matrix.astype(np.float64)
         else:
-            self.matrix = np.array([])
+            self.matrix = tf.matrix
+
         self.undefined_rows = []
 
 

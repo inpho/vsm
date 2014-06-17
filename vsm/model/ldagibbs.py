@@ -121,6 +121,13 @@ class LDAGibbs(object):
             for i, w in enumerate(doc):
                 self.update_z(d, i, w)
 
+    @property
+    def word_top(self):
+        return self.top_word.T
+
+    @property
+    def top_doc(self):
+        return self.doc_top.T
 
     def train(self, itr=1000, verbose=True):
         """

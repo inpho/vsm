@@ -8,13 +8,7 @@ from vsm import (
     isstr as _isstr_,
     isint as _isint_)
 
-from vsm.linalg import (
-    row_norms as _row_norms_,
-    row_cosines as _row_cosines_,
-    row_cos_mat as _row_cos_mat_,
-    posterior as _posterior_,
-    row_kld as _row_kld_,
-    row_js_mat as _row_js_mat_)
+from vsm.linalg import JS_div as _JS_div_
 
 from labeleddata import (
     LabeledColumn as _LabeledColumn_,
@@ -30,16 +24,13 @@ from vsm.viewer import (
     def_label_fn as _def_label_fn_)
 
 from similarity import (
-    sim_word_word as _sim_word_word_,
-    sim_doc_doc as _sim_doc_doc_,
-    sim_top_top as _sim_top_top_,
-    sim_top_doc as _sim_top_doc_,
-    sim_word_top as _sim_word_top_,
-    dismat_words as _dismat_words_,
-    dismat_documents as _dismat_documents_,
-    dismat_topics as _dismat_topics_)
+    dist_doc_doc as _dist_doc_doc_,
+    dist_top_top as _dist_top_top_,
+    dist_top_doc as _dist_top_doc_,
+    dist_word_top as _dist_word_top_,
+    dismat_doc as _dismat_doc_,
+    dismat_top as _dismat_top_)
 
-from manifold import Manifold
 
 
 
@@ -106,13 +97,6 @@ class LDAGibbsViewer(object):
         """
         self.corpus = corpus
         self.model = model
-        self._word_norms_ = None
-        self._doc_norms_ = None
-        self._topic_norms_ = None
-        self._word_sums_ = None
-        self._doc_sums_ = None
-        self._topic_sums_w_ = None
-        self._topic_sums_d_ = None
 
 
     @property
@@ -121,83 +105,11 @@ class LDAGibbsViewer(object):
         """
         return _doc_label_name_(self.model.context_type)
 
-
-    @property
-    def _word_norms(self):
-        """
-        """
-        if self._word_norms_ is None:
-            self._word_norms_ = _row_norms_(self.model.top_word.T)            
-
-        return self._word_norms_
-
-
-    @property
-    def _doc_norms(self):
-        """
-        """
-        if self._doc_norms_ is None:
-            self._doc_norms_ = _row_norms_(self.model.doc_top)
-
-        return self._doc_norms_
-
-
-    @property
-    def _topic_norms(self):
-        """
-        """
-        if self._topic_norms_ is None:
-            self._topic_norms_ = _row_norms_(self.model.top_word)
-
-        return self._topic_norms_
-
-
-    @property
-    def _word_sums(self):
-        """
-        """
-        if self._word_sums_ is None:
-            self._word_sums_ = self.model.top_word.sum(0)            
-
-        return self._word_sums_
-
-
-    @property
-    def _doc_sums(self):
-        """
-        """
-        if self._doc_sums_ is None:
-            self._doc_sums_ = self.model.doc_top.sum(1)
-
-        return self._doc_sums_
-
-
-    @property
-    def _topic_sums_w(self):
-        """
-        """
-        if self._topic_sums_w_ is None:
-            self._topic_sums_w_ = self.model.top_word.sum(1)
-
-        return self._topic_sums_w_
-
-
-    @property
-    def _topic_sums_d(self):
-        """
-        """
-        if self._topic_sums_d_ is None:
-            self._topic_sums_d_ = self.model.doc_top.sum(0)
-
-        return self._topic_sums_d_
-
-
     def _res_doc_type(self, doc):
         """
         """
         return _res_doc_type_(self.corpus, self.model.context_type, 
                               self._doc_label_name, doc)
-
 
     def _res_word_type(self, word):
         """
@@ -239,16 +151,16 @@ class LDAGibbsViewer(object):
 
         # Normalize the topic word matrix so that topics are
         # distributions
-        phi = (self.model.top_word[k_indices] / 
-               self._topic_sums_w[k_indices][:, np.newaxis])
+        phi = self.model.word_top[:,k_indices]
+        phi /= phi.sum(0)
         
         # Label data
         if as_strings:
-	    k_arr = _enum_matrix_(phi, indices=self.corpus.words,
-				 field_name='word')
+	    k_arr = _enum_matrix_(phi.T, indices=self.corpus.words,
+                                  field_name='word')
         else:
             ind = [self.corpus.words_int[word] for word in self.corpus.words]
-            k_arr = _enum_matrix_(phi, indices=ind, field_name='word')
+            k_arr = _enum_matrix_(phi.T, indices=ind, field_name='word')
 
 
         # without probabilities, just words
@@ -272,8 +184,8 @@ class LDAGibbsViewer(object):
         return table
 
 
-    def topic_entropies(self, print_len=10, k_indices=[], as_strings=True, 
-                        compact_view=True):
+    #TODO: Use linalg.H to compute entropy
+    def topic_entropies(self, print_len=10, as_strings=True, compact_view=True):
         """
         Returns a list of topics sorted according to the entropy of 
         each topic. The entropy of topic k is calculated by summing 
@@ -301,11 +213,10 @@ class LDAGibbsViewer(object):
 
         # Normalize the document-topic matrix so that documents are
         # distributions
-        theta = (self.model.doc_top[:, k_indices] / 
-                 self._topic_sums_d[k_indices][np.newaxis, :])
+        theta = self.model.top_doc / self.model.top_doc.sum(0)
 
         # Compute entropy values for each topic
-        ent = -1 * (theta * np.log2(theta)).sum(0)
+        ent = -1 * (theta.T * np.log2(theta.T)).sum(0)
 
         # Sort topics according to entropies
         k_indices = _enum_sort_(ent)['i'][::-1]
@@ -394,7 +305,8 @@ class LDAGibbsViewer(object):
 
         # Normalize the document-topic matrix so that documents are
         # distributions
-        k_arr = self.model.doc_top[d, :] / self._doc_sums[d]
+        k_arr = self.model.top_doc[:,d]
+        k_arr /= k_arr.sum()
 
         # Index, sort and label data
         k_arr = _enum_sort_(k_arr).view(_LabeledColumn_)
@@ -452,9 +364,10 @@ class LDAGibbsViewer(object):
         return Z_w
 
 
-    def sim_top_top(self, topic_or_topics, weights=None, sim_fn=_row_kld_, 
-                    show_topics=True, print_len=10, filter_nan=True, 
-                    as_strings=True, compact_view=True):
+    def dist_top_top(self, topic_or_topics, weights=None, 
+                     dist_fn=_JS_div_, order='i', 
+                     show_topics=True, print_len=10, filter_nan=True, 
+                     as_strings=True, compact_view=True):
         """
         Takes a topic or list of topics (by integer index) and returns
         a list of topics sorted by the cosine values between a given
@@ -496,42 +409,43 @@ class LDAGibbsViewer(object):
         
         :See Also: :meth:`vsm.viewer.similarity.sim_top_top`
         """
-        sim = _sim_top_top_(self.model.top_word, topic_or_topics, 
-                             norms=self._topic_norms, weights=weights, 
-                             print_len=print_len, filter_nan=filter_nan, sim_fn=sim_fn)
+        Q = self.model.word_top / self.model.word_top.sum(0)
+
+        distances = _dist_top_top_(Q, topic_or_topics, weights=weights, 
+                                   print_len=print_len, filter_nan=filter_nan, 
+                                   dist_fn=dist_fn, order=order)
 
         if show_topics:
             topic_or_topics = [topic_or_topics]
-            k_indices = sim[sim.dtype.names[0]]
+            k_indices = distances[distances.dtype.names[0]]
 
             # Retrieve topics
             if compact_view:
                 k_arr = self.topics(print_len=print_len, k_indices=k_indices,
-                    as_strings=as_strings, compact_view=compact_view)
-                k_arr.table_header = 'Sorted by Topic Similarity'
+                                    as_strings=as_strings, 
+                                    compact_view=compact_view)
+                k_arr.table_header = 'Sorted by Topic Distance'
                 return k_arr
 
             k_arr = self.topics(k_indices=k_indices, print_len=print_len,
                                 as_strings=as_strings, compact_view=compact_view)
 
             # Relabel results
-            k_arr.table_header = 'Sorted by Word Similarity'
-            for i in xrange(sim.size):
-                k_arr[i].col_header += ' ({0:.5f})'.format(sim[i][1])
+            k_arr.table_header = 'Sorted by Topic Distance'
+            for i in xrange(distances.size):
+                k_arr[i].col_header += ' ({0:.5f})'.format(distances[i][1])
 
             return k_arr
 
-        return sim 
+        return distances 
 
 
 
-    def sim_top_doc(self, topic_or_topics, weights=[], filter_words=[],
-                    print_len=10, as_strings=True, label_fn=_def_label_fn_, 
-                    filter_nan=True, sim_fn=_row_cosines_):
+    def dist_top_doc(self, topic_or_topics, weights=[], filter_words=[],
+                     print_len=10, as_strings=True, label_fn=_def_label_fn_, 
+                     filter_nan=True, dist_fn=_JS_div_, order='i'):
         """
-        Takes a topic or list of topics (by integer index) and returns a 
-        list of documents sorted by the posterior probabilities of
-        documents given the topic.
+        Takes...
 
         :param topic_or_topics: Query topic(s) to which posterior probabilities
             are calculated.
@@ -567,12 +481,14 @@ class LDAGibbsViewer(object):
 
         :See Also: :meth:`def_label_fn`, :meth:`vsm.viewer.similarity.sim_top_doc`
         """
-        d_arr = _sim_top_doc_(self.corpus, self.model.doc_top, topic_or_topics, 
-                              self.model.context_type, weights=weights, 
-                              norms=self._doc_norms, print_len=print_len,
-                              as_strings=False, label_fn=label_fn, 
-                              filter_nan=filter_nan, sim_fn=sim_fn)
-        
+        Q = self.model.top_doc / self.model.top_doc.sum(0)
+
+        d_arr = _dist_top_doc_(topic_or_topics, Q, self.corpus,   
+                               self.model.context_type, weights=weights, 
+                               print_len=print_len, as_strings=False, 
+                               label_fn=label_fn, filter_nan=filter_nan, 
+                               dist_fn=dist_fn)
+
         topics = _res_top_type_(topic_or_topics)
 
         if len(filter_words) > 0:
@@ -592,25 +508,22 @@ class LDAGibbsViewer(object):
     	return d_arr
 
 
-    def sim_word_top(self, word_or_words, weights=[], filter_nan=True,
-                     show_topics=True, print_len=10, as_strings=True, 
-                     compact_view=True):
+    def dist_word_top(self, word_or_words, weights=[], filter_nan=True,
+                      show_topics=True, print_len=10, as_strings=True, 
+                      compact_view=True, dist_fn=_JS_div_, order='i'):
         """
-        A wrapper of `sim_word_top` in similarity.py. 
-
         Intuitively, the function sorts topics according to their 
         "relevance" to the query `word_or_words`.
         
         Technically, it creates a pseudo-topic consisting of 
-        `word_or_words` and computes the cosine values between that 
-        pseudo-topic and every topic in the simplex defined by the 
-        probability distribution of words conditional on topics. 
+        `word_or_words` and computes distances between that 
+        pseudo-topic and every topic.
         
-        If weights are not provided, the word list
-        is represented in the space of topics as a topic which assigns
-        equal non-zero probability to each word in `words` and 0 to 
-        every other word in the corpus. Otherwise, each word in `words` 
-        is assigned the provided weight.
+        If weights are not provided, the word list is represented in
+        the space of topics as a topic which assigns equal non-zero
+        probability to each word in `words` and 0 to every other word
+        in the corpus. Otherwise, each word in `words` is assigned the
+        provided weight.
         
         :param word_or_words: word(s) to which cosine values are calculated
         :type word_or_words: string or list of strings
@@ -647,10 +560,14 @@ class LDAGibbsViewer(object):
             with `word_or_words`.
         
         :See Also: :meth:`vsm.viewer.similarity.sim_word_top`
+
         """
-        sim = _sim_word_top_(self.corpus, self.model.top_word, word_or_words,
-                             weights=weights, norms=self._topic_norms, 
-                             print_len=print_len, filter_nan=filter_nan)
+        Q = self.model.word_top / self.model.word_top.sum(0)
+
+        distances = _dist_word_top_(word_or_words, self.corpus, Q,  
+                                    weights=weights, print_len=print_len, 
+                                    filter_nan=filter_nan,
+                                    dist_fn=dist_fn, order=order)
 
         if show_topics:
             if _isstr_(word_or_words):
@@ -659,77 +576,34 @@ class LDAGibbsViewer(object):
             # Filter based on topic assignments to words (Z values) 
             k_indices = sum([self.word_topics(w)['value'].tolist() 
                            for w in word_or_words], [])
-            k_indices = [i for i in xrange(sim.size) if sim[i][0] in k_indices]
-            sim = sim[k_indices]
-            k_indices = sim[sim.dtype.names[0]]
+            k_indices = [i for i in xrange(distances.size) if distances[i][0] in k_indices]
+            distances = distances[k_indices]
+            k_indices = distances[distances.dtype.names[0]]
 
             # Retrieve topics
             if compact_view:
                 k_arr = self.topics(print_len=print_len, k_indices=k_indices,
                     as_strings=as_strings, compact_view=compact_view)
-                k_arr.table_header = 'Sorted by Word Similarity'
+                k_arr.table_header = 'Sorted by Topic Distance'
                 return k_arr
 
             k_arr = self.topics(k_indices=k_indices, print_len=print_len,
                                 as_strings=as_strings, compact_view=compact_view)
 
             # Relabel results
-            k_arr.table_header = 'Sorted by Word Similarity'
-            for i in xrange(sim.size):
-                k_arr[i].col_header += ' ({0:.5f})'.format(sim[i][1])
+            k_arr.table_header = 'Sorted by Topic Distance'
+            for i in xrange(distances.size):
+                k_arr[i].col_header += ' ({0:.5f})'.format(distances[i][1])
 
             return k_arr
 
-        return sim
+        return distances
 
 
-    def sim_word_word(self, word_or_words, weights=None, 
-                      filter_nan=True, print_len=10, as_strings=True):
-        """
-        A wrapper of `sim_word_word` in similarity.py.
-        
-        Computes and sorts the cosine values between a word or list of
-        words and every word based on the topic distributions.
-        Hence a pair of words (w1, w2) is similar according to this 
-        function if P(w1|k) ~= P(w2|k) for every topic k. 
-        
-        If weights are provided, the word list is represented as the 
-        weighted average of the words in the list. If weights are not 
-        provided, the arithmetic mean is used.
-
-        :param word_or_words: Query word(s) to which cosine values are calculated.
-        :type word_or_words: string or list of strings
-        
-        :param weights: Specify weights for each query word in `word_or_words`. 
-            Default uses equal weights (i.e. arithmetic mean)
-        :type weights: list of floating point, optional
-        
-        :param as_strings: If `True`, returns a list of words as strings rather
-            than their integer representations. Default is `True`.
-        :type as_strings: boolean, optional
-
-        :param print_len: Number of words printed by pretty-printing function
-            Default is 10.
-        :type print_len: int, optional
-
-        :param filter_nan: If `True` not a number entries are filtered.
-            Default is `True`.
-        :type filter_nan: boolean, optional
-
-        :returns: :class:`LabeledColumn`.
-            A 2-dim array containing words and their cosine values to 
-            `word_or_words`. 
-        
-        :See Also: :meth:`vsm.viewer.similarity.sim_word_word`
-        """
-        return _sim_word_word_(self.corpus, self.model.top_word.T, 
-                               word_or_words, weights=weights, 
-                               norms=self._word_norms, filter_nan=filter_nan, 
-                               print_len=print_len, as_strings=as_strings)
-
-
-    def sim_doc_doc(self, doc_or_docs, k_indices=[], print_len=10, filter_nan=True,
-                    label_fn=_def_label_fn_, as_strings=True, sim_fn=_row_kld_):
+    def dist_doc_doc(self, doc_or_docs, 
+                     print_len=10, filter_nan=True, 
+                     label_fn=_def_label_fn_, as_strings=True,
+                     dist_fn=_JS_div_, order='i'):
         """
         Computes and sorts the cosine similarity values between a document 
         or list of documents and every document in the topic space. 
@@ -738,10 +612,6 @@ class LDAGibbsViewer(object):
             are calculated
         :type doc_or_docs: string/integer or list of strings/integers
         
-        :param k_indices: A list of topics based on which similarity value is
-            computed. Default is all the topics in the model.            
-        :type k_indices: list of integers, optional
-       
         :param print_len: Number of words printed by pretty-printing function.
             Default is 10.
         :type print_len: int, optional
@@ -764,101 +634,62 @@ class LDAGibbsViewer(object):
         
         :See Also: :meth:`vsm.viewer.similarity.sim_doc_doc`
         """
-        
-        if len(k_indices) == 0:
-            mat = self.model.doc_top.T
-        else:
-            mat = self.model.doc_top[:,k_indices].T
+        Q = self.model.top_doc / self.model.top_doc.sum(0)
 
-        return _sim_doc_doc_(self.corpus, mat, self.model.context_type, 
-                             doc_or_docs, norms=self._doc_norms, 
-                             print_len=print_len, filter_nan=filter_nan, 
-                             label_fn=label_fn, as_strings=as_strings,
-                             sim_fn=sim_fn)
+        return _dist_doc_doc_(doc_or_docs, self.corpus, 
+                              self.model.context_type, Q,  
+                              print_len=print_len, filter_nan=filter_nan, 
+                              label_fn=label_fn, as_strings=as_strings,
+                              dist_fn=dist_fn, order=order)
     
 
-    def dismat_words(self, word_list):
+    def dismat_doc(self, docs=[], dist_fn=_JS_div_):
         """
-        Calculates the distance matrix for `word_list`.
-
-        :param word_list: A list of words whose distance matrix is to be
-            computed.
-        :type word_list: list
-        
-        :returns: :class:`Manifold`.
-            contains n x n matrix containing floats where n is the number of words
-            in `word_list`.
-       
-        :See Also: :meth:`vsm.viewer.similarity.dismat_words`
-        """
-
-        dm =  _dismat_words_(self.corpus,
-                             self.model.top_word.T,
-                             word_list)
-
-        return Manifold(dm, dm.labels)
-
-
-
-    def dismat_docs(self, docs=[], k_indices=[], sim_fn=_row_js_mat_):
-        """
-        Calculates the similarity matrix for a given list of documents.
+        Calculates the distance matrix for a given list of documents.
 
         :param docs: A list of documents whose similarity matrix is to be computed.
             Default is all the documents in the model.
         :type docs: list, optional
         
-        :param k_indices: A list of topics based on which similarity matrix is
-            computed. Default is all the topics in the model.
-        :type k_indices: list
-
-        :returns: :class:`Manifold`.
+        :returns: :class:....
             contains n x n matrix containing floats where n is the number of 
             documents.
 
-        :See Also: :meth:`vsm.viewer.similarity.dusmat_documents`
+        :See Also: :meth:`vsm.viewer.similarity.dismat_documents`
         """
-
         if len(docs) == 0:
-            docs = range(len(self.model.W))
+            docs = range(self.model.top_doc.shape[1])
 
-        if len(k_indices) == 0:
-            mat = self.model.doc_top.T
-        else:
-            mat = self.model.doc_top[:,k_indices].T
+        Q = self.model.top_doc / self.model.top_doc.sum(0)
 
-        dm =  _dismat_documents_(self.corpus, mat,
-                                 self.model.context_type,
-                                 docs, sim_fn=sim_fn)
+        dm =  _dismat_doc_(docs, self.corpus, self.model.context_type,
+                           Q, dist_fn=dist_fn)
 
-        return Manifold(dm, dm.labels)
+        return dm
 
 
 
-    def dismat_topics(self, k_indices=[], sim_fn=_row_js_mat_):
+    def dismat_top(self, topics=[], dist_fn=_JS_div_):
         """
-        Calculates the similarity matrix for a given list of topics.
+        Calculates the distance matrix for a given list of topics.
 
         :param k_indices: A list of topics whose similarity matrix is to be
             computed. Default is all topics in the model.
         :type k_indices: list, optional
 
-        :returns: :class:`Manifold`.
+        :returns: :class:...
             contains n x n matrix containing floats where n is the number of topics
             considered.
         
-        :See Also: :meth:`vsm.viewer.similarity.dismat_topics`
+        :See Also: :meth:`vsm.viewer.similarity.dismat_top`
         """
 
-        if len(k_indices) == 0:
-            k_indices = range(self.model.K)
+        if len(topics) == 0:
+            topics = range(self.model.word_top.shape[1])
 
-        dm = _dismat_topics_(self.model.top_word, k_indices, sim_fn=sim_fn)
+        Q = self.model.word_top / self.model.word_top.sum(0)
 
-        # convert strings to integer labels
-        labels = [int(x) for x in dm.labels]
-
-        return Manifold(dm, labels)
+        return _dismat_top_(topics, Q, dist_fn=dist_fn)
 
 
 

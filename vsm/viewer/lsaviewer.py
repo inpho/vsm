@@ -1,16 +1,15 @@
 import numpy as np
 
-from vsm.linalg import row_norms as _row_norms_
+from vsm.linalg import angle as _angle_
 
 from vsm.viewer import def_label_fn as _def_label_fn_
 
 from similarity import (
-    sim_word_word as _sim_word_word_,
-    sim_doc_doc as _sim_doc_doc_,
-    dismat_words as _dismat_words_,
-    dismat_documents as _dismat_documents_)
+    dist_word_word as _dist_word_word_,
+    dist_doc_doc as _dist_doc_doc_,
+    dismat_word as _dismat_word_,
+    dismat_doc as _dismat_doc_)
 
-from manifold import Manifold
 
 
 class LsaViewer(object):
@@ -26,14 +25,12 @@ class LsaViewer(object):
     :attributes:
         * **corpus** (Corpus object) - `corpus`
         * **model** (Tf object) - `model`
-        * **_words_norms_**
-        * **_doc_norms_**
 
     :methods:
-        * :doc:`lsa_sim_word_word`
+        * :doc:`lsa_dist_word_word`
             Returns words sorted by the cosine values between a word or list
             of words and every word.
-        * :doc:`lsa_sim_doc_doc`
+        * :doc:`lsa_dist_doc_doc`
             Computes and sorts the cosine similarity values between a
             document or list of documents and every document.
         * :doc:`lsa_simmat_words`
@@ -48,34 +45,13 @@ class LsaViewer(object):
         """
         self.corpus = corpus
         self.model = model
-        self._word_norms_ = None
-        self._doc_norms_ = None
 
 
-    @property
-    def _word_norms(self):
+    def dist_word_word(self, word_or_words, weights=None, 
+                       filter_nan=True, print_len=10, as_strings=True, 
+                       dist_fn=_angle_, order='i'):
         """
-        """
-        if self._word_norms_ is None:
-            self._word_norms_ = _row_norms_(self.model.word_matrix)            
-
-        return self._word_norms_
-
-
-    @property
-    def _doc_norms(self):
-        """
-        """
-        if self._doc_norms_ is None:
-            self._doc_norms_ = _row_norms_(self.model.doc_matrix)
-
-        return self._doc_norms_
-
-
-    def sim_word_word(self, word_or_words, weights=None, 
-                      filter_nan=True, print_len=10, as_strings=True):
-        """
-        A wrapper of `sim_word_word` in similarity.py
+        A wrapper of `dist_word_word` in similarity.py
 
         :param word_or_words: Query word(s) to which cosine values are calculated.
         :type word_or_words: string or list of strings
@@ -100,16 +76,18 @@ class LsaViewer(object):
             A 2-dim array containing words and their cosine values to 
             `word_or_words`. 
         
-        :See Also: :meth:`vsm.viewer.similarity.sim_word_word`
+        :See Also: :meth:`vsm.viewer.similarity.dist_word_word`
         """
-        return _sim_word_word_(self.corpus, self.model.word_matrix, 
-                               word_or_words, weights=weights, 
-                               norms=self._word_norms, filter_nan=filter_nan, 
-                               print_len=print_len, as_strings=True)
+        return _dist_word_word_(word_or_words, self.corpus, 
+                                self.model.word_matrix.T, weights=weights, 
+                                filter_nan=filter_nan, 
+                                print_len=print_len, as_strings=True, 
+                                dist_fn=dist_fn, order=order)
 
 
-    def sim_doc_doc(self, doc_or_docs, weights=None, print_len=10, 
-                    filter_nan=True, label_fn=_def_label_fn_, as_strings=True):
+    def dist_doc_doc(self, doc_or_docs, weights=None, print_len=10, 
+                     filter_nan=True, label_fn=_def_label_fn_, as_strings=True,
+                     dist_fn=_angle_, order='i'):
         """
         :param doc_or_docs: Query document(s) to which cosine values
             are calculated
@@ -139,16 +117,16 @@ class LsaViewer(object):
             A 2-dim array containing documents and their cosine values to 
             `doc_or_docs`. 
         
-        :See Also: :meth:`vsm.viewer.similarity.sim_doc_doc`
+        :See Also: :meth:`vsm.viewer.similarity.dist_doc_doc`
         """
-        return _sim_doc_doc_(self.corpus, self.model.doc_matrix.T,
-                             self.model.context_type, doc_or_docs, weights=weights,
-                             norms=self._doc_norms, print_len=print_len,
-                             filter_nan=filter_nan, 
-                             label_fn=label_fn, as_strings=True)
+        return _dist_doc_doc_(doc_or_docs, self.corpus, self.model.context_type,
+                              self.model.doc_matrix, weights=weights,
+                              print_len=print_len, filter_nan=filter_nan, 
+                              label_fn=label_fn, as_strings=True,
+                              dist_fn=dist_fn, order=order)
     
 
-    def dismat_words(self, word_list):
+    def dismat_word(self, word_list, dist_fn=_angle_):
         """
         Calculates a distance matrix for a given list of words.
 
@@ -156,18 +134,17 @@ class LsaViewer(object):
             computed.
         :type word_list: list
 
-        :returns: :class:`Manifold`.
+        :returns: :class:`IndexedSymmArray`.
             contains n x n matrix containing floats where n is the number 
             of words in `word_list`.
         
         :See Also: :meth:`vsm.viewer.similarity.dismat_words`
         """
-        dm = _dismat_words_(self.corpus, self.model.word_matrix, word_list)
-        
-        return Manifold(dm, dm.labels)
+        return _dismat_word_(word_list, self.corpus, 
+                             self.model.word_matrix.T, dist_fn=dist_fn)
 
 
-    def dismat_docs(self, docs):
+    def dismat_doc(self, docs, dist_fn=_angle_):
         """
         Calculates a distance matrix for a given list of documents.
 
@@ -175,14 +152,12 @@ class LsaViewer(object):
             Default is all the documents in the model.
         :type docs: list, optional
         
-        :returns: :class:`Manifold`.
+        :returns: :class:`IndexedSymmArray`.
             contains n x n matrix containing floats where n is the number of documents. 
 
         :See Also: :meth:`vsm.viewer.similarity.dismat_docs`
         """
-        dm = _dismat_documents_(self.corpus, self.model.doc_matrix.T,
-                                  self.model.context_type, docs)
-        
-        return Manifold(dm, dm.labels)
+        return _dismat_doc_(docs, self.corpus, self.model.context_type, 
+                            self.model.doc_matrix, dist_fn=dist_fn)
 
 
