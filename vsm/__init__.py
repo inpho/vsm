@@ -356,3 +356,11 @@ def isfloat(x):
     """
     return (isinstance(x, np.inexact) or isinstance(x, np.float))
 
+
+class LegacyInterfaceError(Exception):
+    
+    def __init__(self, old, new):
+        self.msg = '{0} has been replaced. Please use {1}'.format(old, new)
+
+    def __str__(self):
+        return self.msg

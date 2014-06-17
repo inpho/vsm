@@ -23,7 +23,7 @@ from vsm.viewer import (
     doc_label_name as _doc_label_name_,
     def_label_fn as _def_label_fn_)
 
-from similarity import (
+from vsm.viewer import (
     dist_doc_doc as _dist_doc_doc_,
     dist_top_top as _dist_top_top_,
     dist_top_doc as _dist_top_doc_,

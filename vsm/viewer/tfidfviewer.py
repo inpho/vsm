@@ -2,7 +2,7 @@ from vsm.linalg import angle_sparse as _angle_sparse_
 
 from vsm.viewer import def_label_fn as _def_label_fn_
 
-from similarity import (
+from vsm.viewer import (
     dist_word_word as _dist_word_word_,
     dist_doc_doc as _dist_doc_doc_,
     dismat_word as _dismat_word_,

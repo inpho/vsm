@@ -2,7 +2,7 @@ import numpy as np
 
 from vsm.linalg import angle as _angle_
 
-from similarity import (
+from vsm.viewer import (
     dist_word_word as _dist_word_word_,
     dismat_word as _dismat_word_)
 

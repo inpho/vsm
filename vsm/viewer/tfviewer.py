@@ -9,7 +9,7 @@ from vsm.viewer import (
     def_label_fn as _def_label_fn_,
     res_word_type as _res_word_type_)
 
-from similarity import (
+from vsm.viewer import (
     dist_word_word as _dist_word_word_,
     dist_doc_doc as _dist_doc_doc_,
     dismat_word as _dismat_word_,
