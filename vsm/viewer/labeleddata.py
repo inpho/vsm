@@ -64,10 +64,20 @@ def default_col_widths(dtype):
     
     return col_widths
 
+def calc_col_num(col_len, n):
+    
+    num = col_len / n
 
-def calc_col_num(li, max_width):
+    if col_len % n > 0:
+        num += 1
+
+    return num
+
+
+def max_col_num(li, max_width):
     """
-    Calculates the total width given subcol_widths.
+    Calculates the total number of columns for multi_col option
+    in LabeledColumn.
     """
     w = sum(li)
     num = max_width/w
@@ -201,7 +211,8 @@ class LabeledColumn(np.ndarray):
     @property
     def col_num(self):
         if not hasattr(self, '_col_num') or not self._col_num:
-            self._col_num = calc_col_num(self.subcol_widths, 180)
+            self._col_num = min(calc_col_num(self._col_len, 15),
+                                max_col_num(self._subcol_widths, 160))
         return self._col_num
 
     @col_num.setter
@@ -266,8 +277,8 @@ class LabeledColumn(np.ndarray):
         Returns an html table in ipython online session.
         """ 
         s = '<table style="margin: 0">'
-        # multi_col happens only when there are more than 10 to display.
-        if self.multi_col and self.col_len >10:
+        # multi_col happens only when there are more than 15 to display.
+        if self.multi_col and self.col_len >15:
             if self.col_header:
                 s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
                     ="{0}">{1}</th></tr>'.format(len(self.subcol_widths)*self.col_num, 
@@ -281,20 +292,22 @@ class LabeledColumn(np.ndarray):
                     </th>'.format(sch)
                 s += subcol * self.col_num
                 s += '</tr>'
-           
+            
             count = self.col_len
             last_row = self.col_len % self.col_num
             rows = self.col_len / self.col_num
+            
             li = [rows] * self.col_num
             li = [li[i]+1 if i<last_row else li[i] for i in xrange(self.col_num)]
             li = [0] + li[:-1]
             if last_row > 0:
                 rows += 1            
+
             for k in xrange(rows):
                 s += '<tr>'
                 ind = k
                 for i in xrange(self.col_num):
-                    ind = ind + li[i]
+                    ind += li[i]
                     for j in xrange(len(self.dtype)):
                         w = self.subcol_widths[j]
                         n = self.dtype.names[j]

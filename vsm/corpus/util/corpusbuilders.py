@@ -314,7 +314,7 @@ def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
     :param json_file: Json file name containing documents and metadata.
     :type json_file: string-like
     
-    :param doc_key: Name of the key that indicates a document in each entry.
+    :param doc_key: Name of the key for documents.
     :type doc_key: string-like
 
     :param label_key: Name of the key used for document labels. Labels are 
@@ -362,7 +362,7 @@ def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
     # add document label and metadata
     dtype = [('idx', np.array(tok).dtype),
              ('document_label', np.array(label).dtype),
-             ('metadata', np.array(metadata).dtype)]
+             ('metadata', np.array(metadata).dtype)]         # todo: create separate dtype for each key?
     tok = np.array(zip(tok, label, metadata), dtype=dtype)
 
     
