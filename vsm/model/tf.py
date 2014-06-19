@@ -1,9 +1,10 @@
 import multiprocessing as mp
 import numpy as np
+from scipy.sparse import hstack
 
 from vsm import mp_split_ls, mp_shared_array, mp_shared_value
 from vsm.model import BaseModel
-from vsm.linalg import hstack_coo, count_matrix
+from vsm.linalg import count_matrix
 
 
 class TfSeq(BaseModel):
@@ -154,7 +155,7 @@ class TfMulti(BaseModel):
 
         print 'Reducing'
         # Horizontally stack TF matrices and store the result
-        self.matrix = hstack_coo(cnt_mats)
+        self.matrix = hstack(cnt_mats, format='coo')
 
 
 def tf_fn(ctx_sbls):

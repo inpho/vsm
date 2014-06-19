@@ -33,8 +33,7 @@ from vsm.viewer import (
 
 
 
-
-class LDAGibbsViewer(object):
+class LdaCgsViewer(object):
     """
     A class for viewing a topic model estimated by `LDAGibbs`.
 
@@ -364,7 +363,7 @@ class LDAGibbsViewer(object):
         return Z_w
 
 
-    def dist_top_top(self, topic_or_topics, weights=None, 
+    def dist_top_top(self, topic_or_topics, weights=[], 
                      dist_fn=_JS_div_, order='i', 
                      show_topics=True, print_len=10, filter_nan=True, 
                      as_strings=True, compact_view=True):

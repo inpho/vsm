@@ -1,12 +1,13 @@
 import numpy as np
 
-from scipy.sparse import issparse, csr_matrix
+from scipy.sparse import issparse, csr_matrix, coo_matrix
 
 from vsm import enum_matrix, enum_sort, map_strarr, isstr, isint
 
 from vsm.linalg import angle, JS_div
 
 from labeleddata import LabeledColumn, IndexedSymmArray
+
 
 
 def def_label_fn(metadata):
@@ -41,7 +42,6 @@ def def_label_fn(metadata):
     return np.array(labels)
 
 
-
 def doc_label_name(context_type):
     """
     Takes a string `context_type` and makes that a standard 'label' string.
@@ -54,7 +54,6 @@ def doc_label_name(context_type):
     :returns: label name for `context_type` as string.
     """
     return context_type + '_label'
-
 
 
 def res_doc_type(corp, context_type, label_name, doc):
@@ -81,7 +80,6 @@ def res_doc_type(corp, context_type, label_name, doc):
 
     return d, doc
                     
-            
 
 def res_word_type(corp, word):
     """
@@ -106,7 +104,7 @@ def res_top_type(topic_or_topics):
     return topic_or_topics
 
 
-def dist_word_word(word_or_words, corp, mat, weights=None,
+def dist_word_word(word_or_words, corp, mat, weights=[],
                    as_strings=True, print_len=20,
                    filter_nan=True, dist_fn=angle, order='i'):
     """
@@ -126,6 +124,8 @@ def dist_word_word(word_or_words, corp, mat, weights=None,
     words, labels = list(words), list(labels)
 
     # Generate pseudo-word
+    if len(weights) == 0:
+        weights=None
     if issparse(mat):
         cols = mat.tocsc()[:,words].toarray()
         word = np.average(cols, weights=weights, axis=1)[np.newaxis,:]
@@ -159,7 +159,7 @@ def dist_word_word(word_or_words, corp, mat, weights=None,
     return w_arr
 
 
-def dist_doc_doc(doc_or_docs, corp, context_type, mat, weights=None,
+def dist_doc_doc(doc_or_docs, corp, context_type, mat, weights=[],
                  filter_nan=True, print_len=10,
                  label_fn=def_label_fn, as_strings=True,
                  dist_fn=angle, order='i'):
@@ -176,6 +176,8 @@ def dist_doc_doc(doc_or_docs, corp, context_type, mat, weights=None,
                 for d in doc_or_docs]
 
     # Generate pseudo-document
+    if len(weights) == 0:
+        weights=None
     if issparse(mat):
         cols = mat.tocsc()[:,docs].toarray()
         doc = np.average(cols, weights=weights, axis=1)[np.newaxis,:]
@@ -205,6 +207,60 @@ def dist_doc_doc(doc_or_docs, corp, context_type, mat, weights=None,
     d_arr = d_arr.view(LabeledColumn)
     # TODO: Finish this header
     d_arr.col_header = 'Documents: '
+    d_arr.subcol_headers = ['Document', 'Distance']
+    d_arr.col_len = print_len
+
+    return d_arr
+
+
+def dist_word_doc(word_or_words, corp, context_type, mat, weights=[], 
+                  filter_nan=True, print_len=10,
+                  label_fn=def_label_fn, as_strings=True,
+                  dist_fn=angle, order='i'):
+    """
+    Computes distances between a word or a list of words to every
+    document and sorts the results. The function constructs a
+    pseudo-document vector from `word_or_words` and `weights`: the
+    vector representation is non-zero only if the corresponding word
+    appears in the list. If `weights` are not given, `1` is assigned
+    to each word in `word_or_words`.
+    """
+    # Resolve `word_or_words`
+    if isstr(word_or_words):
+        word_or_words = [word_or_words]
+    words, labels = zip(*[res_word_type(corp, w) for w in word_or_words])
+    words, labels = list(words), list(labels)
+
+    # Generate pseudo-document
+    doc = np.zeros((mat.shape[0],1), dtype=np.float)
+    if len(weights) == 0:
+        doc[words,:] = np.ones(len(words))
+    else:
+        doc[words,:] = weights
+    if issparse(mat):
+        doc = coo_matrix(doc)
+
+    # Compute distances
+    d_arr = dist_fn(doc.T, mat)
+
+    # Label data
+    if as_strings:
+        md = corp.view_metadata(context_type)
+        docs = label_fn(md)
+        d_arr = enum_sort(d_arr, indices=docs, field_name='doc')
+    else:
+        d_arr = enum_sort(d_arr, filter_nan=filter_nan)
+
+    if order=='d':
+        pass
+    elif order=='i':
+        d_arr = d_arr[::-1]
+    else:
+        raise Exception('Invalid order parameter.')
+
+    d_arr = d_arr.view(LabeledColumn)
+    # TODO: Finish this header
+    d_arr.col_header = 'Words: '
     d_arr.subcol_headers = ['Document', 'Distance']
     d_arr.col_len = print_len
 
@@ -299,7 +355,7 @@ def dist_top_doc(topic_or_topics, mat, corp, context_type, weights=[],
     return d_arr
 
 
-def dist_top_top(mat, topic_or_topics, weights=None, 
+def dist_top_top(mat, topic_or_topics, weights=[], 
                  print_len=10, filter_nan=True, 
                  dist_fn=JS_div, order='i'):
     """
@@ -309,6 +365,8 @@ def dist_top_top(mat, topic_or_topics, weights=None,
     topics = res_top_type(topic_or_topics)
 
     # Generate pseudo-topic
+    if len(weights) == 0:
+        weights = None
     top = np.average(mat[:,topics], weights=weights, axis=1)
 
     # Compute distances

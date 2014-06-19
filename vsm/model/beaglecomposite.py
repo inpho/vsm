@@ -1,6 +1,5 @@
 import numpy as np
 
-from vsm.linalg import row_normalize as _row_normalize
 from vsm.model import BaseModel
 from vsm.model.beaglecontext import realign_env_mat as _realign_env_mat
 
@@ -50,9 +49,9 @@ class BeagleComposite(BaseModel):
         corpus. The order matrix is sliced and reordered so that it
         aligns with the context matrix.
         """
-        self.ctx_matrix = _row_normalize(ctx_matrix)
+        self.ctx_matrix /= np.sqrt((ctx_matrix * ctx_matrix).sum(1)[:,np.newaxis])
         ord_matrix = _realign_env_mat(ctx_corp, ord_corp, ord_matrix)
-        self.ord_matrix = _row_normalize(ord_matrix)
+        self.ord_matrix /= np.sqrt((ord_matrix * ord_matrix).sum(1)[:,np.newaxis])
         self.context_type = context_type
 
 

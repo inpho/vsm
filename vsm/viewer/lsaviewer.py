@@ -1,8 +1,16 @@
 import numpy as np
 
+from vsm import (
+    isstr as _isstr_,
+    enum_sort as _enum_sort_)
+
 from vsm.linalg import angle as _angle_
 
-from vsm.viewer import def_label_fn as _def_label_fn_
+from vsm.viewer import (
+    def_label_fn as _def_label_fn_,
+    res_word_type as _res_word_type_)
+
+from vsm.viewer.labeleddata import LabeledColumn as _LabeledColumn_
 
 from vsm.viewer import (
     dist_word_word as _dist_word_word_,
@@ -47,7 +55,7 @@ class LsaViewer(object):
         self.model = model
 
 
-    def dist_word_word(self, word_or_words, weights=None, 
+    def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True, 
                        dist_fn=_angle_, order='i'):
         """
@@ -85,7 +93,7 @@ class LsaViewer(object):
                                 dist_fn=dist_fn, order=order)
 
 
-    def dist_doc_doc(self, doc_or_docs, weights=None, print_len=10, 
+    def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
                      filter_nan=True, label_fn=_def_label_fn_, as_strings=True,
                      dist_fn=_angle_, order='i'):
         """
@@ -126,6 +134,60 @@ class LsaViewer(object):
                               dist_fn=dist_fn, order=order)
     
 
+    def dist_word_doc(self, word_or_words, weights=[], label_fn=_def_label_fn_, 
+                      filter_nan=True, print_len=10, as_strings=True, 
+                      dist_fn=_angle_, order='i'):
+        """
+        Computes distances between a word or a list of words to every
+        document and sorts the results. The function constructs a
+        pseudo-document vector from `word_or_words` and `weights`: the
+        vector representation is non-zero only if the corresponding word
+        appears in the list. If `weights` are not given, `1` is assigned
+        to each word in `word_or_words`.
+        """
+        # Resolve `word_or_words`
+        if _isstr_(word_or_words):
+            word_or_words = [word_or_words]
+        words, labels = zip(*[_res_word_type_(self.corpus, w) for w in word_or_words])
+        words, labels = list(words), list(labels)
+
+        # Generate pseudo-document
+        doc = np.zeros((self.model.word_matrix.shape[0],1), dtype=np.float)
+        if len(weights) == 0:
+            doc[words,:] = np.ones(len(words))
+        else:
+            doc[words,:] = weights
+
+        doc = np.dot(np.dot(np.diag(1 /self.model.eigenvalues), 
+                            self.model.word_matrix.T), doc)
+
+        # Compute distances
+        d_arr = dist_fn(doc.T, self.model.doc_matrix)
+
+        # Label data
+        if as_strings:
+            md = self.corpus.view_metadata(self.model.context_type)
+            docs = label_fn(md)
+            d_arr = _enum_sort_(d_arr, indices=docs, field_name='doc')
+        else:
+            d_arr = _enum_sort_(d_arr, filter_nan=filter_nan)
+
+        if order=='d':
+            pass
+        elif order=='i':
+            d_arr = d_arr[::-1]
+        else:
+            raise Exception('Invalid order parameter.')
+
+        d_arr = d_arr.view(_LabeledColumn_)
+        # TODO: Finish this header
+        d_arr.col_header = 'Words: '
+        d_arr.subcol_headers = ['Document', 'Distance']
+        d_arr.col_len = print_len
+        
+        return d_arr
+
+
     def dismat_word(self, word_list, dist_fn=_angle_):
         """
         Calculates a distance matrix for a given list of words.
@@ -159,5 +221,4 @@ class LsaViewer(object):
         """
         return _dismat_doc_(docs, self.corpus, self.model.context_type, 
                             self.model.doc_matrix, dist_fn=dist_fn)
-
 

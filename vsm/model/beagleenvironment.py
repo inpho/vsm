@@ -1,6 +1,5 @@
 import numpy as np
 
-from vsm.linalg import row_normalize
 from vsm.model import BaseModel
 
 
@@ -56,6 +55,7 @@ class BeagleEnvironment(BaseModel):
         """
         self.matrix = np.array(np.random.normal(size=self.shape),
                                dtype=self.dtype)
-        self.matrix = row_normalize(self.matrix)
+        # normalize rows
+        self.matrix /= np.sqrt((self.matrix * self.matrix).sum(1)[:,np.newaxis])
 
 

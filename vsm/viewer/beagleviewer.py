@@ -41,7 +41,7 @@ class BeagleViewer(object):
         self.model = model
 
 
-    def dist_word_word(self, word_or_words, weights=None, 
+    def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True,
                        dist_fn=_angle_, order='i'):
         """
@@ -114,7 +114,7 @@ class BeagleViewer(object):
     # # This is a quick adaptation of the isomap_docs function from
     # # ldagibbsviewer. This should be abstracted and moved to
     # # similarity.py or something equivalent.
-    # def isomap_words(self, words, weights=None, thres=.8,
+    # def isomap_words(self, words, weights=[], thres=.8,
     #                  n_neighbors=5, scale=True, trim=20):
     #     """
     #     """

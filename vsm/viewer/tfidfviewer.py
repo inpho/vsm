@@ -5,6 +5,7 @@ from vsm.viewer import def_label_fn as _def_label_fn_
 from vsm.viewer import (
     dist_word_word as _dist_word_word_,
     dist_doc_doc as _dist_doc_doc_,
+    dist_word_doc as _dist_word_doc_,
     dismat_word as _dismat_word_,
     dismat_doc as _dismat_doc_)
 
@@ -45,7 +46,7 @@ class TfIdfViewer(object):
         self.model = model
 
 
-    def dist_word_word(self, word_or_words, weights=None, 
+    def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True, 
                        dist_fn=_angle_sparse_, order='i'):
         """
@@ -83,7 +84,7 @@ class TfIdfViewer(object):
                                 dist_fn=dist_fn, order=order)
 
 
-    def dist_doc_doc(self, doc_or_docs, weights=None, print_len=10, 
+    def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
                      filter_nan=True, label_fn=_def_label_fn_, as_strings=True,
                      dist_fn=_angle_sparse_, order='i'):
         """
@@ -120,8 +121,22 @@ class TfIdfViewer(object):
         return _dist_doc_doc_(doc_or_docs, self.corpus, self.model.context_type, 
                               self.model.matrix, weights=weights,
                               print_len=print_len, filter_nan=filter_nan, 
-                              label_fn=label_fn, as_strings=True,
+                              label_fn=_def_label_fn_, as_strings=True,
                               dist_fn=dist_fn, order=order)
+
+
+    def dist_word_doc(self, word_or_words, weights=[], label_fn=_def_label_fn_, 
+                      filter_nan=True, print_len=10, as_strings=True, 
+                      dist_fn=_angle_sparse_, order='i'):
+        """
+        """
+        return _dist_word_doc_(word_or_words, self.corpus, 
+                               self.model.context_type, 
+                               self.model.matrix, weights=weights, 
+                               label_fn=label_fn,
+                               filter_nan=filter_nan, 
+                               print_len=print_len, as_strings=as_strings,
+                               dist_fn=dist_fn, order=order)
 
 
     def dismat_word(self, word_list, dist_fn=_angle_sparse_):
