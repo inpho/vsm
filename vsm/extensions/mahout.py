@@ -91,6 +91,22 @@ def make_corpus(txtfile, word_int, as_strings=False):
     return corp
 
 
+def stopwords(corp, topword):
+    """
+    corp : `Corpus` object
+    topword : topword (list of dictionaries) from model.
+    """
+    ind = topword[0].keys()
+
+    rem = []
+    for w in corp.words:
+        i = corp.words_int[w]
+        if i not in ind:
+            rem.append(w)
+
+    return rem
+
+
 def savez(fname, ctx_type, itr, K, alpha, beta, doc_top, top_word, W):
     arrays_out = dict()
     
@@ -121,24 +137,35 @@ def savez(fname, ctx_type, itr, K, alpha, beta, doc_top, top_word, W):
     np.savez(fname, **arrays_out)
 
 
+"""
 if __name__=='__main__':
+    # workflow
+    # from vsm.corpus.util.corpupsbuilders import corpus_fromlist
+
     # Return topword, doctop information from the txt file as arrays.
-    top_word = load_vals('../mahout-lda-test/lda.txt')
-    doc_top = load_vals('../mahout-dt-test/doc-topics.txt')
+    top_word = load_vals('../../../mahout-lda-test/lda.txt')
+    doc_top = load_vals('../../../mahout-dt-test/doc-topics.txt')
 
     arrtw = build_arr(top_word)
     arrdt = build_arr(doc_top)
     
     # dicionary that corresponds to Corpus.words_int
-    words_int = load_kv('../mahout-vect-test/dict.txt')
+    words_int = load_kv('../../../mahout-vect-test/dict.txt')
 
     # list of arrays that represent documents.
     # `wcorp` can be an input to `corpus_fromlist()` to create a `Corpus`.
-    wcorp = make_corpus('../mahout-vect-test/tokenized-documents/tdocs.txt',
+    wcorp = make_corpus('../../../mahout-vect-test/tokenized-documents/tdocs.txt',
                         words_int, as_strings=True)
 
+    # make `Corpus` object and apply_stoplist to ensure the words
+    # are exactly the same as the ones in the topword.
+    wc = corpus_fromlist(wcorp, 'document')
+    rem = stopwords(wc, top_word)
+    wc_ = wc.apply_stoplist(rem)
+
+    # Save `Corpus` and LDA model.
+    wc_.save('mahout-test.npz')
     savez('mahout-test-K5-100.npz', 'document', 100, 5, 0.01, 0.01, arrdt,
             arrtw, wcorp)
 
-
-    
+""" 
