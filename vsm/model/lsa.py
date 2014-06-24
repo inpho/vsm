@@ -3,16 +3,78 @@ from scipy import sparse
 from scipy.sparse import linalg as linalgs
 
 
+__all__ = ['Lsa']
 
-class BaseLsaModel(object):
 
-    def __init__(self, context_type=None, word_matrix=None, 
-                 eigenvalues=None, doc_matrix=None):
+class Lsa(object):
+    """
 
-        self.word_matrix = word_matrix
-        self.doc_matrix = doc_matrix
-        self.eigenvalues = eigenvalues
+    :param td_matrix: ? Default is an empty array.
+    :type td_matrix: np.array, optional
+
+    :param context_type: Name of tokenization whose tokens will be
+        treated as documents. Default is `None`.
+    :type context_type: string, optional
+
+    :Attributes:
+        * **td_matrix** (np.array)
+
+    :Methods:
+        * :meth:`train`
+           Trains the model. 
+        * :meth:`load`
+            Loads the saved model.
+        * :meth:`save`
+            Saves the model in an `.npz` file.
+    """
+    def __init__(self, td_matrix=np.array([]), context_type=None):
+
+        self.word_matrix = None
+        self.doc_matrix = None
+        self.eigenvalues = None
         self.context_type = context_type
+
+        if td_matrix.size > 0:
+            td_matrix = sparse.coo_matrix(td_matrix)
+            
+            # Removing infinite values for SVD
+            finite_mask = np.isfinite(td_matrix.data)
+            coo_in = (td_matrix.data[finite_mask],
+                      (td_matrix.row[finite_mask], 
+                       td_matrix.col[finite_mask]))
+
+            td_matrix = sparse.coo_matrix(coo_in, shape=td_matrix.shape, 
+                                          dtype=np.float64)
+            self.td_matrix = td_matrix.tocsr()
+        else:
+            self.td_matrix = np.array([])
+
+
+    def train(self, k_factors=300):
+        """
+        Trains the model.
+
+        :param k_factors: Default is 300.
+        :type k_factors: int, optional
+
+        :returns: None
+
+        """
+
+        u,s,v = np.array([]), np.array([]), np.array([])
+
+        if self.td_matrix.size > 0:
+            s = min(self.td_matrix.shape)
+            if s < k_factors:
+                k_factors = s - 1
+
+            print 'Performing sparse SVD'
+            u, s, v = linalgs.svds(self.td_matrix, k=k_factors)
+
+        indices = s.argsort()[::-1]
+        self.word_matrix = u[:, indices]
+        self.eigenvalues = s[indices]
+        self.doc_matrix = v[indices, :]
 
 
     def save(self, f):
@@ -60,71 +122,3 @@ class BaseLsaModel(object):
                          doc_matrix=arrays_in['doc_matrix'],
                          context_type=arrays_in['context_type'])
         return m
-
-
-
-class Lsa(BaseLsaModel):
-    """
-
-    :param td_matrix: ? Default is an empty array.
-    :type td_matrix: np.array, optional
-
-    :param context_type: Name of tokenization whose tokens will be
-        treated as documents. Default is `None`.
-    :type context_type: string, optional
-
-    :Attributes:
-        * **td_matrix** (np.array)
-
-    :Methods:
-        * :meth:`train`
-           Trains the model. 
-        * :meth:`load`
-            Loads the saved model.
-        * :meth:`save`
-            Saves the model in an `.npz` file.
-    """
-    def __init__(self, td_matrix=np.array([]), context_type=None):
-
-        super(Lsa, self).__init__(context_type)
-
-        if td_matrix.size > 0:
-            td_matrix = sparse.coo_matrix(td_matrix)
-            
-            # Removing infinite values for SVD
-            finite_mask = np.isfinite(td_matrix.data)
-            coo_in = (td_matrix.data[finite_mask],
-                      (td_matrix.row[finite_mask], 
-                       td_matrix.col[finite_mask]))
-
-            td_matrix = sparse.coo_matrix(coo_in, shape=td_matrix.shape, 
-                                          dtype=np.float64)
-            self.td_matrix = td_matrix.tocsr()
-        else:
-            self.td_matrix = np.array([])
-
-
-    def train(self, k_factors=300):
-        """
-        Trains the model.
-
-        :param k_factors: Default is 300.
-        :type k_factors: int, optional
-
-        :returns: None
-
-        """
-
-        u,s,v = np.array([]), np.array([]), np.array([])
-
-        if self.td_matrix.size > 0:
-            s = min(self.td_matrix.shape)
-            if s < k_factors:
-                k_factors = s - 1
-
-            print 'Performing sparse SVD'
-            u, s, v = linalgs.svds(self.td_matrix, k=k_factors)
-
-        self.word_matrix = u
-        self.eigenvalues = s
-        self.doc_matrix = v

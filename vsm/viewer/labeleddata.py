@@ -1,6 +1,11 @@
 import numpy as np
 
-from vsm import enum_sort, map_strarr, isfloat, isint, isstr
+from vsm.structarr import *
+from types import *
+
+
+__all__ = ['CompactTable', 'DataTable', 'IndexedSymmArray', 'LabeledColumn']
+
 
 
 def format_entry(x):
@@ -63,6 +68,7 @@ def default_col_widths(dtype):
             col_widths.append(10)
     
     return col_widths
+
 
 def calc_col_num(col_len, n):
     
@@ -537,7 +543,6 @@ class CompactTable(np.ndarray):
         return s
 
 
-
 class DataTable(list):
     """
     A subclass of list whose purpose is to store labels and
@@ -704,10 +709,6 @@ class DataTable(list):
         return s
 
 
-
-
-# TODO: Investigate compressed forms of symmetric matrix. Cf.
-# scipy.spatial.distance.squareform
 class IndexedSymmArray(np.ndarray):
     """
     """
@@ -725,5 +726,3 @@ class IndexedSymmArray(np.ndarray):
         """
         if obj is None: return
         self.labels = getattr(obj, 'labels', None)
-
-

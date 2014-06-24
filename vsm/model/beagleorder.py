@@ -7,8 +7,11 @@ import cPickle as cpickle
 import numpy as np
 from numpy import dual
 
-from vsm.model import BaseModel
-from vsm.linalg import rand_pt_unit_sphere
+from vsm.spatial import rand_pt_unit_sphere
+from base import BaseModel
+
+
+__all__ = ['BeagleOrderSeq', 'BeagleOrderMulti']
 
 
 
@@ -28,7 +31,6 @@ def two_rand_perm(n, seed=None):
     return perm1, perm2
 
 
-
 def mk_b_conv(n, rand_perm=None):
     """
     """
@@ -43,7 +45,6 @@ def mk_b_conv(n, rand_perm=None):
         return np.real_if_close(dual.ifft(w1 * w2))
 
     return b_conv
-
 
 
 def ngram_slices(i, n, l):
@@ -69,7 +70,6 @@ def ngram_slices(i, n, l):
         out.append(slice(start, stop))
 
     return out
-
 
 
 def reduce_ngrams(fn, a, n, i, flat=True):
@@ -100,7 +100,6 @@ def reduce_ngrams(fn, a, n, i, flat=True):
         out = [v for d in out.values() for v in d.values()]
     
     return out
-
 
 
 class BeagleOrderSeq(BaseModel):
@@ -145,7 +144,7 @@ class BeagleOrderSeq(BaseModel):
         * :doc:`bos_train`
             Trains the model.
 
-    :See Also: :class:`vsm.model.BaseModel`
+    :See Also: :class:`vsm.model.base.BaseModel`
     """
 
     def __init__(self, corpus, env_matrix, context_type='sentence',
@@ -228,10 +227,8 @@ class BeagleOrderMulti(BaseModel):
         * :doc:`bom_train`
             Trains the model.
 
-    :See Also: :class:`vsm.model.BaseModel`
+    :See Also: :class:`vsm.model.base.BaseModel`
     """
-
-
     def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):
         """
@@ -308,7 +305,6 @@ class BeagleOrderMulti(BaseModel):
             print 'Removing', tmp_dir
             shutil.rmtree(tmp_dir)
         
-
 
 def mpfn((sents, filename)):
     """

@@ -1,23 +1,13 @@
 import numpy as np
 
-from vsm import (
-    isstr as _isstr_,
-    enum_sort as _enum_sort_)
+from vsm.spatial import angle
+from vsm.structarr import *
+from types import *
+from labeleddata import *
+from wrappers import *
 
-from vsm.linalg import angle as _angle_
 
-from vsm.viewer import (
-    def_label_fn as _def_label_fn_,
-    res_word_type as _res_word_type_)
-
-from vsm.viewer.labeleddata import LabeledColumn as _LabeledColumn_
-
-from vsm.viewer import (
-    dist_word_word as _dist_word_word_,
-    dist_doc_doc as _dist_doc_doc_,
-    dismat_word as _dismat_word_,
-    dismat_doc as _dismat_doc_)
-
+__all__ = ['LsaViewer']
 
 
 class LsaViewer(object):
@@ -57,7 +47,7 @@ class LsaViewer(object):
 
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True, 
-                       dist_fn=_angle_, order='i'):
+                       dist_fn=angle, order='i'):
         """
         A wrapper of `dist_word_word` in similarity.py
 
@@ -86,7 +76,7 @@ class LsaViewer(object):
         
         :See Also: :meth:`vsm.viewer.similarity.dist_word_word`
         """
-        return _dist_word_word_(word_or_words, self.corpus, 
+        return dist_word_word(word_or_words, self.corpus, 
                                 self.model.word_matrix.T, weights=weights, 
                                 filter_nan=filter_nan, 
                                 print_len=print_len, as_strings=True, 
@@ -94,8 +84,8 @@ class LsaViewer(object):
 
 
     def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
-                     filter_nan=True, label_fn=_def_label_fn_, as_strings=True,
-                     dist_fn=_angle_, order='i'):
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True,
+                     dist_fn=angle, order='i'):
         """
         :param doc_or_docs: Query document(s) to which cosine values
             are calculated
@@ -127,16 +117,16 @@ class LsaViewer(object):
         
         :See Also: :meth:`vsm.viewer.similarity.dist_doc_doc`
         """
-        return _dist_doc_doc_(doc_or_docs, self.corpus, self.model.context_type,
+        return dist_doc_doc(doc_or_docs, self.corpus, self.model.context_type,
                               self.model.doc_matrix, weights=weights,
                               print_len=print_len, filter_nan=filter_nan, 
                               label_fn=label_fn, as_strings=True,
                               dist_fn=dist_fn, order=order)
     
 
-    def dist_word_doc(self, word_or_words, weights=[], label_fn=_def_label_fn_, 
+    def dist_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
                       filter_nan=True, print_len=10, as_strings=True, 
-                      dist_fn=_angle_, order='i'):
+                      dist_fn=angle, order='i'):
         """
         Computes distances between a word or a list of words to every
         document and sorts the results. The function constructs a
@@ -146,9 +136,9 @@ class LsaViewer(object):
         to each word in `word_or_words`.
         """
         # Resolve `word_or_words`
-        if _isstr_(word_or_words):
+        if isstr(word_or_words):
             word_or_words = [word_or_words]
-        words, labels = zip(*[_res_word_type_(self.corpus, w) for w in word_or_words])
+        words, labels = zip(*[res_word_type(self.corpus, w) for w in word_or_words])
         words, labels = list(words), list(labels)
 
         # Generate pseudo-document
@@ -168,9 +158,9 @@ class LsaViewer(object):
         if as_strings:
             md = self.corpus.view_metadata(self.model.context_type)
             docs = label_fn(md)
-            d_arr = _enum_sort_(d_arr, indices=docs, field_name='doc')
+            d_arr = enum_sort(d_arr, indices=docs, field_name='doc')
         else:
-            d_arr = _enum_sort_(d_arr, filter_nan=filter_nan)
+            d_arr = enum_sort(d_arr, filter_nan=filter_nan)
 
         if order=='d':
             pass
@@ -179,7 +169,7 @@ class LsaViewer(object):
         else:
             raise Exception('Invalid order parameter.')
 
-        d_arr = d_arr.view(_LabeledColumn_)
+        d_arr = d_arr.view(LabeledColumn)
         # TODO: Finish this header
         d_arr.col_header = 'Words: '
         d_arr.subcol_headers = ['Document', 'Distance']
@@ -188,7 +178,7 @@ class LsaViewer(object):
         return d_arr
 
 
-    def dismat_word(self, word_list, dist_fn=_angle_):
+    def dismat_word(self, word_list, dist_fn=angle):
         """
         Calculates a distance matrix for a given list of words.
 
@@ -202,11 +192,11 @@ class LsaViewer(object):
         
         :See Also: :meth:`vsm.viewer.similarity.dismat_words`
         """
-        return _dismat_word_(word_list, self.corpus, 
+        return dismat_word(word_list, self.corpus, 
                              self.model.word_matrix.T, dist_fn=dist_fn)
 
 
-    def dismat_doc(self, docs, dist_fn=_angle_):
+    def dismat_doc(self, docs, dist_fn=angle):
         """
         Calculates a distance matrix for a given list of documents.
 
@@ -219,6 +209,6 @@ class LsaViewer(object):
 
         :See Also: :meth:`vsm.viewer.similarity.dismat_docs`
         """
-        return _dismat_doc_(docs, self.corpus, self.model.context_type, 
+        return dismat_doc(docs, self.corpus, self.model.context_type, 
                             self.model.doc_matrix, dist_fn=dist_fn)
 

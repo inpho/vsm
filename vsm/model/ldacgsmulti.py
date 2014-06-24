@@ -5,6 +5,8 @@ import numpy as np
 from ldagibbs import smpl_cat
 
 
+__all__ = ['LdaCgsMulti']
+
 
 class LdaCgsMulti(object):
     """

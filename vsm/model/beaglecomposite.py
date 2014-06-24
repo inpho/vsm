@@ -1,7 +1,10 @@
 import numpy as np
 
-from vsm.model import BaseModel
-from vsm.model.beaglecontext import realign_env_mat as _realign_env_mat
+from base import BaseModel
+from beaglecontext import realign_env_mat as _realign_env_mat
+
+
+__all__ = ['BeagleComposite']
 
 
 class BeagleComposite(BaseModel):
@@ -39,7 +42,7 @@ class BeagleComposite(BaseModel):
         * :doc:`beaglecomposite_train`
             Combines context and order model with user-defined `wgt`.
 
-    :See Also: :class:`vsm.model.BaseModel`.
+    :See Also: :class:`vsm.model.base.BaseModel`.
     """
     def __init__(self, ctx_corp, ctx_matrix, 
                  ord_corp, ord_matrix, context_type='sentence'):

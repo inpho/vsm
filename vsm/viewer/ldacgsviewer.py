@@ -1,36 +1,17 @@
+"""
+Provides the class `LdaCgsViewer`.
+"""
+
 import numpy as np
-import matplotlib.pyplot as plt
 
-from vsm import (
-    map_strarr as _map_strarr_,
-    enum_matrix as _enum_matrix_,
-    enum_sort as _enum_sort_, 
-    isstr as _isstr_,
-    isint as _isint_)
+from vsm.spatial import JS_div
+from vsm.structarr import *
+from types import *
+from labeleddata import *
+from wrappers import *
 
-from vsm.linalg import JS_div as _JS_div_
 
-from labeleddata import (
-    LabeledColumn as _LabeledColumn_,
-    CompactTable as _CompactTable_,
-    DataTable as _DataTable_,
-    format_entry as _format_entry_)
-
-from vsm.viewer import (
-    res_word_type as _res_word_type_,
-    res_doc_type as _res_doc_type_,
-    res_top_type as _res_top_type_,
-    doc_label_name as _doc_label_name_,
-    def_label_fn as _def_label_fn_)
-
-from vsm.viewer import (
-    dist_doc_doc as _dist_doc_doc_,
-    dist_top_top as _dist_top_top_,
-    dist_top_doc as _dist_top_doc_,
-    dist_word_top as _dist_word_top_,
-    dismat_doc as _dismat_doc_,
-    dismat_top as _dismat_top_)
-
+__all__ = ['LdaCgsViewer']
 
 
 class LdaCgsViewer(object):
@@ -102,18 +83,18 @@ class LdaCgsViewer(object):
     def _doc_label_name(self):
         """
         """
-        return _doc_label_name_(self.model.context_type)
+        return doc_label_name(self.model.context_type)
 
     def _res_doc_type(self, doc):
         """
         """
-        return _res_doc_type_(self.corpus, self.model.context_type, 
+        return res_doc_type(self.corpus, self.model.context_type, 
                               self._doc_label_name, doc)
 
     def _res_word_type(self, word):
         """
         """
-        return _res_word_type_(self.corpus, word)
+        return res_word_type(self.corpus, word)
 
 
     def topics(self, print_len=10, k_indices=[], as_strings=True, 
@@ -155,35 +136,35 @@ class LdaCgsViewer(object):
         
         # Label data
         if as_strings:
-	    k_arr = _enum_matrix_(phi.T, indices=self.corpus.words,
+	    k_arr = enum_matrix(phi.T, indices=self.corpus.words,
                                   field_name='word')
         else:
             ind = [self.corpus.words_int[word] for word in self.corpus.words]
-            k_arr = _enum_matrix_(phi.T, indices=ind, field_name='word')
+            k_arr = enum_matrix(phi.T, indices=ind, field_name='word')
 
 
         # without probabilities, just words
         if compact_view:
             sch = ['Topic', 'Words']
             fc = [str(k) for k in k_indices]
-            return _CompactTable_(k_arr, table_header='Topics Sorted by Index',
+            return CompactTable(k_arr, table_header='Topics Sorted by Index',
 		    	subcol_headers=sch, first_cols=fc, num_words=print_len)
 	
         table = []
         for i,k in enumerate(k_indices):
             ch = 'Topic ' + str(k)
             sch = ['Word', 'Prob']
-            col = _LabeledColumn_(k_arr[i], col_header=ch,
+            col = LabeledColumn(k_arr[i], col_header=ch,
                                   subcol_headers=sch, col_len=print_len)
             table.append(col)
 
-        table = _DataTable_(table, 'Topics Sorted by Index')
+        table = DataTable(table, 'Topics Sorted by Index')
 
 
         return table
 
 
-    #TODO: Use linalg.H to compute entropy
+    #TODO: Use spatial.H to compute entropy
     def topic_entropies(self, print_len=10, as_strings=True, compact_view=True):
         """
         Returns a list of topics sorted according to the entropy of 
@@ -218,7 +199,7 @@ class LdaCgsViewer(object):
         ent = -1 * (theta.T * np.log2(theta.T)).sum(0)
 
         # Sort topics according to entropies
-        k_indices = _enum_sort_(ent)['i'][::-1]
+        k_indices = enum_sort(ent)['i'][::-1]
         
         # Retrieve topics
         if compact_view:
@@ -257,6 +238,7 @@ class LdaCgsViewer(object):
         :returns: a matplotlib.pyplot object.
              Contains the topic proportion histogram.
         """
+        import matplotlib.pyplot as plt
 
         if len(d_indices) == 0:
             d_indices = xrange(len(self.model.W))
@@ -266,7 +248,7 @@ class LdaCgsViewer(object):
         if len(k_indices) != 0:
             arr = arr[k_indices]
 
-        l = _enum_sort_(arr)
+        l = enum_sort(arr)
         rank, prob = zip(*l)
 
         y_pos = np.arange(len(rank))
@@ -308,7 +290,7 @@ class LdaCgsViewer(object):
         k_arr /= k_arr.sum()
 
         # Index, sort and label data
-        k_arr = _enum_sort_(k_arr).view(_LabeledColumn_)
+        k_arr = enum_sort(k_arr).view(LabeledColumn)
         k_arr.col_header = 'Document: ' + label
         k_arr.subcol_headers = ['Topic', 'Prob']
         k_arr.col_len = print_len
@@ -356,7 +338,7 @@ class LdaCgsViewer(object):
         else:
             dt = [('i', np.int), ('pos',np.int), ('value', np.int)]
 
-        Z_w = np.array(Z_w, dtype=dt).view(_LabeledColumn_)
+        Z_w = np.array(Z_w, dtype=dt).view(LabeledColumn)
         Z_w.col_header = 'Word: ' + word
         Z_w.subcol_headers = ['Document', 'Pos', 'Topic']
 
@@ -364,7 +346,7 @@ class LdaCgsViewer(object):
 
 
     def dist_top_top(self, topic_or_topics, weights=[], 
-                     dist_fn=_JS_div_, order='i', 
+                     dist_fn=JS_div, order='i', 
                      show_topics=True, print_len=10, filter_nan=True, 
                      as_strings=True, compact_view=True):
         """
@@ -410,7 +392,7 @@ class LdaCgsViewer(object):
         """
         Q = self.model.word_top / self.model.word_top.sum(0)
 
-        distances = _dist_top_top_(Q, topic_or_topics, weights=weights, 
+        distances = dist_top_top(Q, topic_or_topics, weights=weights, 
                                    print_len=print_len, filter_nan=filter_nan, 
                                    dist_fn=dist_fn, order=order)
 
@@ -441,8 +423,8 @@ class LdaCgsViewer(object):
 
 
     def dist_top_doc(self, topic_or_topics, weights=[], filter_words=[],
-                     print_len=10, as_strings=True, label_fn=_def_label_fn_, 
-                     filter_nan=True, dist_fn=_JS_div_, order='i'):
+                     print_len=10, as_strings=True, label_fn=def_label_fn, 
+                     filter_nan=True, dist_fn=JS_div, order='i'):
         """
         Takes...
 
@@ -482,13 +464,13 @@ class LdaCgsViewer(object):
         """
         Q = self.model.top_doc / self.model.top_doc.sum(0)
 
-        d_arr = _dist_top_doc_(topic_or_topics, Q, self.corpus,   
+        d_arr = dist_top_doc(topic_or_topics, Q, self.corpus,   
                                self.model.context_type, weights=weights, 
                                print_len=print_len, as_strings=False, 
                                label_fn=label_fn, filter_nan=filter_nan, 
                                dist_fn=dist_fn)
 
-        topics = _res_top_type_(topic_or_topics)
+        topics = res_top_type(topic_or_topics)
 
         if len(filter_words) > 0:
             white = set()
@@ -502,14 +484,14 @@ class LdaCgsViewer(object):
         if as_strings:
             md = self.corpus.view_metadata(self.model.context_type)
             docs = label_fn(md)
-            d_arr = _map_strarr_(d_arr, docs, k='i', new_k='doc')
+            d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
 
     	return d_arr
 
 
     def dist_word_top(self, word_or_words, weights=[], filter_nan=True,
                       show_topics=True, print_len=10, as_strings=True, 
-                      compact_view=True, dist_fn=_JS_div_, order='i'):
+                      compact_view=True, dist_fn=JS_div, order='i'):
         """
         Intuitively, the function sorts topics according to their 
         "relevance" to the query `word_or_words`.
@@ -563,13 +545,13 @@ class LdaCgsViewer(object):
         """
         Q = self.model.word_top / self.model.word_top.sum(0)
 
-        distances = _dist_word_top_(word_or_words, self.corpus, Q,  
+        distances = dist_word_top(word_or_words, self.corpus, Q,  
                                     weights=weights, print_len=print_len, 
                                     filter_nan=filter_nan,
                                     dist_fn=dist_fn, order=order)
 
         if show_topics:
-            if _isstr_(word_or_words):
+            if isstr(word_or_words):
                 word_or_words = [word_or_words]
 
             # Filter based on topic assignments to words (Z values) 
@@ -601,8 +583,8 @@ class LdaCgsViewer(object):
 
     def dist_doc_doc(self, doc_or_docs, 
                      print_len=10, filter_nan=True, 
-                     label_fn=_def_label_fn_, as_strings=True,
-                     dist_fn=_JS_div_, order='i'):
+                     label_fn=def_label_fn, as_strings=True,
+                     dist_fn=JS_div, order='i'):
         """
         Computes and sorts the cosine similarity values between a document 
         or list of documents and every document in the topic space. 
@@ -635,14 +617,14 @@ class LdaCgsViewer(object):
         """
         Q = self.model.top_doc / self.model.top_doc.sum(0)
 
-        return _dist_doc_doc_(doc_or_docs, self.corpus, 
+        return dist_doc_doc(doc_or_docs, self.corpus, 
                               self.model.context_type, Q,  
                               print_len=print_len, filter_nan=filter_nan, 
                               label_fn=label_fn, as_strings=as_strings,
                               dist_fn=dist_fn, order=order)
     
 
-    def dismat_doc(self, docs=[], dist_fn=_JS_div_):
+    def dismat_doc(self, docs=[], dist_fn=JS_div):
         """
         Calculates the distance matrix for a given list of documents.
 
@@ -661,14 +643,14 @@ class LdaCgsViewer(object):
 
         Q = self.model.top_doc / self.model.top_doc.sum(0)
 
-        dm =  _dismat_doc_(docs, self.corpus, self.model.context_type,
+        dm =  dismat_doc(docs, self.corpus, self.model.context_type,
                            Q, dist_fn=dist_fn)
 
         return dm
 
 
 
-    def dismat_top(self, topics=[], dist_fn=_JS_div_):
+    def dismat_top(self, topics=[], dist_fn=JS_div):
         """
         Calculates the distance matrix for a given list of topics.
 
@@ -688,7 +670,7 @@ class LdaCgsViewer(object):
 
         Q = self.model.word_top / self.model.word_top.sum(0)
 
-        return _dismat_top_(topics, Q, dist_fn=dist_fn)
+        return dismat_top(topics, Q, dist_fn=dist_fn)
 
 
 
@@ -720,6 +702,7 @@ class LdaCgsViewer(object):
         :returns: a matplotlib.pyplot object.
             Contains the log probability plot. 
         """
+        import matplotlib.pyplot as plt
 
         # If range is not specified, include the whole chain.
         if len(range) == 0:

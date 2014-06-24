@@ -1,6 +1,9 @@
 import numpy as np
 
-from vsm.model import BaseModel
+from base import BaseModel
+
+
+__all__ = ['BeagleEnvironment']
 
 
 class BeagleEnvironment(BaseModel):
@@ -36,7 +39,7 @@ class BeagleEnvironment(BaseModel):
             Sets the environment matrix to randomly generated then 
             normalized vectors.
             
-    :See Also: :class:`vsm.model.BaseModel`
+    :See Also: :class:`vsm.model.base.BaseModel`
     """
     def __init__(self, corpus, n_cols=2048, dtype=np.float64, 
                  context_type='sentence'):

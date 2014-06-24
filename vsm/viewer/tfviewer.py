@@ -1,22 +1,13 @@
 import numpy as np
 
-from vsm import (enum_sort as _enum_sort_, 
-                 map_strarr as _map_strarr_)
+from vsm.spatial import angle_sparse
+from vsm.structarr import *
+from types import *
+from labeleddata import *
+from wrappers import *
 
-from vsm.linalg import angle_sparse as _angle_sparse_
 
-from vsm.viewer import (
-    def_label_fn as _def_label_fn_,
-    res_word_type as _res_word_type_)
-
-from vsm.viewer import (
-    dist_word_word as _dist_word_word_,
-    dist_doc_doc as _dist_doc_doc_,
-    dismat_word as _dismat_word_,
-    dismat_doc as _dismat_doc_)
-
-from labeleddata import LabeledColumn as _LabeledColumn_
-
+__all__ = ['TfViewer']
 
 
 class TfViewer(object):
@@ -58,7 +49,7 @@ class TfViewer(object):
 
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True,
-                       dist_fn=_angle_sparse_, order='i'):
+                       dist_fn=angle_sparse, order='i'):
         """
         A wrapper of `dist_word_word` in similarity.py
 
@@ -87,15 +78,15 @@ class TfViewer(object):
         
         :See Also: :meth:`vsm.viewer.similarity.dist_word_word`
         """
-        return _dist_word_word_(word_or_words, self.corpus, self.model.matrix.T,
+        return dist_word_word(word_or_words, self.corpus, self.model.matrix.T,
                                 weights=weights, filter_nan=filter_nan, 
                                 print_len=print_len, as_strings=True,
                                 dist_fn=dist_fn, order=order)
 
 
     def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
-                     filter_nan=True, label_fn=_def_label_fn_, as_strings=True,
-                     dist_fn=_angle_sparse_, order='i'):
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True,
+                     dist_fn=angle_sparse, order='i'):
         """ 
         :param doc_or_docs: Query document(s) to which cosine values
             are calculated
@@ -127,7 +118,7 @@ class TfViewer(object):
 
         :See Also: :meth:`vsm.viewer.similarity.dist_doc_doc`
         """
-        return _dist_doc_doc_(doc_or_docs, self.corpus, 
+        return dist_doc_doc(doc_or_docs, self.corpus, 
                               self.model.context_type, self.model.matrix, 
                               weights=weights, print_len=print_len,
                               filter_nan=filter_nan, label_fn=label_fn, 
@@ -135,12 +126,12 @@ class TfViewer(object):
                               dist_fn=dist_fn, order=order)
     
 
-    def dist_word_doc(self, word_or_words, weights=[], label_fn=_def_label_fn_, 
+    def dist_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
                       filter_nan=True, print_len=10, as_strings=True, 
-                      dist_fn=_angle_sparse_, order='i'):
+                      dist_fn=angle_sparse, order='i'):
         """
         """
-        return _dist_word_doc_(word_or_words, self.corpus, 
+        return dist_word_doc(word_or_words, self.corpus, 
                                self.model.context_type, 
                                self.model.matrix, weights=weights, 
                                label_fn=label_fn,
@@ -149,7 +140,7 @@ class TfViewer(object):
                                dist_fn=dist_fn, order=order)
 
 
-    def dismat_word(self, word_list, dist_fn=_angle_sparse_):
+    def dismat_word(self, word_list, dist_fn=angle_sparse):
         """
         Calculates a distance matrix for a given list of words.
 
@@ -164,11 +155,11 @@ class TfViewer(object):
         :See Also: :meth:`vsm.viewer.similarity.dismat_words`
         """
         
-        return _dismat_word_(word_list, self.corpus, 
+        return dismat_word(word_list, self.corpus, 
                              self.model.matrix.T.tocsc(), dist_fn=dist_fn)
 
 
-    def dismat_doc(self, docs, dist_fn=_angle_sparse_):
+    def dismat_doc(self, docs, dist_fn=angle_sparse):
         """
         Calculates a distance matrix for a given list of documents.
 
@@ -181,14 +172,14 @@ class TfViewer(object):
 
         :See Also: :meth:`vsm.viewer.similarity.dismat_docs`
         """
-        return _dismat_doc_(docs, self.corpus, self.model.context_type, 
+        return dismat_doc(docs, self.corpus, self.model.context_type, 
                             self.model.matrix.tocsc(), dist_fn=dist_fn)
 
 
     def coll_freq(self, word):
         """
         """
-        i,w = _res_word_type_(self.corpus, word)
+        i,w = res_word_type(self.corpus, word)
         row = self.model.matrix.tocsr()[i, :].toarray()
         return row.sum()
 
@@ -207,12 +198,12 @@ class TfViewer(object):
             A table with word and its counts.
         """
         freqs = self.model.matrix.tocsr().sum(1) 
-        w_arr = _enum_sort_(freqs.view(np.ndarray)[:, 0])
+        w_arr = enum_sort(freqs.view(np.ndarray)[:, 0])
         
         # Label data
         if as_strings:
-            w_arr = _map_strarr_(w_arr, self.corpus.words, k='i', new_k='word')
-        w_arr = w_arr.view(_LabeledColumn_)
+            w_arr = map_strarr(w_arr, self.corpus.words, k='i', new_k='word')
+        w_arr = w_arr.view(LabeledColumn)
         w_arr.col_header = 'Collection Frequencies'
         w_arr.subcol_headers = ['Word', 'Counts']
         w_arr.col_len = print_len

@@ -3,12 +3,41 @@ import os
 import numpy as np
 
 from vsm.corpus import Corpus
-from vsm.corpus.util import *
+from util import *
 
 
 __all__ = ['empty_corpus', 'random_corpus',
            'toy_corpus', 'corpus_fromlist',
-           'file_corpus', 'dir_corpus', 'coll_corpus']
+           'file_corpus', 'dir_corpus', 'coll_corpus', 'json_corpus',
+           'corpus_from_strings']
+
+
+
+def corpus_from_strings(strings, metadata=[], unidecode=True,
+                        nltk_stop=True, stop_freq=0, add_stop=None):
+    """
+    Takes a list of strings and returns a Corpus object whose document
+    tokens are the strings.
+
+    """
+    documents = [word_tokenize(s) for s in strings]
+    corpus = sum(documents, [])
+    indices = np.cumsum([len(d) for d in documents])
+    del documents
+
+    if unidecode and isinstance(corpus, unicode):
+        import unidecode
+        corpus = unidecode(corpus)
+
+    if len(metadata) == 0:
+        metadata = ['document_{0}'.format(i) for i in xrange(len(strings))]
+    md_type = np.array(metadata).dtype
+    dtype = [('idx', np.int), ('document_label', md_type)]
+    context_data = [np.array(zip(indices, metadata), dtype=dtype)]
+
+    c = Corpus(corpus, context_data=context_data, context_types=['document'])
+    return apply_stoplist(c, nltk_stop=nltk_stop,
+                          freq=stop_freq, add_stop=add_stop)
 
 
 
@@ -123,7 +152,6 @@ def corpus_fromlist(ls, context_type='context'):
 
     return Corpus(corpus, context_data=context_data,
                   context_types=[context_type])
-
 
 
 def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
@@ -661,6 +689,8 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
                        freq=stop_freq, add_stop=add_stop)
 
     return c
+
+
 
 
 ###########

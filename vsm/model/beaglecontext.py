@@ -6,8 +6,10 @@ import cPickle as cpickle
 
 import numpy as np
 
-from vsm.model import BaseModel
+from base import BaseModel
 
+
+__all__ = ['BeagleContextSeq', 'BeagleContextMulti']
 
 
 def realign_env_mat(corpus, env_corpus, env_matrix):
@@ -49,7 +51,7 @@ class BeagleContextSeq(BaseModel):
         * :doc:`bcs_train`
             Trains the model.
 
-    :See Also: :class:`vsm.model.BaseModel`
+    :See Also: :class:`vsm.model.base.BaseModel`
     """
     def __init__(self, corpus, env_corpus, env_matrix, 
                 context_type='sentence'):

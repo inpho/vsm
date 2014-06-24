@@ -4,7 +4,7 @@ import setuptools
 
 setup(
     name = "vsm",
-    version = "0.1",
+    version = "0.2",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
@@ -28,12 +28,11 @@ setup(
     install_requires=[
         "numpy>=1.6.1",
         "scipy>=0.10.1",
-        "nltk>=2.0.0"
     ],
     packages=['vsm',
               'vsm.corpus',
-              'vsm.corpus.util',
               'vsm.model',
               'vsm.viewer',
-              'vsm.extensions'],
+              'vsm.ext',
+    ],
 )

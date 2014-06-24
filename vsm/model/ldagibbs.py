@@ -2,6 +2,7 @@ from sys import stdout
 import numpy as np
 
 
+__all__ = ['LDAGibbs']
 
 
 def smpl_cat(d_cum):

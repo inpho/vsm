@@ -1,14 +1,11 @@
 import numpy as np
 
-from vsm.linalg import angle as _angle_
+from vsm.spatial import angle
 
-from vsm.viewer import (
-    dist_word_word as _dist_word_word_,
-    dismat_word as _dismat_word_)
+from wrappers import *
 
-# from plotting import (
-#     gen_colors as _gen_colors_,
-#     plot_clusters as _plot_clusters_)
+
+__all__ = ['BeagleViewer']
 
 
 
@@ -43,7 +40,7 @@ class BeagleViewer(object):
 
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True,
-                       dist_fn=_angle_, order='i'):
+                       dist_fn=angle, order='i'):
         """
         A wrapper of `sim_word_word` in similarity.py
 
@@ -66,7 +63,7 @@ class BeagleViewer(object):
             than their integer representations. Default is `True`.
         :type as_strings: boolean, optional
 
-        :param dist_fn: A distance function from functions in vsm.linalg. 
+        :param dist_fn: A distance function from functions in vsm.spatial. 
             Default is :meth: angle.
         :type dist_fn: string, optional
 
@@ -79,15 +76,15 @@ class BeagleViewer(object):
         
         :See Also: :meth:`vsm.viewer.similarity.dist_word_word`
         """
-        return _dist_word_word_(word_or_words, self.corpus, 
-                                self.model.matrix.T, weights=weights, 
-                                filter_nan=filter_nan, 
-                                print_len=print_len, as_strings=True,
-                                dist_fn=dist_fn, order=order)
+        return dist_word_word(word_or_words, self.corpus, 
+                              self.model.matrix.T, weights=weights, 
+                              filter_nan=filter_nan, 
+                              print_len=print_len, as_strings=True,
+                              dist_fn=dist_fn, order=order)
 
 
 
-    def dismat_word(self, word_list, dist_fn=_angle_):        
+    def dismat_word(self, word_list, dist_fn=angle):        
         """
         Calculates the distance matrix for a given list of words.
 
@@ -95,7 +92,7 @@ class BeagleViewer(object):
             computed.
         :type word_list: list
 
-        :param dist_fn: A distance function from functions in vsm.linalg. 
+        :param dist_fn: A distance function from functions in vsm.spatial. 
             Default is :meth: angle.
         :type dist_fn: string, optional
 
@@ -106,7 +103,7 @@ class BeagleViewer(object):
         :See Also: :meth:`vsm.viewer.similarity.dismat_word`
         """
 
-        return _dismat_word_(word_list, self.corpus, 
+        return dismat_word(word_list, self.corpus, 
                            self.model.matrix.T, dist_fn=dist_fn)
 
 
@@ -120,6 +117,9 @@ class BeagleViewer(object):
     #     """
     #     from sklearn import manifold
     #     from math import ceil
+    #     from vsm.ext.clustering.plotting import (
+    #         gen_colors as _gen_colors_,
+    #         plot_clusters as _plot_clusters_)
 
     #     # create a list to be plotted
     #     word_list = self.dist_word_word(words, weights=weights)

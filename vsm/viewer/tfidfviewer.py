@@ -1,14 +1,9 @@
-from vsm.linalg import angle_sparse as _angle_sparse_
+from vsm.spatial import angle_sparse
 
-from vsm.viewer import def_label_fn as _def_label_fn_
+from wrappers import *
 
-from vsm.viewer import (
-    dist_word_word as _dist_word_word_,
-    dist_doc_doc as _dist_doc_doc_,
-    dist_word_doc as _dist_word_doc_,
-    dismat_word as _dismat_word_,
-    dismat_doc as _dismat_doc_)
 
+__all__ = ['TfIdfViewer']
 
 
 class TfIdfViewer(object):
@@ -48,7 +43,7 @@ class TfIdfViewer(object):
 
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True, 
-                       dist_fn=_angle_sparse_, order='i'):
+                       dist_fn=angle_sparse, order='i'):
         """
         A wrapper of `dist_word_word` in similarity.py
 
@@ -77,7 +72,7 @@ class TfIdfViewer(object):
 
         :See Also: :meth:`vsm.viewer.similarity.dist_word_word`
         """
-        return _dist_word_word_(word_or_words, self.corpus, 
+        return dist_word_word(word_or_words, self.corpus, 
                                 self.model.matrix.T, weights=weights, 
                                 filter_nan=filter_nan, 
                                 print_len=print_len, as_strings=True,
@@ -85,8 +80,8 @@ class TfIdfViewer(object):
 
 
     def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
-                     filter_nan=True, label_fn=_def_label_fn_, as_strings=True,
-                     dist_fn=_angle_sparse_, order='i'):
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True,
+                     dist_fn=angle_sparse, order='i'):
         """
         :param doc_or_docs: Query document(s) to which cosine values
             are calculated
@@ -118,19 +113,19 @@ class TfIdfViewer(object):
 
         :See Also: :meth:`vsm.viewer.similarity.dist_doc_doc`
         """
-        return _dist_doc_doc_(doc_or_docs, self.corpus, self.model.context_type, 
+        return dist_doc_doc(doc_or_docs, self.corpus, self.model.context_type, 
                               self.model.matrix, weights=weights,
                               print_len=print_len, filter_nan=filter_nan, 
-                              label_fn=_def_label_fn_, as_strings=True,
+                              label_fn=def_label_fn, as_strings=True,
                               dist_fn=dist_fn, order=order)
 
 
-    def dist_word_doc(self, word_or_words, weights=[], label_fn=_def_label_fn_, 
+    def dist_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
                       filter_nan=True, print_len=10, as_strings=True, 
-                      dist_fn=_angle_sparse_, order='i'):
+                      dist_fn=angle_sparse, order='i'):
         """
         """
-        return _dist_word_doc_(word_or_words, self.corpus, 
+        return dist_word_doc(word_or_words, self.corpus, 
                                self.model.context_type, 
                                self.model.matrix, weights=weights, 
                                label_fn=label_fn,
@@ -139,7 +134,7 @@ class TfIdfViewer(object):
                                dist_fn=dist_fn, order=order)
 
 
-    def dismat_word(self, word_list, dist_fn=_angle_sparse_):
+    def dismat_word(self, word_list, dist_fn=angle_sparse):
         """
         Calculates a distance matrix for a given list of words.
 
@@ -153,11 +148,11 @@ class TfIdfViewer(object):
 
         :See Also: :meth:`vsm.viewer.similarity.distmat_words`
         """
-        return _dismat_word_(word_list, self.corpus,
+        return dismat_word(word_list, self.corpus,
                              self.model.matrix.T.tocsc(), dist_fn=dist_fn)
 
 
-    def dismat_doc(self, docs, dist_fn=_angle_sparse_):
+    def dismat_doc(self, docs, dist_fn=angle_sparse):
         """
         Calculates a distance matrix for a given list of documents.
 
@@ -171,5 +166,5 @@ class TfIdfViewer(object):
 
         :See Also: :meth:`vsm.viewer.similarity.dismat_docs`
         """
-        return _dismat_doc_(docs, self.corpus, self.model.context_type, 
+        return dismat_doc(docs, self.corpus, self.model.context_type, 
                             self.model.matrix.tocsc(), dist_fn=dist_fn)

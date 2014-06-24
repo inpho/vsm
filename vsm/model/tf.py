@@ -1,10 +1,16 @@
 import multiprocessing as mp
+
 import numpy as np
 from scipy.sparse import hstack
 
-from vsm import mp_split_ls, mp_shared_array, mp_shared_value
-from vsm.model import BaseModel
-from vsm.linalg import count_matrix
+from vsm.spatial import count_matrix
+from vsm.split import *
+from base import *
+from mparray import *
+
+
+__all__ = ['TfSeq', 'TfMulti']
+
 
 
 class TfSeq(BaseModel):
@@ -46,7 +52,7 @@ class TfSeq(BaseModel):
             Takes a filename or file object and loads it as an npz archive
             into a BaseModel object.
 
-    :See Also: :class:`vsm.model.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
+    :See Also: :class:`vsm.model.base.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
     """
     def __init__(self, corpus=None, context_type=None):
 
@@ -109,7 +115,7 @@ class TfMulti(BaseModel):
             Takes a filename or file object and loads it as an npz archive
             into a BaseModel object.
 
-    :See Also: :class:`vsm.model.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
+    :See Also: :class:`vsm.model.base.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
     """
     def __init__(self, corpus=None, context_type=None):
 
