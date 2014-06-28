@@ -122,16 +122,29 @@ def angle_sparse(P, Q):
 
     Angles are computed wrt the rows of P and wrt the columns of Q.
     """
-    P = P.tocsr().astype(np.float)
-    Q = Q.tocsc().astype(np.float)
+    P = P.tocsc().astype(np.float)
+    Q = Q.tocsr().astype(np.float)
 
     # Normalize P row-wise and Q column-wise
     P_inv_norms = 1 / np.sqrt(P.multiply(P).sum(1))
     Q_inv_norms = 1 / np.sqrt(Q.multiply(Q).sum(0))
 
-    P = P.multiply(csc_matrix(P_inv_norms))
-    Q = Q.multiply(csr_matrix(Q_inv_norms))
+    # Attempt to use scipy.sparse version >= 0.13 
+    try:
+        P = P.multiply(csc_matrix(P_inv_norms))
+        Q = Q.multiply(csr_matrix(Q_inv_norms))
+    except ValueError:
+        for j in xrange(P.shape[1]):
+            col = P[:,j].multiply(csc_matrix(P_inv_norms))
+            P = P.tolil()
+            P[:,j] = col
+        for i in xrange(Q.shape[0]):
+            row = Q[i,:].multiply(csr_matrix(Q_inv_norms))
+            Q = Q.tolil()
+            Q[i,:] = row
 
+    P = P.tocsr()
+    Q = Q.tocsc()
     cos_PQ = P.dot(Q).toarray()
 
     # Rounding errors may result in values outside of the domain of
