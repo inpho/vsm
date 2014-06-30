@@ -29,7 +29,7 @@ class LdaCgsViewer(object):
         * **model** (LDAGibbs object) - `model`
 
     :methods:
-        * :doc:`topics` 
+        * :doc:`topics` `
             Returns a list of topics estimated by `LDAGibbs`
             sampler. Each topic is represented by a set of words and the
             corresponding probabilities.
@@ -48,24 +48,19 @@ class LdaCgsViewer(object):
             returns a list each row of which contains the name or ID number of
             document, the relative position in the document, and the assigned
             topic number for each occurrence of `word`.
-        * :doc:`lda_sim_top_top`
-            Returns topics sorted by the cosine similarity values between
+        * :doc:`dist_top_top`
+            Returns topics sorted by the distances between
             topic(s) and every topic.
-        * :doc:`lda_sim_top_doc`
+        * :doc:`dist_top_doc`
             Returns documents sorted according to their relevance to topic(s).
-        * :doc:`lda_sim_word_top`
+        * :doc:`dist_word_top`
             Returns topics sorted according to their relevance to word(s).
-        * :doc:`lda_sim_word_word`
-            Returns words sorted by the cosine values between a word or list
-            of words and every word based on the topic distributions.
-        * :doc:`lda_sim_doc_doc`
-            Computes and sorts the cosine similarity values between a
+        * :doc:`dist_doc_doc`
+            Computes and sorts the distances between a
             document or list of documents and every document in the topic space.
-        * :doc:`lda_dismat_words`
-            Calculates the distance matrix for a given list of words.
-        * :doc:`lda_dismat_docs`
+        * :doc:`dismat_doc`
             Calculates the distance matrix for a given list of documents.
-        * :doc:`lda_dismat_topics`
+        * :doc:`dismat_top`
             Calculates the distance matrix for a given list of topics.
         * :doc:`logp_plot`
             Returns a plot of log probabilities for the specified range of 
@@ -104,26 +99,25 @@ class LdaCgsViewer(object):
         Each topic is represented by a set of words and the corresponding 
         probabilities.
         
-        :param k_indices: Order of topics. For example, if k_indices = [3, 0, 2], 
-            the 4th, 1st and 3rd topics are printed in this order. 
-            Default is ascending from 0 to K-1, where K is the 
-            number of topics.
+        :param k_indices: Indices of topics to be displayed. For example,
+            if k_indices = [3, 0, 2], the 4th, 1st and 3rd topics are 
+            printed in this order. Default is ascending from 0 to K-1, 
+            where K is the number of topics.
         :type k_indices: list of integers
         
-        :param print_len: Number of words shown for each topic. If this is i,
-            i top probability words are shown for each topic. Default is 10.
+        :param print_len: Number of words shown for each topic. Default is 10.
         :type print_len: int, optional
 
         :param as_string: If `True`, each topic displays words rather than its
             integer representation. Default is `True`.
         :type as_string: boolean, optional
  
-        :param compact_view: If `True`, topics are represented with their
-            words and their probabilities. Otherwise, topics are represented
-            as their top `print_len` words.
+        :param compact_view: If `True`, topics are simply represented as
+            their top `print_len` number of words. Otherwise, topics are
+            shown as words and their probabilities. Default is `True`.
         :type compact_view: boolean, optional       
         
-        :returns: table : :class:`DataTable`.
+        :returns: an instance of :class:`DataTable`.
             A structured array of topics.
         """
         if len(k_indices) == 0:
@@ -173,19 +167,18 @@ class LdaCgsViewer(object):
         measure how informative a given topic is to select documents. 
         
         :type print_len: int, optional
-        :param print_len: Number of words shown for each topic. If this is i,
-            i top probability words are shown for each topic. Default is 10.
+        :param print_len: Number of words shown for each topic. Default is 10.
 
         :param as_string: If `True`, each topic displays words rather than its
             integer representation. Default is `True`.
         :type as_string: boolean, optional
         
-        :param compact_view: If `True`, topics are represented with their
-            words and their probabilities. Otherwise, topics are represented
-            as their top `print_len` words.
-        :type compact_view: boolean, optional
+        :param compact_view: If `True`, topics are simply represented as
+            their top `print_len` number of words. Otherwise, topics are
+            shown as words and their probabilities. Default is `True`.
+        :type compact_view: boolean, optional 
         
-        :returns: k_arr : :class:`DataTable`.
+        :returns: an instance of :class:`DataTable`.
             A structured array of topics sorted by entropy.
         """
         if len(k_indices) == 0:
@@ -221,21 +214,21 @@ class LdaCgsViewer(object):
 
     def topic_hist(self, k_indices=[], d_indices=[], show=True):
         """
-        Draw a histogram showing the proportion of topics within a set of
+        Draws a histogram showing the proportion of topics within a set of
         documents specified by d_indices. 
 
         :param k_indices: Specifies the topics for which proportions are 
-             calculated.
-        :type doc: list of int
+             calculated. Default is all topics.
+        :type doc: list of integers, optional
         
-        :param d_indices: Specifies the document in which topic proportions
-             are culculated. 
-        :type d_indices: list of int
+        :param d_indices: Specifies the document for which topic proportions
+             are calculated. Default is all documents.
+        :type d_indices: list of integers, optional
 
-        :param show: shows plot if true.
-        :type d_indices: boolean
+        :param show: shows plot if `True`. Default is `True`.
+        :type d_indices: boolean, optional
         
-        :returns: a matplotlib.pyplot object.
+        :returns: an instance of matplotlib.pyplot object.
              Contains the topic proportion histogram.
         """
         import matplotlib.pyplot as plt
@@ -274,11 +267,10 @@ class LdaCgsViewer(object):
              name (string) of the document.
         :type doc: int or string
         
-        :param print_len: Number of topics to be listed. If this is i,
-            i top probability topics are shown. Default is 10.
+        :param print_len: Number of topics to be listed. Default is 10.
         :type print_len: int, optional
         
-        :returns: k_arr : :class:`LabeledColumn`.
+        :returns: an instance of :class:`LabeledColumn`.
             An array of topics (represented by their number) and the 
             corresponding probabilities.
         """
@@ -312,7 +304,7 @@ class LdaCgsViewer(object):
             ID numbers. Default is `True`.
         :type as_strings: boolean, optional
 
-        :returns: Z_w : :class:`LabeledColumn`.
+        :returns: an instance of :class:`LabeledColumn`.
             A structured array consisting of three columns. Each column 
             is a list of:
             (1) name/ID of document containing `word`
@@ -351,11 +343,11 @@ class LdaCgsViewer(object):
                      as_strings=True, compact_view=True):
         """
         Takes a topic or list of topics (by integer index) and returns
-        a list of topics sorted by the cosine values between a given
+        a list of topics sorted by the distances between a given
         topic and every topic.
         
-        :param topic_or_topics: Query topic(s) to which cosine values are calculated.
-        :type topic_or_topics: string or list of strings
+        :param topic_or_topics: Query topic(s) to which distances are calculated.
+        :type topic_or_topics: integer or list of integers
         
         :param weights: Specify weights for each topic in `topic_or_topics`. 
             Default uses equal weights (i.e. arithmetic mean)
@@ -366,29 +358,36 @@ class LdaCgsViewer(object):
             are shown. Default is `True`.
          :type show_topics: boolean, optional
 
-        :param print_len: Number of topics printed by pretty-pringing function
-            Default is 10.
+        :param print_len: Number of topics to be shown. Default is 10.
         :type print_len: int, optional       
 
         :param filter_nan: If `True` not a number entries are filtered.
             Default is `True`.
         :type filter_nan: boolean, optional
+        
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`JS_div`.
+        :type dist_fn: string, optional
+
+        :param order: Order of sorting. 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
+        :type order: string, optional
 
         :param as_strings: If `True`, words of each topic are represented as
             strings. Otherwise they are represented by their integer
             representation. Default is `True`.
         :type as_strings: boolean, optional
 
-        :param compact_view: If `True`, topics are represented with their
-            words and their probabilities. Otherwise, topics are represented
-            as their top `print_len` words.
-        :type compact_view: boolean, optional
+        :param compact_view: If `True`, topics are simply represented as
+            their top `print_len` number of words. Otherwise, topics are
+            shown as words and their probabilities. Default is `True`.
+        :type compact_view: boolean, optional       
 
-        :returns: :class:`LabeledColumn`.
-            A 2-dim array containing topics and their cosine values to 
+        :returns: an instance of :class:`LabeledColumn`.
+            A 2-dim array containing topics and their distances to 
             `topic_or_topics`. 
         
-        :See Also: :meth:`vsm.viewer.similarity.sim_top_top`
+        :See Also: :meth:`vsm.viewer.wrapper.dist_top_top`
         """
         Q = self.model.word_top / self.model.word_top.sum(0)
 
@@ -426,7 +425,9 @@ class LdaCgsViewer(object):
                      print_len=10, as_strings=True, label_fn=def_label_fn, 
                      filter_nan=True, dist_fn=JS_div, order='i'):
         """
-        Takes...
+        Takes a topic or list of topics (by integer index) and returns
+        a list of documents sorted by the posterior probabilities of
+        documents given the topic(s).
 
         :param topic_or_topics: Query topic(s) to which posterior probabilities
             are calculated.
@@ -449,18 +450,27 @@ class LdaCgsViewer(object):
         :type as_strings: boolean, optional
 
         :param label_fn: A function that defines how documents are represented.
-            Default is def_label_fn which retrieves the labels from corpus metadata.
+            Default is def_label_fn which retrieves the labels from corpus
+            metadata.
         :type label_fn: string, optional
 
         :param filter_nan: If `True` not a number entries are filtered.
             Default is `True`.
         :type filter_nan: boolean, optional
+        
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`JS_div`.
+        :type dist_fn: string, optional
 
-        :returns: :class:`LabeledColumn`.
+        :param order: Order of sorting. 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
+        :type order: string, optional
+
+        :returns: an instance of :class:`LabeledColumn`.
             A 2-dim array containing documents and their posterior probabilities 
             to `topic_or_topics`. 
 
-        :See Also: :meth:`def_label_fn`, :meth:`vsm.viewer.similarity.sim_top_doc`
+        :See Also: :meth:`def_label_fn`, :meth:`vsm.viewer.wrapper.dist_top_doc`
         """
         Q = self.model.top_doc / self.model.top_doc.sum(0)
 
@@ -506,7 +516,7 @@ class LdaCgsViewer(object):
         in the corpus. Otherwise, each word in `words` is assigned the
         provided weight.
         
-        :param word_or_words: word(s) to which cosine values are calculated
+        :param word_or_words: word(s) to which distances are calculated
         :type word_or_words: string or list of strings
         
         :param weights: Specify weights for each query word in `word_or_words`. 
@@ -531,17 +541,24 @@ class LdaCgsViewer(object):
             representation. Default is `True`.
         :type as_strings: boolean, optional
 
-        :param compact_view: If `True`, topics are represented with their
-            words and their probabilities. Otherwise, topics are represented
-            as their top `print_len` words.
-        :type compact_view: boolean, optional
+        :param compact_view: If `True`, topics are simply represented as
+            their top `print_len` number of words. Otherwise, topics are
+            shown as words and their probabilities. Default is `True`.
+        :type compact_view: boolean, optional       
         
-        :returns: :class:`LabeledColumn`.
-            A structured array of topics sorted by their cosines values 
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`JS_div`.
+        :type dist_fn: string, optional
+
+        :param order: Order of sorting. 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
+        :type order: string, optional
+
+        :returns: an instance of :class:`LabeledColumn`.
+            A structured array of topics sorted by their distances 
             with `word_or_words`.
         
-        :See Also: :meth:`vsm.viewer.similarity.sim_word_top`
-
+        :See Also: :meth:`vsm.viewer.wrapper.dist_word_top`
         """
         Q = self.model.word_top / self.model.word_top.sum(0)
 
@@ -586,10 +603,10 @@ class LdaCgsViewer(object):
                      label_fn=def_label_fn, as_strings=True,
                      dist_fn=JS_div, order='i'):
         """
-        Computes and sorts the cosine similarity values between a document 
+        Computes and sorts the distances between a document 
         or list of documents and every document in the topic space. 
         
-        :param doc_or_docs: Query document(s) to which cosine values
+        :param doc_or_docs: Query document(s) to which distances
             are calculated
         :type doc_or_docs: string/integer or list of strings/integers
         
@@ -602,18 +619,27 @@ class LdaCgsViewer(object):
         :type filter_nan: boolean, optional
 
         :param label_fn: A function that defines how documents are represented.
-            Default is def_label_fn which retrieves the labels from corpus metadata.
+            Default is def_label_fn which retrieves the labels from corpus
+            metadata.
         :type label_fn: string, optional
 
         :param as_strings: If `True`, returns a list of words rather than
             their integer representations. Default is `True`.
         :type as_strings: boolean, optional
         
-        :returns: `LabeledColumn`.
-            A 2-dim array containing documents and their cosine values to 
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`JS_div`.
+        :type dist_fn: string, optional
+
+        :param order: Order of sorting. 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
+        :type order: string, optional
+       
+        :returns: an instance of `LabeledColumn`.
+            A 2-dim array containing documents and their distances to 
             `doc_or_docs`. 
         
-        :See Also: :meth:`vsm.viewer.similarity.sim_doc_doc`
+        :See Also: :meth:`vsm.viewer.wrapper.dist_doc_doc`
         """
         Q = self.model.top_doc / self.model.top_doc.sum(0)
 
@@ -628,15 +654,18 @@ class LdaCgsViewer(object):
         """
         Calculates the distance matrix for a given list of documents.
 
-        :param docs: A list of documents whose similarity matrix is to be computed.
+        :param docs: A list of documents whose distance matrix is to be computed.
             Default is all the documents in the model.
         :type docs: list, optional
         
-        :returns: :class:....
-            contains n x n matrix containing floats where n is the number of 
-            documents.
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`JS_div`.
+        :type dist_fn: string, optional
 
-        :See Also: :meth:`vsm.viewer.similarity.dismat_documents`
+        :returns: an instance of :class:`IndexedSymmArray`.
+            n x n matrix containing floats where n is the number of documents.
+
+        :See Also: :meth:`vsm.viewer.wrapper.dismat_documents`
         """
         if len(docs) == 0:
             docs = range(self.model.top_doc.shape[1])
@@ -654,15 +683,19 @@ class LdaCgsViewer(object):
         """
         Calculates the distance matrix for a given list of topics.
 
-        :param k_indices: A list of topics whose similarity matrix is to be
+        :param k_indices: A list of topics whose distance matrix is to be
             computed. Default is all topics in the model.
         :type k_indices: list, optional
-
-        :returns: :class:...
-            contains n x n matrix containing floats where n is the number of topics
-            considered.
         
-        :See Also: :meth:`vsm.viewer.similarity.dismat_top`
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`JS_div`.
+        :type dist_fn: string, optional
+
+        :returns: an instance of :class:`IndexedSymmArray`.
+            n x n matrix containing floats where n is the number of
+            topics considered.
+        
+        :See Also: :meth:`vsm.viewer.wrapper.dismat_top`
         """
 
         if len(topics) == 0:
@@ -699,7 +732,7 @@ class LdaCgsViewer(object):
         :param grid: If `True` draw a grid. Default is `True`. 
         :type grid: boolean, optional
         
-        :returns: a matplotlib.pyplot object.
+        :returns: an instance of matplotlib.pyplot object.
             Contains the log probability plot. 
         """
         import matplotlib.pyplot as plt

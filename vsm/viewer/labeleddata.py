@@ -146,7 +146,6 @@ class LabeledColumn(np.ndarray):
         * **subcol_headers** (list, optional)
             List of labels that correspond to the fields of 
             the structured array. Default is `None`.
-
         * **subcol_widths** (list, optional)
             List of widths for each subcolumn. If not provided, 
             `subcol_widths` is calculated based on the data-type of the entries.
