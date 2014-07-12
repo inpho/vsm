@@ -13,6 +13,26 @@ class LdaCgsSeq(object):
     """
     def __init__(self, corpus=None, context_type=None,
                  K=100, alpha=[], beta=[]):
+        """
+        Initialize LdaCgsSeq.
+
+        :param corpus: Source of observed data.
+        :type corpus: `Corpus`
+    
+        :param context_type: Name of tokenization stored in `corpus` whose tokens
+            will be treated as documents.
+        :type context_type: string, optional
+
+        :param K: Number of topics. Default is `100`.
+        :type K: int, optional
+    
+        :param top_prior: Topic priors. Default is 0.01 for all topics.
+        :type top_prior: list, optional
+    
+        :param ctx_prior: Context priors. Default is a flat prior of 0.01 
+            for all contexts.
+        :type ctx_prior: list, optional
+        """
 
         self.context_type = context_type
         self.K = K

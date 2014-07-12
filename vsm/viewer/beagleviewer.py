@@ -12,25 +12,17 @@ __all__ = ['BeagleViewer']
 class BeagleViewer(object):
     """
     A class for viewing BEAGLE models.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
-    
-    :param model: One of the Beagle objects.
-    :type model: Beagle object
-
-    :attributes:
-        * **corpus** (Corpus object) - `corpus`
-        * **model** (Beagle object) - `model`
-
-    :methods:
-        * :doc:`dist_word_word`
-            Computes and sorts the distances between word(s) and every word.
-        * :doc:`dismat_word`
-            Calculates a distance matrix for a given list of words.
     """
+    
     def __init__(self, corpus, model):
-        """
+        """ 
+        Initialize BeagleViewer.
+
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+    
+        :param model: One of the Beagle objects.
+        :type model: BEAGLE model
         """
         self.corpus = corpus
         self.model = model

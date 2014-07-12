@@ -8,26 +8,19 @@ __all__ = ['Lsa']
 
 class Lsa(object):
     """
-
-    :param td_matrix: ? Default is an empty array.
-    :type td_matrix: np.array, optional
-
-    :param context_type: Name of tokenization whose tokens will be
-        treated as documents. Default is `None`.
-    :type context_type: string, optional
-
-    :Attributes:
-        * **td_matrix** (np.array)
-
-    :Methods:
-        * :meth:`train`
-           Trains the model. 
-        * :meth:`load`
-            Loads the saved model.
-        * :meth:`save`
-            Saves the model in an `.npz` file.
     """
+    
     def __init__(self, td_matrix=np.array([]), context_type=None):
+        """
+        Initialize Lsa.
+
+        :param td_matrix: Term-Document matrix. Default is an empty array.
+        :type td_matrix: np.array, optional
+
+        :param context_type: Name of tokenization whose tokens will be
+            treated as documents. Default is `None`.
+        :type context_type: string, optional
+        """
 
         self.word_matrix = None
         self.doc_matrix = None
@@ -56,9 +49,6 @@ class Lsa(object):
 
         :param k_factors: Default is 300.
         :type k_factors: int, optional
-
-        :returns: None
-
         """
 
         u,s,v = np.array([]), np.array([]), np.array([])
@@ -87,9 +77,7 @@ class Lsa(object):
             `numpy.savez` for further details.
         :type f: str-like or file-like object
             
-        :returns: None
-
-        :See Also: :meth: LsaModel.load, :meth: numpy.savez
+        :See Also: :meth:`numpy.savez`
         """
         print 'Saving model as', f
         arrays_out = dict()
@@ -111,9 +99,9 @@ class Lsa(object):
             `numpy.load` for further details.
         :type f: str-like or file-like object
             
-        :returns: None
+        :returns: a saved Lsa model.
 
-        :See Also: :meth: LsaModel.save, :meth: numpy.load
+        :See Also: :meth:`numpy.load`
         """
         print 'Loading model from', f
         arrays_in = np.load(f)

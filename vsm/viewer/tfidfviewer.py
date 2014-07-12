@@ -9,36 +9,17 @@ __all__ = ['TfIdfViewer']
 class TfIdfViewer(object):
     """
     A class for viewing Term frequency-Inverse document Frequency model.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
-
-    :param model: A Term frequency-Inverse document Frequency model.
-    :type model: TfIdf object.
-
-    :attributes:
-        * **corpus** (Corpus object) - `corpus`
-        * **model** (Tf object) - `model`
-
-    :methods:
-        * :doc:`dist_word_word`
-            Computes and sorts the distances between a word or list
-            of words and every word.
-        * :doc:`dist_doc_doc`
-            Computes and sorts the distances between a
-            document or list of documents and every document.
-        * :doc:`dist_word_doc`
-            Computes and sorts distances between a word or a list of words to
-            every document.
-        * :doc:`dismat_word`
-            Calculates the distance matrix for a given list of words.
-        * :doc:`dismat_doc`
-            Calculates the distance matrix for a given list of documents.
-
-    :See Also: :class:`vsm.model.tfidf.TfIdf`
     """
+    
     def __init__(self, corpus, model):
         """
+        Initialize TfIdfViewer.
+        
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+
+        :param model: A Term frequency-Inverse document Frequency model.
+        :type model: TfIdf.
         """
         self.corpus = corpus
         self.model = model
@@ -104,7 +85,7 @@ class TfIdfViewer(object):
         :param weights: Specify weights for each query doc in `doc_or_docs`. 
             Default uses equal weights (i.e. arithmetic mean)
         :type weights: list of floating point, optional
-        
+
         :param print_len: Number of words to be displayed. Default is 10.
         :type print_len: int, optional
 
@@ -114,7 +95,7 @@ class TfIdfViewer(object):
  
         :param label_fn: A function that defines how documents are represented.
             Default is def_label_fn which retrieves the labels from corpus
-             metadata.
+            metadata.
         :type label_fn: string, optional
         
         :param as_strings: If `True`, returns a list of words rather than
@@ -146,6 +127,9 @@ class TfIdfViewer(object):
                       filter_nan=True, print_len=10, as_strings=True, 
                       dist_fn=angle_sparse, order='i'):
         """
+        Computes and sorts distances between a word or a list of words to every
+        document.
+        
         :param word_or_words: Query word(s) to which a pseudo-document is
             created for computation of distances.
         :type word_or_words: string/integer or list of strings/integers

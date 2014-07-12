@@ -24,28 +24,7 @@ class LDAGibbs(object):
     Griffiths, Tom. Gibbs sampling in the generative model of Latent Dirichlet Allocation.
 
     Wang, Yi. Distributed Gibbs Sampling of Latent Topic Models: The Gritty Details.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
     
-    :param context_type: Name of tokenization stored in `corpus` whose tokens will be
-        treated as documents.
-    :type context_type: string
-
-    :param K: Number of topics. Default is `100`.
-    :type K: int
-    
-    :param alpha: Parameter for the prior distribution of theta_d. Default is `0.01`.
-    :type alpha: float
-    
-    :param beta: Parameter for the prior distribution of phi_d. Default is `0.01`.
-    :type beta: float
-    
-    :param log_prob: If `True`, compute the log probabilities of the corpus given
-        the values of the latent variables at each iteration and
-        records them in `log_prob`. Default is `True`.
-    :type log_prob: boolean
-
     :Attributes:
         * **W** (list of integer arrays)
             List of documents, which are extracted from the input Corpus object.
@@ -63,42 +42,34 @@ class LDAGibbs(object):
             terms for each topic in a K x V matrix.
         * **sum_word_top** (1-dim floating point array)
             Stores the sum of words over topics.
-
-    :Methods:
-        * :meth:`train`
-            Takes an optional argument `itr`, which defaults to 1000, and
-            updates the model `itr` times.
-        * :meth:`load`
-            Static method to load a saved model.
-        * :meth:`save`
-            Saves the LDAGibbs model in an `.npz` file.
-        * **`update_z`**
-            Takes a document index `d`, a word index `i` relative to that
-            document and a word `w` and updates the model.
-        * **z_dist**
-            Takes a document index `d` and a word `w` and computes the
-            distribution over topics for `w` in `d`.
-        * **phi_k**
-            Takes a topic index `t` and returns the estimated posterior
-            distribution over words for `t`.
-        * **phi_w**
-            Takes a word `w` and returns the estimated posterior
-            distribution over topics for `w`.
-        * **theta_d**
-            Takes a document index `d` and returns the estimated posterior
-            distribution over topics for `d`.
-        * **theta_k**
-            Takes a topic index `t` and returns the estimated posterior
-            distribution over documents for `t`.
-        * **logp**
-            Compute the log probability of the corpus `W` given the
-            estimated values of the latent variables `phi`, `theta` and
-            `Z`.
-
     """
     def __init__(self, corpus, context_type,
                  K=100, alpha = 0.01, beta = 0.01, 
                  log_prob=True):
+        """
+        Initialize LDAGibbs. 
+        
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+    
+        :param context_type: Name of tokenization stored in `corpus` whose tokens will be
+            treated as documents.
+        :type context_type: string
+
+        :param K: Number of topics. Default is `100`.
+        :type K: int
+    
+        :param alpha: Parameter for the prior distribution of theta_d. Default is `0.01`.
+        :type alpha: float
+    
+        :param beta: Parameter for the prior distribution of phi_d. Default is `0.01`.
+        :type beta: float
+    
+        :param log_prob: If `True`, compute the log probabilities of the corpus given
+            the values of the latent variables at each iteration and
+            records them in `log_prob`. Default is `True`.
+        :type log_prob: boolean
+        """
 
         self.context_type = context_type
         self.K = K
@@ -132,6 +103,8 @@ class LDAGibbs(object):
 
     def train(self, itr=1000, verbose=True):
         """
+        Takes an optional argument `itr`, which defaults to 1000, and
+        updates the model `itr` times.
 
         :param itr: Number of iterations for training. Default is 1000.
         :type itr: int, optional
@@ -165,15 +138,21 @@ class LDAGibbs(object):
 
 
     def z_dist(self, d, w):
-
+        """
+        Takes a document index `d` and a word `w` and computes the
+        distribution over topics for `w` in `d`.
+        """
         sum_word_top_inv = 1. / self.sum_word_top
         dist = (self.doc_top[d, :] * self.top_word[:, w]  * sum_word_top_inv)
         dist_cum = np.cumsum(dist)
         return dist_cum
 
 
-    def update_z(self, d, i, w):
-        
+    def update_z(self, d, i, w):  
+        """     
+        Takes a document index `d`, a word index `i` relative to that
+        document and a word `w` and updates the model.
+        """
         z = smpl_cat(self.z_dist(d, w))
         self.doc_top[d, z] += 1
         self.top_word[z, w] += 1
@@ -182,25 +161,39 @@ class LDAGibbs(object):
 
 
     def theta_d(self, d):
+        """
+        Takes a document index `d` and returns the estimated posterior
+        distribution over topics for `d`.
+        """
         return self.doc_top[d, :] / self.doc_top[d, :].sum()
 
 
     def theta_k(self, k):
+        """
+        Takes a topic index `t` and returns the estimated posterior
+        distribution over documents for `t`.
+        """
         return self.doc_top[:, k] / self.doc_top[:, k].sum()
 
 
     def phi_w(self, w):
+        """
+        Takes a word `w` and returns the estimated posterior
+        distribution over topics for `w`.
+        """
         return self.top_word[:, w] / self.top_word[:, w].sum()
 
 
     def phi_k(self, k):
+        """
+        Takes a topic index `t` and returns the estimated posterior
+        distribution over words for `t`.
+        """
         return self.top_word[k, :] / self.sum_word_top[k]
 
 
     def _logp(self):
-        """
-        For testing
-        """
+        
         from math import log
 
         log_p = 0
@@ -213,6 +206,11 @@ class LDAGibbs(object):
 
 
     def logp(self):
+        """
+        Compute the log probability of the corpus `W` given the
+        estimated values of the latent variables `phi`, `theta` and
+        `Z`.
+        """
         # This is slightly faster than distributing log over division
         log_kw = np.log(self.top_word / self.top_word.sum(1)[:, np.newaxis])
         log_dk = np.log(self.doc_top / self.doc_top.sum(1)[:, np.newaxis])
@@ -302,5 +300,3 @@ class LDAGibbs(object):
         print 'Saving LDA-Gibbs model to', filename
         np.savez(filename, **arrays_out)
         
-
-

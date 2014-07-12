@@ -1,5 +1,5 @@
 """
-[General documentation about the corpus submodule]
+[General documentation about the :mod:`corpus` submodule]
 """
 
 

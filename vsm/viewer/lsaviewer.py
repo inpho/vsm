@@ -13,36 +13,17 @@ __all__ = ['LsaViewer']
 class LsaViewer(object):
     """
     A class for viewing LSA model.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
-
-    :param model: An LSA model.
-    :type model: Lsa object.
-
-    :attributes:
-        * **corpus** (Corpus object) - `corpus`
-        * **model** (Lsa object) - `model`
-
-    :methods:
-        * :doc:`dist_word_word`
-            Computes and sorts the distances between a word or list
-            of words and every word.
-        * :doc:`dist_doc_doc`
-            Computes and sorts the distances between a
-            document or list of documents and every document.
-        * :doc:`dist_word_doc`
-            Computes and sorts distances between a word or a list of words to
-            every document.
-        * :doc:`dismat_word`
-            Calculates the distance matrix for a given list of words.
-        * :doc:`dismat_doc`
-            Calculates the distance matrix for a given list of documents.
-
-    :See Also: :mod:`vsm.model.lsa`
     """
+    
     def __init__(self, corpus, model):
         """
+        Initialize LsaViewer.
+
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+
+        :param model: An LSA model.
+        :type model: Lsa
         """
         self.corpus = corpus
         self.model = model

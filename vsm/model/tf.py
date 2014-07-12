@@ -22,39 +22,21 @@ class TfSeq(BaseModel):
     types correspond to matrix rows and contexts correspond to matrix
     columns.
 
-    The data structure is a sparse integer matrix.
-
-    :param corpus: A Corpus object containing the training data.
-    :type corpus: Corpus
-    
-    :param context_type: A string specifying the type of context over which
-        the model trainer is applied.
-    :type context_type: string
-
-    :attributes:
-        * **corpus** (Corpus)
-            A Corpus object containing the training data.
-        * **context_type** (string)
-            A string specifying the type of context over which the model
-            trainer is applied.
-        * **matrix** (scipy.sparse.coo_matrix)
-            A sparse matrix in 'coordinate' format that contains the
-            frequency counts.
-
-    :methods:
-        * :meth:`train`
-            Counts word-type occurrences per context and stores the
-            results in `self.matrix`
-        * :meth:`save`
-            Takes a filename or file object and saves `self.matrix` and
-            `self.context_type` in an npz archive.
-        * :meth:`load`
-            Takes a filename or file object and loads it as an npz archive
-            into a BaseModel object.
-
-    :See Also: :class:`vsm.model.base.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
+    :See Also: :class:`vsm.model.base`, :class:`vsm.corpus.Corpus`,
+        :class:`scipy.sparse.coo_matrix`
     """
+    
     def __init__(self, corpus=None, context_type=None):
+        """
+        Initialize TfSeq.
+
+        :param corpus: A Corpus object containing the training data.
+        :type corpus: Corpus
+    
+        :param context_type: A string specifying the type of context over which
+            the model trainer is applied.
+        :type context_type: string
+        """
 
         self.context_type = context_type
         if corpus:
@@ -87,37 +69,21 @@ class TfMulti(BaseModel):
 
     The data structure is a sparse integer matrix.
 
-    :param corpus: A Corpus object containing the training data
-    :type corpus: Corpus
-    
-    :param context_type: A string specifying the type of context over which
-        the model trainer is applied.
-    :type context_type: string
-
-    :attributes:
-        * **corpus** (Corpus)
-            A Corpus object containing the training data.
-        * **context_type** (string)
-            A string specifying the type of context over which the model
-            trainer is applied.
-        * **matrix** (scipy.sparse.coo_matrix)
-            A sparse matrix in 'coordinate' format that contains the
-            frequency counts.
-
-    :methods:
-        * :meth:`train`
-            Counts word-type occurrences per context and stores the
-            results in `self.matrix`
-        * :meth:`save`
-            Takes a filename or file object and saves `self.matrix` and
-            `self.context_type` in an npz archive.
-        * :meth:`load`
-            Takes a filename or file object and loads it as an npz archive
-            into a BaseModel object.
-
-    :See Also: :class:`vsm.model.base.BaseModel`, :class:`vsm.corpus.Corpus`, :class:`scipy.sparse.coo_matrix`
+    :See Also: :class:`vsm.model.base.BaseModel`, :class:`vsm.corpus.Corpus`,
+        :class:`scipy.sparse.coo_matrix`
     """
+    
     def __init__(self, corpus=None, context_type=None):
+        """
+        Initialize TfMulti.
+
+        :param corpus: A Corpus object containing the training data
+        :type corpus: Corpus, optional
+    
+        :param context_type: A string specifying the type of context over which
+            the model trainer is applied.
+        :type context_type: string, optional
+        """
 
         self.context_type = context_type
         if corpus:
@@ -146,10 +112,8 @@ class TfMulti(BaseModel):
         """
         Takes a number of processes `n_procs` over which to map and reduce.
 
-        :param n_procs: Number of processes.
-        :type n_procs: integer
-
-        :returns: `None`
+        :param n_procs: Number of processors.
+        :type n_procs: int
         """
         ctx_ls = mp_split_ls(self.contexts, n_procs)
 

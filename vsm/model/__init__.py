@@ -1,5 +1,5 @@
 """
-[General Documentation about model classes]
+[General Documentation about :mod:`model` classes]
 """
 
 import beaglecomposite

@@ -13,39 +13,17 @@ __all__ = ['TfViewer']
 class TfViewer(object):
     """
     A class for viewing Term-Frequency model.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
-
-    :param model: A Term-Frequency model.
-    :type model: TfSeq or TfMulti object.
-
-    :attributes:
-        * **corpus** (Corpus object) - `corpus`
-        * **model** (Tf object) - `model`
-
-    :methods:
-        * :doc:`dist_word_word`
-            Returns words sorted by the distances between word(s) and every word.
-        * :doc:`dist_doc_doc`
-            Returns documents sorted by the distances between document(s) and
-            every document.
-        * :doc:`dist_word_doc`
-            Computes and sorts distances between a word or a list of words to
-            every document.
-        * :doc:`dismat_word`
-            Calculates a distance matrix for a given list of words.
-        * :doc:`dismat_doc`
-            Calculates a distance matrix for a given list of documents.
-        * :doc:`coll_freq`
-            Returns the frequency of `word` in all documents.
-        * :doc:`coll_freqs`
-            Returns the frequency of all words in all documents.
-
-    :See Also: :class:`vsm.model.tf.TfSeq`, :class:`vsm.model.tf.TfMulti`
     """
+    
     def __init__(self, corpus, model):
         """
+        Initialize TfViewer. 
+    
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+
+        :param model: A Term-Frequency model.
+        :type model: TfSeq or TfMulti object.
         """
         self.corpus = corpus
         self.model = model
@@ -99,6 +77,9 @@ class TfViewer(object):
                      filter_nan=True, label_fn=def_label_fn, as_strings=True,
                      dist_fn=angle_sparse, order='i'):
         """ 
+        Computes and sorts the distances between a document or list of documents
+        and every document.
+
         :param doc_or_docs: Query document(s) to which distances are calculated.
         :type doc_or_docs: string/integer or list of strings/integers
         

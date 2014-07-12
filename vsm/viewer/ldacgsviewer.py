@@ -17,58 +17,17 @@ __all__ = ['LdaCgsViewer']
 class LdaCgsViewer(object):
     """
     A class for viewing a topic model estimated by `LDAGibbs`.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
-    
-    :param model: A topic modeled fitted by `LDAGibbs`
-    :type model: LDAGibbs object
-
-    :attributes:
-        * **corpus** (Corpus object) - `corpus`
-        * **model** (LDAGibbs object) - `model`
-
-    :methods:
-        * :doc:`topics` `
-            Returns a list of topics estimated by `LDAGibbs`
-            sampler. Each topic is represented by a set of words and the
-            corresponding probabilities.
-        * :doc:`topic_entropies` 
-            Returns topics sorted according to the entropy of each topic. 
-            The entropy of topic k is calculated by summing P(d|k) * log(P(d|k))
-            over all document d, and is thought to measure how informative a
-            given topic is to select documents.
-        * :doc:`topic_hist`
-            Draws a histogram showing the proportions of topics within a 
-            selected set of documents. 
-        * :doc:`doc_topics`
-            Returns distribution P(K|D=d) over topics K for document d.
-        * :doc:`word_topics`
-            Searches for every occurrence of `word` in the entire corpus and
-            returns a list each row of which contains the name or ID number of
-            document, the relative position in the document, and the assigned
-            topic number for each occurrence of `word`.
-        * :doc:`dist_top_top`
-            Returns topics sorted by the distances between
-            topic(s) and every topic.
-        * :doc:`dist_top_doc`
-            Returns documents sorted according to their relevance to topic(s).
-        * :doc:`dist_word_top`
-            Returns topics sorted according to their relevance to word(s).
-        * :doc:`dist_doc_doc`
-            Computes and sorts the distances between a
-            document or list of documents and every document in the topic space.
-        * :doc:`dismat_doc`
-            Calculates the distance matrix for a given list of documents.
-        * :doc:`dismat_top`
-            Calculates the distance matrix for a given list of topics.
-        * :doc:`logp_plot`
-            Returns a plot of log probabilities for the specified range of 
-            the MCMC chain used to fit a topic model by `LDAGibbs`.
-            The function requires matplotlib package.
     """
+    
     def __init__(self, corpus, model):
         """
+        Initialize LdaCgsViewer.
+
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+    
+        :param model: A topic modeled fitted by `LDAGibbs`
+        :type model: LDAGibbs
         """
         self.corpus = corpus
         self.model = model
@@ -356,7 +315,7 @@ class LdaCgsViewer(object):
         :param show_topics: If `True`, topics are represented by their number
             and distribution over words. Otherwise only topic numbers
             are shown. Default is `True`.
-         :type show_topics: boolean, optional
+        :type show_topics: boolean, optional
 
         :param print_len: Number of topics to be shown. Default is 10.
         :type print_len: int, optional       
