@@ -454,11 +454,11 @@ class Corpus(BaseCorpus):
                  context_data=[],
                  remove_empty=True):
 
+        corpus = np.array(map(str, corpus))
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
                                      context_data=context_data,
-                                     dtype=np.str_,
-				     remove_empty=remove_empty)
+                                     remove_empty=remove_empty)
 
         self.__set_words_int()
 
