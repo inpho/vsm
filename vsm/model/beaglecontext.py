@@ -31,10 +31,10 @@ class BeagleContextSeq(BaseModel):
         Initialize BeagleContextSeq.
 
         :param corpus: Source of observed data.
-        :type corpus: Corpus
+        :type corpus: class:`Corpus`
 
         :param env_corpus: BEAGLE environment corpus.
-        :type env_corpus: Corpus
+        :type env_corpus: class:`Corpus`
 
         :param env_matrix: Matrix from BEAGLE environment model.
         :type env_matrix: 2-D array
@@ -87,10 +87,10 @@ class BeagleContextMulti(BaseModel):
         Initialize BeagleContextMulti.
         
         :param corpus: Souce of observed data.
-        :type corpus: Corpus
+        :type corpus: class:`Corpus`
 
         :param env_corpus: BEAGLE environment corpus. 
-        :type env_corpus: Corpus
+        :type env_corpus: class:`Corpus`
 
         :param env_matrix: Matrix from BEAGLE environment model.
         :type env_matrix: 2-D array
@@ -122,6 +122,8 @@ class BeagleContextMulti(BaseModel):
         
         :param n_procs: Number of processors. Default is 2.
         :type n_procs: int, optional
+
+        :returs: `None`
         """
         sent_lists = np.array_split(self.sents, n_procs-1)
         if len(sent_lists) != n_procs:

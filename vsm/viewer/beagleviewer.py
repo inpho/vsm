@@ -19,7 +19,7 @@ class BeagleViewer(object):
         Initialize BeagleViewer.
 
         :param corpus: Source of observed data.
-        :type corpus: Corpus
+        :type corpus: :class:`Corpus`
     
         :param model: One of the Beagle objects.
         :type model: BEAGLE model

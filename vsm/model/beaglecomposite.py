@@ -23,13 +23,13 @@ class BeagleComposite(BaseModel):
         aligns with the context matrix.
  
         :param ctx_corp: Corpus from BEAGLE context model.
-        :type ctx_corp: Corpus
+        :type ctx_corp: :class:`Corpus`
     
         :param ctx_matrix: BEAGLE context matrix.
         :type ctx_matrix: np.ndarray matrix
 
         :param ord_corp: Corpus from BEAGLE order model.
-        :type ord_corp: Corpus
+        :type ord_corp: :class:`Corpus`
 
         :param ord_matrix: BEAGLE order matrix.
         :type ord_matrix: np.ndarray matrix
@@ -51,6 +51,8 @@ class BeagleComposite(BaseModel):
             the ratio of context and order model is 7:3. `wgt` should be 
             a value in [0,1]. Default is .5.
         :type wgt: float, optional
+        
+        :returns: `None`
         """
         print 'Summing context and order vectors'        
         self.matrix = wgt * self.ctx_matrix + (1 - wgt) * self.ord_matrix

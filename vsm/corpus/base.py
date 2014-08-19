@@ -58,24 +58,24 @@ class BaseCorpus(object):
         * **context_data**   (list of 1-D array-like)
 
     :methods: 
-        * :doc:`meta_int`
+        * **meta_int**
             Takes a type of tokenization and a query and returns the index of
             the metadata found in the query.
-        * :doc:`get_metadatum`
+        * **get_metadatum**
             Takes a type of tokenization and a query and returns the metadatum
             corresponding to the query and the field.
-        * :doc:`bc_view_contexts`
+        * **view_contexts**
             Takes a type of tokenization and returns a view of the corpus
             tokenized accordingly.
-        * :doc:`view_metadata`
+        * **view_metadata**
             Takes a type of tokenization and returns a view of the metadata
             of the tokenization.
-        * :doc:`bc_tolist`
+        * **tolist**
             Returns Corpus object as a list of lists.
-        * :doc:`remove_empty`
+        * **remove_empty**
             Removes empty documents in the corpus.
 
-    :See Also: :class:`vsm.corpus.Corpus`
+    :See Also: :class:`Corpus`
 
     **Examples**
 
@@ -349,28 +349,28 @@ class Corpus(BaseCorpus):
             corresponding integers (i.e., indices in `words`).
         
     :methods:
-        * :doc:`view_metadata`
+        * **view_metadata**
             Takes a type of tokenization and returns a view of the metadata
             of the tokenization.
-        * :doc:`view_contexts`
+        * **view_contexts**
             Takes a type of tokenization and returns a view of the corpus tokenized
             accordingly. The optional parameter `strings` takes a boolean value: 
             True to view string representations of words; False to view integer 
             representations of words. Default is `False`.
-        * :doc:`save`
+        * **save**
             Takes a filename and saves the data contained in a Corpus object to 
             a `npy` file using `numpy.savez`.
-        * :doc:`load`
+        * **load**
             Static method. Takes a filename, loads the file data into a Corpus
             object and returns the object.
-        * :doc:`apply_stoplist`
+        * **apply_stoplist**
             Takes a list of stopwords and returns a copy of the corpus with 
             the stopwords removed.
-        * :doc:`tolist`
+        * **tolist**
             Returns Corpus object as a list of lists of either integers or strings, 
             according to `as_strings`.
         
-    :See Also: :class:`vsm.corpus.BaseCorpus`
+    :See Also: :class:`BaseCorpus`
 
     **Examples**
 
@@ -630,7 +630,7 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
     Returns a corpus with metadata added.
 
     :param corpus: Corpus object to add new metadata to.
-    :type corpus: Corpus
+    :type corpus: :class:`Corpus`
 
     :param ctx_type: A type of tokenization.
     :type ctx_type: string
@@ -643,7 +643,7 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
 
     :returns: Corpus with new metadata added to the existing metdata.
 
-    :See Also: :class:`vsm.corpus.Corpus`
+    :See Also: :class:`Corpus`
     """
     i = corpus.context_types.index(ctx_type)
     md = corpus.context_data[i]

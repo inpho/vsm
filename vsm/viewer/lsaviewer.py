@@ -20,7 +20,7 @@ class LsaViewer(object):
         Initialize LsaViewer.
 
         :param corpus: Source of observed data.
-        :type corpus: Corpus
+        :type corpus: :class:`Corpus`
 
         :param model: An LSA model.
         :type model: Lsa
@@ -114,7 +114,7 @@ class LsaViewer(object):
             decreasing order. Default is 'i'.
         :type order: string, optional
 
-        :returns: w_arr : :class:`LabeledColumn`.
+        :returns: an instance of :class:`LabeledColumn`.
             A 2-dim array containing documents and their distances to 
             `doc_or_docs`. 
         

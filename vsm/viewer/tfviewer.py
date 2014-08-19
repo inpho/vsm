@@ -20,7 +20,7 @@ class TfViewer(object):
         Initialize TfViewer. 
     
         :param corpus: Source of observed data.
-        :type corpus: Corpus
+        :type corpus: :class:`Corpus`
 
         :param model: A Term-Frequency model.
         :type model: TfSeq or TfMulti object.

@@ -24,7 +24,7 @@ class LdaCgsViewer(object):
         Initialize LdaCgsViewer.
 
         :param corpus: Source of observed data.
-        :type corpus: Corpus
+        :type corpus: :class:`Corpus`
     
         :param model: A topic modeled fitted by `LDAGibbs`
         :type model: LDAGibbs

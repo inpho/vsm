@@ -16,7 +16,7 @@ class TfIdfViewer(object):
         Initialize TfIdfViewer.
         
         :param corpus: Source of observed data.
-        :type corpus: Corpus
+        :type corpus: :class:`Corpus`
 
         :param model: A Term frequency-Inverse document Frequency model.
         :type model: TfIdf.
