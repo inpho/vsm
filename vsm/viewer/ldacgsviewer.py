@@ -80,7 +80,7 @@ class LdaCgsViewer(object):
             A structured array of topics.
         """
         if len(k_indices) == 0:
-            k_indices = np.arange(self.model.top_word.shape[0])
+            k_indices = np.arange(self.model.K)
 
         # Normalize the topic word matrix so that topics are
         # distributions
@@ -142,7 +142,7 @@ class LdaCgsViewer(object):
             A structured array of topics sorted by entropy.
         """
         if len(k_indices) == 0:
-            k_indices = np.arange(self.model.top_word.shape[0])
+            k_indices = np.arange(self.model.K)
 
         # Normalize the document-topic matrix so that documents are
         # distributions
@@ -194,9 +194,12 @@ class LdaCgsViewer(object):
         import matplotlib.pyplot as plt
 
         if len(d_indices) == 0:
-            d_indices = xrange(len(self.model.W))
+            i = self.corpus.context_types.index(self.model.context_type)
+            d_indices = xrange(len(self.corpus.context_data[i]))
 
-        arr = self.model.theta_d(d_indices).sum(axis=0)
+        td_mat = self.model.top_doc[:, d_indices]
+        td_mat /= td_mat.sum(0)
+        arr = td_mat.sum(1)
 
         if len(k_indices) != 0:
             arr = arr[k_indices]

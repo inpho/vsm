@@ -43,11 +43,11 @@ def corpus_from_strings(strings, metadata=[], unidecode=True,
 
 
 
-def empty_corpus(context_type='context'):
+def empty_corpus(context_type='document'):
     """
     Creates an empty Corpus with defined context_type.
 
-    :param context_type: A type of tokenization. Default is 'context'.
+    :param context_type: A type of tokenization. Default is 'document'.
     :type context_type: string
 
     :returns: An empty Corpus with no words or context_data.
@@ -63,7 +63,7 @@ def random_corpus(corpus_len,
                   n_words,
                   min_token_len,
                   max_token_len,
-                  context_type='context',
+                  context_type='document',
                   metadata=False):
     """
     Generates a random integer corpus.
@@ -82,7 +82,7 @@ def random_corpus(corpus_len,
         for corpus.
     :type max_token_len: int
 
-    :param context_type: A type of tokenization. Default is 'context'.
+    :param context_type: A type of tokenization. Default is 'document'.
     :type context_type: string, optional
 
     :param metadata: If `True` generates metadata. If `False` the only

@@ -8,11 +8,15 @@ from ldafunctions import(
     save_lda as _save_lda_)
 
 
+__all__ = [ 'LdaCgsSeq' ]
+
+
+
 class LdaCgsSeq(object):
     """
     """
     def __init__(self, corpus=None, context_type=None,
-                 K=100, alpha=[], beta=[]):
+                 K=20, alpha=[], beta=[]):
         """
         Initialize LdaCgsSeq.
 
@@ -23,7 +27,7 @@ class LdaCgsSeq(object):
             will be treated as documents.
         :type context_type: string, optional
 
-        :param K: Number of topics. Default is `100`.
+        :param K: Number of topics. Default is `20`.
         :type K: int, optional
     
         :param top_prior: Topic priors. Default is 0.01 for all topics.
@@ -110,27 +114,3 @@ class LdaCgsSeq(object):
 
     def save(self, filename):
         _save_lda_(self, filename)
-
-
-def query_sampler(doc, m):
-    """
-    Takes an LDA model object `m`, a fresh document (assumed to be
-    from the same corpus) `doc` and returns a ``query sampler'' as an
-    LDA model object. Note that this sampler contains a single
-    document and so a Kx1 matrix as its topic-document matrix and Z
-    variables corresponding only to this document; while it contains
-    the word-topic matrix from m (so the counts in `Z` and `docs` do
-    not correspond to the counts in `word_top`).
-    """
-    sampler = LdaCgsSeq()
-    sampler.docs = [np.array(doc, dtype=np.int)]
-    sampler.V = len(doc)
-    sampler.context_type = m.context_type
-    sampler.K = m.K
-    sampler.beta = m.beta.copy()
-    sampler.alpha = m.alpha.copy()
-    sampler.word_top = m.word_top.copy()
-    sampler.Z = [np.zeros_like(doc)]
-    sampler.top_doc = np.zeros((m.K, 1), dtype=np.float) + m.alpha
-    
-    return sampler

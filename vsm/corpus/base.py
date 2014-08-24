@@ -4,7 +4,7 @@ from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
 
 
-__all__ = ['Corpus', 'add_metadata']
+__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata' ]
 
 
 
