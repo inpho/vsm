@@ -587,13 +587,13 @@ class Corpus(BaseCorpus):
         if freq:
             #TODO: Use the TF model instead
 
-            print 'Computing collection frequencies'
+            # print 'Computing collection frequencies'
             cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
     
             for word in self.corpus:
                 cfs[word] += 1
 
-            print 'Selecting words of frequency <=', freq
+            # print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
             stop = set(freq_stop)
         else:
@@ -604,18 +604,18 @@ class Corpus(BaseCorpus):
                 stop.add(self.words_int[t])
 
         if not stop:
-            print 'Stop list is empty.'
+            # print 'Stop list is empty.'
             return self
     
-        print 'Removing stop words'
+        # print 'Removing stop words'
         f = np.vectorize(lambda x: x not in stop)
         corpus = self.corpus[f(self.corpus)]
 
-        print 'Rebuilding corpus'
+        # print 'Rebuilding corpus'
         corpus = [self.words[i] for i in corpus]
         context_data = []
         for i in xrange(len(self.context_data)):
-            print 'Recomputing token breaks:', self.context_types[i]
+            # print 'Recomputing token breaks:', self.context_types[i]
             tokens = self.view_contexts(self.context_types[i])
             spans = [t[f(t)].size for t in tokens]
             tok = self.context_data[i].copy()

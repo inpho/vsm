@@ -3,7 +3,7 @@ import os, json
 
 __all__ = [ 'doc_files', 'doc_meta_file',
             'documents', 'document_metadata',
-            'corpus', 'doc_label_fn' ]
+            'corpus', 'paragraphs', 'doc_label_fn' ]
 
 
 
@@ -23,19 +23,8 @@ doc_files = [os.path.join(os.path.dirname(__file__), f)
 doc_meta_file = os.path.join(os.path.dirname(__file__), 'doc_meta.json')
 
 
-def documents():
-    """Returns an iterator over of documents in corpus.
-
-    """
-    for doc_file in doc_files:
-        with open(doc_file, 'r') as f:
-            docs = json.load(f)
-        for doc in docs:
-            yield doc
-
-
 def document_metadata():
-    """Returns an iterator over of document metadata in corpus.
+    """Returns an iterator over document metadata in corpus.
 
     """
     with open(doc_meta_file, 'r') as f:
@@ -45,20 +34,60 @@ def document_metadata():
             yield doc_meta
 
 
-def corpus(unidecode=True, nltk_stop=True, stop_freq=0, add_stop=None):
+def documents():
+    """Returns an iterator over documents paired with their metadata.
+
+    """
+    m = document_metadata()
+
+    for doc_file in doc_files:
+        with open(doc_file, 'r') as f:
+            docs = json.load(f)
+        for doc in docs:
+            yield doc, m.next()
+
+
+def paragraphs():
+    """Returns iterator over paragraphs and associated metadata.
+
+    """
+    import copy
+    import vsm.ext.corpusbuilders.util as util
+
+    docs = documents()
+    for doc, meta in docs:
+        p = 0
+        pars = util.paragraph_tokenize(doc)
+        for par in pars:
+            par_meta = copy.deepcopy(meta)
+            par_meta['paragraph'] = p
+            p += 1
+            yield par, par_meta
+ 
+
+def corpus(doc_type='document', unidecode=True, nltk_stop=True, 
+           stop_freq=0, add_stop=None):
     """Returns Corpus object containing text data and metadata.
 
     """
     from vsm.ext.corpusbuilders import corpus_from_strings
 
-    return corpus_from_strings(documents(), 
-                               list(document_metadata()), 
+    if doc_type=='document':
+        docs = documents()
+    elif doc_type=='paragraphs':
+        docs = paragraphs()
+    else:
+        raise Exception('Unrecognized document type given.')
+
+    docs, meta = zip(*list(docs))
+
+    return corpus_from_strings(docs, meta, 
                                unidecode=unidecode, 
                                nltk_stop=nltk_stop, 
                                stop_freq=stop_freq, 
                                add_stop=add_stop)
 
 
-def doc_label_fn(global_idx, metadata):
+def doc_label_fn(metadata):
     label = metadata['part_of_book']
     return label
