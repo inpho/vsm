@@ -13,45 +13,43 @@ __all__ = ['LsaViewer']
 class LsaViewer(object):
     """
     A class for viewing LSA model.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
-
-    :param model: An LSA mode.
-    :type model: Lsa object.
-
-    :attributes:
-        * **corpus** (Corpus object) - `corpus`
-        * **model** (Tf object) - `model`
-
-    :methods:
-        * :doc:`lsa_dist_word_word`
-            Returns words sorted by the cosine values between a word or list
-            of words and every word.
-        * :doc:`lsa_dist_doc_doc`
-            Computes and sorts the cosine similarity values between a
-            document or list of documents and every document.
-        * :doc:`lsa_simmat_words`
-            Calculates the similarity matrix for a given list of words.
-        * :doc:`lsa_simmat_docs`
-            Calculates the similarity matrix for a given list of documents.
-
-    :See Also: :mod:`vsm.model.lsa`
     """
+    
     def __init__(self, corpus, model):
         """
+        Initialize LsaViewer.
+
+        :param corpus: Source of observed data.
+        :type corpus: :class:`Corpus`
+
+        :param model: An LSA model.
+        :type model: Lsa
         """
         self.corpus = corpus
         self.model = model
+
+    
+    def sim_word_word(self, word_or_words, weights=[], 
+                       filter_nan=True, print_len=10, as_strings=True):
+        """
+        Wrapper for dist_word_word. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=angle, order='i'
+        """
+        deprecation_warning("sim_word_word", "dist_word_word")
+
+        return self.dist_word_word(word_or_words, weights=weights, 
+                       filter_nan=filter_nan, print_len=print_len,
+                       as_strings=as_strings, dist_fn=angle, order='i')
 
 
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True, 
                        dist_fn=angle, order='i'):
         """
-        A wrapper of `dist_word_word` in similarity.py
+        Computes and sorts the distances between a word or list
+        of words and every word.
 
-        :param word_or_words: Query word(s) to which cosine values are calculated.
+        :param word_or_words: Query word(s) to which distances are calculated.
         :type word_or_words: string or list of strings
         
         :param weights: Specify weights for each query word in `word_or_words`. 
@@ -62,19 +60,26 @@ class LsaViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :param print_len: Number of words printed by pretty-printing function
-            Default is 10.
+        :param print_len: Number of words to be displayed. Default is 10.
         :type print_len: int, optional
 
         :param as_strings: If `True`, returns a list of words as strings rather
             than their integer representations. Default is `True`.
         :type as_strings: boolean, optional
         
-        :returns: w_arr : :class:`LabeledColumn`.
-            A 2-dim array containing words and their cosine values to 
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`angle`.
+        :type dist_fn: string, optional
+        
+        :param order: Order of sorting. 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
+        :type order: string, optional
+
+        :returns: an instance of :class:`LabeledColumn`.
+            A 2-dim array containing words and their distances to 
             `word_or_words`. 
         
-        :See Also: :meth:`vsm.viewer.similarity.dist_word_word`
+        :See Also: :meth:`vsm.viewer.wrappers.dist_word_word`
         """
         return dist_word_word(word_or_words, self.corpus, 
                                 self.model.word_matrix.T, weights=weights, 
@@ -83,20 +88,36 @@ class LsaViewer(object):
                                 dist_fn=dist_fn, order=order)
 
 
+    def sim_doc_doc(self, doc_or_docs, weights=[], print_len=10,
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True):
+        """
+        Wrapper for dist_doc_doc. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=angle, order='i'
+        """  
+        deprecation_warning("sim_doc_doc", "dist_doc_doc")
+        
+        return self.dist_doc_doc(doc_or_docs, weights=weights, 
+                    print_len=print_len, filter_nan=filter_nan, 
+                    label_fn=def_label_fn, 
+                    as_strings=as_strings, dist_fn=angle, order='i')
+
+
     def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
                      filter_nan=True, label_fn=def_label_fn, as_strings=True,
                      dist_fn=angle, order='i'):
         """
-        :param doc_or_docs: Query document(s) to which cosine values
-            are calculated
+        Computes and sorts the distances between a
+        document or list of documents and every document.
+
+        :param doc_or_docs: Query document(s) to which distances
+            are calculated.
         :type doc_or_docs: string/integer or list of strings/integers
         
         :param weights: Specify weights for each query doc in `doc_or_docs`. 
             Default uses equal weights (i.e. arithmetic mean)
         :type weights: list of floating point, optional
         
-        :param print_len: Number of words printed by pretty-printing function.
-            Default is 10.
+        :param print_len: Number of words to be displayed. Default is 10.
         :type print_len: int, optional
 
         :param filter_nan: If `True` not a number entries are filtered.
@@ -104,18 +125,27 @@ class LsaViewer(object):
         :type filter_nan: boolean, optional
  
         :param label_fn: A function that defines how documents are represented.
-            Default is def_label_fn which retrieves the labels from corpus metadata.
+            Default is def_label_fn which retrieves the labels from corpus
+            metadata.
         :type label_fn: string, optional
         
         :param as_strings: If `True`, returns a list of words rather than
             their integer representations. Default is `True`.
         :type as_strings: boolean, optional
+        
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`angle`.
+        :type dist_fn: string, optional
+        
+        :param order: Order of sorting. 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
+        :type order: string, optional
 
-        :returns: w_arr : :class:`LabeledColumn`.
-            A 2-dim array containing documents and their cosine values to 
+        :returns: an instance of :class:`LabeledColumn`.
+            A 2-dim array containing documents and their distances to 
             `doc_or_docs`. 
         
-        :See Also: :meth:`vsm.viewer.similarity.dist_doc_doc`
+        :See Also: :meth:`vsm.viewer.wrappers.dist_doc_doc`
         """
         return dist_doc_doc(doc_or_docs, self.corpus, self.model.context_type,
                               self.model.doc_matrix, weights=weights,
@@ -123,17 +153,65 @@ class LsaViewer(object):
                               label_fn=label_fn, as_strings=True,
                               dist_fn=dist_fn, order=order)
     
+    
+    def sim_word_doc(self, word_or_words, weights=[], print_len=10,
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True):
+        """
+        Wrapper for dist_word_doc. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=angle, order='i'
+        """  
+        deprecation_warning("sim_word_doc", "dist_word_doc")
+        
+        return self.dist_word_doc(word_or_words, weights=weights, 
+                    print_len=print_len, filter_nan=filter_nan, 
+                    label_fn=def_label_fn, 
+                    as_strings=as_strings, dist_fn=angle, order='i')
+
 
     def dist_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
                       filter_nan=True, print_len=10, as_strings=True, 
                       dist_fn=angle, order='i'):
         """
-        Computes distances between a word or a list of words to every
-        document and sorts the results. The function constructs a
-        pseudo-document vector from `word_or_words` and `weights`: the
-        vector representation is non-zero only if the corresponding word
-        appears in the list. If `weights` are not given, `1` is assigned
-        to each word in `word_or_words`.
+        Computes and sorts distances between a word or a list of words to
+        every document.
+        
+        :param word_or_words: Query word(s) to which a pseudo-document is
+            created for computation of distances.
+        :type word_or_words: string/integer or list of strings/integers
+        
+        :param weights: Specify weights for each query doc in `word_or_words`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+        
+        :param print_len: Number of documents to be displayed. Default is 10.
+        :type print_len: int, optional
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+ 
+        :param label_fn: A function that defines how documents are represented.
+            Default is :meth:`def_label_fn` which retrieves the labels 
+            from corpus metadata.
+        :type label_fn: string, optional
+        
+        :param as_strings: If `True`, returns a list of documents as strings
+            rather than indices. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :param dist_fn: A distance function from functions in vsm.spatial.
+            Default is :meth:`angle`.
+        :type dist_fn: string, optional
+         
+        :param order: Order of sorting 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
+        :type order: string, optional
+       
+        :returns: an instance of :class:`LabeledColumn`.
+            A 2-dim array containing documents and their distances to 
+            `word_or_words`. 
+
+        :See Also: :meth:`vsm.viewer.wrappers.dist_word_doc`
         """
         # Resolve `word_or_words`
         if isstr(word_or_words):
@@ -177,6 +255,15 @@ class LsaViewer(object):
         
         return d_arr
 
+    
+    def simmat_words(self, word_list, sim_fn=angle):
+        """
+        Wrapper for dismat_word. Throws a DeprecationWarning.
+        """
+        deprecation_warning("simmat_words", "dismat_word")
+
+        return self.dismat_word(word_list, dist_fn=sim_fn)
+
 
     def dismat_word(self, word_list, dist_fn=angle):
         """
@@ -186,29 +273,47 @@ class LsaViewer(object):
             computed.
         :type word_list: list
 
-        :returns: :class:`IndexedSymmArray`.
-            contains n x n matrix containing floats where n is the number 
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`angle`.
+        :type dist_fn: string, optional
+
+        :returns: an instance of :class:`IndexedSymmArray`.
+            n x n matrix containing floats where n is the number 
             of words in `word_list`.
         
-        :See Also: :meth:`vsm.viewer.similarity.dismat_words`
+        :See Also: :meth:`vsm.viewer.wrappers.dismat_word`
         """
         return dismat_word(word_list, self.corpus, 
                              self.model.word_matrix.T, dist_fn=dist_fn)
 
 
-    def dismat_doc(self, docs, dist_fn=angle):
+    def simmat_docs(self, doc_list, sim_fn=angle):
+        """
+        Wrapper for dismat_doc. Throws a DeprecationWarning.
+        """
+        deprecation_warning("simmat_docs", "dismat_doc")
+
+        return self.dismat_doc(doc_list, dist_fn=sim_fn)
+
+
+    def dismat_doc(self, doc_list, dist_fn=angle):
         """
         Calculates a distance matrix for a given list of documents.
 
-        :param docs: A list of documents whose similarity matrix is to be computed.
-            Default is all the documents in the model.
+        :param doc_list: A list of documents whose distance matrix is 
+            to be computed.
         :type docs: list, optional
         
-        :returns: :class:`IndexedSymmArray`.
-            contains n x n matrix containing floats where n is the number of documents. 
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`angle`.
+        :type dist_fn: string, optional
 
-        :See Also: :meth:`vsm.viewer.similarity.dismat_docs`
+        :returns: an instance of :class:`IndexedSymmArray`.
+            n x n matrix containing floats where n is the number 
+            of documents. 
+
+        :See Also: :meth:`vsm.viewer.wrappers.dismat_doc`
         """
-        return dismat_doc(docs, self.corpus, self.model.context_type, 
+        return dismat_doc(doc_list, self.corpus, self.model.context_type, 
                             self.model.doc_matrix, dist_fn=dist_fn)
 

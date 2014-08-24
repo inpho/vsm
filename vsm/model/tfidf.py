@@ -25,39 +25,8 @@ class TfIdf(BaseModel):
 
     The data structure is a sparse float matrix.
 
-    :param tf_matrix: A matrix containing the term-frequency data.
-    :type tf_matrix: scipy.sparse matrix
-    
-    :param context_type: A string specifying the type of context over
-        which the model trainer is applied.
-    :type context_type: string 
-
-    :attributes:
-        * **corpus** (Corpus)
-            A Corpus object containing the training data
-        * **context_type** (string)
-            A string specifying the type of context over which the
-            model trainer is applied.
-        * **matrix** (scipy.sparse.coo_matrix)
-            A sparse matrix in 'coordinate' format that contains the
-            frequency counts.
-        * **undefined_rows** (list)
-            A list of row indices corresponding to words which have
-            zero document frequency (so which have an undefined idf).
-
-    :methods:
-        * :meth:`train`
-            Computes the IDF values for the input term-frequency matrix,
-            scales the rows by these values and stores the results in
-            `self.matrix`.
-        * :meth:`save`
-            Takes a filename or file object and saves `self.matrix` and
-            `self.context_type` in an npz archive.
-        * :meth:`load`
-            Takes a filename or file object and loads it as an npz archive
-            into a BaseModel object.
-
-    :See Also: :class:`vsm.model.tf.TfSeq`, :class:`vsm.model.base.BaseModel`, :class:`scipy.sparse.coo_matrix`
+    :See Also: :class:`vsm.model.TfSeq`, :class:`vsm.model.base`,
+        :class:`scipy.sparse.coo_matrix`
 
     :notes:
         A zero in the matrix might arise in two ways: (1) the word type
@@ -66,6 +35,16 @@ class TfIdf(BaseModel):
         value is undefined.
     """
     def __init__(self, tf_matrix=np.array([]), context_type=None):
+        """
+        Initialize TfIdf.
+
+        :param tf_matrix: A matrix containing the term-frequency data.
+        :type tf_matrix: scipy.sparse matrix
+    
+        :param context_type: A string specifying the type of context over
+            which the model trainer is applied.
+        :type context_type: string 
+        """
 
         self.context_type = context_type
 
@@ -84,8 +63,6 @@ class TfIdf(BaseModel):
         Computes the IDF values for the input term-frequency matrix,
         scales the rows by these values and stores the results in
         `self.matrix`.
-
-        :returns: `None`
         """
         if self.matrix.size > 0:
             n_docs = np.float64(self.matrix.shape[1])

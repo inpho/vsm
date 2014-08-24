@@ -10,9 +10,9 @@ BUILDDIR      = build
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 # the i18n builder cannot share the environment and doctrees with the others
-I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 
 .PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
 
@@ -77,17 +77,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/vsm.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/test1.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/vsm.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/test1.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/vsm"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/vsm"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/test1"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/test1"
 	@echo "# devhelp"
 
 epub:
@@ -151,15 +151,3 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
-
-gh-pages:
-	make html
-	git clone https://github.com/inpho/vsm vsm_gh_pages
-	cd vsm_gh_pages \
-	&& git checkout gh-pages \
-	&& rm -rf * _static _sources \
-	&& mv ../$(BUILDDIR)/html/* . \
-	&& git add -A \
-	&& git commit -m "Generated gh-pages" \
-	&& git push origin gh-pages
-	rm -rf $(BUILDDIR) vsm_gh_pages

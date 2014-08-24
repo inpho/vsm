@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 
 from scipy.sparse import issparse, csr_matrix, coo_matrix
 
@@ -8,10 +9,20 @@ from types import *
 from labeleddata import *
 
 
-__all__ = ['def_label_fn', 'doc_label_name',
+__all__ = ['deprecation_warning','def_label_fn', 'doc_label_name',
            'dismat_doc', 'dismat_top', 'dismat_word', 'dist_doc_doc',
            'dist_word_doc', 'dist_word_top', 'dist_word_word', 
            'dist_top_doc', 'dist_top_top']
+
+
+def deprecation_warning(old_name, new_name):
+    """
+    Deprecation warning for 'sim_*' functions.
+    """
+    warnings.simplefilter('always', DeprecationWarning)
+    message = "{0} is deprecated. Please use {1} instead.".format(old_name,
+                new_name)
+    warnings.warn(message, DeprecationWarning)
 
 
 # 
@@ -131,6 +142,11 @@ def dist_doc_doc(doc_or_docs, corp, context_type, mat, weights=[],
                  label_fn=def_label_fn, as_strings=True,
                  dist_fn=angle, order='i'):
     """
+    Computes and sorts the distances between a document or list of
+    documents and every document. If weights are provided, the document
+    list is represented as the weighted average of the documents in the list.
+    If weights are not provided, the arithmetic mean is used.
+
     The columns of `mat` are assumed to represent documents.
     """
     # Resolve `doc_or_docs`
@@ -281,10 +297,10 @@ def dist_top_doc(topic_or_topics, mat, corp, context_type, weights=[],
                  label_fn=def_label_fn, as_strings=True,
                  dist_fn=JS_div, order='i'):
     """
-    The columns of `mat` are assumed to represent documents.    
-
     Takes a topic or list of topics (by integer index) and returns a
     list of documents sorted by distance.
+    
+    The columns of `mat` are assumed to represent documents.    
     """
     topics = res_top_type(topic_or_topics)
 
@@ -326,6 +342,10 @@ def dist_top_top(mat, topic_or_topics, weights=[],
                  print_len=10, filter_nan=True, 
                  dist_fn=JS_div, order='i'):
     """
+    Takes a topic or list of topics (by integer index) and returns
+    a list of topics sorted by the distances between a given topic
+    and every topic.
+
     The columns of `mat` are assumed to be probability distributions
     (namely, topics).
     """
@@ -378,11 +398,10 @@ def dismat_word(word_list, corp, mat, dist_fn=angle):
 #TODO: Abstract the label creation correctly
 def dismat_doc(doc_list, corp, context_type, mat, dist_fn=angle):
     """
+    Calculates a distance matrix for a given list of documents.
+    
     The columns of `mat` are assumed to be probability distributions
     (namely, over topics).
-
-    Calculates a distance matrix for a given list of documents.
-
     """
     label_name = doc_label_name(context_type)
 
@@ -401,10 +420,10 @@ def dismat_doc(doc_list, corp, context_type, mat, dist_fn=angle):
 
 def dismat_top(topics, mat, dist_fn=JS_div):
     """
+    Calculates a distance matrix for a given list of topics.
+    
     The columns of `mat` are assumed to be probability distributions
     (namely, topics).
-    
-    Calculates a distance matrix for a given list of topics.
     """
     mat = mat[:,topics]
 

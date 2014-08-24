@@ -10,40 +10,25 @@ class BeagleEnvironment(BaseModel):
     """
     `BeagleEnvironment` is a randomly generated fixed vectors
     representing the environment.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus object
-
-    :param n_cols: Number of columns. Default is 2048.
-    :type n_cols: int, optional
-
-    :param dtype: Numpy dtype for matrix attribute. Default is `np.float64`.
-    :type dtype: np.dtype, optional
-
-    :param context_type: Name of tokenization stored in `corpus` whose
-        tokens will be treated as documents. Default is `sentence`.
-    :type context_type: string, optional
-
-    :Attributes:
-        * **context_type** (string)
-            Name of tokenization whose tokens will be treated as documents.
-        * **shape** (tuple)
-            Shape for the matrix.
-        * **dtype** (np.dtype)
-            Dtype for the matrix.
-        * **matrix** (2-D array)
-            Randomly generated environment matrix.             
-
-    :Methods:
-        * :doc:`be_train`
-            Sets the environment matrix to randomly generated then 
-            normalized vectors.
-            
-    :See Also: :class:`vsm.model.base.BaseModel`
     """
+    
     def __init__(self, corpus, n_cols=2048, dtype=np.float64, 
                  context_type='sentence'):
         """
+        Initialize BeagleEnvironment.
+
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+
+        :param n_cols: Number of columns. Default is 2048.
+        :type n_cols: int, optional
+
+        :param dtype: Numpy dtype for matrix attribute. Default is `np.float64`.
+        :type dtype: np.dtype, optional
+
+        :param context_type: Name of tokenization stored in `corpus` whose
+            tokens will be treated as documents. Default is `sentence`.
+        :type context_type: string, optional
         """
         self.context_type = context_type
         self.shape = (corpus.words.shape[0], n_cols)

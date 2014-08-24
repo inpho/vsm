@@ -8,41 +8,42 @@ from wrappers import *
 __all__ = ['BeagleViewer']
 
 
-
 class BeagleViewer(object):
     """
     A class for viewing BEAGLE models.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
-    
-    :param model: One of the Beagle objects.
-    :type model: Beagle object
-
-    :attributes:
-        * **corpus** (Corpus object) - `corpus`
-        * **model** (Beagle object) - `model`
-
-    :methods:
-        * :doc:`beagle_sim_word_word`
-            Returns words sorted by the cosine similarity values between
-            word(s) and every word.
-        * :doc:`beagle_simmat_words`
-            Calculates the similarity matrix for a given list of words.
-        * :doc:`beagle_isomap_words`
     """
+    
     def __init__(self, corpus, model):
-        """
+        """ 
+        Initialize BeagleViewer.
+
+        :param corpus: Source of observed data.
+        :type corpus: :class:`Corpus`
+    
+        :param model: One of the Beagle objects.
+        :type model: BEAGLE model
         """
         self.corpus = corpus
         self.model = model
 
+    def sim_word_word(self, word_or_words, weights=[], 
+                       filter_nan=True, print_len=10, as_strings=True,
+                       sim_fn=angle, order='i'):
+        """
+        Wrapper for dist_word_word. Throws a DeprecationWarning.
+        """
+        deprecation_warning("sim_word_word", "dist_word_word")
 
+        return self.dist_word_word(word_or_words, weights=weights, 
+                       filter_nan=filter_nan, print_len=print_len,
+                       as_strings=as_strings, dist_fn=sim_fn, order=order)
+ 
+    
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True,
                        dist_fn=angle, order='i'):
         """
-        A wrapper of `sim_word_word` in similarity.py
+        Computes and sorts the distances between word(s) and every word.
 
         :param word_or_words: Query word(s) to which distances are calculated.
         :type word_or_words: string or list of strings
@@ -55,8 +56,7 @@ class BeagleViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :param print_len: Number of words printed by pretty-printing function
-            Default is 10.
+        :param print_len: Number of words to be displayed. Default is 10.
         :type print_len: int, optional
 
         :param as_strings: If `True`, returns a list of words as strings rather
@@ -64,17 +64,18 @@ class BeagleViewer(object):
         :type as_strings: boolean, optional
 
         :param dist_fn: A distance function from functions in vsm.spatial. 
-            Default is :meth: angle.
+            Default is :meth:`angle`.
         :type dist_fn: string, optional
 
-        :param order: Default is 'i'.
+        :param order: Order of sorting. 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
         :type order: string, optional
 
-        :returns: w_arr : :class:`LabeledColumn`.
+        :returns: an instance of :class:`LabeledColumn`.
             A 2-dim array containing words and their distances to 
             `word_or_words`. 
         
-        :See Also: :meth:`vsm.viewer.similarity.dist_word_word`
+        :See Also: :meth:`vsm.viewer.wrappers.dist_word_word`
         """
         return dist_word_word(word_or_words, self.corpus, 
                               self.model.matrix.T, weights=weights, 
@@ -82,25 +83,33 @@ class BeagleViewer(object):
                               print_len=print_len, as_strings=True,
                               dist_fn=dist_fn, order=order)
 
+    
+    def simmat_word(self, word_list, sim_fn=angle):
+        """
+        Wrapper for dismat_word. Throws a DeprecationWarning.
+        """
+        deprecation_warning("simmat_word", "dismat_word")
+
+        return self.dismat_word(word_list, dist_fn=sim_fn)
 
 
     def dismat_word(self, word_list, dist_fn=angle):        
         """
-        Calculates the distance matrix for a given list of words.
+        Calculates a distance matrix for a given list of words.
 
         :param word_list: A list of words whose distance matrix is to be
             computed.
-        :type word_list: list
+        :type word_list: list of strings
 
         :param dist_fn: A distance function from functions in vsm.spatial. 
-            Default is :meth: angle.
+            Default is :meth:`angle`.
         :type dist_fn: string, optional
 
-        :returns: ...
-            contains n x n matrix containing floats where n is the number of words
+        :returns: an instance of :class:`IndexedSymmArray`.
+            A n x n matrix containing floats where n is the number of words
             in `word_list`.
         
-        :See Also: :meth:`vsm.viewer.similarity.dismat_word`
+        :See Also: :meth:`vsm.viewer.wrappers.dismat_word`
         """
 
         return dismat_word(word_list, self.corpus, 

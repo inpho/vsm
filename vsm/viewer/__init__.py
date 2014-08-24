@@ -1,5 +1,5 @@
 """
-[General documentation about the viewer submodule]
+[General documentation about the :mod:`viewer` submodule]
 """
 
 

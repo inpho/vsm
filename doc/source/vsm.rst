@@ -1,0 +1,45 @@
+vsm
+===
+
+.. automodule:: vsm
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      
+      add_metadata
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      
+      BeagleComposite
+      BeagleContextMulti
+      BeagleContextSeq
+      BeagleEnvironment
+      BeagleOrderMulti
+      BeagleOrderSeq
+      BeagleViewer
+      Corpus
+      LDAGibbs
+      LdaCgsMulti
+      LdaCgsViewer
+      Lsa
+      LsaViewer
+      TfIdf
+      TfIdfViewer
+      TfMulti
+      TfSeq
+      TfViewer
+   
+   
+
+   
+   
+   

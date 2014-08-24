@@ -10,71 +10,30 @@ __all__ = ['LdaCgsMulti']
 
 class LdaCgsMulti(object):
     """
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
-    
-    :param context_type: Name of tokenization stored in `corpus` whose tokens
-        will be treated as documents.
-    :type context_type: string
-
-    :param K: Number of topics. Default is `100`.
-    :type K: int
-    
-    :param top_prior: Topic priors. Default is 0.01 for all topics.
-    :type top_prior: list, optional
-    
-    :param ctx_prior: Context priors. Default is a flat prior of 0.01 
-        for all contexts.
-    :type ctx_prior: list, optional
-
-    :Attributes:
-        * **K** (int)
-            Number of topics.
-        * **contexts** (list of arrays)
-            Tokens tokenized by `context_type` retrieved from `corpus`.
-        * **context_type** (string)
-            Name of tokenization whose tokens are treated as documents.            
-        * **top_prior** (array)
-            Topic priors.
-        * **ctx_prior** (array)
-            Context priors.
-        * **iteration** (int)
-            Number of iterations. Set to 0 when the object is made.
-
-    :Methods:
-        * :meth:`train`
-            Takes an optional argument `itr`, which defaults to 1000, and
-            updates the model `itr` times.
-        * :meth:`load`
-            A static method for loading a saved LdaCgsMulti model.
-        * :meth:`save`
-            Saves the model in an `.npz` file.
-        * **update_z**
-            Takes a document index `d`, a word index `i` relative to that
-            document and a word `w` and updates the model.
-        * **z_dist**
-            Takes a document index `d` and a word `w` and computes the
-            distribution over topics for `w` in `d`.
-        * **phi_k**
-            Takes a topic index `t` and returns the estimated posterior
-            distribution over words for `t`.
-        * **phi_w**
-            Takes a word `w` and returns the estimated posterior
-            distribution over topics for `w`.
-        * **theta_d**
-            Takes a document index `d` and returns the estimated posterior
-            distribution over topics for `d`.
-        * **theta_k**
-            Takes a topic index `t` and returns the estimated posterior
-            distribution over documents for `t`.
-        * **logp**
-            Compute the log probability of the corpus `W` given the
-            estimated values of the latent variables `phi`, `theta` and
-            `Z`.
     """
+    
     def __init__(self, corpus, context_type,
                  K=100, top_prior = [], ctx_prior = []):
+        """
+        Initialize LdaCgsMulti.
 
+        :param corpus: Source of observed data.
+        :type corpus: `Corpus`
+    
+        :param context_type: Name of tokenization stored in `corpus` whose tokens
+            will be treated as documents.
+        :type context_type: string, optional
+
+        :param K: Number of topics. Default is `100`.
+        :type K: int, optional
+    
+        :param top_prior: Topic priors. Default is 0.01 for all topics.
+        :type top_prior: list, optional
+    
+        :param ctx_prior: Context priors. Default is a flat prior of 0.01 
+            for all contexts.
+        :type ctx_prior: list, optional
+        """
         # The width of the word by topic matrix and the height of the
         # topic by context matrix
         self.K = K
@@ -163,10 +122,9 @@ class LdaCgsMulti(object):
             2.
         :type n_proc: int, optional
 
-        Note
-        ----
-        Training sessions can be continued only if the previous
-        training session of completed.
+        :notes:
+            Training sessions can be continued only if the previous
+            training session of completed.
         """
         # Split contexts into an `n_proc`-length list of lists of
         # contexts

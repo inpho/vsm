@@ -13,47 +13,42 @@ __all__ = ['TfViewer']
 class TfViewer(object):
     """
     A class for viewing Term-Frequency model.
-
-    :param corpus: Source of observed data.
-    :type corpus: Corpus
-
-    :param model: A Term-Frequency model.
-    :type model: TfSeq or TfMulti object.
-
-    :attributes:
-        * **corpus** (Corpus object) - `corpus`
-        * **model** (Tf object) - `model`
-
-    :methods:
-        * :doc:`tf_sim_word_word`
-            Returns words sorted by the cosine values between a word or list
-            of words and every word.
-        * :doc:`tf_sim_doc_doc`
-            Computes and sorts the cosine similarity values between a
-            document or list of documents.
-        * :doc:`tf_simmat_words`
-            Calculates the similarity matrix for a given list of words.
-        * :doc:`tf_simmat_docs`
-            Calculates the similarity matrix for a given list of documents.
-        * :doc:`coll_freq`
-        * :doc:`coll_freqs`
-
-    :See Also: :class:`vsm.model.tf.TfSeq`, :class:`vsm.model.tf.TfMulti`
     """
+    
     def __init__(self, corpus, model):
         """
+        Initialize TfViewer. 
+    
+        :param corpus: Source of observed data.
+        :type corpus: :class:`Corpus`
+
+        :param model: A Term-Frequency model.
+        :type model: TfSeq or TfMulti object.
         """
         self.corpus = corpus
         self.model = model
+
+
+    def sim_word_word(self, word_or_words, weights=[], 
+                       filter_nan=True, print_len=10, as_strings=True):
+        """
+        Wrapper for dist_word_word. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=angle_sparse, order='i')
+        """
+        deprecation_warning("sim_word_word", "dist_word_word")
+
+        return self.dist_word_word(word_or_words, weights=weights, 
+                       filter_nan=filter_nan, print_len=print_len,
+                       as_strings=as_strings, dist_fn=angle_sparse, order='i')
 
 
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True,
                        dist_fn=angle_sparse, order='i'):
         """
-        A wrapper of `dist_word_word` in similarity.py
+        Returns words sorted by the distances between word(s) and every word.
 
-        :param word_or_words: Query word(s) to which cosine values are calculated.
+        :param word_or_words: Query word(s) to which distances are calculated.
         :type word_or_words: string or list of strings
         
         :param weights: Specify weights for each query word in `word_or_words`. 
@@ -64,19 +59,26 @@ class TfViewer(object):
             Default is `True`.
         :type filter_nan: boolean, optional
 
-        :param print_len: Number of words printed by pretty-printing function
-            Default is 10.
+        :param print_len: Number of words to be displayed. Default is 10.
         :type print_len: int, optional
 
         :param as_strings: If `True`, returns a list of words as strings rather
             than their integer representations. Default is `True`.
         :type as_strings: boolean, optional
+        
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`angle_sparse`.
+        :type dist_fn: string, optional
+        
+        :param order: Order of sorting. 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
+        :type order: string, optional
 
-        :returns: w_arr : :class:`LabeledColumn`.
-            A 2-dim array containing words and their cosine values to 
+        :returns: an instance of :class:`LabeledColumn`.
+            A 2-dim array containing words and their distances to 
             `word_or_words`. 
         
-        :See Also: :meth:`vsm.viewer.similarity.dist_word_word`
+        :See Also: :meth:`vsm.viewer.wrappers.dist_word_word`
         """
         return dist_word_word(word_or_words, self.corpus, self.model.matrix.T,
                                 weights=weights, filter_nan=filter_nan, 
@@ -84,20 +86,36 @@ class TfViewer(object):
                                 dist_fn=dist_fn, order=order)
 
 
+    def sim_doc_doc(self, doc_or_docs, weights=[], print_len=10,
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True):
+        """
+        Wrapper for dist_doc_doc. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=angle_sparse, order='i'
+        """  
+        deprecation_warning("sim_doc_doc", "dist_doc_doc")
+        
+        return self.dist_doc_doc(doc_or_docs, weights=weights, 
+                    print_len=print_len, filter_nan=filter_nan, 
+                    label_fn=def_label_fn, 
+                    as_strings=as_strings, dist_fn=angle_sparse, order='i')
+ 
+
+
     def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
                      filter_nan=True, label_fn=def_label_fn, as_strings=True,
                      dist_fn=angle_sparse, order='i'):
         """ 
-        :param doc_or_docs: Query document(s) to which cosine values
-            are calculated
+        Computes and sorts the distances between a document or list of documents
+        and every document.
+
+        :param doc_or_docs: Query document(s) to which distances are calculated.
         :type doc_or_docs: string/integer or list of strings/integers
         
         :param weights: Specify weights for each query doc in `doc_or_docs`. 
             Default uses equal weights (i.e. arithmetic mean)
         :type weights: list of floating point, optional
         
-        :param print_len: Number of words printed by pretty-printing function.
-            Default is 10.
+        :param print_len: Number of documents to be displayed. Default is 10.
         :type print_len: int, optional
 
         :param filter_nan: If `True` not a number entries are filtered.
@@ -105,18 +123,27 @@ class TfViewer(object):
         :type filter_nan: boolean, optional
  
         :param label_fn: A function that defines how documents are represented.
-            Default is def_label_fn which retrieves the labels from corpus metadata.
+            Default is :meth:`def_label_fn` which retrieves the labels 
+            from corpus metadata.
         :type label_fn: string, optional
         
-        :param as_strings: If `True`, returns a list of words rather than
-            their integer representations. Default is `True`.
+        :param as_strings: If `True`, returns a list of documents as strings
+            rather than indices. Default is `True`.
         :type as_strings: boolean, optional
 
-        :returns: w_arr : :class:`LabeledColumn`.
-            A 2-dim array containing documents and their cosine values to 
+        :param dist_fn: A distance function from functions in vsm.spatial.
+            Default is :meth:`angle_sparse`.
+        :type dist_fn: string, optional
+        
+        :param order: Order of sorting. 'i' for increasing and 'd' for
+            decreasing order. Default is 'i'.
+        :type order: string, optional
+
+        :returns: an instance of :class:`LabeledColumn`.
+            A 2-dim array containing documents and their distances to 
             `doc_or_docs`. 
 
-        :See Also: :meth:`vsm.viewer.similarity.dist_doc_doc`
+        :See Also: :meth:`vsm.viewer.wrappers.dist_doc_doc`
         """
         return dist_doc_doc(doc_or_docs, self.corpus, 
                               self.model.context_type, self.model.matrix, 
@@ -125,11 +152,66 @@ class TfViewer(object):
                               as_strings=True, 
                               dist_fn=dist_fn, order=order)
     
+    
+    def sim_word_doc(self, word_or_words, weights=[], print_len=10,
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True):
+        """
+        Wrapper for dist_word_doc. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=angle_sparse, order='i'
+        """  
+        deprecation_warning("sim_word_doc", "dist_word_doc")
+        
+        return self.dist_word_doc(word_or_words, weights=weights, 
+                    print_len=print_len, filter_nan=filter_nan, 
+                    label_fn=def_label_fn, 
+                    as_strings=as_strings, dist_fn=angle_sparse, order='i')
+ 
+
 
     def dist_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
                       filter_nan=True, print_len=10, as_strings=True, 
                       dist_fn=angle_sparse, order='i'):
         """
+        Computes and sorts distances between a word or a list of words to
+        every document.
+        
+        :param word_or_words: Query word(s) to which a pseudo-document is
+            created for computation of distances.
+        :type word_or_words: string/integer or list of strings/integers
+        
+        :param weights: Specify weights for each query doc in `word_or_words`. 
+            Default uses equal weights (i.e. arithmetic mean)
+        :type weights: list of floating point, optional
+        
+        :param print_len: Number of documents to be displayed. Default is 10.
+        :type print_len: int, optional
+
+        :param filter_nan: If `True` not a number entries are filtered.
+            Default is `True`.
+        :type filter_nan: boolean, optional
+ 
+        :param label_fn: A function that defines how documents are represented.
+            Default is :meth:`def_label_fn` which retrieves the labels 
+            from corpus metadata.
+        :type label_fn: string, optional
+        
+        :param as_strings: If `True`, returns a list of documents as strings
+            rather than indices. Default is `True`.
+        :type as_strings: boolean, optional
+
+        :param dist_fn: A distance function from functions in vsm.spatial.
+            Default is :meth:`angle_sparse`.
+        :type dist_fn: string, optional
+        
+        :param order: Order of sorting. 'i' for increasing and 'd' for decreasing
+            order. Default is 'i'.
+        :type order: string, optional
+
+        :returns: an instance of :class:`LabeledColumn`.
+            A 2-dim array containing documents and their distances to 
+            `word_or_words`. 
+
+        :See Also: :meth:`vsm.viewer.wrappers.dist_word_doc`
         """
         return dist_word_doc(word_or_words, self.corpus, 
                                self.model.context_type, 
@@ -139,45 +221,78 @@ class TfViewer(object):
                                print_len=print_len, as_strings=as_strings,
                                dist_fn=dist_fn, order=order)
 
+    
+    def simmat_words(self, word_list, sim_fn=angle_sparse):
+        """
+        Wrapper for dismat_word. Throws a DeprecationWarning.
+        """
+        deprecation_warning("simmat_words", "dismat_word")
+
+        return self.dismat_word(word_list, dist_fn=sim_fn)
+
 
     def dismat_word(self, word_list, dist_fn=angle_sparse):
         """
         Calculates a distance matrix for a given list of words.
 
-        :param word_list: A list of words whose similarity matrix is to be
+        :param word_list: A list of words whose distance matrix is to be
             computed.
-        :type word_list: list
-
-        :returns: .....
-            contains n x n matrix containing floats where n is the number of words
+        :type word_list: list strings/integers.
+ 
+        :param dist_fn: A distance function from functions in vsm.spatial.
+            Default is :meth:`angle_sparse`.
+        :type dist_fn: string, optional
+        
+        :returns: an instance of :class:`IndexedSymmArray`.
+            n x n matrix containing floats where n is the number of words
             in `word_list`.
 
-        :See Also: :meth:`vsm.viewer.similarity.dismat_words`
+        :See Also: :meth:`vsm.viewer.wrappers.dismat_word`
         """
         
         return dismat_word(word_list, self.corpus, 
                              self.model.matrix.T.tocsc(), dist_fn=dist_fn)
 
+    
+    def simmat_docs(self, doc_list, sim_fn=angle_sparse):
+        """
+        Wrapper for dismat_doc. Throws a DeprecationWarning.
+        """
+        deprecation_warning("simmat_docs", "dismat_doc")
 
-    def dismat_doc(self, docs, dist_fn=angle_sparse):
+        return self.dismat_doc(doc_list, dist_fn=sim_fn)
+
+
+    def dismat_doc(self, doc_list, dist_fn=angle_sparse):
         """
         Calculates a distance matrix for a given list of documents.
 
-        :param docs: A list of documents whose similarity matrix is to be computed.
-            Default is all the documents in the model.
-        :type docs: list, optional
+        :param doc_list: A list of documents whose distance matrix is to be
+            computed.
+        :type docs: list of strings/integers.
         
-        :returns: ....
-            contains n x n matrix containing floats where n is the number of documents.
+        :param dist_fn: A distance function from functions in vsm.spatial.
+            Default is :meth:`angle_sparse`.
+        :type dist_fn: string, optional
+        
+        :returns: an instance of :class:`IndexedSymmArray`.
+            n x n matrix containing floats where n is the number of
+            documents in `doc_list`.
 
-        :See Also: :meth:`vsm.viewer.similarity.dismat_docs`
+        :See Also: :meth:`vsm.viewer.wrappers.dismat_doc`
         """
-        return dismat_doc(docs, self.corpus, self.model.context_type, 
+        return dismat_doc(doc_list, self.corpus, self.model.context_type, 
                             self.model.matrix.tocsc(), dist_fn=dist_fn)
 
 
     def coll_freq(self, word):
         """
+        Returns the frequency of `word` in all documents.
+
+        :param word: Word to which its frequency is retrieved.
+        :type word: string or integer
+
+        :returns: freqency as integer
         """
         i,w = res_word_type(self.corpus, word)
         row = self.model.matrix.tocsr()[i, :].toarray()
@@ -186,16 +301,17 @@ class TfViewer(object):
     
     def coll_freqs(self, print_len=20, as_strings=True):
         """
+        Returns the frequency of all words in all documents.
 
-        :param print_len: Length of words to display. Default is `20`.
+        :param print_len: Length of words to display. Default is 20.
         :type print_len: integer, optional
 
         :param as_strings: If `True`, words are represented as strings
             rather than their integer representation.
         :type as_strings: boolean, optional
 
-        :returns: :class:`LabeledColumn`.
-            A table with word and its counts.
+        :returns: an instance of :class:`LabeledColumn`.
+            A table with words and their frequencies.
         """
         freqs = self.model.matrix.tocsc().sum(1) 
         w_arr = enum_sort(freqs.view(np.ndarray)[:, 0])
