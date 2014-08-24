@@ -29,6 +29,19 @@ class TfViewer(object):
         self.model = model
 
 
+    def sim_word_word(self, word_or_words, weights=[], 
+                       filter_nan=True, print_len=10, as_strings=True):
+        """
+        Wrapper for dist_word_word. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=angle_sparse, order='i')
+        """
+        deprecation_warning("sim_word_word", "dist_word_word")
+
+        return self.dist_word_word(word_or_words, weights=weights, 
+                       filter_nan=filter_nan, print_len=print_len,
+                       as_strings=as_strings, dist_fn=angle_sparse, order='i')
+
+
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True,
                        dist_fn=angle_sparse, order='i'):
@@ -71,6 +84,21 @@ class TfViewer(object):
                                 weights=weights, filter_nan=filter_nan, 
                                 print_len=print_len, as_strings=True,
                                 dist_fn=dist_fn, order=order)
+
+
+    def sim_doc_doc(self, doc_or_docs, weights=[], print_len=10,
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True):
+        """
+        Wrapper for dist_doc_doc. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=angle_sparse, order='i'
+        """  
+        deprecation_warning("sim_doc_doc", "dist_doc_doc")
+        
+        return self.dist_doc_doc(doc_or_docs, weights=weights, 
+                    print_len=print_len, filter_nan=filter_nan, 
+                    label_fn=def_label_fn, 
+                    as_strings=as_strings, dist_fn=angle_sparse, order='i')
+ 
 
 
     def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
@@ -124,6 +152,21 @@ class TfViewer(object):
                               as_strings=True, 
                               dist_fn=dist_fn, order=order)
     
+    
+    def sim_word_doc(self, word_or_words, weights=[], print_len=10,
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True):
+        """
+        Wrapper for dist_word_doc. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=angle_sparse, order='i'
+        """  
+        deprecation_warning("sim_word_doc", "dist_word_doc")
+        
+        return self.dist_word_doc(word_or_words, weights=weights, 
+                    print_len=print_len, filter_nan=filter_nan, 
+                    label_fn=def_label_fn, 
+                    as_strings=as_strings, dist_fn=angle_sparse, order='i')
+ 
+
 
     def dist_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
                       filter_nan=True, print_len=10, as_strings=True, 
@@ -178,6 +221,15 @@ class TfViewer(object):
                                print_len=print_len, as_strings=as_strings,
                                dist_fn=dist_fn, order=order)
 
+    
+    def simmat_words(self, word_list, sim_fn=angle_sparse):
+        """
+        Wrapper for dismat_word. Throws a DeprecationWarning.
+        """
+        deprecation_warning("simmat_words", "dismat_word")
+
+        return self.dismat_word(word_list, dist_fn=sim_fn)
+
 
     def dismat_word(self, word_list, dist_fn=angle_sparse):
         """
@@ -200,6 +252,15 @@ class TfViewer(object):
         
         return dismat_word(word_list, self.corpus, 
                              self.model.matrix.T.tocsc(), dist_fn=dist_fn)
+
+    
+    def simmat_docs(self, doc_list, sim_fn=angle_sparse):
+        """
+        Wrapper for dismat_doc. Throws a DeprecationWarning.
+        """
+        deprecation_warning("simmat_docs", "dismat_doc")
+
+        return self.dismat_doc(doc_list, dist_fn=sim_fn)
 
 
     def dismat_doc(self, doc_list, dist_fn=angle_sparse):

@@ -117,6 +117,7 @@ class LdaCgsViewer(object):
         return table
 
 
+    ## PendingDeprecation : k_indices parameter of the same function.
     #TODO: Use spatial.H to compute entropy
     def topic_entropies(self, print_len=10, as_strings=True, compact_view=True):
         """
@@ -296,6 +297,22 @@ class LdaCgsViewer(object):
         return Z_w
 
 
+    def sim_top_top(self, topic_or_topics, weights=[], 
+                     show_topics=True, print_len=10, filter_nan=True, 
+                     as_strings=True, compact_view=True):
+        """
+        Wrapper for dist_top_top. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=JS_div, order='i'
+        """
+        deprecation_warning("sim_top_top", "dist_top_top")
+
+        return self.dist_top_top(topic_or_topics, weights=weights, 
+                        dist_fn=JS_div, order='i', 
+                        show_topics=show_topics, print_len=print_len,
+                        filter_nan=filter_nan, 
+                        as_strings=as_strings, compact_view=compact_view)
+        
+
     def dist_top_top(self, topic_or_topics, weights=[], 
                      dist_fn=JS_div, order='i', 
                      show_topics=True, print_len=10, filter_nan=True, 
@@ -379,6 +396,20 @@ class LdaCgsViewer(object):
         return distances 
 
 
+    def sim_top_doc(self, topic_or_topics, weights=[], filter_words=[],
+                     print_len=10, filter_nan=True, label_fn=def_label_fn, 
+                     as_strings=True):
+        """
+        Wrapper for dist_top_doc. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=JS_div, order='i'
+        """
+        deprecation_warning("sim_top_doc", "dist_top_doc")
+
+        return self.dist_top_doc(topic_or_topics, weights=weights, 
+                    filter_words=filter_words, print_len=print_len, 
+                    as_strings=as_strings, label_fn=def_label_fn, 
+                    filter_nan=filter_nan, dist_fn=JS_div, order='i')
+ 
 
     def dist_top_doc(self, topic_or_topics, weights=[], filter_words=[],
                      print_len=10, as_strings=True, label_fn=def_label_fn, 
@@ -458,6 +489,19 @@ class LdaCgsViewer(object):
     	return d_arr
 
 
+    def sim_word_top(self, word_or_words, weights=[], filter_nan=True,
+                      show_topics=True, print_len=10, as_strings=True, 
+                      compact_view=True):
+        """
+        Wrapper for dist_word_top. Throws a DeprecationWarning.
+        """
+        deprecation_warning("sim_word_top", "dist_word_top")
+
+        return self.dist_word_top(word_or_words, weights=weights,
+                    filter_nan=filter_nan, show_topics=show_topics,
+                    print_len=print_len, as_strings=as_strings, 
+                    compact_view=compact_view, dist_fn=JS_div, order='i')
+    
     def dist_word_top(self, word_or_words, weights=[], filter_nan=True,
                       show_topics=True, print_len=10, as_strings=True, 
                       compact_view=True, dist_fn=JS_div, order='i'):
@@ -557,6 +601,21 @@ class LdaCgsViewer(object):
         return distances
 
 
+
+        
+    def sim_doc_doc(self, doc_or_docs, k_indices=[], print_len=10,
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True):
+        """
+        Wrapper for dist_doc_doc. Throws a DeprecationWarning.
+        New parameters are set to default: dist_fn=JS_div, order='i')
+        """  
+        deprecation_warning("sim_doc_doc", "dist_doc_doc")
+        
+        return self.dist_doc_doc(doc_or_docs, print_len=print_len, 
+                    filter_nan=filter_nan, label_fn=def_label_fn, 
+                    as_strings=as_strings, dist_fn=JS_div, order='i')
+ 
+
     def dist_doc_doc(self, doc_or_docs, 
                      print_len=10, filter_nan=True, 
                      label_fn=def_label_fn, as_strings=True,
@@ -564,7 +623,6 @@ class LdaCgsViewer(object):
         """
         Computes and sorts the distances between a document 
         or list of documents and every document in the topic space. 
-        
         :param doc_or_docs: Query document(s) to which distances
             are calculated
         :type doc_or_docs: string/integer or list of strings/integers
@@ -609,6 +667,16 @@ class LdaCgsViewer(object):
                               dist_fn=dist_fn, order=order)
     
 
+    def simmat_docs(self, docs=[], k_indices=[]):
+        """
+        Wrapper for dist_doc_doc. Throws a DeprecationWarning.
+        New parameter dist_fn is set to default `JS_div`.
+        """
+        deprecation_warning("simmat_docs", "dismat_doc")
+
+        return self.dismat_doc(docs=docs, dist_fn=JS_div)
+    
+
     def dismat_doc(self, docs=[], dist_fn=JS_div):
         """
         Calculates the distance matrix for a given list of documents.
@@ -636,7 +704,16 @@ class LdaCgsViewer(object):
 
         return dm
 
+    
+    def simmat_topics(self, k_indices=[]):
+        """
+        Wrapper for dist_doc_doc. Throws a DeprecationWarning.
+        New parameter dist_fn is set to default `JS_div`.
+        """
+        deprecation_warning("simmat_topics", "dismat_top")
 
+        return self.dismat_top(topics=k_indices, dist_fn=JS_div)
+    
 
     def dismat_top(self, topics=[], dist_fn=JS_div):
         """
