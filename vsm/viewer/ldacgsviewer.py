@@ -623,10 +623,9 @@ class LdaCgsViewer(object):
         """
         Computes and sorts the distances between a document 
         or list of documents and every document in the topic space. 
-        :param doc_or_docs: Query document(s) to which distances
-            are calculated
-        :type doc_or_docs: string/integer or list of strings/integers
-        
+        :param doc_or_docs: Query document(s) to which distances are calculated.
+        :type doc_or_docs: string/integer or list of strings/integer.
+
         :param print_len: Number of words printed by pretty-printing function.
             Default is 10.
         :type print_len: int, optional

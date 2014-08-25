@@ -5,16 +5,6 @@ vsm
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      
-      add_metadata
-   
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
