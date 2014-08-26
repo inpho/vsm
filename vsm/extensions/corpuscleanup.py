@@ -1,6 +1,6 @@
 import nltk
 from vsm.corpus import Corpus
-from vsm.ext.corpusbuilders.util import *
+from vsm.extensions.corpusbuilders.util import *
 
 
 def apply_stoplist_len(corp, nltk_stop=True, add_stop=None, 
