@@ -3,7 +3,7 @@ import multiprocessing as mp
 import numpy as np
 
 
-__all__ = ['mp_shared_array', 'mp_shared_value']
+__all__ = [ 'mp_shared_array', 'mp_shared_value' ]
 
 
 

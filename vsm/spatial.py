@@ -129,19 +129,9 @@ def angle_sparse(P, Q):
     P_inv_norms = 1 / np.sqrt(P.multiply(P).sum(1))
     Q_inv_norms = 1 / np.sqrt(Q.multiply(Q).sum(0))
 
-    # Attempt to use scipy.sparse version >= 0.13 
-    try:
-        P = P.multiply(csc_matrix(P_inv_norms))
-        Q = Q.multiply(csr_matrix(Q_inv_norms))
-    except ValueError:
-        for j in xrange(P.shape[1]):
-            col = P[:,j].multiply(csc_matrix(P_inv_norms))
-            P = P.tolil()
-            P[:,j] = col
-        for i in xrange(Q.shape[0]):
-            row = Q[i,:].multiply(csr_matrix(Q_inv_norms))
-            Q = Q.tolil()
-            Q[i,:] = row
+    # Requires scipy version >= 0.13
+    P = P.multiply(csc_matrix(P_inv_norms))
+    Q = Q.multiply(csr_matrix(Q_inv_norms))
 
     P = P.tocsr()
     Q = Q.tocsc()

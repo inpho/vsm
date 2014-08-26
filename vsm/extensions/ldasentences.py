@@ -1,6 +1,6 @@
 import numpy as np
 from vsm.corpus import Corpus
-from vsm.corpus.util import *
+from vsm.extensions.corpusbuilders import *
 from vsm.extensions.corpuscleanup import apply_stoplist_len
 from vsm.extensions.htrc import vol_link_fn, add_link_
 import os

@@ -1,5 +1,11 @@
 import numpy as np
 
+
+__all__ = [ 'init_priors', 'categorical', 'cgs_update',
+            'load_lda', 'save_lda' ]
+
+
+
 def init_priors(V=0, K=0, beta=[], alpha=[]):
 
     # Topic and context priors; set defaults if need be
@@ -102,7 +108,7 @@ def compute_word_top(W, Z, K, V, beta=[]):
     return word_top
 
     
-def load_lda(filename, ldaclass, corpus=None):
+def load_lda(filename, ldaclass):
     """
     A static method for loading a saved `ldaclass` model.
     
@@ -115,31 +121,58 @@ def load_lda(filename, ldaclass, corpus=None):
     """
     print 'Loading LDA data from', filename
     arrays_in = np.load(filename)
-    context_type = arrays_in['context_type'][()]
-    K = arrays_in['K'][()]
-    alpha = arrays_in['alpha']
-    beta = arrays_in['beta']
+    try:
+        context_type = arrays_in['context_type'][()]
+        K = arrays_in['K'][()]
+        alpha = arrays_in['alpha']
+        beta = arrays_in['beta']
     
-    m = ldaclass(context_type=context_type, K=K,
-                 alpha=alpha, beta=beta)
-    if corpus:
-        m._load_corpus(corpus)
-    else:
-        m.V = arrays_in['V']
+        m = ldaclass(context_type=context_type, K=K,
+                     alpha=alpha, beta=beta)
+
+        m.V = arrays_in['V'][()]
+        m.corpus = arrays_in['corpus']
+
+        m.Z_indices = ['Z_indices']
+        m.Z_flat = arrays_in['Z_flat']
         
-    m.iteration = arrays_in['iteration'][()]
-    m.log_probs = arrays_in['log_probs'].tolist()
-    m.Z = arrays_in['Z']
-    m.top_doc = arrays_in['top_doc']
-    m.word_top = arrays_in['word_top']
-    m.inv_top_sums = arrays_in['inv_top_sums']
+        m.iteration = arrays_in['iteration'][()]
+        m.log_probs = arrays_in['log_probs'].tolist()
+
+        m.top_doc = arrays_in['top_doc']
+        m.word_top = arrays_in['word_top']
+        m.inv_top_sums = arrays_in['inv_top_sums']
+
+    except (KeyError, TypeError):
+        # Compatibility with old LDAGibbs class
+        context_type = arrays_in['context_type'][()]
+        K = arrays_in['K'][()]
+        V = arrays_in['V'][()]
+        alpha = arrays_in['alpha'][()]
+        beta = arrays_in['beta'][()]
+        
+        m = ldaclass(context_type=context_type, K=K,
+                     alpha=[alpha]*K, beta=[beta]*V)
+
+        m.V = V
+        m.corpus = arrays_in['W_corpus']
+
+        m.Z_indices = arrays_in['Z_indices']
+        m.Z_flat = arrays_in['Z_corpus']
+        
+        m.iteration = arrays_in['iterations'][()]
+        m.log_probs = arrays_in['log_prob'].tolist()
+
+        m.top_doc = arrays_in['doc_top'].T
+        m.word_top = arrays_in['top_word'].T
+        m.inv_top_sums = (1. / arrays_in['sum_word_top'])
 
     return m
 
-    
+
 def save_lda(m, filename):
     """
-    Saves the model in `.npz` file.
+    Saves the model in an `.npz` file.
     
     :param filename: Name of file to be saved.
     :type filename: string
@@ -147,18 +180,25 @@ def save_lda(m, filename):
     :See Also: :class:`numpy.savez`
     """
     arrays_out = dict()
+    
+    arrays_out['K'] = m.K
+    arrays_out['alpha'] = m.alpha
+    arrays_out['beta'] = m.beta
+
+    arrays_out['V'] = m.V
+    arrays_out['context_type'] = m.context_type
+    arrays_out['corpus'] = m.corpus
+
+    arrays_out['Z_indices'] = m.Z_indices
+    arrays_out['Z_flat'] = m.Z_flat
+
     arrays_out['iteration'] = m.iteration
     dt = dtype=[('i', np.int), ('v', np.float)]
     arrays_out['log_probs'] = np.array(m.log_probs, dtype=dt)
-    arrays_out['Z'] = m.Z
+
     arrays_out['top_doc'] = m.top_doc
     arrays_out['word_top'] = m.word_top
     arrays_out['inv_top_sums'] = m.inv_top_sums
-    arrays_out['context_type'] = m.context_type
-    arrays_out['K'] = m.K
-    arrays_out['V'] = m.V
-    arrays_out['alpha'] = m.alpha
-    arrays_out['beta'] = m.beta
     
     print 'Saving LDA model to', filename
     np.savez(filename, **arrays_out)

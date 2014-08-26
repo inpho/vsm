@@ -58,7 +58,7 @@ class Lsa(object):
             if s < k_factors:
                 k_factors = s - 1
 
-            print 'Performing sparse SVD'
+            # print 'Performing sparse SVD'
             u, s, v = linalgs.svds(self.td_matrix, k=k_factors)
 
         indices = s.argsort()[::-1]

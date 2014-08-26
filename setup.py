@@ -27,7 +27,7 @@ setup(
         ],
     install_requires=[
         "numpy>=1.6.1",
-        "scipy>=0.10.1",
+        "scipy>=0.13.0",
     ],
     packages=['vsm',
               'vsm.corpus',

@@ -10,10 +10,10 @@ import beagleenvironment
 from beagleenvironment import *
 import beagleorder
 from beagleorder import *
+import ldacgsseq
+from ldacgsseq import *
 import ldacgsmulti
 from ldacgsmulti import *
-import ldagibbs
-from ldagibbs import *
 import lsa
 from lsa import *
 import tf
@@ -26,8 +26,8 @@ __all__ = beaglecomposite.__all__
 __all__ += beaglecontext.__all__
 __all__ += beagleenvironment.__all__
 __all__ += beagleorder.__all__
+__all__ += ldacgsseq.__all__
 __all__ += ldacgsmulti.__all__
-__all__ += ldagibbs.__all__
 __all__ += lsa.__all__
 __all__ += tf.__all__
 __all__ += tfidf.__all__

@@ -20,14 +20,16 @@ def corpus_from_strings(strings, metadata=[], unidecode=True,
     tokens are the strings.
 
     """
+    if unidecode:
+        import unidecode
+        for i in xrange(len(strings)):
+            if isinstance(strings[i], unicode):
+                strings[i] = unidecode.unidecode(strings[i])
+
     documents = [word_tokenize(s) for s in strings]
     corpus = sum(documents, [])
     indices = np.cumsum([len(d) for d in documents])
     del documents
-
-    if unidecode and isinstance(corpus, unicode):
-        import unidecode
-        corpus = unidecode(corpus)
 
     if len(metadata) == 0:
         metadata = ['document_{0}'.format(i) for i in xrange(len(strings))]
@@ -41,11 +43,11 @@ def corpus_from_strings(strings, metadata=[], unidecode=True,
 
 
 
-def empty_corpus(context_type='context'):
+def empty_corpus(context_type='document'):
     """
     Creates an empty Corpus with defined context_type.
 
-    :param context_type: A type of tokenization. Default is 'context'.
+    :param context_type: A type of tokenization. Default is 'document'.
     :type context_type: string
 
     :returns: An empty Corpus with no words or context_data.
@@ -61,7 +63,7 @@ def random_corpus(corpus_len,
                   n_words,
                   min_token_len,
                   max_token_len,
-                  context_type='context',
+                  context_type='document',
                   metadata=False):
     """
     Generates a random integer corpus.
@@ -80,7 +82,7 @@ def random_corpus(corpus_len,
         for corpus.
     :type max_token_len: int
 
-    :param context_type: A type of tokenization. Default is 'context'.
+    :param context_type: A type of tokenization. Default is 'document'.
     :type context_type: string, optional
 
     :param metadata: If `True` generates metadata. If `False` the only
@@ -440,7 +442,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
         par_n = 0
         
         for chk, label in zip(chunks, labels):
-            print 'Tokenizing', label
+            # print 'Tokenizing', label
             pars = paragraph_tokenize(chk)
 
             for par in pars:
@@ -460,7 +462,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
             chk_n += 1
     else:
         for chk, label in zip(chunks, labels):
-            print 'Tokenizing', label
+            # print 'Tokenizing', label
             sents = sentence_tokenize(chk)
 
             for sent in sents:
@@ -591,7 +593,7 @@ def coll_tokenize(books, book_names):
     sent_break, book_n, page_n, sent_n = 0, 0, 0, 0
 
     for book, book_label in zip(books, book_names):
-        print 'Tokenizing', book_label
+        # print 'Tokenizing', book_label
         for page, page_file in book:
             sents = sentence_tokenize(page)
 

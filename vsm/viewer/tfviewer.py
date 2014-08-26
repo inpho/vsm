@@ -313,7 +313,7 @@ class TfViewer(object):
         :returns: an instance of :class:`LabeledColumn`.
             A table with words and their frequencies.
         """
-        freqs = self.model.matrix.tocsr().sum(1) 
+        freqs = self.model.matrix.tocsc().sum(1) 
         w_arr = enum_sort(freqs.view(np.ndarray)[:, 0])
         
         # Label data
