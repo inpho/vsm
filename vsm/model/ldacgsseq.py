@@ -1,11 +1,7 @@
 import numpy as np
 import time
-
-from ldafunctions import(
-    init_priors as _init_priors_,
-    cgs_update as _update_,
-    load_lda as _load_lda_,
-    save_lda as _save_lda_)
+from vsm.split import split_corpus
+from ldafunctions import *
 
 
 __all__ = [ 'LdaCgsSeq' ]
@@ -42,12 +38,18 @@ class LdaCgsSeq(object):
         self.K = K
 
         if corpus:
-            self._load_corpus(corpus)
+            self.corpus = corpus.corpus
+            self.V = corpus.words.size
+            i = corpus.context_types.index(self.context_type)
+            self.Z_indices = corpus.context_data[i]['idx']
+            self.Z_flat = np.zeros_like(self.corpus, dtype=np.int)
         else:
-            self.docs = []
             self.V = 0
+            self.corpus = []
+            self.Z_indices = []
+            self.Z_flat = []
 
-        priors = _init_priors_(self.V, K, beta, alpha)
+        priors = init_priors(self.V, K, beta, alpha)
         self.beta, self.alpha = priors
 
         # Word by topic matrix
@@ -60,14 +62,20 @@ class LdaCgsSeq(object):
         # Topic by document matrix
         self.top_doc = (np.zeros((len(self.alpha), len(self.docs)),
                                  dtype=np.float) + self.alpha)
-        self.Z=[np.zeros_like(doc) for doc in self.docs]
 
         self.iteration = 0
         self.log_probs = []
 
-    def _load_corpus(self, corpus):
-        self.docs = corpus.view_contexts(self.context_type)
-        self.V = corpus.words.size
+
+    @property
+    def Z(self):
+        return split_corpus(self.Z_flat, self.Z_indices)
+
+
+    @property
+    def docs(self):
+        return split_corpus(self.corpus, self.Z_indices)
+
 
     def train(self, n_iterations=100, verbose=1, random_state=None):
 
@@ -82,9 +90,9 @@ class LdaCgsSeq(object):
         stop = self.iteration + n_iterations
         for itr in xrange(self.iteration, stop):
 
-            results = _update_(self.iteration, self.docs, self.word_top,
-                               self.inv_top_sums, self.top_doc, self.Z, 
-                               random_state=random_state)
+            results = cgs_update(self.iteration, self.docs, self.word_top,
+                                 self.inv_top_sums, self.top_doc, self.Z, 
+                                 random_state=random_state)
 
             lp = results[4]
             self.log_probs.append((self.iteration, lp))
@@ -101,16 +109,11 @@ class LdaCgsSeq(object):
             print '-'*60, ('\n\nWalltime per iteration: {0} seconds'
                            .format(np.around((t-start)/n_iterations, decimals=2)))
 
-    def query_sample(self, doc, n_iterations, random_state=None):
-
-        sampler = query_sampler(doc, self)
-        sampler.train(n_iterations, random_state=random_state)
-
-        return sampler
 
     @staticmethod
-    def load(filename, corpus=None):
-        return _load_lda_(filename, LdaCgsSeq, corpus=corpus)
+    def load(filename):
+        return load_lda(filename, LdaCgsSeq)
+
 
     def save(self, filename):
-        _save_lda_(self, filename)
+        save_lda(self, filename)

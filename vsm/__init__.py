@@ -16,10 +16,6 @@ results with a Viewer class specialized to a particular model type. A
 Viewer object contains a variety of methods for analysis and
 visualization and achieves its full functionality within an IPython
 notebook session extended with matplotlib and scikit-learn.
-
-This documentation site is in its early days. We'll soon have
-documentation for :mod:`vsm` generated from docstrings and example
-IPython notebooks.
 """
 
 
