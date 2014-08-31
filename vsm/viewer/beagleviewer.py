@@ -1,6 +1,7 @@
 import numpy as np
 
 from vsm.spatial import angle
+from vsm.exceptions import *
 
 from wrappers import *
 
@@ -26,19 +27,6 @@ class BeagleViewer(object):
         self.corpus = corpus
         self.model = model
 
-    def sim_word_word(self, word_or_words, weights=[], 
-                       filter_nan=True, print_len=10, as_strings=True,
-                       sim_fn=angle, order='i'):
-        """
-        Wrapper for dist_word_word. Throws a DeprecationWarning.
-        """
-        deprecation_warning("sim_word_word", "dist_word_word")
-
-        return self.dist_word_word(word_or_words, weights=weights, 
-                       filter_nan=filter_nan, print_len=print_len,
-                       as_strings=as_strings, dist_fn=sim_fn, order=order)
- 
-    
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True,
                        dist_fn=angle, order='i'):
@@ -83,15 +71,19 @@ class BeagleViewer(object):
                               print_len=print_len, as_strings=True,
                               dist_fn=dist_fn, order=order)
 
+
+    @deprecated_meth("dist_word_word")
+    def sim_word_word(self, word_or_words, weights=[], 
+                       filter_nan=True, print_len=10, as_strings=True,
+                       dist_fn=angle, order='i'):
+
+        self.sim_word_word.__func__.__doc__ = dist_word_word.__doc__
+        pass
+
     
-    def simmat_word(self, word_list, sim_fn=angle):
-        """
-        Wrapper for dismat_word. Throws a DeprecationWarning.
-        """
-        deprecation_warning("simmat_word", "dismat_word")
-
-        return self.dismat_word(word_list, dist_fn=sim_fn)
-
+    @deprecated_meth("dismat_word")
+    def simmat_word(self, word_list, dist_fn=angle):
+        pass
 
     def dismat_word(self, word_list, dist_fn=angle):        
         """
