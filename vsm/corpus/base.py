@@ -305,8 +305,8 @@ class BaseCorpus(object):
     
 class Corpus(BaseCorpus):
     """
-    The goal of the Corpus class is to provide an efficient
-    representation of a textual corpus.
+    The goal of the Corpus class is to provide an efficient representation\
+    of a textual corpus.
 
     A Corpus object contains an integer representation of the text and
     maps to permit conversion between integer and string

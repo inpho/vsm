@@ -5,12 +5,6 @@ vsm.corpus
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-   
-      add_metadata
-   
 
    .. rubric:: Classes
 
@@ -22,5 +16,3 @@ vsm.corpus
 .. autoclass:: Corpus 
     :members:
 
-.. autofunction:: add_metadata   
-   

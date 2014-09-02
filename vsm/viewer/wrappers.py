@@ -1,5 +1,4 @@
 import numpy as np
-import warnings
 
 from scipy.sparse import issparse, csr_matrix, coo_matrix
 
@@ -9,21 +8,10 @@ from types import *
 from labeleddata import *
 
 
-__all__ = ['deprecation_warning','def_label_fn', 'doc_label_name',
+__all__ = ['def_label_fn', 'doc_label_name',
            'dismat_doc', 'dismat_top', 'dismat_word', 'dist_doc_doc',
            'dist_word_doc', 'dist_word_top', 'dist_word_word', 
            'dist_top_doc', 'dist_top_top']
-
-
-def deprecation_warning(old_name, new_name):
-    """
-    Deprecation warning for 'sim_*' functions.
-    """
-    warnings.simplefilter('always', DeprecationWarning)
-    message = "{0} is deprecated. Please use {1} instead.".format(old_name,
-                new_name)
-    warnings.warn(message, DeprecationWarning)
-
 
 # 
 # A default function for constructing document labels from corpus

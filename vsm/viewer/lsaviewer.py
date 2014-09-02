@@ -2,6 +2,7 @@ import numpy as np
 
 from vsm.spatial import angle
 from vsm.structarr import *
+from vsm.exceptions import *
 from types import *
 from labeleddata import *
 from wrappers import *
@@ -28,18 +29,12 @@ class LsaViewer(object):
         self.corpus = corpus
         self.model = model
 
-    
+    @deprecated_meth("dist_word_word")
     def sim_word_word(self, word_or_words, weights=[], 
-                       filter_nan=True, print_len=10, as_strings=True):
-        """
-        Wrapper for dist_word_word. Throws a DeprecationWarning.
-        New parameters are set to default: dist_fn=angle, order='i'
-        """
-        deprecation_warning("sim_word_word", "dist_word_word")
+                       filter_nan=True, print_len=10, as_strings=True, 
+                       dist_fn=angle, order='i'):
 
-        return self.dist_word_word(word_or_words, weights=weights, 
-                       filter_nan=filter_nan, print_len=print_len,
-                       as_strings=as_strings, dist_fn=angle, order='i')
+        pass
 
 
     def dist_word_word(self, word_or_words, weights=[], 
@@ -87,21 +82,12 @@ class LsaViewer(object):
                                 print_len=print_len, as_strings=True, 
                                 dist_fn=dist_fn, order=order)
 
-
-    def sim_doc_doc(self, doc_or_docs, weights=[], print_len=10,
-                     filter_nan=True, label_fn=def_label_fn, as_strings=True):
-        """
-        Wrapper for dist_doc_doc. Throws a DeprecationWarning.
-        New parameters are set to default: dist_fn=angle, order='i'
-        """  
-        deprecation_warning("sim_doc_doc", "dist_doc_doc")
+    @deprecated_meth("dist_doc_doc")
+    def sim_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
+                     filter_nan=True, label_fn=def_label_fn, as_strings=True,
+                     dist_fn=angle, order='i'):
+        pass
         
-        return self.dist_doc_doc(doc_or_docs, weights=weights, 
-                    print_len=print_len, filter_nan=filter_nan, 
-                    label_fn=def_label_fn, 
-                    as_strings=as_strings, dist_fn=angle, order='i')
-
-
     def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
                      filter_nan=True, label_fn=def_label_fn, as_strings=True,
                      dist_fn=angle, order='i'):
@@ -153,21 +139,12 @@ class LsaViewer(object):
                               label_fn=label_fn, as_strings=True,
                               dist_fn=dist_fn, order=order)
     
+    @deprecated_meth("dist_word_doc")
+    def sim_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
+                      filter_nan=True, print_len=10, as_strings=True, 
+                      dist_fn=angle, order='i'):
+        pass
     
-    def sim_word_doc(self, word_or_words, weights=[], print_len=10,
-                     filter_nan=True, label_fn=def_label_fn, as_strings=True):
-        """
-        Wrapper for dist_word_doc. Throws a DeprecationWarning.
-        New parameters are set to default: dist_fn=angle, order='i'
-        """  
-        deprecation_warning("sim_word_doc", "dist_word_doc")
-        
-        return self.dist_word_doc(word_or_words, weights=weights, 
-                    print_len=print_len, filter_nan=filter_nan, 
-                    label_fn=def_label_fn, 
-                    as_strings=as_strings, dist_fn=angle, order='i')
-
-
     def dist_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
                       filter_nan=True, print_len=10, as_strings=True, 
                       dist_fn=angle, order='i'):
@@ -255,16 +232,10 @@ class LsaViewer(object):
         
         return d_arr
 
+    @deprecated_meth("dismat_word")
+    def simmat_words(self, word_list, dist_fn=angle):
+        pass
     
-    def simmat_words(self, word_list, sim_fn=angle):
-        """
-        Wrapper for dismat_word. Throws a DeprecationWarning.
-        """
-        deprecation_warning("simmat_words", "dismat_word")
-
-        return self.dismat_word(word_list, dist_fn=sim_fn)
-
-
     def dismat_word(self, word_list, dist_fn=angle):
         """
         Calculates a distance matrix for a given list of words.
@@ -286,16 +257,10 @@ class LsaViewer(object):
         return dismat_word(word_list, self.corpus, 
                              self.model.word_matrix.T, dist_fn=dist_fn)
 
-
-    def simmat_docs(self, doc_list, sim_fn=angle):
-        """
-        Wrapper for dismat_doc. Throws a DeprecationWarning.
-        """
-        deprecation_warning("simmat_docs", "dismat_doc")
-
-        return self.dismat_doc(doc_list, dist_fn=sim_fn)
-
-
+    @deprecated_meth("dismat_doc")
+    def simmat_docs(self, doc_list, dist_fn=angle):
+        pass
+    
     def dismat_doc(self, doc_list, dist_fn=angle):
         """
         Calculates a distance matrix for a given list of documents.
