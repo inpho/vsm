@@ -33,6 +33,6 @@ setup(
               'vsm.corpus',
               'vsm.model',
               'vsm.viewer',
-              'vsm.ext',
+              'vsm.extensions',
     ],
 )
