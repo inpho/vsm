@@ -12,7 +12,7 @@ class LdaCgsSeq(object):
     """
     """
     def __init__(self, corpus=None, context_type=None,
-                 K=20, alpha=[], beta=[]):
+                 K=20, V=0, alpha=[], beta=[]):
         """
         Initialize LdaCgsSeq.
 
@@ -42,7 +42,7 @@ class LdaCgsSeq(object):
             self.indices = corpus.view_contexts(self.context_type, as_indices=True)
             self.corpus = corpus.corpus
         else:
-            self.V = 0
+            self.V = V
             self.indices = []
             self.corpus = []
 
@@ -51,11 +51,10 @@ class LdaCgsSeq(object):
         priors = init_priors(self.V, self.K, beta, alpha)
         self.beta, self.alpha = priors
 
-        self.word_top = (np.zeros((len(self.beta), self.K), dtype=np.float)
+        self.word_top = (np.zeros((self.V, self.K), dtype=np.float)
                          + self.beta)
-        self.inv_top_sums = (1. / (np.ones(self.K, dtype=np.float)
-                                   * self.beta.sum()))
-        self.top_doc = (np.zeros((len(self.alpha), len(self.docs)),
+        self.inv_top_sums = 1. / self.word_top.sum(0)
+        self.top_doc = (np.zeros((self.K, len(self.indices)),
                                  dtype=np.float) + self.alpha)
 
         self.iteration = 0
@@ -64,7 +63,7 @@ class LdaCgsSeq(object):
 
     @property
     def Z_split(self):
-        return split_corpus(self.Z, indices)
+        return split_corpus(self.Z, self.indices)
 
 
     @property
@@ -114,3 +113,27 @@ class LdaCgsSeq(object):
 
     def save(self, filename):
         save_lda(self, filename)
+
+
+
+#################################################################
+#                            Demos
+#################################################################
+
+
+def demo_LdaCgsSeq(doc_len=500, V=100000, n_docs=100,
+                   K=20, n_iterations=5):
+
+    from vsm.extensions.corpusbuilders import random_corpus
+    
+    print 'Words per document:', doc_len
+    print 'Words in vocabulary:', V
+    print 'Documents in corpus:', n_docs
+    print 'Number of topics:', K
+    print 'Iterations:', n_iterations
+
+    c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1)
+    m = LdaCgsSeq(c, 'document', K=K)
+    m.train(n_iterations=n_iterations, verbose=2)
+
+    return m
