@@ -121,51 +121,76 @@ def load_lda(filename, ldaclass):
     """
     print 'Loading LDA data from', filename
     arrays_in = np.load(filename)
-    try:
-        context_type = arrays_in['context_type'][()]
-        K = arrays_in['K'][()]
+
+    context_type = arrays_in['context_type'][()]
+    K = arrays_in['K'][()]
+
+    if 'm_words' in arrays_in:
+        V = arrays_in['m_words'][()]
+    else:
+        V = arrays_in['V'][()]
+
+    if 'ctx_prior' in arrays_in:
+        alpha = arrays_in['ctx_prior']
+    elif arrays_in['alpha'].size==1:
+        alpha = np.ones(K, dtype=np.float64) * arrays_in['alpha'][()]
+    else:
         alpha = arrays_in['alpha']
+
+    if 'top_prior' in arrays_in:
+        beta = arrays_in['top_prior']
+    elif arrays_in['beta'].size==1:
+        beta = np.ones(V, dtype=np.float64) * arrays_in['beta'][()]
+    else:
         beta = arrays_in['beta']
-    
-        m = ldaclass(context_type=context_type, K=K,
-                     alpha=alpha, beta=beta)
-
-        m.V = arrays_in['V'][()]
-        m.corpus = arrays_in['corpus']
-
-        m.Z_indices = ['Z_indices']
-        m.Z_flat = arrays_in['Z_flat']
         
-        m.iteration = arrays_in['iteration'][()]
-        m.log_probs = arrays_in['log_probs'].tolist()
+    m = ldaclass(context_type=context_type, K=K, V=V, alpha=alpha, beta=beta)
 
-        m.top_doc = arrays_in['top_doc']
+    if 'W_indices' in arrays_in:
+        m.indices = arrays_in['W_indices']
+    elif 'contexts' in arrays_in: 
+        m.indices = [s.stop for s in arrays_in['contexts']]
+    else:
+        m.indices = arrays_in['indices']
+
+    if 'W_corpus' in arrays_in:
+        m.corpus = arrays_in['W_corpus']
+    else:
+        m.corpus = arrays_in['corpus']        
+
+    if 'Z_corpus' in arrays_in:
+        m.Z = arrays_in['Z_corpus']        
+    else:
+        m.Z = arrays_in['Z']
+
+    if 'top_word' in arrays_in:
+        m.word_top = arrays_in['top_word'].T
+    else:
         m.word_top = arrays_in['word_top']
+
+    if 'doc_top' in arrays_in:
+        m.top_doc = arrays_in['doc_top'].T
+    elif 'top_ctx' in arrays_in:
+        m.top_doc = arrays_in['top_ctx']
+    else:
+        m.top_doc = arrays_in['top_doc']
+
+    if 'sum_word_top' in arrays_in:
+        m.inv_top_sums = 1. / arrays_in['sum_word_top']
+    elif 'top_norms' in arrays_in:
+        m.inv_top_sums = arrays_in['top_norms']
+    else:
         m.inv_top_sums = arrays_in['inv_top_sums']
 
-    except (KeyError, TypeError):
-        # Compatibility with old LDAGibbs class
-        context_type = arrays_in['context_type'][()]
-        K = arrays_in['K'][()]
-        V = arrays_in['V'][()]
-        alpha = arrays_in['alpha'][()]
-        beta = arrays_in['beta'][()]
-        
-        m = ldaclass(context_type=context_type, K=K,
-                     alpha=[alpha]*K, beta=[beta]*V)
-
-        m.V = V
-        m.corpus = arrays_in['W_corpus']
-
-        m.Z_indices = arrays_in['Z_indices']
-        m.Z_flat = arrays_in['Z_corpus']
-        
+    if 'iterations' in arrays_in:
         m.iteration = arrays_in['iterations'][()]
-        m.log_probs = arrays_in['log_prob'].tolist()
+    else:
+        m.iteration = arrays_in['iteration'][()]
 
-        m.top_doc = arrays_in['doc_top'].T
-        m.word_top = arrays_in['top_word'].T
-        m.inv_top_sums = (1. / arrays_in['sum_word_top'])
+    if 'log_prob' in arrays_in:
+        m.log_probs = arrays_in['log_prob'].tolist()
+    else:
+        m.log_probs = arrays_in['log_probs'].tolist()
 
     return m
 
@@ -180,17 +205,17 @@ def save_lda(m, filename):
     :See Also: :class:`numpy.savez`
     """
     arrays_out = dict()
-    
-    arrays_out['K'] = m.K
+
+    arrays_out['context_type'] = m.context_type
+
     arrays_out['alpha'] = m.alpha
     arrays_out['beta'] = m.beta
 
+    arrays_out['K'] = m.K
     arrays_out['V'] = m.V
-    arrays_out['context_type'] = m.context_type
+    arrays_out['indices'] = m.indices
     arrays_out['corpus'] = m.corpus
-
-    arrays_out['Z_indices'] = m.Z_indices
-    arrays_out['Z_flat'] = m.Z_flat
+    arrays_out['Z'] = m.Z
 
     arrays_out['iteration'] = m.iteration
     dt = dtype=[('i', np.int), ('v', np.float)]

@@ -6,7 +6,7 @@ Functions for splitting lists and arrays
 import numpy as np
 
 
-__all__ = ['split_corpus', 'mp_split_ls']
+__all__ = ['split_corpus', 'mp_split_ls', 'split_documents']
 
 
 
@@ -66,3 +66,19 @@ def mp_split_ls(ls, n):
     [array([1, 5]), array([6, 8]), array([2]), array([8])]
     """
     return np.array_split(ls, min(len(ls), n))
+
+
+def split_documents(corpus, indices, n_partitions):
+    """
+    """
+    docs = [(0, indices[0])]
+    for i in xrange(len(indices)-1):
+        docs.append((indices[i], indices[i+1]))
+    docs = np.array(docs, dtype='i8, i8')
+
+    corpus_chunks = np.array_split(corpus, n_partitions)
+    chunk_indices = np.cumsum([len(chunk) for chunk in corpus_chunks])
+    doc_indices = np.searchsorted(indices, chunk_indices, side='right')
+    doc_partitions = np.split(docs, doc_indices[:-1])
+
+    return doc_partitions

@@ -261,7 +261,7 @@ class BaseCorpus(object):
 
 
 
-    def view_contexts(self, ctx_type, as_slices=False):
+    def view_contexts(self, ctx_type, as_slices=False, as_indices=False):
         """
         Displays a tokenization of the corpus.
 
@@ -277,13 +277,12 @@ class BaseCorpus(object):
 
         :See Also: :class:`BaseCorpus`, :meth:`numpy.split`
         """
-        i = self.context_types.index(ctx_type)
-        indices = self.context_data[i]['idx']
+        indices = self.view_metadata(ctx_type)['idx']
+
+        if as_indices:
+            return indices
         
         if as_slices:
-            meta_list = self.view_metadata(ctx_type)
-            indices = meta_list['idx'] 
-            
             if len(indices) == 0:
                 return [slice(0, 0)]
                 
@@ -441,7 +440,8 @@ class Corpus(BaseCorpus):
         """
         self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
-    def view_contexts(self, ctx_type, as_strings=False, as_slices=False):
+
+    def view_contexts(self, ctx_type, as_strings=False, as_slices=False, as_indices=False):
         """
         Displays a tokenization of the corpus.
 
@@ -461,32 +461,19 @@ class Corpus(BaseCorpus):
         :returns: A tokenized view of `corpus`.
 
         :See Also: :class:`Corpus`, :class:`BaseCorpus`
-        """
-        token_list = super(Corpus, self).view_contexts(ctx_type)
-	 
+        """	 
         if as_strings:
+            token_list = super(Corpus, self).view_contexts(ctx_type)
             token_list_ = []
             for token in token_list:
                 token = self.words[token]
                 token_list_.append(token)
 
             return token_list_
-            
-        if as_slices:
-            meta_list = super(Corpus, self).view_metadata(ctx_type)
-            indices = meta_list['idx'] 
-            
-            if len(indices) == 0:
-                return []
-                
-            slices = []
-            slices.append(slice(0, indices[0]))
-            for i in xrange(len(indices) - 1):
-                slices.append(slice(indices[i], indices[i+1]))
-                
-            return slices	    
 
-        return token_list
+        return super(Corpus, self).view_contexts(ctx_type,
+                                                 as_slices=as_slices,
+                                                 as_indices=as_indices)
 	
 	
     def tolist(self, context_type, as_strings=False):

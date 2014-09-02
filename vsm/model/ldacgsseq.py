@@ -26,40 +26,35 @@ class LdaCgsSeq(object):
         :param K: Number of topics. Default is `20`.
         :type K: int, optional
     
-        :param top_prior: Topic priors. Default is 0.01 for all topics.
-        :type top_prior: list, optional
+        :param beta: Topic priors. Default is 0.01 for all words.
+        :type beta: list, optional
     
-        :param ctx_prior: Context priors. Default is a flat prior of 0.01 
-            for all contexts.
-        :type ctx_prior: list, optional
+        :param alpha: Document priors. Default is a flat prior of 0.01 
+            for all topics.
+        :type alpha: list, optional
         """
 
         self.context_type = context_type
         self.K = K
 
         if corpus:
-            self.corpus = corpus.corpus
             self.V = corpus.words.size
-            i = corpus.context_types.index(self.context_type)
-            self.Z_indices = corpus.context_data[i]['idx']
-            self.Z_flat = np.zeros_like(self.corpus, dtype=np.int)
+            self.indices = corpus.view_contexts(self.context_type, as_indices=True)
+            self.corpus = corpus.corpus
         else:
             self.V = 0
+            self.indices = []
             self.corpus = []
-            self.Z_indices = []
-            self.Z_flat = []
 
-        priors = init_priors(self.V, K, beta, alpha)
+        self.Z = np.zeros_like(self.corpus, dtype=np.int)
+
+        priors = init_priors(self.V, self.K, beta, alpha)
         self.beta, self.alpha = priors
 
-        # Word by topic matrix
-        self.word_top = (np.zeros((len(self.beta), K), dtype=np.float)
+        self.word_top = (np.zeros((len(self.beta), self.K), dtype=np.float)
                          + self.beta)
-        # Inverse topic sums, initialized to the inverse sums over the
-        # topic priors
-        self.inv_top_sums = (1. / (np.ones(K, dtype=np.float)
+        self.inv_top_sums = (1. / (np.ones(self.K, dtype=np.float)
                                    * self.beta.sum()))
-        # Topic by document matrix
         self.top_doc = (np.zeros((len(self.alpha), len(self.docs)),
                                  dtype=np.float) + self.alpha)
 
@@ -68,16 +63,19 @@ class LdaCgsSeq(object):
 
 
     @property
-    def Z(self):
-        return split_corpus(self.Z_flat, self.Z_indices)
+    def Z_split(self):
+        return split_corpus(self.Z, indices)
 
 
     @property
     def docs(self):
-        return split_corpus(self.corpus, self.Z_indices)
+        return split_corpus(self.corpus, self.indices)
 
 
     def train(self, n_iterations=100, verbose=1, random_state=None):
+
+        if random_state==None:
+            random_state=np.random.RandomState()
 
         if verbose > 0:
             print ('Begin LDA training for {0} iterations'\
@@ -85,13 +83,12 @@ class LdaCgsSeq(object):
             start = time.time()
             t = start
 
-
         # Training loop
         stop = self.iteration + n_iterations
         for itr in xrange(self.iteration, stop):
 
             results = cgs_update(self.iteration, self.docs, self.word_top,
-                                 self.inv_top_sums, self.top_doc, self.Z, 
+                                 self.inv_top_sums, self.top_doc, self.Z_split, 
                                  random_state=random_state)
 
             lp = results[4]
