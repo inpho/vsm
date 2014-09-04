@@ -1,7 +1,10 @@
 import numpy as np
 import time
 from vsm.split import split_corpus
-from ldafunctions import *
+from ldafunctions import load_lda, save_lda, init_priors
+
+import pyximport; pyximport.install()
+from _cgs_update import cgs_update
 
 
 __all__ = [ 'LdaCgsSeq' ]
@@ -73,8 +76,8 @@ class LdaCgsSeq(object):
 
     def train(self, n_iterations=100, verbose=1, random_state=None):
 
-        if random_state==None:
-            random_state=np.random.RandomState()
+        # if random_state==None:
+        #     random_state=np.random.RandomState()
 
         if verbose > 0:
             print ('Begin LDA training for {0} iterations'\
@@ -86,9 +89,9 @@ class LdaCgsSeq(object):
         stop = self.iteration + n_iterations
         for itr in xrange(self.iteration, stop):
 
-            results = cgs_update(self.iteration, self.docs, self.word_top,
-                                 self.inv_top_sums, self.top_doc, self.Z_split, 
-                                 random_state=random_state)
+            results = cgs_update(self.iteration, self.corpus, self.word_top,
+                                 self.inv_top_sums, self.top_doc, self.Z, 
+                                 self.indices)
 
             lp = results[4]
             self.log_probs.append((self.iteration, lp))
