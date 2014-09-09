@@ -112,7 +112,7 @@ cdef int init_cgs(int K,
                   int n_threads,
                   int iteration) nogil:
 
-    cdef int i, j, D, start, stop, w, k, ID, u, v, nt
+    cdef int i, j, D, start, stop, w, k, ID, u, v, d, dD, dstart, dstop, foo
     cdef double s
     cdef int *Z_local
     cdef double **word_top_local
@@ -121,7 +121,22 @@ cdef int init_cgs(int K,
 
     with nogil, cp.parallel(num_threads=n_threads):
 
-        Z_local = <int *>calloc(W, sizeof(int))
+        ID = cp.threadid()
+
+        dstart = (ID * N) / n_threads
+        if ID == (n_threads-1):
+            dstop = N
+        else:
+            dstop = ((ID + 1) * N) / n_threads
+
+        if ID==0:
+            start = 0
+            d = indices[0]
+        else:
+            start = indices[dstart-1]
+            d = indices[dstop-1] - start
+
+        Z_local = <int *>calloc(d, sizeof(int))
         if Z_local==NULL:
             abort()
 
@@ -133,9 +148,8 @@ cdef int init_cgs(int K,
 
         doc_top_local = calloc_2d(N, K)
 
-
-        for u in range(W):
-            Z_local[u] = Z[u]
+        for u in range(d):
+            Z_local[u] = Z[start + u]
         for u in range(V):
             for v in range(K):
                 word_top_local[u][v] = word_top[u, v]
@@ -145,28 +159,15 @@ cdef int init_cgs(int K,
             for v in range(K):
                 doc_top_local[u][v] = doc_top[u, v]
                 
+        for i in range(dstart, dstop):
+
+            # printf("start %i doc_len %i ID %i doc %i\n", start, d, ID, i)
         
-        for i in cp.prange(N):
-
-            nt = openmp.omp_get_num_threads()
-            
-            ID = cp.threadid()
-            printf('Document %i, thread %i of %i\n', i, ID, nt)
-
-            if i==0:
-                start = 0
-                stop = indices[0]
-            else:
-                start = indices[i-1]
-                stop = indices[i]
-            D = stop - start
-            
-            for j in range(D):
+            for j in range(d):
                 w = corpus[start + j]
 
                 if not iteration == 0:
-                    k = Z[start + j]
-
+                    k = Z_local[j]
                     word_top[w, k] -= 1
                     s = inv_top_sums[k]
                     inv_top_sums[k] = s / (1 - s)
@@ -185,10 +186,10 @@ cdef int init_cgs(int K,
                 s = inv_top_sums_local[k]
                 inv_top_sums_local[k] = s / (1 + s)
                 doc_top_local[i][k] += 1
-                Z_local[start + j] = k
-
-        for u in range(W):
-            Z[u] += Z_cached[u] - Z_local[u]
+                Z_local[j] = k
+ 
+        for u in range(d):
+            Z[start + u] += Z_cached[start + u] - Z_local[u]
 
         for u in range(V):
             for v in range(K):
@@ -273,7 +274,7 @@ def cgs(long K,
         long n_iterations,
         long n_threads,
         unsigned long seed):
-    
+
     cdef int N = indices.shape[0]
     cdef int W = corpus.shape[0]
 

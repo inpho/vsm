@@ -109,7 +109,7 @@ def demo_LdaCgs(doc_len=500, V=100000, n_docs=100,
     print 'Iterations:', n_iterations
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1)
-    
+
     print 'Random corpus generated. Initializing model.'
     m = LdaCgs(c, 'document', K=K)
     
