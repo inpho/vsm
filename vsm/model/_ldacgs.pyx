@@ -4,8 +4,8 @@
 
 import numpy as np
 cimport cython
+cimport openmp
 cimport cython.parallel as cp
-from cython.view cimport array
 
 from libc.stdio cimport printf
 from libc.stdlib cimport srand, rand, RAND_MAX, abort, calloc, free
@@ -112,7 +112,7 @@ cdef int init_cgs(int K,
                   int n_threads,
                   int iteration) nogil:
 
-    cdef int i, j, D, start, stop, w, k, ID, u, v
+    cdef int i, j, D, start, stop, w, k, ID, u, v, nt
     cdef double s
     cdef int *Z_local
     cdef double **word_top_local
@@ -148,8 +148,10 @@ cdef int init_cgs(int K,
         
         for i in cp.prange(N):
 
+            nt = openmp.omp_get_num_threads()
+            
             ID = cp.threadid()
-            printf('Document %i, thread %i\n', i, ID)
+            printf('Document %i, thread %i of %i\n', i, ID, nt)
 
             if i==0:
                 start = 0
