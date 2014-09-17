@@ -2,7 +2,10 @@ from sys import stdout
 import multiprocessing as mp
 import numpy as np
 from vsm.split import split_documents
-from ldafunctions import *
+from ldafunctions import load_lda, save_lda, init_priors
+
+import pyximport; pyximport.install()
+from _cgs_update import cgs_update
 
 
 __all__ = [ 'LdaCgsMulti' ]
@@ -249,12 +252,12 @@ class LdaCgsMulti(object):
         """
         self._move_locals_to_globals()
 
-        doc_partitions = split_documents(self.corpus, self.indices, n_proc)
+        docs = split_documents(self.corpus, self.indices, n_proc)
 
-        doc_indices = [(0, len(doc_partitions[0]))]
-        for i in xrange(len(doc_partitions)-1):
+        doc_indices = [(0, len(docs[0]))]
+        for i in xrange(len(docs)-1):
             doc_indices.append((doc_indices[i][1],
-                                doc_indices[i][1] + len(doc_partitions[i+1])))
+                                doc_indices[i][1] + len(docs[i+1])))
 
         p = mp.Pool(n_proc)
 
@@ -264,7 +267,7 @@ class LdaCgsMulti(object):
                 stdout.write('\rIteration %d: mapping  ' % self.iteration)
                 stdout.flush()
         
-            data = zip(doc_partitions, doc_indices)
+            data = zip(docs, doc_indices)
 
             # For debugging
             # results = map(update, data)
@@ -276,12 +279,13 @@ class LdaCgsMulti(object):
                 stdout.flush()
 
             Z_ls, top_doc_ls, word_top_ls, logp_ls = zip(*results)
-
-            self.Z = np.hstack(Z_ls)
+            
+            for t in xrange(len(results)):
+                start, stop = docs[t][0][0], docs[t][-1][1]
+                self.Z[start:stop] = Z_ls[t]
+                self.top_doc[:, doc_indices[t][0]:doc_indices[t][1]] = top_doc_ls[t]
             self.word_top = self.word_top + np.sum(word_top_ls, axis=0)
             self.inv_top_sums = 1. / self.word_top.sum(0)
-            self.top_doc = np.hstack(top_doc_ls)
-
             lp = np.sum(logp_ls)
             self.log_probs.append((self.iteration, lp))
 
@@ -331,7 +335,8 @@ def update((docs, doc_indices)):
     random_state = np.random.RandomState()
 
     start, stop = docs[0][0], docs[-1][1]
-    corpus = _corpus[start:stop]
+
+    corpus = np.frombuffer(_corpus, dtype=np.int32)[start:stop]
     Z = np.frombuffer(_Z, dtype=np.int32)[start:stop].copy()
 
     gbl_word_top = np.frombuffer(_word_top, dtype=np.float64)
@@ -347,26 +352,39 @@ def update((docs, doc_indices)):
     log_wk = np.log(gbl_word_top * inv_top_sums[np.newaxis, :])
     log_kc = np.log(top_doc / top_doc.sum(0)[np.newaxis, :])
 
-    for i in xrange(len(docs)):
-        offset = docs[i][0] - docs[0][1]
-        N = docs[i][1] - docs[i][0]
-        for j in xrange(N):
-            w, k = corpus[offset+j], Z[offset+j]
+    indices = np.array([(j - start) for (i,j) in docs], dtype='l')
+    Z = np.array(Z, dtype='l')
 
-            log_p += log_wk[w, k] + log_kc[k, i]
+    results = cgs_update(_iteration.value,
+                         corpus,
+                         loc_word_top,
+                         inv_top_sums,
+                         top_doc,
+                         Z,
+                         indices)
 
-            if _iteration.value > 0:
-                loc_word_top[w, k] -= 1
-                inv_top_sums[k] *= 1. / (1 - inv_top_sums[k])
-                top_doc[k, i] -= 1
+    loc_word_top, inv_top_sums, top_doc, Z, log_p = results
 
-            dist = inv_top_sums * loc_word_top[w,:] * top_doc[:,i]
-            k = categorical(dist, random_state=random_state)
+    # for i in xrange(len(docs)):
+    #     offset = docs[i][0] - docs[0][1]
+    #     N = docs[i][1] - docs[i][0]
+    #     for j in xrange(N):
+    #         w, k = corpus[offset+j], Z[offset+j]
 
-            loc_word_top[w, k] += 1
-            inv_top_sums[k] *= 1. / (1 + inv_top_sums[k]) 
-            top_doc[k, i] += 1
-            Z[offset+j] = k
+    #         log_p += log_wk[w, k] + log_kc[k, i]
+
+    #         if _iteration.value > 0:
+    #             loc_word_top[w, k] -= 1
+    #             inv_top_sums[k] *= 1. / (1 - inv_top_sums[k])
+    #             top_doc[k, i] -= 1
+
+    #         dist = inv_top_sums * loc_word_top[w,:] * top_doc[:,i]
+    #         k = categorical(dist, random_state=random_state)
+
+    #         loc_word_top[w, k] += 1
+    #         inv_top_sums[k] *= 1. / (1 + inv_top_sums[k]) 
+    #         top_doc[k, i] += 1
+    #         Z[offset+j] = k
 
     loc_word_top -= gbl_word_top
 
@@ -395,69 +413,3 @@ def demo_LdaCgsMulti(doc_len=500, V=100000, n_docs=100,
     m.train(itr=itr, n_proc=n_proc)
 
     return m
-
-
-# def test_LdaCgsMulti_IO():
-
-#     from vsm.extensions.corpusbuilders import random_corpus
-#     from tempfile import NamedTemporaryFile
-#     import os
-    
-#     c = random_corpus(1000, 50, 6, 100)
-#     tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-#     try:
-#         m0 = LdaCgsMulti(c, 'document', K=10)
-#         m0.train(itr=20)
-#         c0 = np.frombuffer(_corpus, np.int32).copy()
-#         K0 = _K.value
-#         V0 = _V.value
-#         word_top0 = np.frombuffer(_word_top, np.float64).copy()
-#         top_norms0 = np.frombuffer(_top_norms, np.float64).copy()
-#         m0.save(tmp.name)
-#         m1 = LdaCgsMulti.load(tmp.name)
-#         c1 = np.frombuffer(_corpus, np.int32).copy()
-#         K1 = _K.value
-#         V1 = _V.value
-#         word_top1 = np.frombuffer(_word_top, np.float64).copy()
-#         top_norms1 = np.frombuffer(_top_norms, np.float64).copy()
-#         assert m0.context_type == m1.context_type
-#         assert (m0.alpha == m1.alpha).all()
-#         assert (m0.beta == m1.beta).all()
-#         assert m0.log_probs == m1.log_probs
-#         # for i in xrange(max(len(m0.W), len(m1.W))):
-#         #     assert m0.W[i].all() == m1.W[i].all()
-#         assert m0.iteration == m1.iteration
-#         assert (m0._Z == m1._Z).all()
-#         assert m0.top_doc.all() == m1.top_doc.all()
-#         assert m0.word_top.all() == m1.word_top.all()
-#         assert (c0==c1).all()
-#         assert K0==K1
-#         assert V0==V1
-#         assert (word_top0==word_top1).all()
-#         assert (top_norms0==top_norms1).all(), (top_norms0, top_norms1)
-#     finally:
-#         os.remove(tmp.name)
-        
-
-# def test_continuation():
-#     """
-#     :note:
-#     Disable reseeding in `update` before running this test and use
-#     sequential mapping
-#     """
-#     from vsm.util.corpustools import random_corpus
-#     c = random_corpus(100, 5, 4, 20)
-    
-#     m0 = LdaCgsMulti(c, 'random', K=3)
-#     np.random.seed(0)
-#     m0.train(itr=5, n_proc=2)
-#     m0.train(itr=5, n_proc=2)
-
-#     m1 = LdaCgsMulti(c, 'random', K=3)
-#     np.random.seed(0)
-#     m1.train(itr=10, n_proc=2)
-
-#     assert (m0.word_top==m1.word_top).all()
-#     assert (m0._Z==m1._Z).all()
-#     assert (m0.top_doc==m1.top_doc).all()
-#     assert m0.log_probs == m1.log_probs

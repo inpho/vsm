@@ -73,8 +73,8 @@ cdef int sample(int w,
                 double *inv_top_sums,
                 double **word_top,
                 double **doc_top,
-                double [:] dist,
-                double [:] cdist) nogil:
+                double *dist,
+                double *cdist) nogil:
     cdef int k
     cdef double r
 
@@ -118,6 +118,9 @@ cdef int init_cgs(int K,
     cdef double **word_top_local
     cdef double *inv_top_sums_local
     cdef double **doc_top_local
+    cdef double *dist_local
+    cdef double *cdist_local
+
 
     with nogil, cp.parallel(num_threads=n_threads):
 
@@ -146,6 +149,14 @@ cdef int init_cgs(int K,
         if inv_top_sums_local==NULL:
             abort()
 
+        dist_local = <double *>calloc(K, sizeof(double))
+        if dist_local==NULL:
+            abort()
+
+        cdist_local = <double *>calloc(K, sizeof(double))
+        if cdist_local==NULL:
+            abort()
+
         doc_top_local = calloc_2d(N, K)
 
         for u in range(d):
@@ -158,6 +169,8 @@ cdef int init_cgs(int K,
         for u in range(N):
             for v in range(K):
                 doc_top_local[u][v] = doc_top[u, v]
+
+        printf('start loop\n')
                 
         for i in range(dstart, dstop):
 
@@ -165,22 +178,22 @@ cdef int init_cgs(int K,
         
             for j in range(d):
                 w = corpus[start + j]
+                k = Z_local[j]
 
                 if not iteration == 0:
-                    k = Z_local[j]
-                    word_top[w, k] -= 1
-                    s = inv_top_sums[k]
-                    inv_top_sums[k] = s / (1 - s)
-                    doc_top[i, k] -= 1
+                    word_top_local[w][k] -= 1
+                    s = inv_top_sums_local[k]
+                    inv_top_sums_local[k] = s / (1 - s)
+                    doc_top_local[i][k] -= 1
 
-                k = sample(w,
-                           i,
-                           K,
-                           inv_top_sums_local,
-                           word_top_local,
-                           doc_top_local,
-                           dist,
-                           cdist)
+                # k = sample(w,
+                #            i,
+                #            K,
+                #            inv_top_sums_local,
+                #            word_top_local,
+                #            doc_top_local,
+                #            dist_local,
+                #            cdist_local)
 
                 word_top_local[w][k] += 1
                 s = inv_top_sums_local[k]
@@ -188,6 +201,8 @@ cdef int init_cgs(int K,
                 doc_top_local[i][k] += 1
                 Z_local[j] = k
  
+        printf('end loop\n')
+
         for u in range(d):
             Z[start + u] += Z_cached[start + u] - Z_local[u]
 
@@ -206,6 +221,8 @@ cdef int init_cgs(int K,
         free_2d(word_top_local, K)
         free(inv_top_sums_local)
         free_2d(doc_top_local, N)
+        free(dist_local)
+        free(cdist_local)
 
     return 0
 
