@@ -377,6 +377,8 @@ def dismat_word(word_list, corp, mat, dist_fn=angle):
     mat = mat[:,indices]
 
     dm = dist_fn(mat.T, mat)
+    if np.isscalar(dm):
+        dm = np.array([dm])
     dm = dm.view(IndexedSymmArray)
     dm.labels = words
     
@@ -400,6 +402,8 @@ def dismat_doc(doc_list, corp, context_type, mat, dist_fn=angle):
     mat = mat[:,indices]
 
     dm = dist_fn(mat.T, mat)
+    if np.isscalar(dm):
+        dm = np.array([dm])
     dm = dm.view(IndexedSymmArray)
     dm.labels = labels
     
@@ -416,6 +420,8 @@ def dismat_top(topics, mat, dist_fn=JS_div):
     mat = mat[:,topics]
 
     dm = dist_fn(mat.T, mat)
+    if np.isscalar(dm):
+        dm = np.array([dm])
     dm = dm.view(IndexedSymmArray)
     dm.labels = [str(k) for k in topics]
     

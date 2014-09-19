@@ -6,13 +6,14 @@ import numpy as np
 
 from vsm.spatial import JS_div
 from vsm.structarr import *
+from vsm.split import split_corpus
 from vsm.exceptions import *
 from types import *
 from labeleddata import *
 from wrappers import *
 
 
-__all__ = ['LdaCgsViewer']
+__all__ = [ 'LdaCgsViewer' ]
 
 
 class LdaCgsViewer(object):
@@ -282,7 +283,7 @@ class LdaCgsViewer(object):
         ct = self.model.context_type
         contexts = self.corpus.view_contexts(ct)
         idx = [(contexts[d] == w) for d in xrange(len(contexts))]
-        Z = self.model.Z
+        Z = split_corpus(self.model.Z, self.model.indices)
         Z_w = [(d, i, t) for d in xrange(len(Z)) 
                for i,t in enumerate(Z[d]) if idx[d][i]]
 
