@@ -10,6 +10,8 @@ import beagleenvironment
 from beagleenvironment import *
 import beagleorder
 from beagleorder import *
+import lda
+from lda import *
 import ldacgsseq
 from ldacgsseq import *
 import ldacgsmulti
@@ -26,6 +28,7 @@ __all__ = beaglecomposite.__all__
 __all__ += beaglecontext.__all__
 __all__ += beagleenvironment.__all__
 __all__ += beagleorder.__all__
+__all__ += lda.__all__
 __all__ += ldacgsseq.__all__
 __all__ += ldacgsmulti.__all__
 __all__ += lsa.__all__

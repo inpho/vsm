@@ -2,7 +2,8 @@ from sys import stdout
 import multiprocessing as mp
 import numpy as np
 from vsm.split import split_documents
-from ldafunctions import load_lda, save_lda, init_priors
+from ldafunctions import load_lda
+from ldacgsseq import *
 
 import pyximport; pyximport.install()
 from _cgs_update import cgs_update
@@ -12,7 +13,7 @@ __all__ = [ 'LdaCgsMulti' ]
 
 
 
-class LdaCgsMulti(object):
+class LdaCgsMulti(LdaCgsSeq):
     """
     """
     def __init__(self, corpus=None, context_type=None, K=20, V=0, alpha=[], beta=[]):
@@ -39,30 +40,8 @@ class LdaCgsMulti(object):
         self._read_globals = False
         self._write_globals = False
 
-        self.context_type = context_type
-        self.K = K
-        
-        if corpus:
-            self.V = corpus.words.size
-            self.indices = corpus.view_contexts(context_type, as_indices=True)
-            self.corpus = corpus.corpus
-        else:
-            self.V = V
-            self.indices = []
-            self.corpus = []
-
-        self.Z = np.zeros_like(self.corpus, dtype=np.int)
-
-        priors = init_priors(self.V, self.K, beta, alpha)
-        self.beta, self.alpha = priors
-
-        self.word_top = np.zeros((self.V, self.K), dtype=np.float64) + self.beta
-        self.inv_top_sums = 1. / self.word_top.sum(0)
-        self.top_doc = np.zeros((self.K, len(self.indices)),
-                                dtype=np.float64) + self.alpha
-        
-        self.iteration = 0
-        self.log_probs = []
+        super(LdaCgsMulti, self).__init__(corpus=corpus, context_type=context_type,
+                                          K=K, V=V, alpha=alpha, beta=beta)
         
         
     def _move_globals_to_locals(self):
@@ -237,10 +216,10 @@ class LdaCgsMulti(object):
             self._iteration_local = iteration
 
 
-    def train(self, itr=500, verbose=True, n_proc=2):
+    def train(self, n_iterations=500, verbose=True, n_proc=2):
         """
-        :param itr: Number of iterations. Default is 500.
-        :type itr: int, optional
+        :param n_iterations: Number of iterations. Default is 500.
+        :type n_iterations: int, optional
 
         :param verbose: If `True`, current number of iterations
             are printed out to notify the user. Default is `True`.
@@ -261,8 +240,8 @@ class LdaCgsMulti(object):
 
         p = mp.Pool(n_proc)
 
-        itr += self.iteration
-        while self.iteration < itr:
+        n_iterations += self.iteration
+        while self.iteration < n_iterations:
             if verbose:
                 stdout.write('\rIteration %d: mapping  ' % self.iteration)
                 stdout.flush()
@@ -314,18 +293,6 @@ class LdaCgsMulti(object):
         """
         return load_lda(filename, LdaCgsMulti)
 
-    
-    def save(self, filename):
-        """
-        Saves the model in `.npz` file.
-
-        :param filename: Name of file to be saved.
-        :type filename: string
-
-        :See Also: :class:`numpy.savez`
-        """
-        save_lda(self, filename)
-        
 
 
 def update((docs, doc_indices)):
@@ -365,30 +332,10 @@ def update((docs, doc_indices)):
 
     loc_word_top, inv_top_sums, top_doc, Z, log_p = results
 
-    # for i in xrange(len(docs)):
-    #     offset = docs[i][0] - docs[0][1]
-    #     N = docs[i][1] - docs[i][0]
-    #     for j in xrange(N):
-    #         w, k = corpus[offset+j], Z[offset+j]
-
-    #         log_p += log_wk[w, k] + log_kc[k, i]
-
-    #         if _iteration.value > 0:
-    #             loc_word_top[w, k] -= 1
-    #             inv_top_sums[k] *= 1. / (1 - inv_top_sums[k])
-    #             top_doc[k, i] -= 1
-
-    #         dist = inv_top_sums * loc_word_top[w,:] * top_doc[:,i]
-    #         k = categorical(dist, random_state=random_state)
-
-    #         loc_word_top[w, k] += 1
-    #         inv_top_sums[k] *= 1. / (1 + inv_top_sums[k]) 
-    #         top_doc[k, i] += 1
-    #         Z[offset+j] = k
-
     loc_word_top -= gbl_word_top
 
     return (Z, top_doc, loc_word_top, log_p)
+
 
 
 #################################################################
@@ -397,7 +344,7 @@ def update((docs, doc_indices)):
 
 
 def demo_LdaCgsMulti(doc_len=500, V=100000, n_docs=100,
-                     K=20, itr=5, n_proc=20):
+                     K=20, n_iterations=5, n_proc=20):
 
     from vsm.extensions.corpusbuilders import random_corpus
     
@@ -405,11 +352,11 @@ def demo_LdaCgsMulti(doc_len=500, V=100000, n_docs=100,
     print 'Words in vocabulary:', V
     print 'Documents in corpus:', n_docs
     print 'Number of topics:', K
-    print 'Iterations:', itr
+    print 'Iterations:', n_iterations
     print 'Number of processors:', n_proc
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1)
     m = LdaCgsMulti(c, 'document', K=K)
-    m.train(itr=itr, n_proc=n_proc)
+    m.train(n_iterations=n_iterations, n_proc=n_proc)
 
     return m
