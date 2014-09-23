@@ -56,7 +56,10 @@ class LdaCgsSeq(object):
 
         self.word_top = (np.zeros((self.V, self.K), dtype=np.float)
                          + self.beta)
-        self.inv_top_sums = 1. / self.word_top.sum(0)
+        if self.V==0:
+            self.inv_top_sums = np.inf
+        else:
+            self.inv_top_sums = 1. / self.word_top.sum(0)
         self.top_doc = (np.zeros((self.K, len(self.indices)),
                                  dtype=np.float) + self.alpha)
 

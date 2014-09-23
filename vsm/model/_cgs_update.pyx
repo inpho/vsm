@@ -4,6 +4,7 @@ import cython
 @cython.boundscheck(False)
 @cython.cdivision(True)
 
+
 def cgs_update(int itr, 
                np.ndarray[int, negative_indices=False] corpus,
                np.ndarray[np.float64_t, negative_indices=False, ndim=2] word_top, 
