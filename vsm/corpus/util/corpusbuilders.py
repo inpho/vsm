@@ -1,4 +1,4 @@
 """
 Compatibility submodule
 """
-from vsm.ext.corpusbuilders import *
+from vsm.extensions.corpusbuilders import *
