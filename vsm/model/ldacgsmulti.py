@@ -1,3 +1,4 @@
+import itertools
 from sys import stdout
 import multiprocessing as mp
 import numpy as np
@@ -16,7 +17,8 @@ __all__ = [ 'LdaCgsMulti' ]
 class LdaCgsMulti(LdaCgsSeq):
     """
     """
-    def __init__(self, corpus=None, context_type=None, K=20, V=0, alpha=[], beta=[]):
+    def __init__(self, corpus=None, context_type=None, K=20, V=0, 
+                 alpha=[], beta=[], seed=0):
         """
         Initialize LdaCgsMulti.
 
@@ -41,7 +43,8 @@ class LdaCgsMulti(LdaCgsSeq):
         self._write_globals = False
 
         super(LdaCgsMulti, self).__init__(corpus=corpus, context_type=context_type,
-                                          K=K, V=V, alpha=alpha, beta=beta)
+                                          K=K, V=V, alpha=alpha, beta=beta,
+                                          seed=seed)
         
         
     def _move_globals_to_locals(self):
@@ -56,6 +59,7 @@ class LdaCgsMulti(LdaCgsSeq):
         self.inv_top_sums = self.inv_top_sums
         self.top_doc = self.top_doc
         self.iteration = self.iteration
+        self.seed = self.seed
 
         self._read_globals = False
 
@@ -77,6 +81,7 @@ class LdaCgsMulti(LdaCgsSeq):
         self.inv_top_sums = self.inv_top_sums
         self.top_doc = self.top_doc
         self.iteration = self.iteration
+        self.seed = self.seed
 
         self._read_globals = True
 
@@ -246,7 +251,7 @@ class LdaCgsMulti(LdaCgsSeq):
                 stdout.write('\rIteration %d: mapping  ' % self.iteration)
                 stdout.flush()
         
-            data = zip(docs, doc_indices)
+            data = zip(docs, doc_indices, itertools.repeat(self.seed))
 
             # For debugging
             # results = map(update, data)
@@ -271,7 +276,7 @@ class LdaCgsMulti(LdaCgsSeq):
             if verbose:
                 stdout.write('\rIteration %d: log_prob=' % self.iteration)
                 stdout.flush()
-                print '%f' % lp
+                print '%f (seed: %s)' % (lp, self.seed)
 
             self.iteration += 1
 
@@ -295,12 +300,10 @@ class LdaCgsMulti(LdaCgsSeq):
 
 
 
-def update((docs, doc_indices)):
+def update((docs, doc_indices, seed)):
     """
     For LdaCgsMulti
     """
-    random_state = np.random.RandomState()
-
     start, stop = docs[0][0], docs[-1][1]
 
     corpus = np.frombuffer(_corpus, dtype=np.int32)[start:stop]
@@ -328,7 +331,8 @@ def update((docs, doc_indices)):
                          inv_top_sums,
                          top_doc,
                          Z,
-                         indices)
+                         indices,
+                         seed)
 
     loc_word_top, inv_top_sums, top_doc, Z, log_p = results
 
