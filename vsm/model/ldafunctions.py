@@ -24,20 +24,19 @@ def init_priors(V=0, K=0, beta=[], alpha=[]):
     return beta, alpha
 
 
-def categorical(pvals, random_state=None):
+def categorical(pvals, random_seed=0):
     """
     Draws a sample from the categorical distribution parameterized by
     `pvals`.
     """
-    if not random_state:
-        random_state = np.random.RandomState()
+    random_state = np.random.RandomState(random_seed)
     cum_dist = np.cumsum(pvals)
     r = random_state.uniform() * cum_dist[-1]
     return np.searchsorted(cum_dist, r)
 
 
 def cgs_update(itr, docs, word_top, inv_top_sums, 
-               top_doc, Z, random_state=None):
+               top_doc, Z, indices=None, random_seed=0):
 
     log_p = 0
     log_wk = np.log(word_top * inv_top_sums[np.newaxis, :])
@@ -57,7 +56,7 @@ def cgs_update(itr, docs, word_top, inv_top_sums,
 
             dist = inv_top_sums * word_top[w,:] * top_doc[:,i]
 
-            k = categorical(dist, random_state=random_state)
+            k = categorical(dist, random_seed=random_seed)
 
             word_top[w, k] += 1
             inv_top_sums[k] *= 1. / (1 + inv_top_sums[k]) 

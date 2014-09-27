@@ -11,7 +11,8 @@ def cgs_update(int itr,
                np.ndarray[np.float64_t, negative_indices=False] inv_top_sums,
                np.ndarray[np.float64_t, negative_indices=False, ndim=2] top_doc,
                np.ndarray[long, negative_indices=False] Z,
-               np.ndarray[long, negative_indices=False] indices):
+               np.ndarray[long, negative_indices=False] indices,
+               int seed):
 
     cdef int V = corpus.shape[0]
     cdef int N = indices.shape[0]
@@ -23,8 +24,11 @@ def cgs_update(int itr,
     cdef np.ndarray[np.float64_t, ndim=2, negative_indices=False, mode='c']\
         log_kd = np.log(top_doc / top_doc.sum(0)[np.newaxis, :])
 
+    # load a seeded random number generator
+    rstate = np.random.RandomState(seed)
     cdef np.ndarray[np.float64_t, negative_indices=False, mode='c']\
-        samples = np.random.random(V)
+        samples = rstate.random_sample(V)
+        # samples = np.random.random(V) # The original random generator
 
     cdef double r, s
     cdef long start, stop, doc_len, offset

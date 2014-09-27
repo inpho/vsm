@@ -15,7 +15,7 @@ class LdaCgsSeq(object):
     """
     """
     def __init__(self, corpus=None, context_type=None,
-                 K=20, V=0, alpha=[], beta=[]):
+                 K=20, V=0, alpha=[], beta=[], seed=0):
         """
         Initialize LdaCgsSeq.
 
@@ -39,6 +39,7 @@ class LdaCgsSeq(object):
 
         self.context_type = context_type
         self.K = K
+        self.seed = seed
 
         if corpus:
             self.V = corpus.words.size
@@ -94,7 +95,7 @@ class LdaCgsSeq(object):
 
             results = cgs_update(self.iteration, self.corpus, self.word_top,
                                  self.inv_top_sums, self.top_doc, self.Z, 
-                                 self.indices)
+                                 self.indices, self.seed)
 
             lp = results[4]
             self.log_probs.append((self.iteration, lp))
