@@ -16,7 +16,8 @@ __all__ = [ 'LdaCgsMulti' ]
 class LdaCgsMulti(LdaCgsSeq):
     """
     """
-    def __init__(self, corpus=None, context_type=None, K=20, V=0, alpha=[], beta=[]):
+    def __init__(self, corpus=None, context_type=None, K=20, V=0, 
+                 alpha=[], beta=[]):
         """
         Initialize LdaCgsMulti.
 
@@ -328,7 +329,9 @@ def update((docs, doc_indices)):
                          inv_top_sums,
                          top_doc,
                          Z,
-                         indices)
+                         indices,
+                         random_state,
+                         1)
 
     loc_word_top, inv_top_sums, top_doc, Z, log_p = results
 
