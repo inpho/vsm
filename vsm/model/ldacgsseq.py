@@ -79,7 +79,8 @@ class LdaCgsSeq(object):
 
     def train(self, n_iterations=100, verbose=1, seed=None):
 
-        random_state=np.random.RandomState(seed)
+        random_state = np.random.RandomState(seed)
+        mtrand_state = random_state.get_state()
 
         if verbose > 0:
             print ('Begin LDA training for {0} iterations'\
@@ -93,7 +94,9 @@ class LdaCgsSeq(object):
 
             results = cgs_update(self.iteration, self.corpus, self.word_top,
                                  self.inv_top_sums, self.top_doc, self.Z, 
-                                 self.indices, random_state, 0)
+                                 self.indices, mtrand_state[0], 
+                                 mtrand_state[1], mtrand_state[2], 
+                                 mtrand_state[3], mtrand_state[4])
 
             lp = results[4]
             self.log_probs.append((self.iteration, lp))
@@ -105,6 +108,8 @@ class LdaCgsSeq(object):
                     print ('Iteration {0} complete: log_prob={1}, time={2}'
                            .format(self.iteration, lp, itr_time))
             self.iteration += 1
+
+            mtrand_state = results[5:]
 
         if verbose > 1:
             print '-'*60, ('\n\nWalltime per iteration: {0} seconds'
