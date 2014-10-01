@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+from unidecode import unidecode
 
 from vsm.corpus import Corpus
 from util import *
@@ -592,6 +593,7 @@ def coll_tokenize(books, book_names):
     words, book_tokens, page_tokens, sent_tokens = [], [], [], []
     sent_break, book_n, page_n, sent_n = 0, 0, 0, 0
 
+
     for book, book_label in zip(books, book_names):
         # print 'Tokenizing', book_label
         for page, page_file in book:
@@ -631,7 +633,8 @@ def coll_tokenize(books, book_names):
 
 #TODO: This should be a whitelist not a blacklist
 def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
-                nltk_stop=True, stop_freq=1, add_stop=None):
+                nltk_stop=True, stop_freq=1, add_stop=None, 
+                decode=True):
     """
     `coll_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -679,7 +682,7 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
             page_file = book_name + '/' + page_name
             page_name = os.path.join(book_path, page_name)
             with open(page_name, mode='r') as f:
-                pages.append((f.read(), page_file))
+                pages.append((unidecode(f.read()), page_file))
 
         books.append(pages)
 
