@@ -65,7 +65,8 @@ def random_corpus(corpus_len,
                   min_token_len,
                   max_token_len,
                   context_type='document',
-                  metadata=False):
+                  metadata=False,
+                  seed=None):
     """
     Generates a random integer corpus.
 
@@ -94,7 +95,8 @@ def random_corpus(corpus_len,
 
     :See Also: :class:`vsm.corpus.Corpus`
     """
-    corpus = np.random.randint(n_words, size=corpus_len)
+    random_state = np.random.RandomState(seed)
+    corpus = random_state.randint(n_words, size=corpus_len)
 
     indices = []
     i = np.random.randint(min_token_len, max_token_len)

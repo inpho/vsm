@@ -16,7 +16,8 @@ __all__ = [ 'LdaCgsMulti' ]
 class LdaCgsMulti(LdaCgsSeq):
     """
     """
-    def __init__(self, corpus=None, context_type=None, K=20, V=0, alpha=[], beta=[]):
+    def __init__(self, corpus=None, context_type=None, K=20, V=0, 
+                 alpha=[], beta=[]):
         """
         Initialize LdaCgsMulti.
 
@@ -216,7 +217,7 @@ class LdaCgsMulti(LdaCgsSeq):
             self._iteration_local = iteration
 
 
-    def train(self, n_iterations=500, verbose=True, n_proc=2):
+    def train(self, n_iterations=500, verbose=True, n_proc=2, seeds=None):
         """
         :param n_iterations: Number of iterations. Default is 500.
         :type n_iterations: int, optional
@@ -238,6 +239,10 @@ class LdaCgsMulti(LdaCgsSeq):
             doc_indices.append((doc_indices[i][1],
                                 doc_indices[i][1] + len(docs[i+1])))
 
+        if seeds == None:
+            seeds = [None] * n_proc
+        mtrand_states = [np.random.RandomState(seed).get_state() for seed in seeds]
+
         p = mp.Pool(n_proc)
 
         n_iterations += self.iteration
@@ -246,7 +251,7 @@ class LdaCgsMulti(LdaCgsSeq):
                 stdout.write('\rIteration %d: mapping  ' % self.iteration)
                 stdout.flush()
         
-            data = zip(docs, doc_indices)
+            data = zip(docs, doc_indices, mtrand_states)
 
             # For debugging
             # results = map(update, data)
@@ -257,8 +262,13 @@ class LdaCgsMulti(LdaCgsSeq):
                 stdout.write('\rIteration %d: reducing ' % self.iteration)
                 stdout.flush()
 
-            Z_ls, top_doc_ls, word_top_ls, logp_ls = zip(*results)
+            (Z_ls, top_doc_ls, word_top_ls, logp_ls, mtrand_str_ls, 
+             mtrand_keys_ls, mtrand_pos_ls, mtrand_has_gauss_ls, 
+             mtrand_cached_gaussian_ls) = zip(*results)
             
+            mtrand_states = zip(mtrand_str_ls, mtrand_keys_ls, mtrand_pos_ls, 
+                                mtrand_has_gauss_ls, mtrand_cached_gaussian_ls)
+
             for t in xrange(len(results)):
                 start, stop = docs[t][0][0], docs[t][-1][1]
                 self.Z[start:stop] = Z_ls[t]
@@ -295,12 +305,10 @@ class LdaCgsMulti(LdaCgsSeq):
 
 
 
-def update((docs, doc_indices)):
+def update((docs, doc_indices, mtrand_state)):
     """
     For LdaCgsMulti
     """
-    random_state = np.random.RandomState()
-
     start, stop = docs[0][0], docs[-1][1]
 
     corpus = np.frombuffer(_corpus, dtype=np.int32)[start:stop]
@@ -328,13 +336,21 @@ def update((docs, doc_indices)):
                          inv_top_sums,
                          top_doc,
                          Z,
-                         indices)
+                         indices,
+                         mtrand_state[0],
+                         mtrand_state[1],
+                         mtrand_state[2],
+                         mtrand_state[3],
+                         mtrand_state[4])
 
-    loc_word_top, inv_top_sums, top_doc, Z, log_p = results
+    (loc_word_top, inv_top_sums, top_doc, Z, log_p, mtrand_str, mtrand_keys, 
+     mtrand_pos, mtrand_has_gauss, mtrand_cached_gaussian) = results
 
     loc_word_top -= gbl_word_top
 
-    return (Z, top_doc, loc_word_top, log_p)
+    return (Z, top_doc, loc_word_top, log_p, 
+            mtrand_str, mtrand_keys, mtrand_pos, 
+            mtrand_has_gauss, mtrand_cached_gaussian)
 
 
 
@@ -344,7 +360,8 @@ def update((docs, doc_indices)):
 
 
 def demo_LdaCgsMulti(doc_len=500, V=100000, n_docs=100,
-                     K=20, n_iterations=5, n_proc=20):
+                     K=20, n_iterations=5, n_proc=2, 
+                     corpus_seed=None, model_seeds=None):
 
     from vsm.extensions.corpusbuilders import random_corpus
     
@@ -355,8 +372,8 @@ def demo_LdaCgsMulti(doc_len=500, V=100000, n_docs=100,
     print 'Iterations:', n_iterations
     print 'Number of processors:', n_proc
 
-    c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1)
+    c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1, seed=corpus_seed)
     m = LdaCgsMulti(c, 'document', K=K)
-    m.train(n_iterations=n_iterations, n_proc=n_proc)
+    m.train(n_iterations=n_iterations, n_proc=n_proc, seeds=model_seeds)
 
     return m

@@ -11,7 +11,12 @@ def cgs_update(int itr,
                np.ndarray[np.float64_t, negative_indices=False] inv_top_sums,
                np.ndarray[np.float64_t, negative_indices=False, ndim=2] top_doc,
                np.ndarray[long, negative_indices=False] Z,
-               np.ndarray[long, negative_indices=False] indices):
+               np.ndarray[long, negative_indices=False] indices,
+               str mtrand_str,
+               np.ndarray[uint, negative_indices=False] mtrand_keys,
+               int mtrand_pos,
+               int mtrand_has_gauss,
+               float mtrand_cached_gaussian):
 
     cdef int V = corpus.shape[0]
     cdef int N = indices.shape[0]
@@ -23,8 +28,13 @@ def cgs_update(int itr,
     cdef np.ndarray[np.float64_t, ndim=2, negative_indices=False, mode='c']\
         log_kd = np.log(top_doc / top_doc.sum(0)[np.newaxis, :])
 
+    cdef object np_random_state = np.random.RandomState()
+    np_random_state.set_state((mtrand_str, mtrand_keys, 
+                               mtrand_pos, mtrand_has_gauss, 
+                               mtrand_cached_gaussian))
     cdef np.ndarray[np.float64_t, negative_indices=False, mode='c']\
-        samples = np.random.random(V)
+        samples = np_random_state.uniform(size=V)
+    cdef object mtrand_state = np_random_state.get_state()
 
     cdef double r, s
     cdef long start, stop, doc_len, offset
@@ -76,5 +86,7 @@ def cgs_update(int itr,
             top_doc[k, i] += 1
 
             Z[idx] = k
-
-    return word_top, inv_top_sums, top_doc, Z, log_p
+            
+    return (word_top, inv_top_sums, top_doc, Z, log_p, 
+            mtrand_state[0], mtrand_state[1], mtrand_state[2], 
+            mtrand_state[3], mtrand_state[4])

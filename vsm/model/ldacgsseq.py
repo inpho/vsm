@@ -77,10 +77,10 @@ class LdaCgsSeq(object):
         return split_corpus(self.corpus, self.indices)
 
 
-    def train(self, n_iterations=100, verbose=1, random_state=None):
+    def train(self, n_iterations=100, verbose=1, seed=None):
 
-        # if random_state==None:
-        #     random_state=np.random.RandomState()
+        random_state = np.random.RandomState(seed)
+        mtrand_state = random_state.get_state()
 
         if verbose > 0:
             print ('Begin LDA training for {0} iterations'\
@@ -94,7 +94,9 @@ class LdaCgsSeq(object):
 
             results = cgs_update(self.iteration, self.corpus, self.word_top,
                                  self.inv_top_sums, self.top_doc, self.Z, 
-                                 self.indices)
+                                 self.indices, mtrand_state[0], 
+                                 mtrand_state[1], mtrand_state[2], 
+                                 mtrand_state[3], mtrand_state[4])
 
             lp = results[4]
             self.log_probs.append((self.iteration, lp))
@@ -106,6 +108,8 @@ class LdaCgsSeq(object):
                     print ('Iteration {0} complete: log_prob={1}, time={2}'
                            .format(self.iteration, lp, itr_time))
             self.iteration += 1
+
+            mtrand_state = results[5:]
 
         if verbose > 1:
             print '-'*60, ('\n\nWalltime per iteration: {0} seconds'
@@ -128,7 +132,8 @@ class LdaCgsSeq(object):
 
 
 def demo_LdaCgsSeq(doc_len=500, V=100000, n_docs=100,
-                   K=20, n_iterations=5):
+                   K=20, n_iterations=5, 
+                   corpus_seed=None, model_seed=None):
 
     from vsm.extensions.corpusbuilders import random_corpus
     
@@ -138,8 +143,8 @@ def demo_LdaCgsSeq(doc_len=500, V=100000, n_docs=100,
     print 'Number of topics:', K
     print 'Iterations:', n_iterations
 
-    c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1)
+    c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1, seed=corpus_seed)
     m = LdaCgsSeq(c, 'document', K=K)
-    m.train(n_iterations=n_iterations, verbose=2)
+    m.train(n_iterations=n_iterations, verbose=2, seed=model_seed)
 
     return m
