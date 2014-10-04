@@ -1,6 +1,6 @@
-from distutils.core import setup
+from setuptools import setup, Extension, Command
 
-import setuptools
+
 
 setup(
     name = "vsm",
@@ -34,5 +34,8 @@ setup(
               'vsm.model',
               'vsm.viewer',
               'vsm.extensions',
+    ],
+    ext_modules = [
+        Extension('_cgs_update', ['vsm/model/_cgs_update.c']),
     ],
 )

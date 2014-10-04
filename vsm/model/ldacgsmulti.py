@@ -4,8 +4,6 @@ import numpy as np
 from vsm.split import split_documents
 from ldafunctions import load_lda
 from ldacgsseq import *
-
-import pyximport; pyximport.install()
 from _cgs_update import cgs_update
 
 

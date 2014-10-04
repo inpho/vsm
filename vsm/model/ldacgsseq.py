@@ -2,8 +2,6 @@ import numpy as np
 import time
 from vsm.split import split_corpus
 from ldafunctions import load_lda, save_lda, init_priors
-
-import pyximport; pyximport.install()
 from _cgs_update import cgs_update
 
 

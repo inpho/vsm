@@ -1,19 +1,18 @@
 import numpy as np
-cimport numpy as np
 import cython
 @cython.boundscheck(False)
 @cython.cdivision(True)
 
 
 def cgs_update(int itr, 
-               np.ndarray[int, negative_indices=False] corpus,
-               np.ndarray[np.float64_t, negative_indices=False, ndim=2] word_top, 
-               np.ndarray[np.float64_t, negative_indices=False] inv_top_sums,
-               np.ndarray[np.float64_t, negative_indices=False, ndim=2] top_doc,
-               np.ndarray[long, negative_indices=False] Z,
-               np.ndarray[long, negative_indices=False] indices,
+               int [:] corpus,
+               double [:,:] word_top,
+               double [:] inv_top_sums,
+               double [:,:] top_doc,
+               long [:] Z,
+               long [:] indices,
                str mtrand_str,
-               np.ndarray[uint, negative_indices=False] mtrand_keys,
+               unsigned int [:] mtrand_keys,
                int mtrand_pos,
                int mtrand_has_gauss,
                float mtrand_cached_gaussian):
@@ -23,26 +22,23 @@ def cgs_update(int itr,
     cdef int K = word_top.shape[1]
 
     cdef double log_p = 0
-    cdef np.ndarray[np.float64_t, ndim=2, negative_indices=False, mode='c']\
-        log_wk = np.log(word_top * inv_top_sums[np.newaxis, :])
-    cdef np.ndarray[np.float64_t, ndim=2, negative_indices=False, mode='c']\
-        log_kd = np.log(top_doc / top_doc.sum(0)[np.newaxis, :])
+    cdef double [:,:] log_wk = np.log(np.asarray(word_top) * 
+                                      np.asarray(inv_top_sums))
+    cdef double [:,:] log_kd = np.log(np.asarray(top_doc) /
+                                      np.asarray(top_doc).sum(0))
 
     cdef object np_random_state = np.random.RandomState()
     np_random_state.set_state((mtrand_str, mtrand_keys, 
                                mtrand_pos, mtrand_has_gauss, 
                                mtrand_cached_gaussian))
-    cdef np.ndarray[np.float64_t, negative_indices=False, mode='c']\
-        samples = np_random_state.uniform(size=V)
+    cdef double [:] samples = np_random_state.uniform(size=V)
     cdef object mtrand_state = np_random_state.get_state()
+    cdef double [:] dist = np.zeros((K,), dtype=np.float64)
+    cdef double [:] cum_dist = np.zeros((K,), dtype=np.float64)
 
     cdef double r, s
     cdef long start, stop, doc_len, offset
     cdef Py_ssize_t i, j, idx, w, k, t
-    cdef np.ndarray[np.float64_t, ndim=1, negative_indices=False, mode='c']\
-        dist = np.zeros((K,), dtype=np.float64)
-    cdef np.ndarray[np.float64_t, ndim=1, negative_indices=False, mode='c']\
-        cum_dist = np.zeros((K,), dtype=np.float64)
 
     for i in range(N):
 
@@ -58,7 +54,6 @@ def cgs_update(int itr,
         for j in range(doc_len):
 
             idx = offset + j
-
             w,k = corpus[idx], Z[idx]
 
             log_p += log_wk[w, k] + log_kd[k, i]
