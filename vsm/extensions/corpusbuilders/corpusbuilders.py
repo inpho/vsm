@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+from unidecode import unidecode
 
 from vsm.corpus import Corpus
 from util import *
@@ -500,7 +501,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
                ignore=['.json','.log','.pickle'], nltk_stop=True, stop_freq=1, 
-               add_stop=None):
+               add_stop=None, decode=True):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -558,7 +559,10 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     for filename in filenames:
         filename = os.path.join(plain_dir, filename)
         with open(filename, mode='r') as f:
-            chunks.append(f.read())
+            if decode:
+                chunks.append(unidecode(f.read()))
+            else:
+                chunks.append(f.read())
 
     words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
                               paragraphs=paragraphs)
@@ -593,6 +597,7 @@ def coll_tokenize(books, book_names):
     """
     words, book_tokens, page_tokens, sent_tokens = [], [], [], []
     sent_break, book_n, page_n, sent_n = 0, 0, 0, 0
+
 
     for book, book_label in zip(books, book_names):
         # print 'Tokenizing', book_label
@@ -633,7 +638,8 @@ def coll_tokenize(books, book_names):
 
 #TODO: This should be a whitelist not a blacklist
 def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
-                nltk_stop=True, stop_freq=1, add_stop=None):
+                nltk_stop=True, stop_freq=1, add_stop=None, 
+                decode=True):
     """
     `coll_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -681,7 +687,10 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
             page_file = book_name + '/' + page_name
             page_name = os.path.join(book_path, page_name)
             with open(page_name, mode='r') as f:
-                pages.append((f.read(), page_file))
+                if decode:
+                    pages.append((unidecode(f.read()), page_file))
+                else:
+                    pages.append((f.read(), page_file))
 
         books.append(pages)
 
