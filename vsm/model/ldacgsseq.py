@@ -1,7 +1,7 @@
 import numpy as np
 import time
 from vsm.split import split_corpus
-from ldafunctions import load_lda, save_lda, init_priors
+from ldafunctions import *
 from _cgs_update import cgs_update
 
 
@@ -73,6 +73,25 @@ class LdaCgsSeq(object):
     @property
     def docs(self):
         return split_corpus(self.corpus, self.indices)
+
+
+    def _compute_word_top(self):
+        self.word_top = compute_word_top(self.docs, self.Z_split, self.K, 
+                                         self.V, self.beta)
+
+
+    def _compute_top_doc(self):
+        self.top_doc = compute_top_doc(self.Z_split, self.K, self.alpha)
+
+
+    def _compute_log_prob(self, increment=False):
+        log_prob = compute_log_prob(self.docs, self.Z_split, 
+                                    self.word_top, self.top_doc)
+        if increment:
+            self.log_probs.append((self.iteration, log_prob))
+            self.iteration += 1
+        else:
+            return log_prob
 
 
     def train(self, n_iterations=100, verbose=1, seed=None):

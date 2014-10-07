@@ -1,8 +1,8 @@
 import numpy as np
 
 
-__all__ = [ 'init_priors', 'categorical', 'cgs_update',
-            'load_lda', 'save_lda' ]
+__all__ = [ 'init_priors', 'compute_top_doc', 'compute_word_top', 
+            'compute_log_prob', 'load_lda', 'save_lda' ]
 
 
 
@@ -143,6 +143,18 @@ def save_lda(m, filename):
     
     print 'Saving LDA model to', filename
     np.savez(filename, **arrays_out)
+
+
+def compute_log_prob(W, Z, word_top, top_doc):
+    log_wt = np.log(word_top / word_top.sum(0))
+    log_td = np.log(top_doc / top_doc.sum(0))
+    log_prob = 0
+    for i in xrange(len(W)):
+        W_i, Z_i = W[i], Z[i]
+        for j in xrange(len(W_i)):
+            w, k = W_i[j], Z_i[j]
+            log_prob += log_wt[w,k] + log_td[k,i]
+    return log_prob
 
 
 def compute_top_doc(Z, K, alpha=[]):
