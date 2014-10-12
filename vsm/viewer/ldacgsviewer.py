@@ -4,7 +4,7 @@ Provides the class `LdaCgsViewer`.
 
 import numpy as np
 
-from vsm.spatial import JS_div
+from vsm.spatial import H, JS_div
 from vsm.structarr import *
 from vsm.split import split_corpus
 from vsm.exceptions import *
@@ -17,8 +17,9 @@ __all__ = [ 'LdaCgsViewer' ]
 
 
 class LdaCgsViewer(object):
-    """
-    A class for viewing a topic model estimated by `LDAGibbs`.
+    """A class for viewing a topic model estimated by one of vsm's LDA
+    classes using CGS.
+
     """
     
     def __init__(self, corpus, model):
@@ -28,43 +29,123 @@ class LdaCgsViewer(object):
         :param corpus: Source of observed data.
         :type corpus: :class:`Corpus`
     
-        :param model: A topic modeled fitted by `LDAGibbs`
-        :type model: LDAGibbs
+        :param model: An LDA model estimated by a CGS.
+        :type model: LdaCgsSeq
         """
         self.corpus = corpus
         self.model = model
+        self._phi = None
+        self._theta = None
+        self._H_phi = None
+        self._H_theta = None
 
 
     @property
     def _doc_label_name(self):
-        """
-        """
         return doc_label_name(self.model.context_type)
 
+
     def _res_doc_type(self, doc):
-        """
-        """
         return res_doc_type(self.corpus, self.model.context_type, 
                               self._doc_label_name, doc)
 
+
     def _res_word_type(self, word):
-        """
-        """
         return res_word_type(self.corpus, word)
 
 
-    def topics(self, print_len=10, k_indices=[], as_strings=True, 
-                compact_view=True):
+    @property
+    def phi(self):
+        """Returns the word by topic matrix from the model as a right
+        stochastic matrix (the columns phi_i are probability
+        distributions).
+
         """
-        Returns a list of topics estimated by `LDAGibbs` sampler. 
-        Each topic is represented by a set of words and the corresponding 
+        if self._phi==None:
+            self._phi = self.model.word_top / self.model.word_top.sum(0)
+        return self._phi
+
+
+    @property
+    def theta(self):
+        """Returns the topic by document matrix from the model as a right
+        stochastic matrix (the columns theta_i are probability
+        distributions.
+
+        """
+        if self._theta==None:
+            self._theta =  self.model.top_doc / self.model.top_doc.sum(0)
+        return self._theta
+
+
+    @property
+    def H_phi(self):
+        """Returns the entropies of the columns of phi (i.e., topics)
+
+        """
+        if self._H_phi==None:
+            self._H_phi = H(self.phi.T)
+        return self._H_phi
+
+
+    @property
+    def H_theta(self):
+        """Returns the entropies of the columns of theta.
+
+        """
+        if self._H_theta==None:
+            self._H_theta = H(self.theta.T)
+        return self._H_theta
+
+
+    def topic_entropies(self, print_len=10):
+        """Returns the entropies of the topics of the model as an array sorted
+        by entropy.
+
+        """
+        H_phi = self.H_phi
+        k_arr = enum_sort(H_phi).view(LabeledColumn)
+        k_arr.col_header = 'Topic Entropies'
+        k_arr.subcol_headers = ['Index', 'Entropy']
+        k_arr.col_len = print_len
+
+        return k_arr[::-1]
+
+
+    def doc_entropies(self, print_len=10, 
+                      label_fn=def_label_fn, as_strings=True):
+        """Returns the entropies of the distributions over topics as an
+        array sorted by entropy.
+
+        """
+        if as_strings:
+            md = self.corpus.view_metadata(self.model.context_type)
+            docs = label_fn(md)
+            d_arr = enum_sort(self.H_theta, indices=docs, field_name='doc')
+        else:
+            d_arr = enum_sort(self.H_theta)
+
+        d_arr = d_arr.view(LabeledColumn)
+        d_arr.col_header = 'Document Entropies'
+        d_arr.subcol_headers = ['Document', 'Entropy']
+        d_arr.col_len = print_len
+        
+        return d_arr[::-1]
+
+    
+    #TODO: compact_view has a bug. When it is fixed, change default to True.
+    def topics(self, print_len=10, topic_indices=None, sort_by_entropy=False,
+               as_strings=True, compact_view=False):
+        """Returns a list of topics estimated by the model. 
+        Each topic is represented by a list of words and the corresponding 
         probabilities.
         
-        :param k_indices: Indices of topics to be displayed. For example,
-            if k_indices = [3, 0, 2], the 4th, 1st and 3rd topics are 
-            printed in this order. Default is ascending from 0 to K-1, 
-            where K is the number of topics.
-        :type k_indices: list of integers
+        :param topic_indices: List of indices of topics to be
+            displayed. Default is all topics.
+        :type topic_indices: list of integers
+        
+        :param sort_by_entropy: Sorts topics by entropies. Default is False.
+        :type sort_by_entropy: boolean, optional
         
         :param print_len: Number of words shown for each topic. Default is 10.
         :type print_len: int, optional
@@ -80,179 +161,131 @@ class LdaCgsViewer(object):
         
         :returns: an instance of :class:`DataTable`.
             A structured array of topics.
-        """
-        if len(k_indices) == 0:
-            k_indices = np.arange(self.model.K)
 
-        # Normalize the topic word matrix so that topics are
-        # distributions
-        phi = self.model.word_top[:,k_indices]
-        phi /= phi.sum(0)
+        """
+        if sort_by_entropy:
+            th = 'Topics Sorted by Entropy'
+            ent_sort = self.topic_entropies()['i']
+            if topic_indices:
+                ti = set(topic_indices)
+                topic_indices = [k for k in ent_sort if k in ti]
+            else:
+                topic_indices = ent_sort
+        elif topic_indices:
+            th = 'Topics Sorted by User'            
+        else:
+            th = 'Topics Sorted by Index' 
+            topic_indices = range(self.model.K)
+
+        phi = self.phi[:,topic_indices]
         
-        # Label data
         if as_strings:
 	    k_arr = enum_matrix(phi.T, indices=self.corpus.words,
-                                  field_name='word')
+                                field_name='word')
         else:
             ind = [self.corpus.words_int[word] for word in self.corpus.words]
             k_arr = enum_matrix(phi.T, indices=ind, field_name='word')
 
-
-        # without probabilities, just words
         if compact_view:
             sch = ['Topic', 'Words']
-            fc = [str(k) for k in k_indices]
-            return CompactTable(k_arr, table_header='Topics Sorted by Index',
+            fc = [str(k) for k in topic_indices]
+            return CompactTable(k_arr, table_header=th,
 		    	subcol_headers=sch, first_cols=fc, num_words=print_len)
 	
         table = []
-        for i,k in enumerate(k_indices):
+        for i,k in enumerate(topic_indices):
             ch = 'Topic ' + str(k)
             sch = ['Word', 'Prob']
             col = LabeledColumn(k_arr[i], col_header=ch,
-                                  subcol_headers=sch, col_len=print_len)
+                                subcol_headers=sch, col_len=print_len)
             table.append(col)
 
-        table = DataTable(table, 'Topics Sorted by Index')
+        return DataTable(table, th)
 
 
-        return table
-
-
-    ## PendingDeprecation : k_indices parameter of the same function.
-    #TODO: Use spatial.H to compute entropy
-    def topic_entropies(self, print_len=10, as_strings=True, compact_view=True):
+    #TODO: compact_view has a bug. When it is fixed, change default to True.
+    def doc_topics(self, doc_or_docs, sort_by_entropy=False, compact_view=False,
+                   aggregate=False, print_len=10):
         """
-        Returns a list of topics sorted according to the entropy of 
-        each topic. The entropy of topic k is calculated by summing 
-        P(d|k) * log(P(d|k) over all document d, and is thought to 
-        measure how informative a given topic is to select documents. 
-        
-        :type print_len: int, optional
-        :param print_len: Number of words shown for each topic. Default is 10.
-
-        :param as_string: If `True`, each topic displays words rather than its
-            integer representation. Default is `True`.
-        :type as_string: boolean, optional
-        
-        :param compact_view: If `True`, topics are simply represented as
-            their top `print_len` number of words. Otherwise, topics are
-            shown as words and their probabilities. Default is `True`.
-        :type compact_view: boolean, optional 
-        
-        :returns: an instance of :class:`DataTable`.
-            A structured array of topics sorted by entropy.
-        """
-        if len(k_indices) == 0:
-            k_indices = np.arange(self.model.K)
-
-        # Normalize the document-topic matrix so that documents are
-        # distributions
-        theta = self.model.top_doc / self.model.top_doc.sum(0)
-
-        # Compute entropy values for each topic
-        ent = -1 * (theta.T * np.log2(theta.T)).sum(0)
-
-        # Sort topics according to entropies
-        k_indices = enum_sort(ent)['i'][::-1]
-        
-        # Retrieve topics
-        if compact_view:
-            k_arr = self.topics(print_len=print_len, k_indices=k_indices,
-                as_strings=as_strings, compact_view=compact_view)
-            k_arr.table_header = 'Sorted by Entropy'
-            return k_arr
-
-        k_arr = self.topics(print_len=print_len, k_indices=k_indices,
-                            as_strings=as_strings, compact_view=compact_view)
-
-        # Label data
-        k_arr.table_header = 'Sorted by Entropy'
-        for i in xrange(k_indices.size):
-            k_arr[i].col_header += ' ({0:.5f})'.format(ent[k_indices[i]])
- 
-        return k_arr
-
-
-    def topic_hist(self, k_indices=[], d_indices=[], show=True):
-        """
-        Draws a histogram showing the proportion of topics within a set of
-        documents specified by d_indices. 
-
-        :param k_indices: Specifies the topics for which proportions are 
-             calculated. Default is all topics.
-        :type doc: list of integers, optional
-        
-        :param d_indices: Specifies the document for which topic proportions
-             are calculated. Default is all documents.
-        :type d_indices: list of integers, optional
-
-        :param show: shows plot if `True`. Default is `True`.
-        :type d_indices: boolean, optional
-        
-        :returns: an instance of matplotlib.pyplot object.
-             Contains the topic proportion histogram.
-        """
-        import matplotlib.pyplot as plt
-
-        if len(d_indices) == 0:
-            i = self.corpus.context_types.index(self.model.context_type)
-            d_indices = xrange(len(self.corpus.context_data[i]))
-
-        td_mat = self.model.top_doc[:, d_indices]
-        td_mat /= td_mat.sum(0)
-        arr = td_mat.sum(1)
-
-        if len(k_indices) != 0:
-            arr = arr[k_indices]
-
-        l = enum_sort(arr)
-        rank, prob = zip(*l)
-
-        y_pos = np.arange(len(rank))
-        fig = plt.figure(figsize=(10,10))
-
-        plt.barh(y_pos, list(prob))
-        plt.yticks(y_pos, rank)
-        plt.xlabel('Frequencies')
-        plt.title('Topic Proportions')
-
-        if show:
-            plt.show()
-
-        return plt
-
-
-    def doc_topics(self, doc, print_len=10):
-        """
-        Returns distribution P(K|D=d) over topics K for document d. 
+        Returns the distribution over topics for the given documents.
 
         :param doc: Specifies the document whose distribution over topics is 
              returned. It can either be the ID number (integer) or the 
              name (string) of the document.
         :type doc: int or string
         
-        :param print_len: Number of topics to be listed. Default is 10.
+        :param print_len: Number of topics to be printed. Default is 10.
         :type print_len: int, optional
         
         :returns: an instance of :class:`LabeledColumn`.
-            An array of topics (represented by their number) and the 
+            An array of topics (represented by their number) and their 
             corresponding probabilities.
         """
-        d, label = self._res_doc_type(doc)
 
-        # Normalize the document-topic matrix so that documents are
-        # distributions
-        k_arr = self.model.top_doc[:,d]
-        k_arr /= k_arr.sum()
+        if (isstr(doc_or_docs) or isint(doc_or_docs) 
+            or isinstance(doc_or_docs, dict)):
+            doc, label = self._res_doc_type(doc_or_docs)
+            docs, labels = [doc], [label]
+        else:
+            docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
 
-        # Index, sort and label data
-        k_arr = enum_sort(k_arr).view(LabeledColumn)
-        k_arr.col_header = 'Document: ' + label
+        if sort_by_entropy:
+            ent_sort = self.doc_entropies(as_strings=False)['i']
+            docs_, labels_ = [], []
+            for j in xrange(len(ent_sort)):
+                d = ent_sort[j]
+                if d in docs:
+                    i = docs.index(d)
+                    docs_.append(d)
+                    labels_.append(labels[i])
+            docs, labels = docs_, labels_
+        
+        d_arr = enum_matrix(self.theta.T, indices=range(self.model.K), 
+                            field_name='topic')
+
+        th = 'Distributions over Topics'
+
+        if compact_view:
+            sch = ['Doc', 'Topics']
+            return CompactTable(d_arr, table_header=th,
+                                subcol_headers=sch, first_cols=labels, 
+                                num_words=print_len)
+
+        table = []
+        for i in xrange(len(docs)):
+            ch = 'Doc: ' + labels[i]
+            sch = ['Topic', 'Prob']
+            col = LabeledColumn(d_arr[docs[i]], col_header=ch,
+                                subcol_headers=sch, col_len=print_len)
+            table.append(col)
+
+        return DataTable(table, th)
+
+
+    def aggregate_doc_topics(self, docs, normed_sum=False, print_len=10):
+        """Takes a list of documents identifiers and returns the sum of the
+        distributions over topics corresponding to these topics,
+        normalized to sum to 1. If normed_sum is True, the sum is
+        weighted by document lengths, so that documents contribute
+        uniformly to the aggregate distribution.
+
+        """
+        docs, labels = zip(*[self._res_doc_type(d) for d in docs])
+        
+        if normed_sum:
+            S = self.theta[:, docs].sum(1)
+        else:
+            S = self.model.top_doc[:, docs].sum(1)
+
+        S = S / S.sum()
+
+        k_arr = enum_sort(S).view(LabeledColumn)
+        k_arr.col_header = 'Aggregate Distribution over Topics'
         k_arr.subcol_headers = ['Topic', 'Prob']
         k_arr.col_len = print_len
 
         return k_arr
+        
 
 
     def word_topics(self, word, as_strings=True):
@@ -364,22 +397,22 @@ class LdaCgsViewer(object):
         Q = self.model.word_top / self.model.word_top.sum(0)
 
         distances = dist_top_top(Q, topic_or_topics, weights=weights, 
-                                   print_len=print_len, filter_nan=filter_nan, 
-                                   dist_fn=dist_fn, order=order)
+                                 print_len=print_len, filter_nan=filter_nan, 
+                                 dist_fn=dist_fn, order=order)
 
         if show_topics:
             topic_or_topics = [topic_or_topics]
-            k_indices = distances[distances.dtype.names[0]]
+            topic_indices = distances[distances.dtype.names[0]]
 
             # Retrieve topics
             if compact_view:
-                k_arr = self.topics(print_len=print_len, k_indices=k_indices,
+                k_arr = self.topics(print_len=print_len, topic_indices=topic_indices,
                                     as_strings=as_strings, 
                                     compact_view=compact_view)
                 k_arr.table_header = 'Sorted by Topic Distance'
                 return k_arr
 
-            k_arr = self.topics(k_indices=k_indices, print_len=print_len,
+            k_arr = self.topics(topic_indices=topic_indices, print_len=print_len,
                                 as_strings=as_strings, compact_view=compact_view)
 
             # Relabel results
@@ -555,20 +588,20 @@ class LdaCgsViewer(object):
                 word_or_words = [word_or_words]
 
             # Filter based on topic assignments to words (Z values) 
-            k_indices = sum([self.word_topics(w)['value'].tolist() 
+            topic_indices = sum([self.word_topics(w)['value'].tolist() 
                            for w in word_or_words], [])
-            k_indices = [i for i in xrange(distances.size) if distances[i][0] in k_indices]
-            distances = distances[k_indices]
-            k_indices = distances[distances.dtype.names[0]]
+            topic_indices = [i for i in xrange(distances.size) if distances[i][0] in topic_indices]
+            distances = distances[topic_indices]
+            topic_indices = distances[distances.dtype.names[0]]
 
             # Retrieve topics
             if compact_view:
-                k_arr = self.topics(print_len=print_len, k_indices=k_indices,
+                k_arr = self.topics(print_len=print_len, topic_indices=topic_indices,
                     as_strings=as_strings, compact_view=compact_view)
                 k_arr.table_header = 'Sorted by Topic Distance'
                 return k_arr
 
-            k_arr = self.topics(k_indices=k_indices, print_len=print_len,
+            k_arr = self.topics(topic_indices=topic_indices, print_len=print_len,
                                 as_strings=as_strings, compact_view=compact_view)
 
             # Relabel results
@@ -632,10 +665,10 @@ class LdaCgsViewer(object):
         Q = self.model.top_doc / self.model.top_doc.sum(0)
 
         return dist_doc_doc(doc_or_docs, self.corpus, 
-                              self.model.context_type, Q,  
-                              print_len=print_len, filter_nan=filter_nan, 
-                              label_fn=label_fn, as_strings=as_strings,
-                              dist_fn=dist_fn, order=order)
+                            self.model.context_type, Q,  
+                            print_len=print_len, filter_nan=filter_nan, 
+                            label_fn=label_fn, as_strings=as_strings,
+                            dist_fn=dist_fn, order=order)
     
 
     @deprecated_meth("dismat_doc")
@@ -669,6 +702,7 @@ class LdaCgsViewer(object):
 
         return dm
 
+
     @deprecated_meth("dismat_top") 
     def simmat_topics(self, topics=[], dist_fn=JS_div):
         pass
@@ -677,9 +711,9 @@ class LdaCgsViewer(object):
         """
         Calculates the distance matrix for a given list of topics.
 
-        :param k_indices: A list of topics whose distance matrix is to be
+        :param topic_indices: A list of topics whose distance matrix is to be
             computed. Default is all topics in the model.
-        :type k_indices: list, optional
+        :type topic_indices: list, optional
         
         :param dist_fn: A distance function from functions in vsm.spatial. 
             Default is :meth:`JS_div`.
@@ -700,7 +734,10 @@ class LdaCgsViewer(object):
         return dismat_top(topics, Q, dist_fn=dist_fn)
 
 
+    ######################################################################
 
+
+    #TODO: Move to plotting extension
     def logp_plot(self, range=[], step=1, show=True, grid=True):
         """
         Returns a plot of log probabilities for the specified range of 
@@ -750,3 +787,55 @@ class LdaCgsViewer(object):
             plt.show()
 
         return plt
+
+
+    # TODO: Move to plotting extension
+    def topic_hist(self, topic_indices=[], d_indices=[], show=True):
+        """
+        Draws a histogram showing the proportion of topics within a set of
+        documents specified by d_indices. 
+
+        :param topic_indices: Specifies the topics for which proportions are 
+             calculated. Default is all topics.
+        :type doc: list of integers, optional
+        
+        :param d_indices: Specifies the document for which topic proportions
+             are calculated. Default is all documents.
+        :type d_indices: list of integers, optional
+
+        :param show: shows plot if `True`. Default is `True`.
+        :type d_indices: boolean, optional
+        
+        :returns: an instance of matplotlib.pyplot object.
+             Contains the topic proportion histogram.
+        """
+        import matplotlib.pyplot as plt
+
+        if len(d_indices) == 0:
+            i = self.corpus.context_types.index(self.model.context_type)
+            d_indices = xrange(len(self.corpus.context_data[i]))
+
+        td_mat = self.model.top_doc[:, d_indices]
+        td_mat /= td_mat.sum(0)
+        arr = td_mat.sum(1)
+
+        if len(topic_indices) != 0:
+            arr = arr[topic_indices]
+
+        l = enum_sort(arr)
+        rank, prob = zip(*l)
+
+        y_pos = np.arange(len(rank))
+        fig = plt.figure(figsize=(10,10))
+
+        plt.barh(y_pos, list(prob))
+        plt.yticks(y_pos, rank)
+        plt.xlabel('Frequencies')
+        plt.title('Topic Proportions')
+
+        if show:
+            plt.show()
+
+        return plt
+
+
