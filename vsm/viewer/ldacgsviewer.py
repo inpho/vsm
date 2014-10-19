@@ -4,7 +4,7 @@ Provides the class `LdaCgsViewer`.
 
 import numpy as np
 
-from vsm.spatial import H, JS_div
+from vsm.spatial import H, JS_dist
 from vsm.structarr import *
 from vsm.split import split_corpus
 from vsm.exceptions import *
@@ -166,12 +166,12 @@ class LdaCgsViewer(object):
         if sort_by_entropy:
             th = 'Topics Sorted by Entropy'
             ent_sort = self.topic_entropies()['i']
-            if topic_indices:
+            if not topic_indices==None:
                 ti = set(topic_indices)
                 topic_indices = [k for k in ent_sort if k in ti]
             else:
                 topic_indices = ent_sort
-        elif topic_indices:
+        elif not topic_indices==None:
             th = 'Topics Sorted by User'            
         else:
             th = 'Topics Sorted by Index' 
@@ -343,13 +343,13 @@ class LdaCgsViewer(object):
 
     @deprecated_meth("dist_top_top")
     def sim_top_top(self, topic_or_topics, weights=[], 
-                     dist_fn=JS_div, order='i', 
+                     dist_fn=JS_dist, order='i', 
                      show_topics=True, print_len=10, filter_nan=True, 
                      as_strings=True, compact_view=True):
         pass      
 
     def dist_top_top(self, topic_or_topics, weights=[], 
-                     dist_fn=JS_div, order='i', 
+                     dist_fn=JS_dist, order='i', 
                      show_topics=True, print_len=10, filter_nan=True, 
                      as_strings=True, compact_view=True):
         """
@@ -377,7 +377,7 @@ class LdaCgsViewer(object):
         :type filter_nan: boolean, optional
         
         :param dist_fn: A distance function from functions in vsm.spatial. 
-            Default is :meth:`JS_div`.
+            Default is :meth:`JS_dist`.
         :type dist_fn: string, optional
 
         :param order: Order of sorting. 'i' for increasing and 'd' for
@@ -434,12 +434,12 @@ class LdaCgsViewer(object):
     @deprecated_meth("dist_top_doc")
     def sim_top_doc(self, topic_or_topics, weights=[], filter_words=[],
                      print_len=10, as_strings=True, label_fn=def_label_fn, 
-                     filter_nan=True, dist_fn=JS_div, order='i'):
+                     filter_nan=True, dist_fn=JS_dist, order='i'):
         pass
 
     def dist_top_doc(self, topic_or_topics, weights=[], filter_words=[],
                      print_len=10, as_strings=True, label_fn=def_label_fn, 
-                     filter_nan=True, dist_fn=JS_div, order='i'):
+                     filter_nan=True, dist_fn=JS_dist, order='i'):
         """
         Takes a topic or list of topics (by integer index) and returns
         a list of documents sorted by the posterior probabilities of
@@ -475,7 +475,7 @@ class LdaCgsViewer(object):
         :type filter_nan: boolean, optional
         
         :param dist_fn: A distance function from functions in vsm.spatial. 
-            Default is :meth:`JS_div`.
+            Default is :meth:`JS_dist`.
         :type dist_fn: string, optional
 
         :param order: Order of sorting. 'i' for increasing and 'd' for
@@ -518,12 +518,12 @@ class LdaCgsViewer(object):
     @deprecated_meth("dist_word_top")
     def sim_word_top(self, word_or_words, weights=[], filter_nan=True,
                       show_topics=True, print_len=10, as_strings=True, 
-                      compact_view=True, dist_fn=JS_div, order='i'):
+                      compact_view=True, dist_fn=JS_dist, order='i'):
         pass
    
     def dist_word_top(self, word_or_words, weights=[], filter_nan=True,
                       show_topics=True, print_len=10, as_strings=True, 
-                      compact_view=True, dist_fn=JS_div, order='i'):
+                      compact_view=True, dist_fn=JS_dist, order='i'):
         """
         Intuitively, the function sorts topics according to their 
         "relevance" to the query `word_or_words`.
@@ -569,7 +569,7 @@ class LdaCgsViewer(object):
         :type compact_view: boolean, optional       
         
         :param dist_fn: A distance function from functions in vsm.spatial. 
-            Default is :meth:`JS_div`.
+            Default is :meth:`JS_dist`.
         :type dist_fn: string, optional
 
         :param order: Order of sorting. 'i' for increasing and 'd' for
@@ -585,9 +585,9 @@ class LdaCgsViewer(object):
         Q = self.model.word_top / self.model.word_top.sum(0)
 
         distances = dist_word_top(word_or_words, self.corpus, Q,  
-                                    weights=weights, print_len=print_len, 
-                                    filter_nan=filter_nan,
-                                    dist_fn=dist_fn, order=order)
+                                  weights=weights, print_len=print_len, 
+                                  filter_nan=filter_nan,
+                                  dist_fn=dist_fn, order=order)
 
         if show_topics:
             if isstr(word_or_words):
@@ -624,13 +624,13 @@ class LdaCgsViewer(object):
     def sim_doc_doc(self, doc_or_docs, 
                      print_len=10, filter_nan=True, 
                      label_fn=def_label_fn, as_strings=True,
-                     dist_fn=JS_div, order='i'):
+                     dist_fn=JS_dist, order='i'):
         pass
 
     def dist_doc_doc(self, doc_or_docs, 
                      print_len=10, filter_nan=True, 
                      label_fn=def_label_fn, as_strings=True,
-                     dist_fn=JS_div, order='i'):
+                     dist_fn=JS_dist, order='i'):
         """
         Computes and sorts the distances between a document 
         or list of documents and every document in the topic space. 
@@ -655,7 +655,7 @@ class LdaCgsViewer(object):
         :type as_strings: boolean, optional
         
         :param dist_fn: A distance function from functions in vsm.spatial. 
-            Default is :meth:`JS_div`.
+            Default is :meth:`JS_dist`.
         :type dist_fn: string, optional
 
         :param order: Order of sorting. 'i' for increasing and 'd' for
@@ -678,10 +678,10 @@ class LdaCgsViewer(object):
     
 
     @deprecated_meth("dismat_doc")
-    def simmat_docs(self, docs=[], dist_fn=JS_div):
+    def simmat_docs(self, docs=[], dist_fn=JS_dist):
         pass
     
-    def dismat_doc(self, docs=[], dist_fn=JS_div):
+    def dismat_doc(self, docs=[], dist_fn=JS_dist):
         """
         Calculates the distance matrix for a given list of documents.
 
@@ -690,7 +690,7 @@ class LdaCgsViewer(object):
         :type docs: list, optional
         
         :param dist_fn: A distance function from functions in vsm.spatial. 
-            Default is :meth:`JS_div`.
+            Default is :meth:`JS_dist`.
         :type dist_fn: string, optional
 
         :returns: an instance of :class:`IndexedSymmArray`.
@@ -710,10 +710,10 @@ class LdaCgsViewer(object):
 
 
     @deprecated_meth("dismat_top") 
-    def simmat_topics(self, topics=[], dist_fn=JS_div):
+    def simmat_topics(self, topics=[], dist_fn=JS_dist):
         pass
 
-    def dismat_top(self, topics=[], dist_fn=JS_div):
+    def dismat_top(self, topics=[], dist_fn=JS_dist):
         """
         Calculates the distance matrix for a given list of topics.
 
@@ -722,7 +722,7 @@ class LdaCgsViewer(object):
         :type topic_indices: list, optional
         
         :param dist_fn: A distance function from functions in vsm.spatial. 
-            Default is :meth:`JS_div`.
+            Default is :meth:`JS_dist`.
         :type dist_fn: string, optional
 
         :returns: an instance of :class:`IndexedSymmArray`.
@@ -776,11 +776,11 @@ class LdaCgsViewer(object):
 
         # If range is not specified, include the whole chain.
         if len(range) == 0:
-            range = [0, len(self.model.log_prob)]
+            range = [0, len(self.model.log_probs)]
 
         x = []
         logp = []
-        for i, lp in self.model.log_prob[range[0]:range[1]:step]:
+        for i, lp in self.model.log_probs[range[0]:range[1]:step]:
             x.append(i)
             logp.append(lp)
 
@@ -796,7 +796,7 @@ class LdaCgsViewer(object):
 
 
     # TODO: Move to plotting extension
-    def topic_hist(self, topic_indices=[], d_indices=[], show=True):
+    def topic_hist(self, topic_indices=None, d_indices=[], show=True):
         """
         Draws a histogram showing the proportion of topics within a set of
         documents specified by d_indices. 
@@ -825,7 +825,7 @@ class LdaCgsViewer(object):
         td_mat /= td_mat.sum(0)
         arr = td_mat.sum(1)
 
-        if len(topic_indices) != 0:
+        if not topic_indices == None:
             arr = arr[topic_indices]
 
         l = enum_sort(arr)

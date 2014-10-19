@@ -2,7 +2,7 @@ import numpy as np
 
 from scipy.sparse import issparse, csr_matrix, coo_matrix
 
-from vsm.spatial import angle, JS_div
+from vsm.spatial import angle, JS_dist
 from vsm.structarr import *
 from types import *
 from labeleddata import *
@@ -240,7 +240,7 @@ def dist_word_doc(word_or_words, corp, context_type, mat, weights=[],
 
 def dist_word_top(word_or_words, corp, mat, weights=[], 
                   print_len=10, filter_nan=True, 
-                  dist_fn=JS_div, order='i'):
+                  dist_fn=JS_dist, order='i'):
     """
     Computes distances between a word or a list of words to every topic
     and sorts the results. The function treats the query words as a pseudo-topic
@@ -283,7 +283,7 @@ def dist_word_top(word_or_words, corp, mat, weights=[],
 def dist_top_doc(topic_or_topics, mat, corp, context_type, weights=[],
                  print_len=10, filter_nan=True, 
                  label_fn=def_label_fn, as_strings=True,
-                 dist_fn=JS_div, order='i'):
+                 dist_fn=JS_dist, order='i'):
     """
     Takes a topic or list of topics (by integer index) and returns a
     list of documents sorted by distance.
@@ -328,7 +328,7 @@ def dist_top_doc(topic_or_topics, mat, corp, context_type, weights=[],
 
 def dist_top_top(mat, topic_or_topics, weights=[], 
                  print_len=10, filter_nan=True, 
-                 dist_fn=JS_div, order='i'):
+                 dist_fn=JS_dist, order='i'):
     """
     Takes a topic or list of topics (by integer index) and returns
     a list of topics sorted by the distances between a given topic
@@ -410,7 +410,7 @@ def dismat_doc(doc_list, corp, context_type, mat, dist_fn=angle):
     return dm
 
 
-def dismat_top(topics, mat, dist_fn=JS_div):
+def dismat_top(topics, mat, dist_fn=JS_dist):
     """
     Calculates a distance matrix for a given list of topics.
     

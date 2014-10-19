@@ -240,7 +240,7 @@ def KL_div(P, Q):
     return out
 
 
-def JS_div(P, Q, metric=True):
+def JS_div(P, Q, metric=False):
     """
     P and Q are arrays of either dimension 1 or 2.
 
@@ -288,3 +288,15 @@ def JS_div(P, Q, metric=True):
     if out.ndim == 0:
         return out[()]
     return out
+
+
+def JS_dist(P, Q):
+    """
+    P and Q are arrays of either dimension 1 or 2.
+
+    If P is a matrix, then JS distance is computed row-wise on P. (P
+    is assumed to be left stochastic.) If Q is a matrix, JS divergence
+    is computed column-wise on Q. (Q is assumed to be right
+    stochastic.)
+    """
+    return JS_div(P, Q, metric=True)
