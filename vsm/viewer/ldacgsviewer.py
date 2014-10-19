@@ -206,8 +206,7 @@ class LdaCgsViewer(object):
     #TODO: compact_view has a bug. When it is fixed, change default to True.
     def doc_topics(self, doc_or_docs, sort_by_entropy=False, compact_view=False,
                    aggregate=False, print_len=10):
-        """
-        Returns the distribution over topics for the given documents.
+        """Returns the distribution over topics for the given documents.
 
         :param doc: Specifies the document whose distribution over topics is 
              returned. It can either be the ID number (integer) or the 
@@ -217,17 +216,24 @@ class LdaCgsViewer(object):
         :param print_len: Number of topics to be printed. Default is 10.
         :type print_len: int, optional
         
-        :returns: an instance of :class:`LabeledColumn`.
-            An array of topics (represented by their number) and their 
-            corresponding probabilities.
+        :returns: an instance of :class:`LabeledColumn` or of :class: `DataTable`.
+            An structured array of topics (represented by their
+            number) and their corresponding probabilities or a list of
+            such arrays.
+
         """
 
         if (isstr(doc_or_docs) or isint(doc_or_docs) 
             or isinstance(doc_or_docs, dict)):
             doc, label = self._res_doc_type(doc_or_docs)
-            docs, labels = [doc], [label]
-        else:
-            docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
+
+            k_arr = enum_sort(self.theta[:, doc]).view(LabeledColumn)
+            k_arr.col_header = 'Document: ' + label
+            k_arr.subcol_headers = ['Topic', 'Prob']
+            k_arr.col_len = print_len
+            return k_arr
+
+        docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
 
         if sort_by_entropy:
             ent_sort = self.doc_entropies(as_strings=False)['i']
@@ -240,14 +246,14 @@ class LdaCgsViewer(object):
                     labels_.append(labels[i])
             docs, labels = docs_, labels_
         
-        d_arr = enum_matrix(self.theta.T, indices=range(self.model.K), 
+        k_arr = enum_matrix(self.theta.T, indices=range(self.model.K), 
                             field_name='topic')
 
         th = 'Distributions over Topics'
 
         if compact_view:
             sch = ['Doc', 'Topics']
-            return CompactTable(d_arr, table_header=th,
+            return CompactTable(k_arr, table_header=th,
                                 subcol_headers=sch, first_cols=labels, 
                                 num_words=print_len)
 
@@ -255,7 +261,7 @@ class LdaCgsViewer(object):
         for i in xrange(len(docs)):
             ch = 'Doc: ' + labels[i]
             sch = ['Topic', 'Prob']
-            col = LabeledColumn(d_arr[docs[i]], col_header=ch,
+            col = LabeledColumn(k_arr[docs[i]], col_header=ch,
                                 subcol_headers=sch, col_len=print_len)
             table.append(col)
 
