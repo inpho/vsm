@@ -89,6 +89,9 @@ def dist_word_word(word_or_words, corp, mat, weights=[],
     words, labels = zip(*[res_word_type(corp, w) for w in word_or_words])
     words, labels = list(words), list(labels)
 
+    if len(words)==0:
+        raise Exception('At least one target word is needed.')
+
     # Generate pseudo-word
     if len(weights) == 0:
         weights=None
@@ -146,6 +149,9 @@ def dist_doc_doc(doc_or_docs, corp, context_type, mat, weights=[],
         docs = [res_doc_type(corp, context_type, label_name, d)[0] 
                 for d in doc_or_docs]
 
+    if len(docs)==0:
+        raise Exception('At least one target document is needed.')
+
     # Generate pseudo-document
     if len(weights) == 0:
         weights=None
@@ -202,6 +208,9 @@ def dist_word_doc(word_or_words, corp, context_type, mat, weights=[],
     words, labels = zip(*[res_word_type(corp, w) for w in word_or_words])
     words, labels = list(words), list(labels)
 
+    if len(words)==0:
+        raise Exception('At least one target word is needed.')
+
     # Generate pseudo-document
     doc = np.zeros((mat.shape[0],1), dtype=np.float)
     if len(weights) == 0:
@@ -253,6 +262,9 @@ def dist_word_top(word_or_words, corp, mat, weights=[],
     words, labels = zip(*[res_word_type(corp, w) for w in word_or_words])
     words, labels = list(words), list(labels)
 
+    if len(words)==0:
+        raise Exception('At least one target word is needed.')
+
     # Generate pseudo-topic
     top = np.zeros(mat.shape[0], dtype=np.float)
     if len(weights) == 0:
@@ -291,6 +303,9 @@ def dist_top_doc(topic_or_topics, mat, corp, context_type, weights=[],
     The columns of `mat` are assumed to represent documents.    
     """
     topics = res_top_type(topic_or_topics)
+
+    if len(topics)==0:
+        raise Exception('At least one target topic is needed.')
 
     # Generate pseudo-document
     doc = np.zeros(mat.shape[0], dtype=np.float)
@@ -338,6 +353,9 @@ def dist_top_top(mat, topic_or_topics, weights=[],
     (namely, topics).
     """
     topics = res_top_type(topic_or_topics)
+
+    if len(topics)==0:
+        raise Exception('At least one target topic is needed.')
 
     # Generate pseudo-topic
     if len(weights) == 0:
