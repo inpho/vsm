@@ -107,9 +107,8 @@ class LdaCgsSeq(object):
             are printed out to notify the user. Default is 1.
         :type verbose: int, optional
 
-        :param seeds: An arbitrary starting point. If `None` it will
-            start at a random seed. Default is `None`.
-        :type seeds: double, optional
+        :param seed: Seed for numpy's RandomState. Default is `None`.
+        :type seed: int, optional
         """
         random_state = np.random.RandomState(seed)
         mtrand_state = random_state.get_state()

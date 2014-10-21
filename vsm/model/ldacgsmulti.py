@@ -232,10 +232,9 @@ class LdaCgsMulti(LdaCgsSeq):
             2.
         :type n_proc: int, optional
         
-        :param seeds: List of arbitrary starting points for each processors.
-            The length of the list should be same as `n_proc`. If `None`,
-            each threads start at a random seed. Default is `None`.
-        :type seeds: list, optional
+        :param seeds: List of random seeds, one for each thread.
+            The length of the list should be same as `n_proc`. Default is `None`.
+        :type seeds: list of integers, optional
         """
         self._move_locals_to_globals()
 
