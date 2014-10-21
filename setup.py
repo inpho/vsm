@@ -1,6 +1,10 @@
-from setuptools import setup, Extension, Command
+from setuptools import setup, Extension, Command, find_packages
 
 
+# find packages in vsm subdirectory
+# this will skip the unittests, etc.
+packages = ['vsm.'+pkg for pkg in find_packages('vsm')]
+packages.append('vsm')
 
 setup(
     name = "vsm",
@@ -29,12 +33,7 @@ setup(
         "numpy>=1.6.1",
         "scipy>=0.13.0",
     ],
-    packages=['vsm',
-              'vsm.corpus',
-              'vsm.model',
-              'vsm.viewer',
-              'vsm.extensions',
-    ],
+    packages=packages,
     ext_modules = [
         Extension('_cgs_update', ['vsm/model/_cgs_update.c']),
     ],
