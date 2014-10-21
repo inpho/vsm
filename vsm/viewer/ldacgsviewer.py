@@ -440,13 +440,11 @@ class LdaCgsViewer(object):
     def dist_top_doc(self, topic_or_topics, weights=[], filter_words=[],
                      print_len=10, as_strings=True, label_fn=def_label_fn, 
                      filter_nan=True, dist_fn=JS_dist, order='i'):
-        """
-        Takes a topic or list of topics (by integer index) and returns
-        a list of documents sorted by the posterior probabilities of
-        documents given the topic(s).
+        """Takes a topic or list of topics (by integer index) and returns
+        a list of documents sorted by distance.
 
-        :param topic_or_topics: Query topic(s) to which posterior probabilities
-            are calculated.
+        :param topic_or_topics: Query topic(s) relative to which
+            distances are computed.
         :type topic_or_topics: string or list of strings
         
         :param weights: Specify weights for each topic in `topic_or_topics`. 
@@ -487,6 +485,7 @@ class LdaCgsViewer(object):
             to `topic_or_topics`. 
 
         :See Also: :meth:`def_label_fn`, :meth:`vsm.viewer.wrapper.dist_top_doc`
+
         """
         Q = self.model.top_doc / self.model.top_doc.sum(0)
 
@@ -524,18 +523,14 @@ class LdaCgsViewer(object):
     def dist_word_top(self, word_or_words, weights=[], filter_nan=True,
                       show_topics=True, print_len=10, as_strings=True, 
                       compact_view=True, dist_fn=JS_dist, order='i'):
-        """
-        Intuitively, the function sorts topics according to their 
-        "relevance" to the query `word_or_words`.
+        """Sorts topics according to their distance to the query
+        `word_or_words`.
         
-        Technically, it creates a pseudo-topic consisting of 
-        `word_or_words` and computes distances between that 
-        pseudo-topic and every topic.
-        
-        If weights are not provided, the word list is represented in
-        the space of topics as a topic which assigns equal non-zero
-        probability to each word in `words` and 0 to every other word
-        in the corpus. Otherwise, each word in `words` is assigned the
+        A pseudo-topic from `word_or_words` as follows. If weights are
+        not provided, the word list is represented in the space of
+        topics as a topic which assigns equal non-zero probability to
+        each word in `words` and 0 to every other word in the
+        corpus. Otherwise, each word in `words` is assigned the
         provided weight.
         
         :param word_or_words: word(s) to which distances are calculated
@@ -581,6 +576,7 @@ class LdaCgsViewer(object):
             with `word_or_words`.
         
         :See Also: :meth:`vsm.viewer.wrapper.dist_word_top`
+
         """
         Q = self.model.word_top / self.model.word_top.sum(0)
 
@@ -631,10 +627,11 @@ class LdaCgsViewer(object):
                      print_len=10, filter_nan=True, 
                      label_fn=def_label_fn, as_strings=True,
                      dist_fn=JS_dist, order='i'):
-        """
-        Computes and sorts the distances between a document 
-        or list of documents and every document in the topic space. 
-        :param doc_or_docs: Query document(s) to which distances are calculated.
+        """Computes and sorts the distances between a document 
+        or list of documents and every document in the topic space.
+ 
+        :param doc_or_docs: Query document(s) relative to which
+        distances are computed.
         :type doc_or_docs: string/integer or list of strings/integer.
 
         :param print_len: Number of words printed by pretty-printing function.
@@ -667,6 +664,7 @@ class LdaCgsViewer(object):
             `doc_or_docs`. 
         
         :See Also: :meth:`vsm.viewer.wrapper.dist_doc_doc`
+
         """
         Q = self.model.top_doc / self.model.top_doc.sum(0)
 
