@@ -34,6 +34,7 @@ setup(
               'vsm.model',
               'vsm.viewer',
               'vsm.extensions',
+              'vsm.exceptions',
     ],
     ext_modules = [
         Extension('_cgs_update', ['vsm/model/_cgs_update.c']),
