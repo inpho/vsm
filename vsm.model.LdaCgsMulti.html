@@ -155,9 +155,8 @@ for all contexts.</li>
 are printed out to notify the user. Default is <cite>True</cite>.</li>
 <li><strong>n_proc</strong> (<em>int, optional</em>) &#8211; Number of processors used for training. Default is
 2.</li>
-<li><strong>seeds</strong> (<em>list, optional</em>) &#8211; List of arbitrary starting points for each processors.
-The length of the list should be same as <cite>n_proc</cite>. If <cite>None</cite>,
-each threads start at a random seed. Default is <cite>None</cite>.</li>
+<li><strong>seeds</strong> (<em>list of integers, optional</em>) &#8211; List of random seeds, one for each thread.
+The length of the list should be same as <cite>n_proc</cite>. Default is <cite>None</cite>.</li>
 </ul>
 </td>
 </tr>

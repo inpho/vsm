@@ -131,7 +131,7 @@ classes using CGS.</p>
 
 <dl class="method">
 <dt id="vsm.viewer.LdaCgsViewer.dismat_doc">
-<tt class="descname">dismat_doc</tt><big>(</big><em>docs=</em><span class="optional">[</span><span class="optional">]</span>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dismat_doc" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dismat_doc</tt><big>(</big><em>docs=</em><span class="optional">[</span><span class="optional">]</span>, <em>dist_fn=&lt;function JS_dist at 0x2dcdf50&gt;</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dismat_doc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the distance matrix for a given list of documents.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -158,7 +158,7 @@ n x n matrix containing floats where n is the number of documents.</p>
 
 <dl class="method">
 <dt id="vsm.viewer.LdaCgsViewer.dismat_top">
-<tt class="descname">dismat_top</tt><big>(</big><em>topics=</em><span class="optional">[</span><span class="optional">]</span>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dismat_top" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dismat_top</tt><big>(</big><em>topics=</em><span class="optional">[</span><span class="optional">]</span>, <em>dist_fn=&lt;function JS_dist at 0x2dcdf50&gt;</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dismat_top" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the distance matrix for a given list of topics.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -186,7 +186,7 @@ topics considered.</p>
 
 <dl class="method">
 <dt id="vsm.viewer.LdaCgsViewer.dist_doc_doc">
-<tt class="descname">dist_doc_doc</tt><big>(</big><em>doc_or_docs</em>, <em>print_len=10</em>, <em>filter_nan=True</em>, <em>label_fn=&lt;function def_label_fn at 0x4142a28&gt;</em>, <em>as_strings=True</em>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_doc_doc" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dist_doc_doc</tt><big>(</big><em>doc_or_docs</em>, <em>print_len=10</em>, <em>filter_nan=True</em>, <em>label_fn=&lt;function def_label_fn at 0x2f4ca28&gt;</em>, <em>as_strings=True</em>, <em>dist_fn=&lt;function JS_dist at 0x2dcdf50&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_doc_doc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes and sorts the distances between a document 
 or list of documents and every document in the topic space.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -234,7 +234,7 @@ A 2-dim array containing documents and their distances to
 
 <dl class="method">
 <dt id="vsm.viewer.LdaCgsViewer.dist_top_doc">
-<tt class="descname">dist_top_doc</tt><big>(</big><em>topic_or_topics</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>filter_words=</em><span class="optional">[</span><span class="optional">]</span>, <em>print_len=10</em>, <em>as_strings=True</em>, <em>label_fn=&lt;function def_label_fn at 0x4142a28&gt;</em>, <em>filter_nan=True</em>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_top_doc" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dist_top_doc</tt><big>(</big><em>topic_or_topics</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>filter_words=</em><span class="optional">[</span><span class="optional">]</span>, <em>print_len=10</em>, <em>as_strings=True</em>, <em>label_fn=&lt;function def_label_fn at 0x2f4ca28&gt;</em>, <em>filter_nan=True</em>, <em>dist_fn=&lt;function JS_dist at 0x2dcdf50&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_top_doc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a topic or list of topics (by integer index) and returns
 a list of documents sorted by distance.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -278,7 +278,7 @@ to <cite>topic_or_topics</cite>.</p>
 
 <dl class="method">
 <dt id="vsm.viewer.LdaCgsViewer.dist_top_top">
-<tt class="descname">dist_top_top</tt><big>(</big><em>topic_or_topics</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em>, <em>order='i'</em>, <em>show_topics=True</em>, <em>print_len=10</em>, <em>filter_nan=True</em>, <em>as_strings=True</em>, <em>compact_view=True</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_top_top" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dist_top_top</tt><big>(</big><em>topic_or_topics</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>dist_fn=&lt;function JS_dist at 0x2dcdf50&gt;</em>, <em>order='i'</em>, <em>show_topics=True</em>, <em>print_len=10</em>, <em>filter_nan=True</em>, <em>as_strings=True</em>, <em>compact_view=True</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_top_top" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a topic or list of topics (by integer index) and returns
 a list of topics sorted by the distances between a given
 topic and every topic.</p>
@@ -323,7 +323,7 @@ A 2-dim array containing topics and their distances to
 
 <dl class="method">
 <dt id="vsm.viewer.LdaCgsViewer.dist_word_top">
-<tt class="descname">dist_word_top</tt><big>(</big><em>word_or_words</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>filter_nan=True</em>, <em>show_topics=True</em>, <em>print_len=10</em>, <em>as_strings=True</em>, <em>compact_view=True</em>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_word_top" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dist_word_top</tt><big>(</big><em>word_or_words</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>filter_nan=True</em>, <em>show_topics=True</em>, <em>print_len=10</em>, <em>as_strings=True</em>, <em>compact_view=True</em>, <em>dist_fn=&lt;function JS_dist at 0x2dcdf50&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_word_top" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sorts topics according to their distance to the query
 <cite>word_or_words</cite>.</p>
 <p>A pseudo-topic from <cite>word_or_words</cite> as follows. If weights are
