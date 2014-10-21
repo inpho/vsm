@@ -4,6 +4,8 @@ from setuptools import setup, Extension, Command, find_packages
 # find packages in vsm subdirectory
 # this will skip the unittests, etc.
 packages = ['vsm.'+pkg for pkg in find_packages('vsm')]
+packages.append('vsm')
+
 setup(
     name = "vsm",
     version = "0.2",
