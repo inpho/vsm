@@ -14,4 +14,4 @@ install:
   - pip install unidecode nltk
   - pip install .
 # command to run tests
-# script: 
+script: nosetests 
