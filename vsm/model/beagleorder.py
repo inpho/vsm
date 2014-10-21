@@ -7,8 +7,11 @@ import cPickle as cpickle
 import numpy as np
 from numpy import dual
 
-from vsm.model import BaseModel
-from vsm.linalg import rand_pt_unit_sphere
+from vsm.spatial import rand_pt_unit_sphere
+from base import BaseModel
+
+
+__all__ = ['BeagleOrderSeq', 'BeagleOrderMulti']
 
 
 
@@ -28,7 +31,6 @@ def two_rand_perm(n, seed=None):
     return perm1, perm2
 
 
-
 def mk_b_conv(n, rand_perm=None):
     """
     """
@@ -43,7 +45,6 @@ def mk_b_conv(n, rand_perm=None):
         return np.real_if_close(dual.ifft(w1 * w2))
 
     return b_conv
-
 
 
 def ngram_slices(i, n, l):
@@ -69,7 +70,6 @@ def ngram_slices(i, n, l):
         out.append(slice(start, stop))
 
     return out
-
 
 
 def reduce_ngrams(fn, a, n, i, flat=True):
@@ -102,55 +102,34 @@ def reduce_ngrams(fn, a, n, i, flat=True):
     return out
 
 
-
 class BeagleOrderSeq(BaseModel):
     """
     `BeagleOrderSeq` stores word order information in the context.
-
-    :param corpus: Soure of observed data.
-    :type corpus: Corpus object
-
-    :param env_matrix: BEAGLE environment matrix.
-    :type env_matrix: 2-D array
-
-    :param context_type: Name of tokenization stored in `corpus` whose
-        tokens will be treated as documents. Default is `sentence`.
-    :type context_type: string, optional
-
-    :param psi:  
-    :type psi: int, optional
-
-    :param rand_perm:  
-    :type rand_perm:  , optional
-
-    :param lmda:  
-    :type lmda: int, optional
-
-    :Attributes:
-        * **context_type** (string)
-            Name of tokenization whose tokens will be treated as documents.
-        * **sents** (list of arrays)
-            Tokens by `context_type` retrieved from `corpus`.
-        * **env_matrix** (2-D array)
-            BEAGLE environment matrix.
-        * **b_conv**
-
-        * **psi** 
-
-        * **lmda** (int)
-        
-        * **matrix**
-
-    :Methods:
-        * :doc:`bos_train`
-            Trains the model.
-
-    :See Also: :class:`vsm.model.BaseModel`
     """
 
     def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):
-        """
+        """ 
+        Initialize BeagleOrderSeq.
+        
+        :param corpus: Soure of observed data.
+        :type corpus: Corpus
+
+        :param env_matrix: BEAGLE environment matrix.
+        :type env_matrix: 2-D array
+
+        :param context_type: Name of tokenization stored in `corpus` whose
+            tokens will be treated as documents. Default is `sentence`.
+        :type context_type: string, optional
+
+        :param psi:  
+        :type psi: int, optional
+
+        :param rand_perm:  
+        :type rand_perm: boolean, optional
+
+        :param lmda:  
+        :type lmda: int, optional
         """
         self.context_type = context_type
         self.sents = corpus.view_contexts(context_type)
@@ -189,52 +168,30 @@ class BeagleOrderSeq(BaseModel):
 class BeagleOrderMulti(BaseModel):
     """
     `BeagleOrderSeq` stores word order information in the context.
-    
-    :param corpus: Source of observed data.
-    :type corpus: Corpus object
-
-    :param env_matrix: BEAGLE environement matrix.
-    :type env_matrix: 2-D array
-
-    :param context_type: Name of tokenization stored in `corpus` whose
-        tokens will be treated as documents. Default is `sentence`.
-    :type context_type: string, optional
-
-    :param psi:  
-    :type psi: optional
-
-    :param rand_perm:  
-    :type rand_perm: optional
-
-    :param lmda:  
-    :type lmda: int, optional
-
-    :Attributes:
-        * **context_type** (string)
-            Name of tokenization whose tokens will be treated as documents.
-        * **sents** (list of arrays)
-            Tokens by `context_type` retrieved from `corpus`.
-        * **env_matrix** (2-D array)
-            Beagle environment matrix.
-        * **b_conv**
-
-        * **psi** (int)
-
-        * **lmda** (int)
-
-        * **matrix**
-            
-    :Methods:
-        * :doc:`bom_train`
-            Trains the model.
-
-    :See Also: :class:`vsm.model.BaseModel`
     """
-
-
     def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):
-        """
+        """    
+        Initialize BeagleOrderMulti.
+
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+
+        :param env_matrix: BEAGLE environement matrix.
+        :type env_matrix: 2-D array
+
+        :param context_type: Name of tokenization stored in `corpus` whose
+            tokens will be treated as documents. Default is `sentence`.
+        :type context_type: string, optional
+
+        :param psi:  
+        :type psi: int, optional
+
+        :param rand_perm:  
+        :type rand_perm: boolean, optional
+
+        :param lmda:  
+        :type lmda: int, optional
         """
         self.context_type = context_type
         self.sents = corpus.view_contexts(context_type)
@@ -309,7 +266,6 @@ class BeagleOrderMulti(BaseModel):
             shutil.rmtree(tmp_dir)
         
 
-
 def mpfn((sents, filename)):
     """
     """
@@ -338,4 +294,3 @@ def mpfn((sents, filename)):
         cpickle.dump(result, f)
 
     return filename
-

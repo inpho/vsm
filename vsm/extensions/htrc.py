@@ -10,8 +10,8 @@ from unidecode import unidecode
 from nltk.corpus import wordnet as wn
 import enchant
 
-from vsm.corpus.util import filter_by_suffix
-from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
+from vsm.extensions.corpusbuilders.util import filter_by_suffix
+
 
 
 def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
@@ -429,7 +429,7 @@ def url_metadata(corpus, ctx_type, coll_dir):
     """
     Returns a list of urls whose order matches with the existing metadata.
     It creates url metadata that can be added to a Corpus object with
-    add_metadata function in vsm.corpus.util.
+    add_metadata function in vsm.ext.corpusbuilders.util.
 
     :param corpus: Corpus to add url metadata to. Urls match with the existing
         metadata of `corpus`.

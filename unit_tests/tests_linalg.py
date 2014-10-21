@@ -7,6 +7,17 @@ from vsm.linalg import *
 
 class TestLinalg(unittest.TestCase):
 
+    def test_KL_div(self):
+        
+        p = np.array([0,1])
+        Q = np.array([[0,1],
+                      [.5,.5],
+                      [1,0]])
+        
+        exp = np.array([np.inf, 1, 0])
+
+        self.assertTrue(np.allclose(exp, KL_div(p,Q)))
+
     def test_row_normalize(self):
 
         m = np.random.random((5,7))
