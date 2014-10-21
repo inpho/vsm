@@ -1,0 +1,230 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>vsm.model.LdaCgsMulti &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="vsm.model" href="vsm.model.html" />
+    <link rel="next" title="vsm.model.Lsa" href="vsm.model.Lsa.html" />
+    <link rel="prev" title="vsm.model.LdaCgsSeq" href="vsm.model.LdaCgsSeq.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vsm.model.Lsa.html" title="vsm.model.Lsa"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="vsm.model.LdaCgsSeq.html" title="vsm.model.LdaCgsSeq"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="vsm.model.html" accesskey="U">vsm.model</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="vsm-model-ldacgsmulti">
+<h1>vsm.model.LdaCgsMulti<a class="headerlink" href="#vsm-model-ldacgsmulti" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="vsm.model.LdaCgsMulti">
+<em class="property">class </em><tt class="descclassname">vsm.model.</tt><tt class="descname">LdaCgsMulti</tt><big>(</big><em>corpus=None</em>, <em>context_type=None</em>, <em>K=20</em>, <em>V=0</em>, <em>alpha=</em><span class="optional">[</span><span class="optional">]</span>, <em>beta=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#vsm.model.LdaCgsMulti" title="Permalink to this definition">¶</a></dt>
+<dd><p>An implementation of LDA using collapsed Gibbs sampling with multi-processing.</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.model.LdaCgsMulti.__init__" title="vsm.model.LdaCgsMulti.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>([corpus,&nbsp;context_type,&nbsp;K,&nbsp;V,&nbsp;...])</td>
+<td>Initialize LdaCgsMulti.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.model.LdaCgsMulti.load" title="vsm.model.LdaCgsMulti.load"><tt class="xref py py-obj docutils literal"><span class="pre">load</span></tt></a>(filename)</td>
+<td>A static method for loading a saved LdaCgsMulti model.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.model.LdaCgsMulti.save" title="vsm.model.LdaCgsMulti.save"><tt class="xref py py-obj docutils literal"><span class="pre">save</span></tt></a>(filename)</td>
+<td>Saves the model in an <cite>.npz</cite> file.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.model.LdaCgsMulti.train" title="vsm.model.LdaCgsMulti.train"><tt class="xref py py-obj docutils literal"><span class="pre">train</span></tt></a>([n_iterations,&nbsp;verbose,&nbsp;n_proc,&nbsp;seeds])</td>
+<td>Takes an optional argument, <cite>n_iterations</cite> and updates the model <cite>n_iterations</cite> times.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="vsm.model.LdaCgsMulti.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>corpus=None</em>, <em>context_type=None</em>, <em>K=20</em>, <em>V=0</em>, <em>alpha=</em><span class="optional">[</span><span class="optional">]</span>, <em>beta=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#vsm.model.LdaCgsMulti.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize LdaCgsMulti.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>corpus</strong> (<cite>Corpus</cite>) &#8211; Source of observed data.</li>
+<li><strong>context_type</strong> (<em>string, optional</em>) &#8211; Name of tokenization stored in <cite>corpus</cite> whose tokens
+will be treated as documents.</li>
+<li><strong>K</strong> (<em>int, optional</em>) &#8211; Number of topics. Default is <cite>20</cite>.</li>
+<li><strong>beta</strong> (<em>list, optional</em>) &#8211; Topic priors. Default is 0.01 for all topics.</li>
+<li><strong>alpha</strong> (<em>list, optional</em>) &#8211; Context priors. Default is a flat prior of 0.01 
+for all contexts.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="vsm.model.LdaCgsMulti.load">
+<em class="property">static </em><tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#vsm.model.LdaCgsMulti.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>A static method for loading a saved LdaCgsMulti model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; Name of a saved model to be loaded.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">m : LdaCgsMulti object</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">numpy.load</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.model.LdaCgsMulti.save">
+<tt class="descname">save</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#vsm.model.LdaCgsMulti.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the model in an <cite>.npz</cite> file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; Name of a saved model to be loaded.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">See Also:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">numpy.savez</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.model.LdaCgsMulti.train">
+<tt class="descname">train</tt><big>(</big><em>n_iterations=500</em>, <em>verbose=True</em>, <em>n_proc=2</em>, <em>seeds=None</em><big>)</big><a class="headerlink" href="#vsm.model.LdaCgsMulti.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an optional argument, <cite>n_iterations</cite> and updates the model
+<cite>n_iterations</cite> times.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_iterations</strong> (<em>int, optional</em>) &#8211; Number of iterations. Default is 500.</li>
+<li><strong>verbose</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, current number of iterations
+are printed out to notify the user. Default is <cite>True</cite>.</li>
+<li><strong>n_proc</strong> (<em>int, optional</em>) &#8211; Number of processors used for training. Default is
+2.</li>
+<li><strong>seeds</strong> (<em>list, optional</em>) &#8211; List of arbitrary starting points for each processors.
+The length of the list should be same as <cite>n_proc</cite>. If <cite>None</cite>,
+each threads start at a random seed. Default is <cite>None</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="vsm.model.LdaCgsSeq.html"
+                        title="previous chapter">vsm.model.LdaCgsSeq</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="vsm.model.Lsa.html"
+                        title="next chapter">vsm.model.Lsa</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/vsm.model.LdaCgsMulti.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vsm.model.Lsa.html" title="vsm.model.Lsa"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="vsm.model.LdaCgsSeq.html" title="vsm.model.LdaCgsSeq"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="vsm.model.html" >vsm.model</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

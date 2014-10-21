@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>vsm.viewer.BeagleViewer &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="vsm.viewer" href="vsm.viewer.html" />
+    <link rel="next" title="vsm.viewer.LdaCgsViewer" href="vsm.viewer.LdaCgsViewer.html" />
+    <link rel="prev" title="vsm.viewer.TfViewer" href="vsm.viewer.TfViewer.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vsm.viewer.LdaCgsViewer.html" title="vsm.viewer.LdaCgsViewer"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="vsm.viewer.TfViewer.html" title="vsm.viewer.TfViewer"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="vsm.viewer.html" accesskey="U">vsm.viewer</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="vsm-viewer-beagleviewer">
+<h1>vsm.viewer.BeagleViewer<a class="headerlink" href="#vsm-viewer-beagleviewer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="vsm.viewer.BeagleViewer">
+<em class="property">class </em><tt class="descclassname">vsm.viewer.</tt><tt class="descname">BeagleViewer</tt><big>(</big><em>corpus</em>, <em>model</em><big>)</big><a class="headerlink" href="#vsm.viewer.BeagleViewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for viewing BEAGLE models.</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.viewer.BeagleViewer.__init__" title="vsm.viewer.BeagleViewer.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(corpus,&nbsp;model)</td>
+<td>Initialize BeagleViewer.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.viewer.BeagleViewer.dismat_word" title="vsm.viewer.BeagleViewer.dismat_word"><tt class="xref py py-obj docutils literal"><span class="pre">dismat_word</span></tt></a>(word_list[,&nbsp;dist_fn])</td>
+<td>Calculates a distance matrix for a given list of words.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.viewer.BeagleViewer.dist_word_word" title="vsm.viewer.BeagleViewer.dist_word_word"><tt class="xref py py-obj docutils literal"><span class="pre">dist_word_word</span></tt></a>(word_or_words[,&nbsp;weights,&nbsp;...])</td>
+<td>Computes and sorts the distances between word(s) and every word.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="vsm.viewer.BeagleViewer.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>corpus</em>, <em>model</em><big>)</big><a class="headerlink" href="#vsm.viewer.BeagleViewer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize BeagleViewer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>corpus</strong> (<tt class="xref py py-class docutils literal"><span class="pre">Corpus</span></tt>) &#8211; Source of observed data.</li>
+<li><strong>model</strong> (<em>BEAGLE model</em>) &#8211; One of the Beagle objects.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.BeagleViewer.dismat_word">
+<tt class="descname">dismat_word</tt><big>(</big><em>word_list</em>, <em>dist_fn=&lt;function angle at 0x3fd6c80&gt;</em><big>)</big><a class="headerlink" href="#vsm.viewer.BeagleViewer.dismat_word" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a distance matrix for a given list of words.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>word_list</strong> (<em>list of strings</em>) &#8211; A list of words whose distance matrix is to be
+computed.</li>
+<li><strong>dist_fn</strong> (<em>string, optional</em>) &#8211; A distance function from functions in vsm.spatial. 
+Default is <tt class="xref py py-meth docutils literal"><span class="pre">angle()</span></tt>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an instance of <tt class="xref py py-class docutils literal"><span class="pre">IndexedSymmArray</span></tt>.
+A n x n matrix containing floats where n is the number of words
+in <cite>word_list</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><tt class="xref py py-meth docutils literal"><span class="pre">vsm.viewer.wrappers.dismat_word()</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.BeagleViewer.dist_word_word">
+<tt class="descname">dist_word_word</tt><big>(</big><em>word_or_words</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>filter_nan=True</em>, <em>print_len=10</em>, <em>as_strings=True</em>, <em>dist_fn=&lt;function angle at 0x3fd6c80&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.BeagleViewer.dist_word_word" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes and sorts the distances between word(s) and every word.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>word_or_words</strong> (<em>string or list of strings</em>) &#8211; Query word(s) to which distances are calculated.</li>
+<li><strong>weights</strong> (<em>list of floating point, optional</em>) &#8211; Specify weights for each query word in <cite>word_or_words</cite>. 
+Default uses equal weights (i.e. arithmetic mean)</li>
+<li><strong>filter_nan</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite> not a number entries are filtered.
+Default is <cite>True</cite>.</li>
+<li><strong>print_len</strong> (<em>int, optional</em>) &#8211; Number of words to be displayed. Default is 10.</li>
+<li><strong>as_strings</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, returns a list of words as strings rather
+than their integer representations. Default is <cite>True</cite>.</li>
+<li><strong>dist_fn</strong> (<em>string, optional</em>) &#8211; A distance function from functions in vsm.spatial. 
+Default is <tt class="xref py py-meth docutils literal"><span class="pre">angle()</span></tt>.</li>
+<li><strong>order</strong> (<em>string, optional</em>) &#8211; Order of sorting. &#8216;i&#8217; for increasing and &#8216;d&#8217; for
+decreasing order. Default is &#8216;i&#8217;.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an instance of <tt class="xref py py-class docutils literal"><span class="pre">LabeledColumn</span></tt>.
+A 2-dim array containing words and their distances to 
+<cite>word_or_words</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><tt class="xref py py-meth docutils literal"><span class="pre">vsm.viewer.wrappers.dist_word_word()</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="vsm.viewer.TfViewer.html"
+                        title="previous chapter">vsm.viewer.TfViewer</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="vsm.viewer.LdaCgsViewer.html"
+                        title="next chapter">vsm.viewer.LdaCgsViewer</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/vsm.viewer.BeagleViewer.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vsm.viewer.LdaCgsViewer.html" title="vsm.viewer.LdaCgsViewer"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="vsm.viewer.TfViewer.html" title="vsm.viewer.TfViewer"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="vsm.viewer.html" >vsm.viewer</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

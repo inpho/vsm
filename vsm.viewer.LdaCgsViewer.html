@@ -1,0 +1,590 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>vsm.viewer.LdaCgsViewer &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="vsm.viewer" href="vsm.viewer.html" />
+    <link rel="next" title="vsm.viewer.LsaViewer" href="vsm.viewer.LsaViewer.html" />
+    <link rel="prev" title="vsm.viewer.BeagleViewer" href="vsm.viewer.BeagleViewer.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vsm.viewer.LsaViewer.html" title="vsm.viewer.LsaViewer"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="vsm.viewer.BeagleViewer.html" title="vsm.viewer.BeagleViewer"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="vsm.viewer.html" accesskey="U">vsm.viewer</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="vsm-viewer-ldacgsviewer">
+<h1>vsm.viewer.LdaCgsViewer<a class="headerlink" href="#vsm-viewer-ldacgsviewer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="vsm.viewer.LdaCgsViewer">
+<em class="property">class </em><tt class="descclassname">vsm.viewer.</tt><tt class="descname">LdaCgsViewer</tt><big>(</big><em>corpus</em>, <em>model</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for viewing a topic model estimated by one of vsm&#8217;s LDA
+classes using CGS.</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.__init__" title="vsm.viewer.LdaCgsViewer.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(corpus,&nbsp;model)</td>
+<td>Initialize LdaCgsViewer.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.dismat_doc" title="vsm.viewer.LdaCgsViewer.dismat_doc"><tt class="xref py py-obj docutils literal"><span class="pre">dismat_doc</span></tt></a>([docs,&nbsp;dist_fn])</td>
+<td>Calculates the distance matrix for a given list of documents.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.dismat_top" title="vsm.viewer.LdaCgsViewer.dismat_top"><tt class="xref py py-obj docutils literal"><span class="pre">dismat_top</span></tt></a>([topics,&nbsp;dist_fn])</td>
+<td>Calculates the distance matrix for a given list of topics.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.dist_doc_doc" title="vsm.viewer.LdaCgsViewer.dist_doc_doc"><tt class="xref py py-obj docutils literal"><span class="pre">dist_doc_doc</span></tt></a>(doc_or_docs[,&nbsp;print_len,&nbsp;...])</td>
+<td>Computes and sorts the distances between a document  or list of documents and every document in the topic space.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.dist_top_doc" title="vsm.viewer.LdaCgsViewer.dist_top_doc"><tt class="xref py py-obj docutils literal"><span class="pre">dist_top_doc</span></tt></a>(topic_or_topics[,&nbsp;weights,&nbsp;...])</td>
+<td>Takes a topic or list of topics (by integer index) and returns a list of documents sorted by distance.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.dist_top_top" title="vsm.viewer.LdaCgsViewer.dist_top_top"><tt class="xref py py-obj docutils literal"><span class="pre">dist_top_top</span></tt></a>(topic_or_topics[,&nbsp;weights,&nbsp;...])</td>
+<td>Takes a topic or list of topics (by integer index) and returns a list of topics sorted by the distances between a given topic and every topic.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.dist_word_top" title="vsm.viewer.LdaCgsViewer.dist_word_top"><tt class="xref py py-obj docutils literal"><span class="pre">dist_word_top</span></tt></a>(word_or_words[,&nbsp;weights,&nbsp;...])</td>
+<td>Sorts topics according to their distance to the query <cite>word_or_words</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.doc_topics" title="vsm.viewer.LdaCgsViewer.doc_topics"><tt class="xref py py-obj docutils literal"><span class="pre">doc_topics</span></tt></a>(doc_or_docs[,&nbsp;sort_by_entropy,&nbsp;...])</td>
+<td>Returns the distribution over topics for the given documents.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.logp_plot" title="vsm.viewer.LdaCgsViewer.logp_plot"><tt class="xref py py-obj docutils literal"><span class="pre">logp_plot</span></tt></a>([range,&nbsp;step,&nbsp;show,&nbsp;grid])</td>
+<td>Returns a plot of log probabilities for the specified range of</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.topic_entropies" title="vsm.viewer.LdaCgsViewer.topic_entropies"><tt class="xref py py-obj docutils literal"><span class="pre">topic_entropies</span></tt></a>([print_len])</td>
+<td>Returns the entropies of the topics of the model as an array sorted</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.topic_hist" title="vsm.viewer.LdaCgsViewer.topic_hist"><tt class="xref py py-obj docutils literal"><span class="pre">topic_hist</span></tt></a>([topic_indices,&nbsp;d_indices,&nbsp;show])</td>
+<td>Draws a histogram showing the proportion of topics within a set of documents specified by d_indices.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.topics" title="vsm.viewer.LdaCgsViewer.topics"><tt class="xref py py-obj docutils literal"><span class="pre">topics</span></tt></a>([print_len,&nbsp;topic_indices,&nbsp;...])</td>
+<td>Returns a list of topics estimated by the model.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.viewer.LdaCgsViewer.word_topics" title="vsm.viewer.LdaCgsViewer.word_topics"><tt class="xref py py-obj docutils literal"><span class="pre">word_topics</span></tt></a>(word[,&nbsp;as_strings])</td>
+<td>Searches for every occurrence of <cite>word</cite> in the entire corpus and returns</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>corpus</em>, <em>model</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize LdaCgsViewer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>corpus</strong> (<tt class="xref py py-class docutils literal"><span class="pre">Corpus</span></tt>) &#8211; Source of observed data.</li>
+<li><strong>model</strong> (<em>LdaCgsSeq</em>) &#8211; An LDA model estimated by a CGS.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.dismat_doc">
+<tt class="descname">dismat_doc</tt><big>(</big><em>docs=</em><span class="optional">[</span><span class="optional">]</span>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dismat_doc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the distance matrix for a given list of documents.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>docs</strong> (<em>list, optional</em>) &#8211; A list of documents whose distance matrix is to be computed.
+Default is all the documents in the model.</li>
+<li><strong>dist_fn</strong> (<em>string, optional</em>) &#8211; A distance function from functions in vsm.spatial. 
+Default is <tt class="xref py py-meth docutils literal"><span class="pre">JS_dist()</span></tt>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an instance of <tt class="xref py py-class docutils literal"><span class="pre">IndexedSymmArray</span></tt>.
+n x n matrix containing floats where n is the number of documents.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><tt class="xref py py-meth docutils literal"><span class="pre">vsm.viewer.wrapper.dismat_documents()</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.dismat_top">
+<tt class="descname">dismat_top</tt><big>(</big><em>topics=</em><span class="optional">[</span><span class="optional">]</span>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dismat_top" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the distance matrix for a given list of topics.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topic_indices</strong> (<em>list, optional</em>) &#8211; A list of topics whose distance matrix is to be
+computed. Default is all topics in the model.</li>
+<li><strong>dist_fn</strong> (<em>string, optional</em>) &#8211; A distance function from functions in vsm.spatial. 
+Default is <tt class="xref py py-meth docutils literal"><span class="pre">JS_dist()</span></tt>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an instance of <tt class="xref py py-class docutils literal"><span class="pre">IndexedSymmArray</span></tt>.
+n x n matrix containing floats where n is the number of
+topics considered.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><tt class="xref py py-meth docutils literal"><span class="pre">vsm.viewer.wrapper.dismat_top()</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.dist_doc_doc">
+<tt class="descname">dist_doc_doc</tt><big>(</big><em>doc_or_docs</em>, <em>print_len=10</em>, <em>filter_nan=True</em>, <em>label_fn=&lt;function def_label_fn at 0x4142a28&gt;</em>, <em>as_strings=True</em>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_doc_doc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes and sorts the distances between a document 
+or list of documents and every document in the topic space.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>doc_or_docs</strong> &#8211; Query document(s) relative to which</td>
+</tr>
+</tbody>
+</table>
+<p>distances are computed.
+:type doc_or_docs: string/integer or list of strings/integer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>print_len</strong> (<em>int, optional</em>) &#8211; Number of words printed by pretty-printing function.
+Default is 10.</li>
+<li><strong>filter_nan</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite> not a number entries are filtered.
+Default is <cite>True</cite>.</li>
+<li><strong>label_fn</strong> (<em>string, optional</em>) &#8211; A function that defines how documents are represented.
+Default is def_label_fn which retrieves the labels from corpus
+metadata.</li>
+<li><strong>as_strings</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, returns a list of words rather than
+their integer representations. Default is <cite>True</cite>.</li>
+<li><strong>dist_fn</strong> (<em>string, optional</em>) &#8211; A distance function from functions in vsm.spatial. 
+Default is <tt class="xref py py-meth docutils literal"><span class="pre">JS_dist()</span></tt>.</li>
+<li><strong>order</strong> (<em>string, optional</em>) &#8211; Order of sorting. &#8216;i&#8217; for increasing and &#8216;d&#8217; for
+decreasing order. Default is &#8216;i&#8217;.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an instance of <cite>LabeledColumn</cite>.
+A 2-dim array containing documents and their distances to 
+<cite>doc_or_docs</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><tt class="xref py py-meth docutils literal"><span class="pre">vsm.viewer.wrapper.dist_doc_doc()</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.dist_top_doc">
+<tt class="descname">dist_top_doc</tt><big>(</big><em>topic_or_topics</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>filter_words=</em><span class="optional">[</span><span class="optional">]</span>, <em>print_len=10</em>, <em>as_strings=True</em>, <em>label_fn=&lt;function def_label_fn at 0x4142a28&gt;</em>, <em>filter_nan=True</em>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_top_doc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a topic or list of topics (by integer index) and returns
+a list of documents sorted by distance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topic_or_topics</strong> (<em>string or list of strings</em>) &#8211; Query topic(s) relative to which
+distances are computed.</li>
+<li><strong>weights</strong> (<em>list of floating point, optional</em>) &#8211; Specify weights for each topic in <cite>topic_or_topics</cite>. 
+Default uses equal weights (i.e. arithmetic mean)</li>
+<li><strong>filter_words</strong> (<em>list of words, optional</em>) &#8211; The topics that include these words are considered.
+If not provided, by default all topics are considered.</li>
+<li><strong>print_len</strong> (<em>int, optional</em>) &#8211; Number of documents printed by pretty-pringing function
+Default is 10.</li>
+<li><strong>as_strings</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, returns a list of documents as strings rather
+than their integer representations. Default is <cite>True</cite>.</li>
+<li><strong>label_fn</strong> (<em>string, optional</em>) &#8211; A function that defines how documents are represented.
+Default is def_label_fn which retrieves the labels from corpus
+metadata.</li>
+<li><strong>filter_nan</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite> not a number entries are filtered.
+Default is <cite>True</cite>.</li>
+<li><strong>dist_fn</strong> (<em>string, optional</em>) &#8211; A distance function from functions in vsm.spatial. 
+Default is <tt class="xref py py-meth docutils literal"><span class="pre">JS_dist()</span></tt>.</li>
+<li><strong>order</strong> (<em>string, optional</em>) &#8211; Order of sorting. &#8216;i&#8217; for increasing and &#8216;d&#8217; for
+decreasing order. Default is &#8216;i&#8217;.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an instance of <tt class="xref py py-class docutils literal"><span class="pre">LabeledColumn</span></tt>.
+A 2-dim array containing documents and their posterior probabilities 
+to <cite>topic_or_topics</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><tt class="xref py py-meth docutils literal"><span class="pre">def_label_fn()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">vsm.viewer.wrapper.dist_top_doc()</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.dist_top_top">
+<tt class="descname">dist_top_top</tt><big>(</big><em>topic_or_topics</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em>, <em>order='i'</em>, <em>show_topics=True</em>, <em>print_len=10</em>, <em>filter_nan=True</em>, <em>as_strings=True</em>, <em>compact_view=True</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_top_top" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a topic or list of topics (by integer index) and returns
+a list of topics sorted by the distances between a given
+topic and every topic.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topic_or_topics</strong> (<em>integer or list of integers</em>) &#8211; Query topic(s) to which distances are calculated.</li>
+<li><strong>weights</strong> (<em>list of floating point, optional</em>) &#8211; Specify weights for each topic in <cite>topic_or_topics</cite>. 
+Default uses equal weights (i.e. arithmetic mean)</li>
+<li><strong>show_topics</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, topics are represented by their number
+and distribution over words. Otherwise only topic numbers
+are shown. Default is <cite>True</cite>.</li>
+<li><strong>print_len</strong> (<em>int, optional</em>) &#8211; Number of topics to be shown. Default is 10.</li>
+<li><strong>filter_nan</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite> not a number entries are filtered.
+Default is <cite>True</cite>.</li>
+<li><strong>dist_fn</strong> (<em>string, optional</em>) &#8211; A distance function from functions in vsm.spatial. 
+Default is <tt class="xref py py-meth docutils literal"><span class="pre">JS_dist()</span></tt>.</li>
+<li><strong>order</strong> (<em>string, optional</em>) &#8211; Order of sorting. &#8216;i&#8217; for increasing and &#8216;d&#8217; for
+decreasing order. Default is &#8216;i&#8217;.</li>
+<li><strong>as_strings</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, words of each topic are represented as
+strings. Otherwise they are represented by their integer
+representation. Default is <cite>True</cite>.</li>
+<li><strong>compact_view</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, topics are simply represented as
+their top <cite>print_len</cite> number of words. Otherwise, topics are
+shown as words and their probabilities. Default is <cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an instance of <tt class="xref py py-class docutils literal"><span class="pre">LabeledColumn</span></tt>.
+A 2-dim array containing topics and their distances to 
+<cite>topic_or_topics</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><tt class="xref py py-meth docutils literal"><span class="pre">vsm.viewer.wrapper.dist_top_top()</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.dist_word_top">
+<tt class="descname">dist_word_top</tt><big>(</big><em>word_or_words</em>, <em>weights=</em><span class="optional">[</span><span class="optional">]</span>, <em>filter_nan=True</em>, <em>show_topics=True</em>, <em>print_len=10</em>, <em>as_strings=True</em>, <em>compact_view=True</em>, <em>dist_fn=&lt;function JS_dist at 0x3fd6f50&gt;</em>, <em>order='i'</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.dist_word_top" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts topics according to their distance to the query
+<cite>word_or_words</cite>.</p>
+<p>A pseudo-topic from <cite>word_or_words</cite> as follows. If weights are
+not provided, the word list is represented in the space of
+topics as a topic which assigns equal non-zero probability to
+each word in <cite>words</cite> and 0 to every other word in the
+corpus. Otherwise, each word in <cite>words</cite> is assigned the
+provided weight.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>word_or_words</strong> (<em>string or list of strings</em>) &#8211; word(s) to which distances are calculated</li>
+<li><strong>weights</strong> (<em>list of floating point, optional</em>) &#8211; Specify weights for each query word in <cite>word_or_words</cite>. 
+Default uses equal weights.</li>
+<li><strong>filter_nan</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite> not a number entries are filtered.
+Default is <cite>True</cite>.</li>
+<li><strong>show_topics</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, topics are represented by their number
+and distribution over words. Otherwise, only topic numbers
+are shown. Default is <cite>True</cite>.</li>
+<li><strong>print_len</strong> (<em>int, optional</em>) &#8211; Number of words printed by pretty-printing function.
+Default is 10.</li>
+<li><strong>as_strings</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, words of each topic are represented as
+strings. Otherwise they are represented by their integer 
+representation. Default is <cite>True</cite>.</li>
+<li><strong>compact_view</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, topics are simply represented as
+their top <cite>print_len</cite> number of words. Otherwise, topics are
+shown as words and their probabilities. Default is <cite>True</cite>.</li>
+<li><strong>dist_fn</strong> (<em>string, optional</em>) &#8211; A distance function from functions in vsm.spatial. 
+Default is <tt class="xref py py-meth docutils literal"><span class="pre">JS_dist()</span></tt>.</li>
+<li><strong>order</strong> (<em>string, optional</em>) &#8211; Order of sorting. &#8216;i&#8217; for increasing and &#8216;d&#8217; for
+decreasing order. Default is &#8216;i&#8217;.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an instance of <tt class="xref py py-class docutils literal"><span class="pre">LabeledColumn</span></tt>.
+A structured array of topics sorted by their distances 
+with <cite>word_or_words</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last"><tt class="xref py py-meth docutils literal"><span class="pre">vsm.viewer.wrapper.dist_word_top()</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.doc_topics">
+<tt class="descname">doc_topics</tt><big>(</big><em>doc_or_docs</em>, <em>sort_by_entropy=False</em>, <em>compact_view=False</em>, <em>aggregate=False</em>, <em>print_len=10</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.doc_topics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the distribution over topics for the given documents.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>int or string</em>) &#8211; Specifies the document whose distribution over topics is 
+returned. It can either be the ID number (integer) or the 
+name (string) of the document.</li>
+<li><strong>print_len</strong> (<em>int, optional</em>) &#8211; Number of topics to be printed. Default is 10.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an instance of <tt class="xref py py-class docutils literal"><span class="pre">LabeledColumn</span></tt> or of :class: <cite>DataTable</cite>.
+An structured array of topics (represented by their
+number) and their corresponding probabilities or a list of
+such arrays.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.logp_plot">
+<tt class="descname">logp_plot</tt><big>(</big><em>range=</em><span class="optional">[</span><span class="optional">]</span>, <em>step=1</em>, <em>show=True</em>, <em>grid=True</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.logp_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a plot of log probabilities for the specified range of 
+the MCMC chain used to fit a topic model by <cite>LDAGibbs</cite>.
+The function requires matplotlib package.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>range</strong> (<em>list of integers, optional</em>) &#8211; Specifies the range of the MCMC chain whose log probabilites 
+are to be plotted. For example, range = [0, 999] plots log 
+probabilities from the 1st to the 1000th iterations. 
+The length of the list must be exactly two, and the first 
+element must be smaller than the second which can not exceed 
+the total length of the MCMC chain.
+Default produces the plot for the entire chain.</li>
+<li><strong>step</strong> (<em>int, optional</em>) &#8211; Steps by which points are plotted. Default is 1.</li>
+<li><strong>show</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, the function actually draws the plot 
+in addition to returning a plot object. Default is <cite>True</cite>.</li>
+<li><strong>grid</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite> draw a grid. Default is <cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an instance of matplotlib.pyplot object.
+Contains the log probability plot.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.topic_entropies">
+<tt class="descname">topic_entropies</tt><big>(</big><em>print_len=10</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.topic_entropies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the entropies of the topics of the model as an array sorted
+by entropy.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.topic_hist">
+<tt class="descname">topic_hist</tt><big>(</big><em>topic_indices=None</em>, <em>d_indices=</em><span class="optional">[</span><span class="optional">]</span>, <em>show=True</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.topic_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws a histogram showing the proportion of topics within a set of
+documents specified by d_indices.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topic_indices</strong> &#8211; Specifies the topics for which proportions are 
+calculated. Default is all topics.</li>
+<li><strong>d_indices</strong> (<em>boolean, optional</em>) &#8211; Specifies the document for which topic proportions
+are calculated. Default is all documents.</li>
+<li><strong>show</strong> &#8211; shows plot if <cite>True</cite>. Default is <cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an instance of matplotlib.pyplot object.
+Contains the topic proportion histogram.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.topics">
+<tt class="descname">topics</tt><big>(</big><em>print_len=10</em>, <em>topic_indices=None</em>, <em>sort_by_entropy=False</em>, <em>as_strings=True</em>, <em>compact_view=False</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.topics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of topics estimated by the model. 
+Each topic is represented by a list of words and the corresponding 
+probabilities.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>topic_indices</strong> (<em>list of integers</em>) &#8211; List of indices of topics to be
+displayed. Default is all topics.</li>
+<li><strong>sort_by_entropy</strong> (<em>boolean, optional</em>) &#8211; Sorts topics by entropies. Default is False.</li>
+<li><strong>print_len</strong> (<em>int, optional</em>) &#8211; Number of words shown for each topic. Default is 10.</li>
+<li><strong>as_string</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, each topic displays words rather than its
+integer representation. Default is <cite>True</cite>.</li>
+<li><strong>compact_view</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, topics are simply represented as
+their top <cite>print_len</cite> number of words. Otherwise, topics are
+shown as words and their probabilities. Default is <cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an instance of <tt class="xref py py-class docutils literal"><span class="pre">DataTable</span></tt>.
+A structured array of topics.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.viewer.LdaCgsViewer.word_topics">
+<tt class="descname">word_topics</tt><big>(</big><em>word</em>, <em>as_strings=True</em><big>)</big><a class="headerlink" href="#vsm.viewer.LdaCgsViewer.word_topics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches for every occurrence of <cite>word</cite> in the entire corpus and returns 
+a list each row of which contains the name or ID number of document, 
+the relative position in the document, and the assigned topic number 
+for each occurrence of <cite>word</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>word</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; The word for which the search is performed.</li>
+<li><strong>as_strings</strong> (<em>boolean, optional</em>) &#8211; If <cite>True</cite>, returns document names rather than 
+ID numbers. Default is <cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an instance of <tt class="xref py py-class docutils literal"><span class="pre">LabeledColumn</span></tt>.
+A structured array consisting of three columns. Each column 
+is a list of:
+(1) name/ID of document containing <cite>word</cite>
+(2) relative position of <cite>word</cite> in the document
+(3) Topic number assigned to the token.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="vsm.viewer.BeagleViewer.html"
+                        title="previous chapter">vsm.viewer.BeagleViewer</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="vsm.viewer.LsaViewer.html"
+                        title="next chapter">vsm.viewer.LsaViewer</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/vsm.viewer.LdaCgsViewer.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vsm.viewer.LsaViewer.html" title="vsm.viewer.LsaViewer"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="vsm.viewer.BeagleViewer.html" title="vsm.viewer.BeagleViewer"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="vsm.viewer.html" >vsm.viewer</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

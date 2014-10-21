@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>vsm.model.BeagleContextMulti &mdash; vsm 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="vsm 0.1 documentation" href="index.html" />
+    <link rel="up" title="vsm.model" href="vsm.model.html" />
+    <link rel="next" title="vsm.model.BeagleContextSeq" href="vsm.model.BeagleContextSeq.html" />
+    <link rel="prev" title="vsm.model.BeagleComposite" href="vsm.model.BeagleComposite.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vsm.model.BeagleContextSeq.html" title="vsm.model.BeagleContextSeq"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="vsm.model.BeagleComposite.html" title="vsm.model.BeagleComposite"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="vsm.model.html" accesskey="U">vsm.model</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="vsm-model-beaglecontextmulti">
+<h1>vsm.model.BeagleContextMulti<a class="headerlink" href="#vsm-model-beaglecontextmulti" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="vsm.model.BeagleContextMulti">
+<em class="property">class </em><tt class="descclassname">vsm.model.</tt><tt class="descname">BeagleContextMulti</tt><big>(</big><em>corpus</em>, <em>env_corpus</em>, <em>env_matrix</em>, <em>context_type='sentence'</em><big>)</big><a class="headerlink" href="#vsm.model.BeagleContextMulti" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.model.BeagleContextMulti.__init__" title="vsm.model.BeagleContextMulti.__init__"><tt class="xref py py-obj docutils literal"><span class="pre">__init__</span></tt></a>(corpus,&nbsp;env_corpus,&nbsp;env_matrix[,&nbsp;...])</td>
+<td>Initialize BeagleContextMulti.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.model.BeagleContextMulti.load" title="vsm.model.BeagleContextMulti.load"><tt class="xref py py-obj docutils literal"><span class="pre">load</span></tt></a>(f)</td>
+<td>Takes a filename or file object and loads it as an npz archive</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#vsm.model.BeagleContextMulti.save" title="vsm.model.BeagleContextMulti.save"><tt class="xref py py-obj docutils literal"><span class="pre">save</span></tt></a>(f)</td>
+<td>Takes a filename or file object and saves <cite>self.matrix</cite> in an npz archive.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#vsm.model.BeagleContextMulti.train" title="vsm.model.BeagleContextMulti.train"><tt class="xref py py-obj docutils literal"><span class="pre">train</span></tt></a>([n_procs])</td>
+<td>Takes an optional argument <cite>n_procs</cite>, number of processors, and trains the model on the number of processors.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="vsm.model.BeagleContextMulti.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>corpus</em>, <em>env_corpus</em>, <em>env_matrix</em>, <em>context_type='sentence'</em><big>)</big><a class="headerlink" href="#vsm.model.BeagleContextMulti.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize BeagleContextMulti.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>corpus</strong> (class:<cite>Corpus</cite>) &#8211; Souce of observed data.</li>
+<li><strong>env_corpus</strong> (class:<cite>Corpus</cite>) &#8211; BEAGLE environment corpus.</li>
+<li><strong>env_matrix</strong> (<em>2-D array</em>) &#8211; Matrix from BEAGLE environment model.</li>
+<li><strong>context_type</strong> (<em>string, optional</em>) &#8211; Name of tokenization stored in <cite>corpus</cite> whose
+tokens will be treated as documents. Default is <cite>sentence</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="vsm.model.BeagleContextMulti.load">
+<em class="property">static </em><tt class="descname">load</tt><big>(</big><em>f</em><big>)</big><a class="headerlink" href="#vsm.model.BeagleContextMulti.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a filename or file object and loads it as an npz archive
+into a BaseModel object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> (<em>str-like or file-like object</em>) &#8211; Designates the file to read. If <cite>file</cite> is a string
+ending in <cite>.gz</cite>, the file is first gunzipped. See <cite>numpy.load</cite>
+for further details.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary storing the data found in <cite>file</cite>.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><tt class="xref py py-meth docutils literal"><span class="pre">numpy.load()</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.model.BeagleContextMulti.save">
+<tt class="descname">save</tt><big>(</big><em>f</em><big>)</big><a class="headerlink" href="#vsm.model.BeagleContextMulti.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a filename or file object and saves <cite>self.matrix</cite> in an
+npz archive.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> (<em>str-like or file-like object</em>) &#8211; Designates the file to which to save data. See
+<cite>numpy.savez</cite> for further details.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><cite>None</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">See Also:</th><td class="field-body"><tt class="xref py py-meth docutils literal"><span class="pre">numpy.savez()</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="vsm.model.BeagleContextMulti.train">
+<tt class="descname">train</tt><big>(</big><em>n_procs=2</em><big>)</big><a class="headerlink" href="#vsm.model.BeagleContextMulti.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an optional argument <cite>n_procs</cite>, number of processors,
+and trains the model on the number of processors. <cite>n_procs</cite>
+is 2 by default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n_procs</strong> (<em>int, optional</em>) &#8211; Number of processors. Default is 2.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returs :</th><td class="field-body"><cite>None</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="vsm.model.BeagleComposite.html"
+                        title="previous chapter">vsm.model.BeagleComposite</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="vsm.model.BeagleContextSeq.html"
+                        title="next chapter">vsm.model.BeagleContextSeq</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/vsm.model.BeagleContextMulti.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vsm.model.BeagleContextSeq.html" title="vsm.model.BeagleContextSeq"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="vsm.model.BeagleComposite.html" title="vsm.model.BeagleComposite"
+             >previous</a> |</li>
+        <li><a href="index.html">vsm 0.1 documentation</a> &raquo;</li>
+          <li><a href="vsm.model.html" >vsm.model</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

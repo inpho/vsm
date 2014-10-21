@@ -1,13 +1,14 @@
-vsm
-===
+vsm.model
+=========
 
-.. automodule:: vsm
+.. currentmodule:: vsm.model
 
-   
-   
+.. automodule:: vsm.model
+
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree: 
       
       BeagleComposite
       BeagleContextMulti
@@ -15,18 +16,12 @@ vsm
       BeagleEnvironment
       BeagleOrderMulti
       BeagleOrderSeq
-      BeagleViewer
-      Corpus
       LdaCgsSeq
       LdaCgsMulti
-      LdaCgsViewer
       Lsa
-      LsaViewer
       TfIdf
-      TfIdfViewer
       TfMulti
       TfSeq
-      TfViewer
    
    
 

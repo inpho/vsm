@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,14 +8,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>vsm — Vector Space Modeling of Textual Semantics &mdash; vsm 0.1 documentation</title>
+    <title>Welcome to vsm documentation! &mdash; vsm 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -24,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="vsm 0.1 documentation" href="#" />
-    <link rel="next" title="vsm Workflow" href="workflow.html" /> 
+    <link rel="next" title="vsm" href="vsm.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,7 +39,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="workflow.html" title="vsm Workflow"
+          <a href="vsm.html" title="vsm"
              accesskey="N">next</a> |</li>
         <li><a href="#">vsm 0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -48,45 +50,36 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="vsm-vector-space-modeling-of-textual-semantics">
-<h1><a class="reference internal" href="vsm.html#module-vsm" title="vsm"><tt class="xref py py-mod docutils literal"><span class="pre">vsm</span></tt></a> &#8212; Vector Space Modeling of Textual Semantics<a class="headerlink" href="#vsm-vector-space-modeling-of-textual-semantics" title="Permalink to this headline">¶</a></h1>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
+  <div class="section" id="welcome-to-vsm-documentation">
+<h1>Welcome to vsm documentation!<a class="headerlink" href="#welcome-to-vsm-documentation" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Release:</th><td class="field-body">0.1</td>
+<tr class="row-odd"><td><a class="reference internal" href="vsm.html#module-vsm" title="vsm"><tt class="xref py py-obj docutils literal"><span class="pre">vsm</span></tt></a></td>
+<td>The <a class="reference internal" href="vsm.html#module-vsm" title="vsm"><tt class="xref py py-mod docutils literal"><span class="pre">vsm</span></tt></a> module provides tools and a workflow for producing semantic models of textual corpora and analyzing and visualizing these models.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">October 05, 2013</td>
+<tr class="row-even"><td><a class="reference internal" href="vsm.corpus.html#module-vsm.corpus" title="vsm.corpus"><tt class="xref py py-obj docutils literal"><span class="pre">vsm.corpus</span></tt></a></td>
+<td>[General documentation about the <tt class="xref py py-mod docutils literal"><span class="pre">corpus</span></tt> submodule]</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="vsm.model.html#module-vsm.model" title="vsm.model"><tt class="xref py py-obj docutils literal"><span class="pre">vsm.model</span></tt></a></td>
+<td>[General Documentation about <tt class="xref py py-mod docutils literal"><span class="pre">model</span></tt> classes]</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="vsm.viewer.html#module-vsm.viewer" title="vsm.viewer"><tt class="xref py py-obj docutils literal"><span class="pre">vsm.viewer</span></tt></a></td>
+<td>[General documentation about the <tt class="xref py py-mod docutils literal"><span class="pre">viewer</span></tt> submodule]</td>
 </tr>
 </tbody>
 </table>
-<p>The <a class="reference internal" href="vsm.html#module-vsm" title="vsm"><tt class="xref py py-mod docutils literal"><span class="pre">vsm</span></tt></a> module provides tools and a workflow for producing
-semantic models of textual corpora and analyzing and visualizing these
-models.</p>
-<p>The <a class="reference internal" href="vsm.html#module-vsm" title="vsm"><tt class="xref py py-mod docutils literal"><span class="pre">vsm</span></tt></a> module has been conceived within the <em class="xref std std-ref">SciPy</em>
-ecosystem. In a typical workflow, a collection of texts is first
-transformed into a <tt class="xref py py-class docutils literal"><span class="pre">Corpus</span></tt> object, whose underlying data
-structures are <em class="xref std std-ref">NumPy</em> numerical <tt class="xref py py-class docutils literal"><span class="pre">arrays</span></tt>. The user may
-then feed a <tt class="xref py py-class docutils literal"><span class="pre">Corpus</span></tt> object to one of the <tt class="xref py py-mod docutils literal"><span class="pre">model</span></tt> classes,
-which contain the algorithms, implemented in <em class="xref std std-ref">NumPy</em>,
-<em class="xref std std-ref">SciPy</em> and <em class="xref std std-ref">IPython.parallel</em>, for training models such as
-TF, TFIDF, LSA, BEAGLE, or LDA. Finally, the user may examine the
-results with a <tt class="xref py py-mod docutils literal"><span class="pre">viewer</span></tt> class specialized to a particular model
-type. A <tt class="xref py py-mod docutils literal"><span class="pre">viewer</span></tt> class contains a variety of methods for analysis
-and graphical display and achieves its full functionality within an
-<em class="xref std std-ref">IPython</em> notebook session extended with <em class="xref std std-ref">matplotlib</em> and
-<em class="xref std std-ref">scikit-learn</em>.</p>
-<p>This documentation site is currently in a pre-alpha state.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="workflow.html"><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tokenization.html">Tokenization and Metadata Collection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="corpus_encoding.html">Corpus Encoding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="model_training.html">Model Training</a></li>
-</ul>
-</li>
-</ul>
 </div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
 </div>
 
 
@@ -95,9 +88,17 @@ and graphical display and achieves its full functionality within an
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to vsm documentation!</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
   <h4>Next topic</h4>
-  <p class="topless"><a href="workflow.html"
-                        title="next chapter"><tt class="docutils literal"><span class="pre">vsm</span></tt> Workflow</a></p>
+  <p class="topless"><a href="vsm.html"
+                        title="next chapter">vsm</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -130,14 +131,14 @@ and graphical display and achieves its full functionality within an
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="workflow.html" title="vsm Workflow"
+          <a href="vsm.html" title="vsm"
              >next</a> |</li>
         <li><a href="#">vsm 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2013, vsm development team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        &copy; Copyright 2014, vsm development team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
