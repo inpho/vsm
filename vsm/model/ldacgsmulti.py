@@ -13,6 +13,7 @@ __all__ = [ 'LdaCgsMulti' ]
 
 class LdaCgsMulti(LdaCgsSeq):
     """
+    An implementation of LDA using collapsed Gibbs sampling with multi-processing.
     """
     def __init__(self, corpus=None, context_type=None, K=20, V=0, 
                  alpha=[], beta=[]):
@@ -217,6 +218,9 @@ class LdaCgsMulti(LdaCgsSeq):
 
     def train(self, n_iterations=500, verbose=True, n_proc=2, seeds=None):
         """
+        Takes an optional argument, `n_iterations` and updates the model
+        `n_iterations` times.
+
         :param n_iterations: Number of iterations. Default is 500.
         :type n_iterations: int, optional
 
@@ -227,6 +231,11 @@ class LdaCgsMulti(LdaCgsSeq):
         :param n_proc: Number of processors used for training. Default is
             2.
         :type n_proc: int, optional
+        
+        :param seeds: List of arbitrary starting points for each processors.
+            The length of the list should be same as `n_proc`. If `None`,
+            each threads start at a random seed. Default is `None`.
+        :type seeds: list, optional
         """
         self._move_locals_to_globals()
 

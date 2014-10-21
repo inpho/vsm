@@ -11,6 +11,7 @@ __all__ = [ 'LdaCgsSeq' ]
 
 class LdaCgsSeq(object):
     """
+    An implementation of LDA using collapsed Gibbs sampling.
     """
     def __init__(self, corpus=None, context_type=None,
                  K=20, V=0, alpha=[], beta=[]):
@@ -95,7 +96,21 @@ class LdaCgsSeq(object):
 
 
     def train(self, n_iterations=100, verbose=1, seed=None):
+        """
+        Takes an optional argument, `n_iterations` and updates the model
+        `n_iterations` times.
 
+        :param n_iterations: Number of iterations. Default is 100.
+        :type n_iterations: int, optional
+
+        :param verbose: If 1, current number of iterations
+            are printed out to notify the user. Default is 1.
+        :type verbose: int, optional
+
+        :param seeds: An arbitrary starting point. If `None` it will
+            start at a random seed. Default is `None`.
+        :type seeds: double, optional
+        """
         random_state = np.random.RandomState(seed)
         mtrand_state = random_state.get_state()
 
@@ -135,10 +150,28 @@ class LdaCgsSeq(object):
 
     @staticmethod
     def load(filename):
+        """
+        A static method for loading a saved LdaCgsMulti model.
+
+        :param filename: Name of a saved model to be loaded.
+        :type filename: string
+
+        :returns: m : LdaCgsMulti object
+
+        :See Also: :class:`numpy.load`
+        """
         return load_lda(filename, LdaCgsSeq)
 
 
     def save(self, filename):
+        """
+        Saves the model in an `.npz` file.
+
+        :param filename: Name of a saved model to be loaded.
+        :type filename: string
+
+        :See Also: :class:`numpy.savez`
+        """
         save_lda(self, filename)
 
 

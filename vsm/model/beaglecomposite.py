@@ -46,12 +46,13 @@ class BeagleComposite(BaseModel):
 
     def train(self, wgt=.5):
         """
-        
+        Combines the context and order matrices blended by `wgt` ratio.
+
         :param wgt: The weight of context model. If `wgt` is .7 then
             the ratio of context and order model is 7:3. `wgt` should be 
             a value in [0,1]. Default is .5.
         :type wgt: float, optional
-        
+       
         :returns: `None`
         """
         print 'Summing context and order vectors'        

@@ -16,7 +16,7 @@ vsm.model
       BeagleEnvironment
       BeagleOrderMulti
       BeagleOrderSeq
-      LDAGibbs
+      LdaCgsSeq
       LdaCgsMulti
       Lsa
       TfIdf

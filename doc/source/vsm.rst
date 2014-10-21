@@ -17,7 +17,7 @@ vsm
       BeagleOrderSeq
       BeagleViewer
       Corpus
-      LDAGibbs
+      LdaCgsSeq
       LdaCgsMulti
       LdaCgsViewer
       Lsa
