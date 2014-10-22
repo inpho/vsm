@@ -75,7 +75,7 @@ class TestLabeleddata(unittest.TestCase):
         from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
 
         c = random_corpus(50000, 1000, 0, 50)
-        m = LDAGibbs(c, 'context', K=20)
+        m = LDAGibbs(c, 'document', K=20)
         viewer = LDAGibbsViewer(c, m)
         
         li = ['0', '1', '10']
