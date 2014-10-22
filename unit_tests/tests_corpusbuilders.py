@@ -1,8 +1,7 @@
 import unittest2 as unittest
 
-from vsm.corpus import util
-from vsm.corpus.util.corpusbuilders import *
-from vsm.corpus.util.corpusbuilders import file_tokenize, coll_tokenize, dir_tokenize, corpus_fromlist
+from vsm.extensions.corpusbuilders import *
+from vsm.extensions.corpusbuilders.corpusbuilders import file_tokenize, coll_tokenize, dir_tokenize, corpus_fromlist
 import numpy as np
 
 
@@ -12,8 +11,8 @@ class TestCorpusbuilders(unittest.TestCase):
         
         c = empty_corpus()
         self.assertTrue((np.array([]) == c.corpus).all())
-        self.assertTrue(['context'] == c.context_types)
-        self.assertTrue((np.array([]) == c.view_contexts('context')).all())
+        self.assertTrue(['document'] == c.context_types)
+        self.assertTrue((np.array([]) == c.view_contexts('document')).all())
 
     def test_corpus_fromlist(self):
 
