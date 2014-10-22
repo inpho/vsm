@@ -2,13 +2,13 @@ import unittest2 as unittest
 import numpy as np
 
 from vsm.corpus.util.corpusbuilders import random_corpus
-from vsm.model import BaseModel
+from vsm.model.base import BaseModel
 
 
 class TestBaseModel(unittest.TestCase):
 
     def setUp(self):
-        self.c = random_corpus(500000, 10000, 0, 100)
+        self.c = random_corpus(1000, 50, 6, 100)
         self.m = BaseModel(self.c, 'context')
 
 
