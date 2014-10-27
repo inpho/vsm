@@ -30,17 +30,16 @@ class TestTfViewer(unittest.TestCase):
         sddl = self.v.dist_doc_doc(li)
         cfs = self.v.coll_freqs()
 
-        dismatw = self.v.dismat_words(['0','2','5'])
-        dismatd = self.v.dismat_docs(li)
+        distmatw = self.v.dismat_word(['0','2','5'])
+        distmatd = self.v.dismat_doc(li)
 
         self.assertEqual(type(sww), LabeledColumn)
         self.assertEqual(type(swwl), LabeledColumn)
         self.assertEqual(type(sdd), LabeledColumn)
         self.assertEqual(type(sddl), LabeledColumn)
         self.assertEqual(type(cfs), LabeledColumn)
-
-        self.assertEqual(type(dismatw), IndexedSymmArray)
-        self.assertEqual(type(dismatd), IndexedSymmArray)
+        self.assertEqual(type(distmatw), IndexedSymmArray)
+        self.assertEqual(type(distmatd), IndexedSymmArray)
 
 
 

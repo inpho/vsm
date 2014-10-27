@@ -19,7 +19,6 @@ __all__ = [ 'LdaCgsViewer' ]
 class LdaCgsViewer(object):
     """A class for viewing a topic model estimated by one of vsm's LDA
     classes using CGS.
-
     """
     
     def __init__(self, corpus, model):
@@ -133,10 +132,10 @@ class LdaCgsViewer(object):
         return d_arr[::-1]
 
     
-    #TODO: compact_view has a bug. When it is fixed, change default to True.
     def topics(self, print_len=10, topic_indices=None, sort_by_entropy=False,
-               as_strings=True, compact_view=False):
-        """Returns a list of topics estimated by the model. 
+               as_strings=True, compact_view=True, topic_labels=None):
+        """
+        Returns a list of topics estimated by the model. 
         Each topic is represented by a list of words and the corresponding 
         probabilities.
         
@@ -158,10 +157,13 @@ class LdaCgsViewer(object):
             their top `print_len` number of words. Otherwise, topics are
             shown as words and their probabilities. Default is `True`.
         :type compact_view: boolean, optional       
-        
+    
+        :param topic_labels: List of strings that are names that correspond
+            to the topics in `topic_indices`.
+        :type topic_labels: list, optional
+
         :returns: an instance of :class:`DataTable`.
             A structured array of topics.
-
         """
         if sort_by_entropy:
             th = 'Topics Sorted by Entropy'
@@ -180,33 +182,34 @@ class LdaCgsViewer(object):
         phi = self.phi[:,topic_indices]
         
         if as_strings:
-	    k_arr = enum_matrix(phi.T, indices=self.corpus.words,
+	        k_arr = enum_matrix(phi.T, indices=self.corpus.words,
                                 field_name='word')
         else:
             ind = [self.corpus.words_int[word] for word in self.corpus.words]
             k_arr = enum_matrix(phi.T, indices=ind, field_name='word')
-
-        if compact_view:
-            sch = ['Topic', 'Words']
-            fc = [str(k) for k in topic_indices]
-            return CompactTable(k_arr, table_header=th,
-		    	subcol_headers=sch, first_cols=fc, num_words=print_len)
-	
+       
         table = []
         for i,k in enumerate(topic_indices):
-            ch = 'Topic ' + str(k)
-            sch = ['Word', 'Prob']
+            if topic_labels==None:
+                ch = 'Topic ' + str(k)
+            else:
+                ch = topic_labels[i]
+
+            if compact_view:
+                sch = ['Topic', 'Words']
+            else:
+                sch = ['Word', 'Prob']
             col = LabeledColumn(k_arr[i], col_header=ch,
                                 subcol_headers=sch, col_len=print_len)
             table.append(col)
 
-        return DataTable(table, th)
+        return DataTable(table, th, compact_view=compact_view)
 
 
-    #TODO: compact_view has a bug. When it is fixed, change default to True.
-    def doc_topics(self, doc_or_docs, sort_by_entropy=False, compact_view=False,
-                   aggregate=False, print_len=10):
-        """Returns the distribution over topics for the given documents.
+    def doc_topics(self, doc_or_docs, sort_by_entropy=False, compact_view=True,
+                   aggregate=False, print_len=10, topic_labels=None):
+        """
+        Returns the distribution over topics for the given documents.
 
         :param doc: Specifies the document whose distribution over topics is 
              returned. It can either be the ID number (integer) or the 
@@ -216,13 +219,20 @@ class LdaCgsViewer(object):
         :param print_len: Number of topics to be printed. Default is 10.
         :type print_len: int, optional
         
+        :param compact_view: If `True`, topics are simply represented as
+        their top `print_len` number of words. Otherwise, topics are
+        shown as words and their probabilities. Default is `True`.
+        :type compact_view: boolean, optional       
+
+        :param topic_labels: List of strings that are names that correspond
+            to the topics in `topic_indices`.
+        :type topic_labels: list, optional
+
         :returns: an instance of :class:`LabeledColumn` or of :class: `DataTable`.
             An structured array of topics (represented by their
             number) and their corresponding probabilities or a list of
             such arrays.
-
         """
-
         if (isstr(doc_or_docs) or isint(doc_or_docs) 
             or isinstance(doc_or_docs, dict)):
             doc, label = self._res_doc_type(doc_or_docs)
@@ -250,22 +260,22 @@ class LdaCgsViewer(object):
                             field_name='topic')
 
         th = 'Distributions over Topics'
-
-        if compact_view:
-            sch = ['Doc', 'Topics']
-            return CompactTable(k_arr, table_header=th,
-                                subcol_headers=sch, first_cols=labels, 
-                                num_words=print_len)
-
+        
         table = []
         for i in xrange(len(docs)):
-            ch = 'Doc: ' + labels[i]
-            sch = ['Topic', 'Prob']
+            if topic_labels==None: 
+                ch = 'Doc: ' + labels[i]
+            else:
+                ch = topic_labels[i] 
+            if compact_view:
+                sch = ['Doc', 'Topics']
+            else:
+                sch = ['Topic', 'Prob']
             col = LabeledColumn(k_arr[docs[i]], col_header=ch,
                                 subcol_headers=sch, col_len=print_len)
             table.append(col)
 
-        return DataTable(table, th)
+        return DataTable(table, th, compact_view=compact_view)
 
 
     def aggregate_doc_topics(self, docs, normed_sum=False, print_len=10):
@@ -351,7 +361,7 @@ class LdaCgsViewer(object):
     def dist_top_top(self, topic_or_topics, weights=[], 
                      dist_fn=JS_dist, order='i', 
                      show_topics=True, print_len=10, filter_nan=True, 
-                     as_strings=True, compact_view=True):
+                     as_strings=True, compact_view=True, topic_labels=None):
         """
         Takes a topic or list of topics (by integer index) and returns
         a list of topics sorted by the distances between a given
@@ -393,6 +403,10 @@ class LdaCgsViewer(object):
             their top `print_len` number of words. Otherwise, topics are
             shown as words and their probabilities. Default is `True`.
         :type compact_view: boolean, optional       
+        
+        :param topic_labels: List of strings that are names that correspond
+            to the topics in `topic_indices`.
+        :type topic_labels: list, optional
 
         :returns: an instance of :class:`LabeledColumn`.
             A 2-dim array containing topics and their distances to 
@@ -409,17 +423,14 @@ class LdaCgsViewer(object):
         if show_topics:
             topic_or_topics = [topic_or_topics]
             topic_indices = distances[distances.dtype.names[0]]
-
+        
+            k_arr = self.topics(topic_indices=topic_indices, print_len=print_len,
+                                as_strings=as_strings, compact_view=compact_view,
+                                topic_labels=topic_labels)
             # Retrieve topics
             if compact_view:
-                k_arr = self.topics(print_len=print_len, topic_indices=topic_indices,
-                                    as_strings=as_strings, 
-                                    compact_view=compact_view)
                 k_arr.table_header = 'Sorted by Topic Distance'
                 return k_arr
-
-            k_arr = self.topics(topic_indices=topic_indices, print_len=print_len,
-                                as_strings=as_strings, compact_view=compact_view)
 
             # Relabel results
             k_arr.table_header = 'Sorted by Topic Distance'
@@ -522,7 +533,8 @@ class LdaCgsViewer(object):
    
     def dist_word_top(self, word_or_words, weights=[], filter_nan=True,
                       show_topics=True, print_len=10, as_strings=True, 
-                      compact_view=True, dist_fn=JS_dist, order='i'):
+                      compact_view=True, dist_fn=JS_dist, order='i',
+                      topic_labels=None):
         """Sorts topics according to their distance to the query
         `word_or_words`.
         
@@ -570,6 +582,10 @@ class LdaCgsViewer(object):
         :param order: Order of sorting. 'i' for increasing and 'd' for
             decreasing order. Default is 'i'.
         :type order: string, optional
+        
+        :param topic_labels: List of strings that are names that correspond
+            to the topics in `topic_indices`.
+        :type topic_labels: list, optional
 
         :returns: an instance of :class:`LabeledColumn`.
             A structured array of topics sorted by their distances 
@@ -596,15 +612,14 @@ class LdaCgsViewer(object):
             distances = distances[topic_indices]
             topic_indices = distances[distances.dtype.names[0]]
 
+            k_arr = self.topics(topic_indices=topic_indices, print_len=print_len,
+                                as_strings=as_strings, compact_view=compact_view,
+                                topic_labels=topic_labels)
+
             # Retrieve topics
             if compact_view:
-                k_arr = self.topics(print_len=print_len, topic_indices=topic_indices,
-                    as_strings=as_strings, compact_view=compact_view)
                 k_arr.table_header = 'Sorted by Topic Distance'
                 return k_arr
-
-            k_arr = self.topics(topic_indices=topic_indices, print_len=print_len,
-                                as_strings=as_strings, compact_view=compact_view)
 
             # Relabel results
             k_arr.table_header = 'Sorted by Topic Distance'

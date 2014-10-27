@@ -11,7 +11,7 @@ from vsm.spatial import rand_pt_unit_sphere
 from base import BaseModel
 
 
-__all__ = ['BeagleOrderSeq', 'BeagleOrderMulti']
+__all__ = [ 'BeagleOrderSeq', 'BeagleOrderMulti' ]
 
 
 
