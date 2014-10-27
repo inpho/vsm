@@ -206,7 +206,7 @@ class LdaCgsViewer(object):
         return DataTable(table, th, compact_view=compact_view)
 
 
-    def doc_topics(self, doc_or_docs, sort_by_entropy=False, compact_view=True,
+    def doc_topics(self, doc_or_docs, sort_by_entropy=False, compact_view=False,
                    aggregate=False, print_len=10, topic_labels=None):
         """
         Returns the distribution over topics for the given documents.
@@ -221,7 +221,7 @@ class LdaCgsViewer(object):
         
         :param compact_view: If `True`, topics are simply represented as
         their top `print_len` number of words. Otherwise, topics are
-        shown as words and their probabilities. Default is `True`.
+        shown as words and their probabilities. Default is `False`.
         :type compact_view: boolean, optional       
 
         :param topic_labels: List of strings that are names that correspond
