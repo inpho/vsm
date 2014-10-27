@@ -24,14 +24,14 @@ class TestTfViewer(unittest.TestCase):
 
         li = [0,1]
 
-        sww = self.v.sim_word_word('0')
-        swwl = self.v.sim_word_word(['0','1'])
-        sdd = self.v.sim_doc_doc(0)
-        sddl = self.v.sim_doc_doc(li)
+        sww = self.v.dist_word_word('0')
+        swwl = self.v.dist_word_word(['0','1'])
+        sdd = self.v.dist_doc_doc(0)
+        sddl = self.v.dist_doc_doc(li)
         cfs = self.v.coll_freqs()
 
-        simmatw = self.v.simmat_words(['0','2','5'])
-        simmatd = self.v.simmat_docs(li)
+        distmatw = self.v.dismat_word(['0','2','5'])
+        distmatd = self.v.dismat_doc(li)
 
         self.assertEqual(type(sww), LabeledColumn)
         self.assertEqual(type(swwl), LabeledColumn)
@@ -39,8 +39,8 @@ class TestTfViewer(unittest.TestCase):
         self.assertEqual(type(sddl), LabeledColumn)
         self.assertEqual(type(cfs), LabeledColumn)
 
-        self.assertEqual(type(simmatw), IndexedSymmArray)
-        self.assertEqual(type(simmatd), IndexedSymmArray)
+        self.assertEqual(type(distmatw), IndexedSymmArray)
+        self.assertEqual(type(distmatd), IndexedSymmArray)
 
 
 
