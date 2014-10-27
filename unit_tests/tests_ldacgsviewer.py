@@ -16,7 +16,7 @@ class TestLdaCgsViewer(unittest.TestCase):
                             metadata=True)
 
         m = LdaCgsSeq(c, 'document', K=10)
-        m.train(n_iterations=50)
+        m.train(n_iterations=50, verbose=0)
 
         self.ldav = LdaCgsViewer(c, m)
 
@@ -53,8 +53,8 @@ class TestLdaCgsViewer(unittest.TestCase):
         self.assertEqual(type(dt), LabeledColumn)
         self.assertEqual(type(dt_), LabeledColumn)
         self.assertEqual(type(wt), LabeledColumn)
-        self.assertEqual(type(stt), CompactTable)
-        self.assertEqual(type(sttl), CompactTable)
+        self.assertEqual(type(stt), DataTable)
+        self.assertEqual(type(sttl), DataTable)
         self.assertEqual(type(std), LabeledColumn)
         self.assertEqual(type(stdl), LabeledColumn)
         self.assertEqual(type(sdd), LabeledColumn)
@@ -62,7 +62,7 @@ class TestLdaCgsViewer(unittest.TestCase):
         
         self.assertEqual(type(t_c), DataTable)
         self.assertEqual(type(te_c), LabeledColumn)
-        self.assertEqual(type(swt_c), CompactTable)
+        self.assertEqual(type(swt_c), DataTable)
 
         self.assertEqual(type(dismatd), IndexedSymmArray)
         self.assertEqual(type(dismatt), IndexedSymmArray)
