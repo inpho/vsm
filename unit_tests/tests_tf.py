@@ -10,9 +10,9 @@ class TestTf(unittest.TestCase):
         self.corpus = np.array([0, 1, 3, 1, 1, 0, 3, 0, 3,
                                 3, 0, 1, 0,
                                 1, 3])
-        self.contexts = [slice(0,9), slice(9,13),
-                         slice(13,13), slice(13,15)]
-        self.m_words = 4
+        self.docs = [slice(0,9), slice(9,13),
+                     slice(13,13), slice(13,15)]
+        self.V = 4
         self.cnt_mat = np.array([[3, 2, 0, 0],
                                  [3, 1, 0, 1],
                                  [0, 0, 0, 0],
@@ -22,18 +22,19 @@ class TestTf(unittest.TestCase):
     def test_TfSeq_train(self):
         m = tf.TfSeq()
         m.corpus = self.corpus
-        m.contexts = self.contexts
-        m.m_words = self.m_words
+        m.docs = self.docs
+        m.V = self.V
         m.train()
         self.assertTrue((self.cnt_mat == m.matrix.toarray()).all())
 
 
     def test_TfMulti_train(self):
         m = tf.TfMulti()
-        m.contexts = self.contexts
-        m._set_corpus(self.corpus)
-        m._set_m_words(self.m_words)
+        m.corpus = self.corpus
+        m.docs = self.docs
+        m.V = self.V
         m.train(2)
+
         self.assertTrue((self.cnt_mat == m.matrix.toarray()).all())
 
 
