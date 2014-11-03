@@ -6,7 +6,6 @@ from scipy.sparse import hstack
 from vsm.spatial import count_matrix
 from vsm.split import *
 from base import *
-from mparray import *
 
 
 __all__ = ['TfSeq', 'TfMulti']
@@ -18,8 +17,8 @@ class TfSeq(BaseModel):
     Trains a term-frequency model. 
 
     In a term-frequency model, the number of occurrences of a word
-    type in a context is counted for all word types and contexts. Word
-    types correspond to matrix rows and contexts correspond to matrix
+    type in a context is counted for all word types and documents. Word
+    types correspond to matrix rows and documents correspond to matrix
     columns.
 
     :See Also: :class:`vsm.model.base`, :class:`vsm.corpus.Corpus`,
@@ -41,12 +40,12 @@ class TfSeq(BaseModel):
         self.context_type = context_type
         if corpus:
             self.corpus = corpus.corpus
-            self.contexts = corpus.view_contexts(context_type, as_slices=True)
-            self.m_words = corpus.words.size
+            self.docs = corpus.view_contexts(context_type, as_slices=True)
+            self.V = corpus.words.size
         else:
             self.corpus = []
-            self.contexts = []
-            self.m_words = 0
+            self.docs = []
+            self.V = 0
 
 
     def train(self):
@@ -54,17 +53,17 @@ class TfSeq(BaseModel):
         Counts word-type occurrences per context and stores the results in
         `self.matrix`.
         """
-        self.matrix = count_matrix(self.corpus, self.contexts, self.m_words)
+        self.matrix = count_matrix(self.corpus, self.docs, self.V)
 
 
     
-class TfMulti(BaseModel):
+class TfMulti(TfSeq):
     """
     Trains a term-frequency model. 
 
     In a term-frequency model, the number of occurrences of a word
-    type in a context is counted for all word types and contexts. Word
-    types correspond to matrix rows and contexts correspond to matrix
+    type in a context is counted for all word types and documents. Word
+    types correspond to matrix rows and documents correspond to matrix
     columns.
 
     The data structure is a sparse integer matrix.
@@ -72,7 +71,6 @@ class TfMulti(BaseModel):
     :See Also: :class:`vsm.model.base.BaseModel`, :class:`vsm.corpus.Corpus`,
         :class:`scipy.sparse.coo_matrix`
     """
-    
     def __init__(self, corpus=None, context_type=None):
         """
         Initialize TfMulti.
@@ -84,56 +82,90 @@ class TfMulti(BaseModel):
             the model trainer is applied.
         :type context_type: string, optional
         """
+        self._read_globals = False
+        self._write_globals = False
 
-        self.context_type = context_type
-        if corpus:
-            self.contexts = corpus.view_contexts(context_type, as_slices=True)
-            self._set_corpus(corpus.corpus)
-            self._set_m_words(corpus.words.size)
-        else:
-            self.contexts = []
-            self._set_corpus(np.array([], dtype=np.int))
-            self._set_m_words(0)
+        super(TfMulti, self).__init__(corpus=corpus, context_type=context_type)
 
 
-    @staticmethod
-    def _set_corpus(arr):
-        global _corpus
-        _corpus = mp_shared_array(arr)
-
-
-    @staticmethod
-    def _set_m_words(n):
-        global _m_words
-        _m_words = mp_shared_value(n)
-
+    def _move_globals_to_locals(self):
         
-    def train(self, n_procs):
+        self._write_globals = False
+        self.V = self.V
+        self.corpus = self.corpus
+        self._read_globals = False
+        global _V, _corpus
+        del _V, _corpus
+
+
+    def _move_locals_to_globals(self):
+        
+        self._write_globals = True
+        self.V = self.V
+        self.corpus = self.corpus
+        self._read_globals = True
+        del self._V_local, self._corpus_local
+
+
+    @property
+    def corpus(self):
+        if self._read_globals:
+            return np.frombuffer(_corpus, np.int32)
+        return self._corpus_local
+
+    @corpus.setter
+    def corpus(self, a):
+        if self._write_globals:
+            global _corpus
+            if not '_corpus' in globals():
+                _corpus = mp.Array('i', len(a), lock=False)
+            _corpus[:] = a
+        else:
+            self._corpus_local = a
+
+    @property
+    def V(self):
+        if self._read_globals:
+            return _V.value
+        return self._V_local
+
+    @V.setter
+    def V(self, V):
+        if self._write_globals:
+            global _V
+            _V = mp.Value('i', V, lock=False)
+        else:
+            self._V_local = V
+
+
+
+    def train(self, n_proc=2):
         """
-        Takes a number of processes `n_procs` over which to map and reduce.
+        Takes a number of processes `n_proc` over which to map and reduce.
 
         :param n_procs: Number of processors.
         :type n_procs: int
         """
-        ctx_ls = mp_split_ls(self.contexts, n_procs)
+        self._move_locals_to_globals()
 
-        print 'Mapping'
-        p=mp.Pool(n_procs)
-        # cnt_mats = map(tf_fn, ctx_ls) # For debugging        
-        cnt_mats = p.map(tf_fn, ctx_ls)
+        doc_indices = mp_split_ls(self.docs, n_proc)
+
+        p=mp.Pool(n_proc)
+        cnt_mats = p.map(tf_fn, doc_indices)
         p.close()
 
-        print 'Reducing'
-        # Horizontally stack TF matrices and store the result
         self.matrix = hstack(cnt_mats, format='coo')
+
+        self._move_globals_to_locals()
+
 
 
 def tf_fn(ctx_sbls):
     """
-    The map function for vsm.model.TfMulti. Takes a list of contexts
+    The map function for vsm.model.TfMulti. Takes a list of documents
     as slices and returns a count matrix.
     
-    :param ctx_sbls: list of contexts as slices.
+    :param ctx_sbls: list of documents as slices.
     :type ctx_sbls: list of slices
 
     :returns: a count matrix
@@ -141,4 +173,4 @@ def tf_fn(ctx_sbls):
     offset = ctx_sbls[0].start
     corpus = _corpus[offset: ctx_sbls[-1].stop]
     slices = [slice(s.start-offset, s.stop-offset) for s in ctx_sbls]
-    return count_matrix(corpus, slices, _m_words.value)
+    return count_matrix(corpus, slices, _V.value)

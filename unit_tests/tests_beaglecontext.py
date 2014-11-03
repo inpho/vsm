@@ -11,7 +11,7 @@ class TestBeagleContext(unittest.TestCase):
         from vsm.corpus.util.corpusbuilders import random_corpus
         from vsm.model.beagleenvironment import BeagleEnvironment
 
-        self.ec = random_corpus(100000, 5000, 0, 20, context_type='sentence')
+        self.ec = random_corpus(1000, 50, 0, 5, context_type='sentence')
         self.cc = self.ec.apply_stoplist(
                 stoplist=[str(i) for i in xrange(0,5000,100)])
 
@@ -22,7 +22,7 @@ class TestBeagleContext(unittest.TestCase):
         self.ms.train()
 
         self.mm = BeagleContextMulti(self.cc, self.ec, self.e.matrix)
-        self.mm.train(n_procs=3)
+        self.mm.train(n_procs=2)
 
 
     def test_BeagleContextSeq(self):

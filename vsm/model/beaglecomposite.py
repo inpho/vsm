@@ -1,10 +1,10 @@
 import numpy as np
 
 from base import BaseModel
-from beaglecontext import realign_env_mat as _realign_env_mat
+from beaglecontext import realign_env_mat
 
 
-__all__ = ['BeagleComposite']
+__all__ = [ 'BeagleComposite' ]
 
 
 class BeagleComposite(BaseModel):
@@ -38,9 +38,10 @@ class BeagleComposite(BaseModel):
             tokens will be treated as documents. Default is `sentence`.
         :type context_type: string, optional
         """
-        self.ctx_matrix /= np.sqrt((ctx_matrix * ctx_matrix).sum(1)[:,np.newaxis])
-        ord_matrix = _realign_env_mat(ctx_corp, ord_corp, ord_matrix)
-        self.ord_matrix /= np.sqrt((ord_matrix * ord_matrix).sum(1)[:,np.newaxis])
+        self.ctx_matrix = (ctx_matrix / 
+                           ((ctx_matrix**2).sum(1)**0.5)[:,np.newaxis])
+        self.ord_matrix = realign_env_mat(ctx_corp, ord_corp, ord_matrix)
+        self.ord_matrix /= ((self.ord_matrix**2).sum(1)**0.5)[:,np.newaxis]
         self.context_type = context_type
 
 

@@ -4,7 +4,7 @@ from vsm.structarr import *
 from types import *
 
 
-__all__ = ['CompactTable', 'DataTable', 'IndexedSymmArray', 'LabeledColumn']
+__all__ = ['DataTable', 'IndexedSymmArray', 'LabeledColumn']
 
 
 
@@ -52,7 +52,7 @@ def format_(x, n):
     return x[:n]
 
 
-def default_col_widths(dtype):
+def default_col_widths(dtype, col_header):
     """
     Assigns default column widths depending on the dtype. 
     Used in _str_ representation.
@@ -65,7 +65,7 @@ def default_col_widths(dtype):
         if t.kind == 'S':
             col_widths.append(t.itemsize + 5)
         else:
-            col_widths.append(10)
+            col_widths.append(len(col_header) + 5)
     
     return col_widths
 
@@ -90,23 +90,6 @@ def max_col_num(li, max_width):
     if num == 0:
         return 1
     return num
-
-
-def compact_col_widths(dtype, n):
-    """
-    Assigns second column width CompactList based on the dtype. 
-    """
-    ccol_widths = [10, 0]
-
-    value =zip(*dtype.fields.values())[0][0]
-
-    for i in xrange(n):
-        if value.kind == 'S':
-            ccol_widths[1] += value.itemsize + 2
-        else:
-            ccol_widths[1] += 10
-   
-    return ccol_widths
 
 
 class LabeledColumn(np.ndarray):
@@ -139,6 +122,11 @@ class LabeledColumn(np.ndarray):
         is set to length of LabeledColumn.
     :type col_len: integer, optional
 
+    :param multi_col: If `True` html table version of :class:`LabeledColumn`
+        is displayed in multiple columns when the number of entries exceed 15.
+        Default is `True`.
+    :type multi_col: boolean, optional
+        
     :attributes:
         * **col_header** (string, optional)
             The title of the object. For example, 'Words: logic'.
@@ -227,7 +215,7 @@ class LabeledColumn(np.ndarray):
     @property
     def subcol_widths(self):
         if not hasattr(self, '_subcol_widths') or not self._subcol_widths:
-            self._subcol_widths = default_col_widths(self.dtype)
+            self._subcol_widths = default_col_widths(self.dtype, self.col_header)
         return self._subcol_widths
 
     @subcol_widths.setter
@@ -282,7 +270,6 @@ class LabeledColumn(np.ndarray):
         Returns an html table in ipython online session.
         """ 
         s = '<table style="margin: 0">'
-        # multi_col happens only when there are more than 15 to display.
         if self.multi_col and self.col_len >15:
             if self.col_header:
                 s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
@@ -347,201 +334,6 @@ class LabeledColumn(np.ndarray):
         return s
 
 
-class CompactTable(np.ndarray):
-    """
-    A subclass of np.ndarray whose purpose is to store labels
-    and formatting information for 2-dimensional structured array.
-    It also provides pretty-printing routines.
-
-    :param input_array: Array to be formatted into a CompactTable.
-    :type input_array: 2-dimensional structured array
-
-    :param table_header: The title of the object. Default is `None`.
-    :type table_header: string, optional
-    
-    :param subcol_headers: List of labels that correspond to the columns
-        of the table. Default is `None`.
-    :type subcol_headers: list, optional
-
-    :param first_cols: List of strings that describes the values in the
-        second column. If not provided, an item in `first_cols` is 'Topic n'
-        where 'n' is the index in the `first_cols`.
-    :type first_cols: list, optional
-    
-    :param subcol_widths: List of widths for each subcolumn. If not provided, 
-        `subcol_widths` is calculated based on the data-type of the entries.
-    :type subcol_widths: list, optional
-    
-    :param num_words: Number of entries to display in the second column. 
-        If not provided, `num_words` is set to 5.
-    :type num_words: integer, optional
-
-    :attributes:
-        * **table_header** (string, optional)
-            The title of the object.
-        * **subcol_headers** (list, optional)
-            List of labels that correspond to the fields of 
-            the structured array. Default is `None`.
-        * **first_cols** (list, optional)
-            List of strings that describes the values in the second column.
-        * **subcol_widths** (list, optional)
-            List of widths for each subcolumn. If not provided, 
-            `subcol_widths` is calculated based on the data-type of the entries.
-        * **num_words** (integer, optional) 
-            Number of entries to display.
-
-    :methods:
-        * **__str__**
-            Returns a pretty printed string version of the object.
-        * **_repr_html_**
-            Returns a html table in ipython online session.
-
-    **Examples**
-    
-    >>> li = [[('logic', 0.08902691511387155), ('foundations', 0.08902691511387155),
-            ('computer', 0.08902691511387155), ('theoretical', 0.059449866903282994)], 
-         [('calculus', 0.14554670528602476), ('lambda', 0.14554670528602476),
-          ('variety', 0.0731354091238234), ('computation', 0.0731354091238234)],
-         [('theology', 0.11285794497473327), ('roman', 0.11285794497473327),
-          ('catholic', 0.11285794497473327), ('source', 0.05670971364402021)]]
-    >>> arr = np.array(li, dtype=[('words', '|S16'), ('values', '<f8')])
-    >>> ct = CompactTable(arr, table_header='Compact view', subcol_headers=['Topic', 'Words'],
-                        num_words=4)
-    >>> print ct
-    --------------------------------------------------
-                       Compact view                   
-    --------------------------------------------------
-    Topics    Words                                   
-    --------------------------------------------------
-     Topic 0 logic     foundationcomputer  theoretica
-     Topic 1 calculus  lambda    variety   computatio
-     Topic 2 theology  roman     catholic  source    
-    """
-    def __new__(cls, input_array, table_header=None, subcol_headers=None,
-                first_cols=None, subcol_widths=None, num_words=None):
-        """
-        """
-        obj = np.asarray(input_array).view(cls)
-        obj.table_header = table_header
-        obj.subcol_headers = subcol_headers
-        obj._first_cols = first_cols
-        obj._subcol_widths = subcol_widths     
-        obj._num_words = num_words        
-        return obj
-
-
-    def __array_finalize__(self, obj):
-        """
-        """
-        if obj is None: return
-
-        self.table_header = getattr(obj, 'table_header', None)
-        self.subcol_headers = getattr(obj, 'subcol_headers', None)
-        self._first_cols = getattr(obj, '_first_cols', None)
-        self._subcol_widths = getattr(obj, '_subcol_widths', None)
-        self._num_words = getattr(obj, '_num_words', None)
-
-    @property
-    def subcol_widths(self):
-        if not hasattr(self, '_subcol_widths') or not self._subcol_widths:
-            self._subcol_widths = compact_col_widths(self.dtype, self.num_words)
-        return self._subcol_widths
-
-    @subcol_widths.setter
-    def subcol_widths(self, w):
-        self._subcol_widths = w
-
-    @property
-    def first_cols(self):
-        if not hasattr(self, '_first_cols') or not self._first_cols:
-            self._first_cols = ['Topic ' + str(i) for i in xrange(len(self))]
-        return self._first_cols
-
-    @first_cols.setter
-    def first_cols(self, w):
-        self._first_cols = w
-
-    @property
-    def num_words(self):
-        if not self._num_words:
-            return 5
-        return self._num_words
-
-    @num_words.setter
-    def num_words(self, n):
-        self._num_words = n
-
-
-    def __str__(self):
-        """
-        Pretty prints `CompatTable` when `print` method is used.
-        """     
-        width = sum(self.subcol_widths)
-        line = '-' * width + '\n'
-        out = line
-        if self.table_header:
-            out += '{0:^{1}}'.format(format_(self.table_header, width), 
-                                     width) + '\n'
-            out += line
-            
-        if self.subcol_headers:
-            for i in xrange(len(self.subcol_headers)):
-                w = self.subcol_widths[i]
-                out += '{0:<{1}}'.format(format_(self.subcol_headers[i], w), w)
-            out += '\n'
-            out += line
-
-        for i in xrange(len(self)):
-            w = self.subcol_widths[0] - 2
-            out += '  {0:<{1}}'.format(format_(self.first_cols[i], w), w)
-
-            for j in xrange(self.num_words):
-                n = self.dtype.names[0] 
-                w = self.subcol_widths[1] / self.num_words
-                out += '{0:<{1}}'.format(format_(self[i][n][j], w), w)
-            out += '\n'
-
-        return out
-
-
-    def _repr_html_(self):
-        """
-        Returns an html table in ipython online session.
-        """ 
-        s = '<table style="margin: 0">'
-
-        if self.table_header:
-            s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
-            ="{0}">{1}</th></tr>'.format(1 + self.num_words, self.table_header)
-
-        if self.subcol_headers:
-            s += '<tr>'
-            for i, sch in enumerate(self.subcol_headers):
-                s += '<th style="text-align: center; background: #EFF2FB;" \
-                    >{0}</th>'.format(sch)
-            s += '</tr>'
-        
-        for i in xrange(len(self)):
-            s += '<tr>'
-            w = self.subcol_widths[0]
-            s += '<td style="padding-left:0.75em;">{0}</td>'.format(
-                    format_(self.first_cols[i], w), w)
-
-            s += '<td>' 
-            for j in xrange(self.num_words):
-                n = self.dtype.names[0] 
-                w = self.subcol_widths[1] / self.num_words
-                if j == self.num_words -1:
-                    s += ' {0:<{1}}'.format(self[i][n][j], w)
-                else:
-                    s += ' {0},'.format(self[i][n][j])
-            s += '</td>'
-            s += '</tr>'
-        s += '</table>'
- 
-        return s
-
-
 class DataTable(list):
     """
     A subclass of list whose purpose is to store labels and
@@ -561,11 +353,16 @@ class DataTable(list):
     
     :param table_header: The title of the object. Default is `None`.
     :type table_header: string, optional
-   
+  
+    :param compact_view: If `True` the DataTable is displayed with its
+        tokens only without the probabilities. Default is `True`
+    :type compact_view: boolean, optional
+
     :attributes:
         * **table_header** (string)
             The title of the object. Default is `None`.
-  
+        * **compact_view** (boolean)
+            Option of viewing tokens with or without the probabilities.
     :methods:
         * **__str__**
             Returns a pretty printed string version of the object.
@@ -608,19 +405,70 @@ class DataTable(list):
     answer     0.23083      
     """
     
-    def __init__(self, l, table_header=None):
+    def __init__(self, l, table_header=None, compact_view=True):
         super(DataTable, self).__init__(l)
         self.table_header = table_header
-        
+        self.compact_view = compact_view
+
     def __getslice__(self, i, j):
         """
         """
         return DataTable(list.__getslice__(self, i, j), 
-                    table_header=self.table_header)
-                    
+                    table_header=self.table_header, 
+                    compact_view=self.compact_view)
+                
     def __str__(self):
         """
         Pretty prints the DataTable when `print` method is used.
+        """
+        if self.compact_view:
+            return self.__str_compact__()
+        else:
+            return self.__str_full__()
+
+    def __str_compact__(self):
+        """
+        Prints DataTable when `compact_view` is `True`.
+        """
+        num_cols = 3
+        w1 = self[0].subcol_widths[1]
+        w2 = min(self[0].subcol_widths[0], 23)
+        col_width = w1 + w2 * 3  
+        
+        line = '-' * col_width + '\n'
+        out = line
+        if self.table_header:
+            out += '{0:^{1}}'.format(format_(self.table_header, col_width), 
+                                     col_width) + '\n'
+            out += line
+
+        if self[0].subcol_headers:
+            out += '{0:<{1}}'.format(format_(self[0].subcol_headers[0], w1), w1)  
+            out += '{0:<{1}}\n'.format(format_(self[0].subcol_headers[1], w2), w2)
+            out += line
+ 
+        for i in xrange(len(self)):
+            j = 0
+            # topic info
+            out += '{0:<{1}}'.format(format_(self[i].col_header, w1), w1)
+            # words or tokens
+            for idx in xrange(self[i].col_len):
+                if j == 0 and idx > 0 :
+                    out += " " * w1
+                word = self[i].dtype.names[0]
+                out += '{0:<{1}}'.format(format_(self[i][word][idx], w2-1), w2)
+                j += 1
+                if j == num_cols or idx == self[i].col_len -1:
+                    out += '\n'
+                    j = 0
+            out += line
+        
+        return out
+    
+
+    def __str_full__(self):
+        """
+        Prints DataTable when `compact_view` is `False`.
         """
         col_width = self[0].col_width
 
@@ -637,7 +485,58 @@ class DataTable(list):
 
     def _repr_html_(self):
         """
-        Returns a html table in ipython online session.
+        Returns a html table in ipython online session. 
+        """
+        if self.compact_view:
+            return self._repr_html_compact_()
+        else:
+            return self._repr_html_full_()
+
+
+    def _repr_html_compact_(self):
+        """
+        Returns a html table in ipython online session when 
+        `compact_view` is `True`.
+        """
+        s = '<table style="margin: 0">'
+
+        num_cols = 3
+        if self.table_header:
+            s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
+            ="{0}">{1}</th></tr>'.format(1 + self[0].col_len, self.table_header)
+
+        if self[0].subcol_headers:
+            s += '<tr>'
+            for i, sch in enumerate(self[0].subcol_headers):
+                s += '<th style="text-align: center; background: #EFF2FB;" \
+                    >{0}</th>'.format(sch)
+            s += '</tr>'
+        
+        for i in xrange(len(self)):
+            s += '<tr>'
+            w = self[0].subcol_widths[1]
+            s += '<td style="padding-left:0.75em;">{0}</td>'.format(
+                    format_(self[i].col_header, w), w)
+# line break.
+            s += '<td>' 
+            for j in xrange(self[0].col_len):
+                n = self[0].dtype.names[0] 
+                w = self[0].subcol_widths[0]
+                if j == self[0].col_len -1:
+                    s += ' {0:<{1}}'.format(self[i][n][j], w)
+                else:
+                    s += ' {0},'.format(self[i][n][j])
+            s += '</td>'
+            s += '</tr>'
+        s += '</table>'
+ 
+        return s
+
+    
+    def _repr_html_full_(self):
+        """
+        Returns a html table in ipython online session when
+        `compact_view` is `False`.
         """        
         s = '<table>'
 

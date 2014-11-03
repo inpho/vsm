@@ -4,10 +4,11 @@ import numpy as np
 from vsm.model.beaglecomposite import *
 
 
+
 class TestBeagleComposite(unittest.TestCase):
 
     def setUp(self):
-        from vsm.corpus.util.corpusbuilders import random_corpus
+        from vsm.extensions.corpusbuilders import random_corpus
         from vsm.model.beagleenvironment import BeagleEnvironment
         from vsm.model.beaglecontext import BeagleContextSeq
         from vsm.model.beagleorder import BeagleOrderSeq
@@ -27,7 +28,7 @@ class TestBeagleComposite(unittest.TestCase):
         self.m = BeagleComposite(self.cc, self.cm.matrix, self.ec, self.om.matrix)
         self.m.train()
 
-   
+
     def test_BeagleCompositeIO(self):
         from tempfile import NamedTemporaryFile
         import os

@@ -9,7 +9,7 @@ import numpy as np
 from base import BaseModel
 
 
-__all__ = ['BeagleContextSeq', 'BeagleContextMulti']
+__all__ = [ 'BeagleContextSeq', 'BeagleContextMulti' ]
 
 
 def realign_env_mat(corpus, env_corpus, env_matrix):

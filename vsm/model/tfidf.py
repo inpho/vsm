@@ -1,9 +1,10 @@
 import numpy as np
+from scipy.sparse import csr_matrix
 
 from base import BaseModel
 
 
-__all__ = ['TfIdf']
+__all__ = [ 'TfIdf' ]
 
 
 class TfIdf(BaseModel):
@@ -34,7 +35,7 @@ class TfIdf(BaseModel):
         the word type occurs in no document at all, in which case the IDF
         value is undefined.
     """
-    def __init__(self, tf_matrix=np.array([]), context_type=None):
+    def __init__(self, tf_matrix=None, context_type=None):
         """
         Initialize TfIdf.
 
@@ -48,12 +49,12 @@ class TfIdf(BaseModel):
 
         self.context_type = context_type
 
-        if tf_matrix.size > 0:
+        if tf_matrix==None:
+            self.matrix = csr_matrix([], dtype=np.float64)
+        else:
             self.matrix = tf_matrix.copy()
             self.matrix = self.matrix.tocsr()
             self.matrix = self.matrix.astype(np.float64)
-        else:
-            self.matrix = tf.matrix
 
         self.undefined_rows = []
 

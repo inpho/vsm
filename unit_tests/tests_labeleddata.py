@@ -27,7 +27,7 @@ class TestLabeleddata(unittest.TestCase):
         arr1 = self.v.view(LabeledColumn)
 
         self.assertTrue(type(arr.__str__()) == str)
-        self.assertTrue(sum(arr.subcol_widths) < arr.col_width)
+        self.assertTrue(sum(arr.subcol_widths) <= arr.col_width)
         self.assertEqual(arr.shape[0], arr1.col_len)
         self.assertFalse(arr1.col_header)
         self.assertFalse(arr1.subcol_headers)
@@ -48,38 +48,25 @@ class TestLabeleddata(unittest.TestCase):
         self.assertTrue(type(t.__str__()) == str)
         self.assertTrue('Song', t.table_header)
 
+        t = DataTable(t, 'Song', compact_view=False)
 
-    def test_CompactTable(self):
-        
-        li = [[('logic', 0.08902691511387155), ('foundations', 0.08902691511387155),
-        ('computer', 0.08902691511387155), ('theoretical', 0.059449866903282994)],
-        [('calculus', 0.14554670528602476), ('lambda', 0.14554670528602476),
-        ('variety', 0.0731354091238234), ('computation', 0.0731354091238234)],
-        [('theology', 0.11285794497473327), ('roman', 0.11285794497473327),
-        ('catholic', 0.11285794497473327), ('source', 0.05670971364402021)]]
+        self.assertTrue(type(t.__str__()) == str)
+        self.assertTrue('Song', t.table_header)
 
-        arr = np.array(li, dtype=[('words', '|S16'), ('values', '<f8')])
 
-        ct = CompactTable(arr, table_header='Compact view', 
-                subcol_headers=['Topic', 'Words'], num_words=4)
-        
-        self.assertTrue(type(ct.__str__() == str))
-        self.assertTrue([1 for s in ct.first_cols if s.startswith('Topic')])     
-        self.assertEqual(ct.num_words * (8 +2), ct.subcol_widths[1])
-    
 
     def test_IndexedSymmArray(self):
 
         from vsm.corpus.util.corpusbuilders import random_corpus
-        from vsm.model.ldagibbs import LDAGibbs
-        from vsm.viewer.ldagibbsviewer import LDAGibbsViewer
+        from vsm.model.ldacgsseq import LdaCgsSeq
+        from vsm.viewer.ldacgsviewer import LdaCgsViewer
 
         c = random_corpus(50000, 1000, 0, 50)
-        m = LDAGibbs(c, 'context', K=20)
-        viewer = LDAGibbsViewer(c, m)
+        m = LdaCgsSeq(c, 'document', K=20)
+        viewer = LdaCgsViewer(c, m)
         
         li = ['0', '1', '10']
-        isa = viewer.simmat_words(li)
+        isa = viewer.dismat_top(li)
         
         self.assertEqual(isa.shape[0], len(li))
         

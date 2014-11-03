@@ -9,8 +9,8 @@ def cgs_update(int itr,
                double [:,:] word_top,
                double [:] inv_top_sums,
                double [:,:] top_doc,
-               long [:] Z,
-               long [:] indices,
+               int [:] Z,
+               int [:] indices,
                str mtrand_str,
                unsigned int [:] mtrand_keys,
                int mtrand_pos,
@@ -82,6 +82,7 @@ def cgs_update(int itr,
 
             Z[idx] = k
             
-    return (word_top, inv_top_sums, top_doc, Z, log_p, 
+    return (np.asarray(word_top), np.asarray(inv_top_sums), 
+            np.asarray(top_doc), np.asarray(Z), log_p, 
             mtrand_state[0], mtrand_state[1], mtrand_state[2], 
             mtrand_state[3], mtrand_state[4])
