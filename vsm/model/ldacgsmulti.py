@@ -317,15 +317,15 @@ def update((docs, doc_indices, mtrand_state)):
     """
     start, stop = docs[0][0], docs[-1][1]
 
-    corpus = np.frombuffer(_corpus, dtype=np.int32)[start:stop]
-    Z = np.frombuffer(_Z, dtype=np.int32)[start:stop].copy()
+    corpus = np.frombuffer(_corpus, dtype='i')[start:stop]
+    Z = np.frombuffer(_Z, dtype='i')[start:stop].copy()
 
-    gbl_word_top = np.frombuffer(_word_top, dtype=np.float64)
+    gbl_word_top = np.frombuffer(_word_top, dtype='d')
     gbl_word_top = gbl_word_top.reshape(_V.value, _K.value)
     loc_word_top = gbl_word_top.copy()
-    inv_top_sums = np.frombuffer(_inv_top_sums, dtype=np.float64).copy()
+    inv_top_sums = np.frombuffer(_inv_top_sums, dtype='d').copy()
 
-    top_doc = np.frombuffer(_top_doc, dtype=np.float64)
+    top_doc = np.frombuffer(_top_doc, dtype='d')
     top_doc = top_doc.reshape(_K.value, top_doc.size/_K.value)
     top_doc = top_doc[:, doc_indices[0]:doc_indices[1]].copy()
 
@@ -333,8 +333,7 @@ def update((docs, doc_indices, mtrand_state)):
     log_wk = np.log(gbl_word_top * inv_top_sums[np.newaxis, :])
     log_kc = np.log(top_doc / top_doc.sum(0)[np.newaxis, :])
 
-    indices = np.array([(j - start) for (i,j) in docs], dtype='l')
-    Z = np.array(Z, dtype='l')
+    indices = np.array([(j - start) for (i,j) in docs], dtype='i')
 
     results = cgs_update(_iteration.value,
                          corpus,
