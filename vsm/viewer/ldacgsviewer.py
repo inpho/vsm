@@ -4,7 +4,7 @@ Provides the class `LdaCgsViewer`.
 
 import numpy as np
 
-from vsm.spatial import H, JS_dist
+from vsm.spatial import H, JS_dist, KL_div
 from vsm.structarr import *
 from vsm.split import split_corpus
 from vsm.exceptions import *
@@ -303,22 +303,30 @@ class LdaCgsViewer(object):
         return k_arr
 
 
-    def osc_top_doc(self, topic_indices=None, compact_view=True, div_fn=KL_div):
-        """Returns ...
+    def osc_top_doc(self, topic_indices=None, div_fn=KL_div, as_strings=True,
+                    compact_view=True, topic_labels=None):
+        """Sorts topics by oscillation in the divergences of documents
+        from each topic k, represented as a categorical distribution
+        over topics with mass concentrated at index k.
 
-
+        Oscillation is computed as the difference between the maximum
+        and the minimum of the divergences.
         """
-        pseudo_docs = np.diag(np.ones(self.model.K, dtype='d'))
-        pseudo_docs = pseudo_docs[topic_indices, :]
+        if topic_indices==None:
+            topic_indices = np.arange(self.model.K)
+        else:
+            topic_indices = np.array(topic_indices)
+            
+        pseudo_docs = np.diag(np.ones(self.model.K, dtype='d'))[topic_indices, :]
         rel_entropies = div_fn(pseudo_docs, self.theta)
         oscillations = rel_entropies.max(axis=1) - rel_entropies.min(axis=1)
-        sort_indices = np.argsort(oscillations)
 
-        data_table = self.topics(compact_view=compact_view)
+        topic_indices = topic_indices[np.argsort(oscillations)]
+        topic_indices = topic_indices[::-1]
 
-        sorted(data_table, key=lambda osc: osc, reverse=True)
+        return self.topics(topic_indices=topic_indices, as_strings=as_strings,
+                           compact_view=compact_view, topic_labels=topic_labels)
 
-        return data_table
 
 
     def word_topics(self, word, as_strings=True):
