@@ -5,16 +5,14 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-BUILDDIR      = _build
+BUILDDIR      = build
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 # the i18n builder cannot share the environment and doctrees with the others
-I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
-
-GH_PAGES_SOURCES = Makefile .
+I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 
 .PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
 
@@ -155,12 +153,13 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 gh-pages:
-	git checkout gh-pages
-	rm -rf $(BUILD_DIR) _sources _static
-	git checkout develop $(GH_PAGES_SOURCES)
-	git reset HEAD
 	make html
-	mv -fv $(BUILD_DIR)/html/* ./
-	rm -rf $(GH_PAGES_SOURCES) $(BUILD_DIR)
-	git add -A
-	git ci -m "Generated gh-pages for `git log develop -1 --pretty=short --abbrev-commit`" && git push origin gh-pages ; git checkout develop
+	git clone https://github.com/inpho/vsm vsm_gh_pages
+	cd vsm_gh_pages \
+	&& git checkout gh-pages \
+	&& rm -rf * _static _sources \
+	&& mv ../$(BUILDDIR)/html/* . \
+	&& git add -A \
+	&& git commit -m "Generated gh-pages" \
+	&& git push origin gh-pages
+	rm -rf $(BUILDDIR) vsm_gh_pages

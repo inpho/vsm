@@ -6,8 +6,10 @@ import cPickle as cpickle
 
 import numpy as np
 
-from vsm.model import BaseModel
+from base import BaseModel
 
+
+__all__ = ['BeagleContextSeq', 'BeagleContextMulti']
 
 
 def realign_env_mat(corpus, env_corpus, env_matrix):
@@ -20,10 +22,26 @@ def realign_env_mat(corpus, env_corpus, env_matrix):
 
 
 class BeagleContextSeq(BaseModel):
+    """
 
+    """
     def __init__(self, corpus, env_corpus, env_matrix, 
                 context_type='sentence'):
         """
+        Initialize BeagleContextSeq.
+
+        :param corpus: Source of observed data.
+        :type corpus: class:`Corpus`
+
+        :param env_corpus: BEAGLE environment corpus.
+        :type env_corpus: class:`Corpus`
+
+        :param env_matrix: Matrix from BEAGLE environment model.
+        :type env_matrix: 2-D array
+
+        :param context_type: Name of tokenization stored in `corpus` whose
+            tokens will be treated as documents. Default is `sentence`.
+        :type context_type: string, optional
         """
         self.context_type = context_type
         self.sents = corpus.view_contexts(context_type)
@@ -32,6 +50,7 @@ class BeagleContextSeq(BaseModel):
 
     def train(self):
         """
+        Trains the model.
         """
         self.matrix = np.zeros_like(self.env_matrix)
 
@@ -58,10 +77,27 @@ class BeagleContextSeq(BaseModel):
 
 
 class BeagleContextMulti(BaseModel):
+    """
+
+    """
 
     def __init__(self, corpus, env_corpus, env_matrix, 
                  context_type='sentence'):
         """
+        Initialize BeagleContextMulti.
+        
+        :param corpus: Souce of observed data.
+        :type corpus: class:`Corpus`
+
+        :param env_corpus: BEAGLE environment corpus. 
+        :type env_corpus: class:`Corpus`
+
+        :param env_matrix: Matrix from BEAGLE environment model.
+        :type env_matrix: 2-D array
+
+        :param context_type: Name of tokenization stored in `corpus` whose
+            tokens will be treated as documents. Default is `sentence`.
+        :type context_type: string, optional
         """
         self.context_type = context_type
         self.sents = corpus.view_contexts(context_type)
@@ -80,6 +116,14 @@ class BeagleContextMulti(BaseModel):
 
     def train(self, n_procs=2):
         """
+        Takes an optional argument `n_procs`, number of processors,
+        and trains the model on the number of processors. `n_procs`
+        is 2 by default.
+        
+        :param n_procs: Number of processors. Default is 2.
+        :type n_procs: int, optional
+
+        :returs: `None`
         """
         sent_lists = np.array_split(self.sents, n_procs-1)
         if len(sent_lists) != n_procs:
@@ -154,92 +198,3 @@ def mpfn((sents, filename)):
 
     return filename
 
-
-
-
-#
-# For testing
-#
-
-
-
-def test_BeagleContextSeq():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.model.beagleenvironment import BeagleEnvironment
-
-    ec = random_corpus(100000, 5000, 0, 20, context_type='sentence')
-    cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,5000,100)])
-
-    e = BeagleEnvironment(ec, n_cols=200)
-    e.train()
-
-    m = BeagleContextSeq(cc, ec, e.matrix)
-    m.train()
-
-    from tempfile import NamedTemporaryFile
-    import os
-
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        m.save(tmp.name)
-        tmp.close()
-        m1 = BeagleContextSeq.load(tmp.name)
-        assert (m.matrix == m1.matrix).all()
-    
-    finally:
-        os.remove(tmp.name)
-
-    return m.matrix
-
-
-def test_BeagleContextMulti():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.model.beagleenvironment import BeagleEnvironment
-
-    ec = random_corpus(100000, 5000, 0, 20, context_type='sentence')
-    cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,5000,100)])
-
-    e = BeagleEnvironment(ec, n_cols=200)
-    e.train()
-
-    m = BeagleContextMulti(cc, ec, e.matrix)
-    m.train(n_procs=3)
-
-    from tempfile import NamedTemporaryFile
-    import os
-
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        m.save(tmp.name)
-        tmp.close()
-        m1 = BeagleContextMulti.load(tmp.name)
-        assert (m.matrix == m1.matrix).all()
-    
-    finally:
-        os.remove(tmp.name)
-
-    return m.matrix
-
-
-def test_compare():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.model.beagleenvironment import BeagleEnvironment
-
-    ec = random_corpus(100000, 5000, 0, 20, context_type='sentence')
-    cc = ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,5000,100)])
-
-    e = BeagleEnvironment(ec, n_cols=5)
-    e.train()
-
-    print 'Training single processor model'
-    ms = BeagleContextSeq(cc, ec, e.matrix)
-    ms.train()
-
-    print 'Training multiprocessor model'
-    mm = BeagleContextMulti(cc, ec, e.matrix)
-    mm.train()
-
-    assert np.allclose(ms.matrix, mm.matrix)

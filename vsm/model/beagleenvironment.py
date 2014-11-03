@@ -1,14 +1,34 @@
 import numpy as np
 
-from vsm.linalg import row_normalize
-from vsm.model import BaseModel
+from base import BaseModel
+
+
+__all__ = ['BeagleEnvironment']
 
 
 class BeagleEnvironment(BaseModel):
-
+    """
+    `BeagleEnvironment` is a randomly generated fixed vectors
+    representing the environment.
+    """
+    
     def __init__(self, corpus, n_cols=2048, dtype=np.float64, 
                  context_type='sentence'):
         """
+        Initialize BeagleEnvironment.
+
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+
+        :param n_cols: Number of columns. Default is 2048.
+        :type n_cols: int, optional
+
+        :param dtype: Numpy dtype for matrix attribute. Default is `np.float64`.
+        :type dtype: np.dtype, optional
+
+        :param context_type: Name of tokenization stored in `corpus` whose
+            tokens will be treated as documents. Default is `sentence`.
+        :type context_type: string, optional
         """
         self.context_type = context_type
         self.shape = (corpus.words.shape[0], n_cols)
@@ -17,39 +37,13 @@ class BeagleEnvironment(BaseModel):
 
     def train(self):
         """
+        Sets a m x n environment matrix where m is the number of words in
+        `corpus` and n is `n_cols`. The matrix consists of randomly generated
+        vectors. 
         """
         self.matrix = np.array(np.random.normal(size=self.shape),
                                dtype=self.dtype)
-        self.matrix = row_normalize(self.matrix)
+        # normalize rows
+        self.matrix /= np.sqrt((self.matrix * self.matrix).sum(1)[:,np.newaxis])
 
 
-
-def test_BeagleEnvironment():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.linalg import row_norms
-
-    c = random_corpus(1000, 100, 0, 20)
-
-    m = BeagleEnvironment(c, n_cols=100)
-    m.train()
-
-    assert (m.matrix <= 1).all()
-    assert (m.matrix >= -1).all()
-
-    norms = row_norms(m.matrix)
-
-    assert np.allclose(np.ones(norms.shape[0]), norms)
-
-    from tempfile import NamedTemporaryFile
-    import os
-
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        m.save(tmp.name)
-        tmp.close()
-        m1 = BeagleEnvironment.load(tmp.name)
-        assert (m.matrix == m1.matrix).all()
-    
-    finally:
-        os.remove(tmp.name)

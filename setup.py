@@ -1,10 +1,14 @@
-from distutils.core import setup
+from setuptools import setup, Extension, Command, find_packages
 
-import setuptools
+
+# find packages in vsm subdirectory
+# this will skip the unittests, etc.
+packages = ['vsm.'+pkg for pkg in find_packages('vsm')]
+packages.append('vsm')
 
 setup(
     name = "vsm",
-    version = "0.1",
+    version = "0.2",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
@@ -27,13 +31,10 @@ setup(
         ],
     install_requires=[
         "numpy>=1.6.1",
-        "scipy>=0.10.1",
-        "nltk>=2.0.0"
+        "scipy>=0.13.0",
     ],
-    packages=['vsm',
-              'vsm.corpus',
-              'vsm.corpus.util',
-              'vsm.model',
-              'vsm.viewer',
-              'vsm.extensions'],
+    packages=packages,
+    ext_modules = [
+        Extension('_cgs_update', ['vsm/model/_cgs_update.c']),
+    ],
 )

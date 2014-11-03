@@ -1,0 +1,30 @@
+This directory contains the source files to build vsm documentation
+with Sphinx. The Makefile has been customized to facilitate updating
+the documentation hosted as github pages.
+
+To update the github pages automatically, invoke
+
+$ make gh-pages
+
+in this directory.
+
+To see what this does concretely, inspect Makefile. In summary, this
+command will do the following:
+
+* build the html documentation in a temporary subdirectory `build`;
+
+* clone the vsm github repo in a temporary subdirectory `vsm-gh-pages'
+  and checkout the gh-pages branch;
+
+* (!) remove almost everything in that branch;
+
+* move the newly built documentation to `vsm-gh-pages`;
+
+* add, commit and push the new files (you may need to give your
+  credentials);
+
+* remove the subdirectories `build` and `vsm-gh-pages`.
+
+Currently, this procedure has no special error-handling. If it doesn't
+complete, you may have to clean up the temporary subdirectories
+yourself.

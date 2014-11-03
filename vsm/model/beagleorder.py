@@ -7,8 +7,11 @@ import cPickle as cpickle
 import numpy as np
 from numpy import dual
 
-from vsm.model import BaseModel
-from vsm.linalg import rand_pt_unit_sphere
+from vsm.spatial import rand_pt_unit_sphere
+from base import BaseModel
+
+
+__all__ = ['BeagleOrderSeq', 'BeagleOrderMulti']
 
 
 
@@ -28,7 +31,6 @@ def two_rand_perm(n, seed=None):
     return perm1, perm2
 
 
-
 def mk_b_conv(n, rand_perm=None):
     """
     """
@@ -43,7 +45,6 @@ def mk_b_conv(n, rand_perm=None):
         return np.real_if_close(dual.ifft(w1 * w2))
 
     return b_conv
-
 
 
 def ngram_slices(i, n, l):
@@ -69,7 +70,6 @@ def ngram_slices(i, n, l):
         out.append(slice(start, stop))
 
     return out
-
 
 
 def reduce_ngrams(fn, a, n, i, flat=True):
@@ -102,12 +102,34 @@ def reduce_ngrams(fn, a, n, i, flat=True):
     return out
 
 
-
 class BeagleOrderSeq(BaseModel):
+    """
+    `BeagleOrderSeq` stores word order information in the context.
+    """
 
     def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):
-        """
+        """ 
+        Initialize BeagleOrderSeq.
+        
+        :param corpus: Soure of observed data.
+        :type corpus: Corpus
+
+        :param env_matrix: BEAGLE environment matrix.
+        :type env_matrix: 2-D array
+
+        :param context_type: Name of tokenization stored in `corpus` whose
+            tokens will be treated as documents. Default is `sentence`.
+        :type context_type: string, optional
+
+        :param psi:  
+        :type psi: int, optional
+
+        :param rand_perm:  
+        :type rand_perm: boolean, optional
+
+        :param lmda:  
+        :type lmda: int, optional
         """
         self.context_type = context_type
         self.sents = corpus.view_contexts(context_type)
@@ -125,6 +147,7 @@ class BeagleOrderSeq(BaseModel):
 
     def train(self):
         """
+        Trains the model.
         """
         self.matrix = np.zeros_like(self.env_matrix)
 
@@ -143,10 +166,32 @@ class BeagleOrderSeq(BaseModel):
 
 
 class BeagleOrderMulti(BaseModel):
-
+    """
+    `BeagleOrderSeq` stores word order information in the context.
+    """
     def __init__(self, corpus, env_matrix, context_type='sentence',
                  psi=None, rand_perm=None, lmda =7):
-        """
+        """    
+        Initialize BeagleOrderMulti.
+
+        :param corpus: Source of observed data.
+        :type corpus: Corpus
+
+        :param env_matrix: BEAGLE environement matrix.
+        :type env_matrix: 2-D array
+
+        :param context_type: Name of tokenization stored in `corpus` whose
+            tokens will be treated as documents. Default is `sentence`.
+        :type context_type: string, optional
+
+        :param psi:  
+        :type psi: int, optional
+
+        :param rand_perm:  
+        :type rand_perm: boolean, optional
+
+        :param lmda:  
+        :type lmda: int, optional
         """
         self.context_type = context_type
         self.sents = corpus.view_contexts(context_type)
@@ -178,7 +223,12 @@ class BeagleOrderMulti(BaseModel):
 
 
     def train(self, n_procs=2):
-                
+        """
+        Trains the model using `n_procs` processors.
+
+        :param n_procs: Number of processors. Default is 2.
+        :type n_procs: int, optional
+        """
         sent_lists = np.array_split(self.sents, n_procs-1)
         if len(sent_lists) != n_procs:
             sent_lists = np.array_split(self.sents, n_procs)
@@ -216,7 +266,6 @@ class BeagleOrderMulti(BaseModel):
             shutil.rmtree(tmp_dir)
         
 
-
 def mpfn((sents, filename)):
     """
     """
@@ -245,156 +294,3 @@ def mpfn((sents, filename)):
         cpickle.dump(result, f)
 
     return filename
-
-
-#
-# For testing
-#
-
-
-def test_BeagleOrderSeq():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.model.beagleenvironment import BeagleEnvironment
-
-    c = random_corpus(1000, 50, 0, 20, context_type='sentence')
-
-    e = BeagleEnvironment(c, n_cols=100)
-    e.train()
-
-    m = BeagleOrderSeq(c, e.matrix)
-    m.train()
-
-    from tempfile import NamedTemporaryFile
-    import os
-
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        m.save(tmp.name)
-        tmp.close()
-        m1 = BeagleOrderSeq.load(tmp.name)
-        assert (m.matrix == m1.matrix).all()
-    
-    finally:
-        os.remove(tmp.name)
-
-    return m.matrix
-
-
-
-def test_BeagleOrderMulti():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.model.beagleenvironment import BeagleEnvironment
-
-    c = random_corpus(1000, 50, 0, 20, context_type='sentence')
-
-    e = BeagleEnvironment(c, n_cols=100)
-    e.train()
-
-    m = BeagleOrderMulti(c, e.matrix)
-    m.train(4)
-
-    from tempfile import NamedTemporaryFile
-    import os
-
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        m.save(tmp.name)
-        tmp.close()
-        m1 = BeagleOrderMulti.load(tmp.name)
-        assert (m.matrix == m1.matrix).all()
-    
-    finally:
-        os.remove(tmp.name)
-
-    return m.matrix
-
-
-
-def test_compare():
-
-    from vsm.util.corpustools import random_corpus
-    from vsm.model.beagleenvironment import BeagleEnvironment
-
-    c = random_corpus(1000, 100, 0, 20, context_type='sentence')
-
-    e = BeagleEnvironment(c, n_cols=5)
-    e.train()
-
-    psi = rand_pt_unit_sphere(e.shape[1])
-
-    rand_perm = two_rand_perm(e.shape[1])
-
-    print 'Training single processor model'
-    ms = BeagleOrderSeq(c, e.matrix, psi=psi, rand_perm=rand_perm)
-    ms.train()
-
-    print 'Training multiprocessor model'
-    mm = BeagleOrderMulti(c, e.matrix, psi=psi, rand_perm=rand_perm)
-    mm.train()
-
-    assert np.allclose(ms.matrix, mm.matrix), (ms.matrix, mm.matrix)
-
-
-
-def test10():
-
-    import pprint
-
-    def fn(x,y):
-        if isinstance(x, tuple):
-            return x + (y,)
-        return (x, y)
-
-    a = np.arange(5)
-    print 'array length', a.shape[0]
-        
-    for i in xrange(a.shape[0]):
-        n = 3
-        print 'ngram length', n
-        print 'index', i
-        pprint.pprint(reduce_ngrams(fn, a, n, i))
-
-    for i in xrange(a.shape[0]):
-        n = 4
-        print 'ngram length', n
-        print 'index', i
-        pprint.pprint(reduce_ngrams(fn, a, n, i))
-
-    for i in xrange(a.shape[0]):
-        n = 5
-        print 'ngram length', n
-        print 'index', i
-        pprint.pprint(reduce_ngrams(fn, a, n, i))
-
-
-
-def test11():
-
-    import pprint
-
-    def fn(x,y):
-        return x + y
-
-    a = np.arange(5)
-    print 'array length', a.shape[0]
-        
-    for i in xrange(a.shape[0]):
-        n = 3
-        print 'ngram length', n
-        print 'index', i
-        pprint.pprint(reduce_ngrams(fn, a, n, i))
-
-    for i in xrange(a.shape[0]):
-        n = 4
-        print 'ngram length', n
-        print 'index', i
-        pprint.pprint(reduce_ngrams(fn, a, n, i))
-
-    for i in xrange(a.shape[0]):
-        n = 5
-        print 'ngram length', n
-        print 'index', i
-        pprint.pprint(reduce_ngrams(fn, a, n, i))
-
