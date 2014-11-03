@@ -301,7 +301,24 @@ class LdaCgsViewer(object):
         k_arr.col_len = print_len
 
         return k_arr
-        
+
+
+    def osc_top_doc(self, topic_indices=None, compact_view=True, div_fn=KL_div):
+        """Returns ...
+
+
+        """
+        pseudo_docs = np.diag(np.ones(self.model.K, dtype='d'))
+        pseudo_docs = pseudo_docs[topic_indices, :]
+        rel_entropies = div_fn(pseudo_docs, self.theta)
+        oscillations = rel_entropies.max(axis=1) - rel_entropies.min(axis=1)
+        sort_indices = np.argsort(oscillations)
+
+        data_table = self.topics(compact_view=compact_view)
+
+        sorted(data_table, key=lambda osc: osc, reverse=True)
+
+        return data_table
 
 
     def word_topics(self, word, as_strings=True):
