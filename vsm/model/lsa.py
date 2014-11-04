@@ -14,7 +14,7 @@ class Lsa(object):
         """
         Initialize Lsa.
 
-        :param td_matrix: Term-Document matrix. Default is an empty array.
+        :param td_matrix: Term-Document matrix. Default is `None`.
         :type td_matrix: np.array, optional
 
         :param context_type: Name of tokenization whose tokens will be
@@ -79,7 +79,6 @@ class Lsa(object):
             
         :See Also: :meth:`numpy.savez`
         """
-        print 'Saving model as', f
         arrays_out = dict()
         arrays_out['word_matrix'] = self.word_matrix
         arrays_out['eigenvalues'] = self.eigenvalues
@@ -103,10 +102,9 @@ class Lsa(object):
 
         :See Also: :meth:`numpy.load`
         """
-        print 'Loading model from', f
         arrays_in = np.load(f)
-        m = BaseLsaModel(word_matrix=arrays_in['word_matrix'],
-                         eigenvalues=arrays_in['eigenvalues'],
-                         doc_matrix=arrays_in['doc_matrix'],
-                         context_type=arrays_in['context_type'])
+        m = Lsa(context_type=arrays_in['context_type'])
+        m.word_matrix=arrays_in['word_matrix']
+        m.eigenvalues=arrays_in['eigenvalues']
+        m.doc_matrix=arrays_in['doc_matrix']
         return m
