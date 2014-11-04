@@ -12,6 +12,7 @@ install:
   - export PATH=$HOME/py/bin:$PATH
   # command to install dependencies
   - pip install unidecode nltk
+  - python2.7 -c "import nltk; nltk.download('stopwords')"
   - pip install .
 # command to run tests
 before_script: pip install unittest2 nose
