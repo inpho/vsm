@@ -4,6 +4,9 @@ from sklearn.manifold import Isomap, MDS
 from plotting import plot_clusters
 
 
+__all__ = [ 'Manifold' ]
+
+
 class Manifold(object):
     def __init__(self, dismat, labels=None, cls=[], pos=[]):
         self.dismat = np.asarray(dismat)
