@@ -5,7 +5,7 @@ from ldafunctions import *
 from _cgs_update import cgs_update
 
 
-__all__ = [ 'LdaCgsSeq' ]
+__all__ = [ 'LdaCgsSeq', 'LdaCgsQuerySampler' ]
 
 
 
@@ -173,6 +173,20 @@ class LdaCgsSeq(object):
         :See Also: :class:`numpy.savez`
         """
         save_lda(self, filename)
+
+
+
+class LdaCgsQuerySampler(LdaCgsSeq):
+    """
+    """
+    def __init__(self, lda_obj, new_corp):
+
+        kwargs = dict(corpus=new_corpus,
+                      context_type=lda_obj.context_type,
+                      K=lda_obj.K, V=lda_obj.V, 
+                      alpha=lda_obj.alpha, beta=lda_obj.beta)
+
+        super(LdaCgsQuerySampler, self).__init__(**kwargs)
 
 
 

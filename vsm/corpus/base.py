@@ -4,7 +4,7 @@ from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
 
 
-__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata' ]
+__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata', 'align_corpora' ]
 
 
 
@@ -639,37 +639,35 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
     return corpus
 
 
-#
-# Testing
-#
 
+def align_corpora(old_corp, new_corp):
+    """Takes two Corpus objects `old_corp` and `new_corp` and returns a
+    copy of `new_corp` with the following modifications: (1) the word
+    to integer mapping agrees with that of `old_corp` and (2) words in
+    `new_corp` which do not appear in `old_corp` are removed from the
+    corpus. Empty documents are removed.
+    """
+    int_words = new_corp.words
+    words_int = old_corp.words_int
 
-    
-def test_file():
+    stopwords = []
+    int_int = {}
 
-    from vsm.util.corpustools import random_corpus
+    for i in xrange(len(int_words)):
+        w = int_words[i]
+        if w in words_int:
+            int_int[i] = words_int[w]
+        else:
+            stopwords.append(w)
 
-    c = random_corpus(10000, 500, 1, 20, context_type='foo', metadata=True)
+    out = new_corp.apply_stoplist(stopwords)
+    out.remove_empty()
 
-    from tempfile import NamedTemporaryFile
-    import os
+    for i in xrange(len(out.corpus)):
+        out.corpus[i] = int_int[i]
+    for i in xrange(len(out.words)):
+        out.words[i] = old_corp[words[int_int[i]]]
+    out.words_int = dict(zip(out.words, range(len(out.words))))
 
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        c.save(tmp.name)
-        tmp.close()
-        c_reloaded = c.load(tmp.name)
-
-        assert (c.corpus == c_reloaded.corpus).all()
-        assert (c.words == c_reloaded.words).all()
-        assert c.words_int == c_reloaded.words_int
-        assert c.context_types == c_reloaded.context_types
-        for i in xrange(len(c.context_data)):
-            assert (c.context_data[i] == c_reloaded.context_data[i]).all()
-    
-    finally:
-        os.remove(tmp.name)
-
-    return c_reloaded
-
+    return out
 
