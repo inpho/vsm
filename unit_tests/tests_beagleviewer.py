@@ -1,7 +1,7 @@
 import unittest2 as unittest
 import numpy as np
 
-from vsm.viewer.beagleviewer import *
+from vsm.viewer.beagleviewer import BeagleViewer 
 from vsm.viewer.labeleddata import *
 
 
@@ -37,13 +37,13 @@ class TestBeagleViewer(unittest.TestCase):
 
     def test_BeagleViewer(self):
     
-        sww = self.venv.sim_word_word('1')        
-        sww1 = self.vord.sim_word_word('0')
+        sww = self.venv.dist_word_word('1')        
+        sww1 = self.vord.dist_word_word('0')
         self.assertTrue(type(sww) == LabeledColumn)
         self.assertTrue(type(sww1) == LabeledColumn)
         
-        smw = self.vcom.simmat_words(['1'])
-        smw1 = self.vctx.simmat_words(['1'])
+        smw = self.vcom.dismat_word(['1'])
+        smw1 = self.vctx.dismat_word(['1'])
         self.assertTrue(type(smw) == IndexedSymmArray)
         self.assertTrue(type(smw1) == IndexedSymmArray)
 
