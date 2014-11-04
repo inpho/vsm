@@ -34,6 +34,7 @@ class TestLinalg(unittest.TestCase):
     def test_JS_dist(self):
         self.assertTrue(np.allclose(JS_dist(self.p,self.q), JSD(self.p,self.q)))
 
+
     def test_KL_div_old(self):
         p = np.array([0,1])
         Q = np.array([[0,1],
@@ -43,15 +44,8 @@ class TestLinalg(unittest.TestCase):
         exp = np.array([np.inf, 1, 0])
 
         self.assertTrue(np.allclose(exp, KL_div(p,Q)))
-    
-    def test_row_normalize(self):
 
-        m = np.random.random((5,7))
-        m = row_normalize(m)
-
-        self.assertTrue(np.allclose(row_norms(m), np.ones(5)))
-
-
+    '''
     def test_row_cos_mat(self):
 
         m = np.random.random((10,5))
@@ -64,7 +58,6 @@ class TestLinalg(unittest.TestCase):
         
         self.assertTrue(np.allclose((out_1, out_2), (out_1, out_2)))
 
-
     def test_hstack_coo(self):
 
         dense_mat_ls = [np.random.random((3,4)),
@@ -75,7 +68,7 @@ class TestLinalg(unittest.TestCase):
     
         self.assertTrue((np.hstack(dense_mat_ls) == 
                         hstack_coo(mat_ls).toarray()).all())
-
+    '''
 
     def test_count_matrix(self):
     
