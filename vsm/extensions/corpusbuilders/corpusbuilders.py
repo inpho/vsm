@@ -408,24 +408,20 @@ def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
 
 
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
-    """
-    `dir_tokenize` is a helper function for :meth:`dir_corpus`.
+    """`dir_tokenize` is a helper function for :meth:`dir_corpus`.
 
-    Takes a list of files, `chunks` and `labels` for the `chunks` and
-    returns words and corpus data.
+    Takes a list of strings and labels and returns words and corpus data.
 
-    :param chunks: List of files. `chunk_name` indicates what a chunk
-        represents.
+    :param chunks: List of strings.
     :type chunks: list
 
-    :param labels: List of filenames where files equal chunks.
+    :param labels: List of strings.
     :type labels: list
 
-    :param chunk_name: The name of the tokenization corresponding 
-        to individual files. For example, if the files are pages 
-        of a book, one might set `chunk_name` to `pages`. Default 
-        is `articles`.
-    :type chunk_name: string-like, optional
+    :param chunk_name: The name of the tokenization corresponding to
+        individual files. For example, if the input strings are pages
+        of a book, one might set `chunk_name` to `pages`. Default is
+        `articles`.  :type chunk_name: string-like, optional
     
     :param paragraphs: If `True`, a paragraph-level tokenization 
         is included. Defaults to `True`.
@@ -436,6 +432,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
         corpus_data : Dictionary with context type as keys and
         corresponding tokenizations as values. The tokenizations
         are np.arrays.
+
     """
     words, chk_tokens, sent_tokens = [], [], []
     sent_break, chk_n, sent_n = 0, 0, 0
