@@ -14,7 +14,7 @@ def JSD(p,q):
     return (0.5*(KL(p,((p+q)*0.5)) + KL(q,((p+q)*0.5))))**0.5
 
 
-class TestLinalg(unittest.TestCase):
+class TestSpatial(unittest.TestCase):
 
     def setUp(self):
         # 2 random distributions
@@ -40,35 +40,10 @@ class TestLinalg(unittest.TestCase):
         Q = np.array([[0,1],
                       [.5,.5],
                       [1,0]])
-        
-        exp = np.array([np.inf, 1, 0])
+        out = np.array([0., 1., np.inf])
 
-        self.assertTrue(np.allclose(exp, KL_div(p,Q)))
+        self.assertTrue(np.allclose(out, KL_div(p,Q.T)))
 
-    '''
-    def test_row_cos_mat(self):
-
-        m = np.random.random((10,5))
-        out_1 = np.zeros((10,10))
-        for i, j in zip(*np.triu_indices_from(out_1)):
-            out_1[i, j] = (np.dot(m[i], m[j])
-                            / (np.dot(m[i], m[i])**.5
-                            * np.dot(m[j], m[j])**.5))
-        out_2 = row_cos_mat(range(10), m, fill_tril=False)
-        
-        self.assertTrue(np.allclose((out_1, out_2), (out_1, out_2)))
-
-    def test_hstack_coo(self):
-
-        dense_mat_ls = [np.random.random((3,4)),
-                        np.random.random((3,5)),
-                        np.random.random((3,6))]
-
-        mat_ls = [coo_matrix(m) for m in dense_mat_ls]
-    
-        self.assertTrue((np.hstack(dense_mat_ls) == 
-                        hstack_coo(mat_ls).toarray()).all())
-    '''
 
     def test_count_matrix(self):
     
@@ -88,5 +63,5 @@ class TestLinalg(unittest.TestCase):
     
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestLinalg)
+suite = unittest.TestLoader().loadTestsFromTestCase(TestSpatial)
 unittest.TextTestRunner(verbosity=2).run(suite)

@@ -3,18 +3,18 @@ from scipy import sparse
 from scipy.sparse import linalg as linalgs
 
 
-__all__ = ['Lsa']
+__all__ = [ 'Lsa' ]
 
 
 class Lsa(object):
     """
     """
     
-    def __init__(self, td_matrix=np.array([]), context_type=None):
+    def __init__(self, td_matrix=None, context_type=None):
         """
         Initialize Lsa.
 
-        :param td_matrix: Term-Document matrix. Default is an empty array.
+        :param td_matrix: Term-Document matrix. Default is `None`.
         :type td_matrix: np.array, optional
 
         :param context_type: Name of tokenization whose tokens will be
@@ -27,7 +27,9 @@ class Lsa(object):
         self.eigenvalues = None
         self.context_type = context_type
 
-        if td_matrix.size > 0:
+        if td_matrix==None:
+            self.td_matrix = np.array([])
+        else:
             td_matrix = sparse.coo_matrix(td_matrix)
             
             # Removing infinite values for SVD
@@ -39,8 +41,6 @@ class Lsa(object):
             td_matrix = sparse.coo_matrix(coo_in, shape=td_matrix.shape, 
                                           dtype=np.float64)
             self.td_matrix = td_matrix.tocsr()
-        else:
-            self.td_matrix = np.array([])
 
 
     def train(self, k_factors=300):
@@ -79,7 +79,6 @@ class Lsa(object):
             
         :See Also: :meth:`numpy.savez`
         """
-        print 'Saving model as', f
         arrays_out = dict()
         arrays_out['word_matrix'] = self.word_matrix
         arrays_out['eigenvalues'] = self.eigenvalues
@@ -103,10 +102,9 @@ class Lsa(object):
 
         :See Also: :meth:`numpy.load`
         """
-        print 'Loading model from', f
         arrays_in = np.load(f)
-        m = BaseLsaModel(word_matrix=arrays_in['word_matrix'],
-                         eigenvalues=arrays_in['eigenvalues'],
-                         doc_matrix=arrays_in['doc_matrix'],
-                         context_type=arrays_in['context_type'])
+        m = Lsa(context_type=arrays_in['context_type'])
+        m.word_matrix=arrays_in['word_matrix']
+        m.eigenvalues=arrays_in['eigenvalues']
+        m.doc_matrix=arrays_in['doc_matrix']
         return m
