@@ -2,8 +2,6 @@ import unittest2 as unittest
 import numpy as np
 
 
-
-
 class TestBeagleComposite(unittest.TestCase):
 
     def setUp(self):

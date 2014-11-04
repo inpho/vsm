@@ -38,7 +38,6 @@ class TestTfViewer(unittest.TestCase):
         self.assertEqual(type(sdd), LabeledColumn)
         self.assertEqual(type(sddl), LabeledColumn)
         self.assertEqual(type(cfs), LabeledColumn)
-
         self.assertEqual(type(distmatw), IndexedSymmArray)
         self.assertEqual(type(distmatd), IndexedSymmArray)
 
