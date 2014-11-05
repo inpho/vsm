@@ -8,7 +8,7 @@ install:
   # install deps
   - sudo conda init
   # sudo conda update conda --yes
-  - conda create -p $HOME/py --yes pip numpy scipy "python=$TRAVIS_PYTHON_VERSION"
+  - conda create -p $HOME/py --yes pip numpy scipy scikit-learn "python=$TRAVIS_PYTHON_VERSION"
   - export PATH=$HOME/py/bin:$PATH
   # command to install dependencies
   - pip install unidecode nltk
