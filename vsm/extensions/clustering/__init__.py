@@ -2,4 +2,4 @@
 [Documentation concerning the clustering extension]
 """
 
-from clustering import *
+from manifold import *
