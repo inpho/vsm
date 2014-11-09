@@ -15,7 +15,7 @@ import tfidfviewer
 from tfidfviewer import *
 
 
-__all__ = beagleviewer.__all__
+__all__ = beagleviewer.__all__[:]
 __all__ += ldacgsviewer.__all__
 __all__ += lsaviewer.__all__
 __all__ += tfviewer.__all__
