@@ -424,7 +424,7 @@ class Corpus(BaseCorpus):
                                      dtype=np.str_,
 				     remove_empty=remove_empty)
 
-        self.__set_words_int()
+        self._set_words_int()
 
         # Integer encoding of a string-type corpus
         self.dtype = np.int32
@@ -434,7 +434,7 @@ class Corpus(BaseCorpus):
 
 
 
-    def __set_words_int(self):
+    def _set_words_int(self):
         """
         Mapping of words to their integer representations.
         """
@@ -523,7 +523,7 @@ class Corpus(BaseCorpus):
             t = arrays_in['context_data_' + n]
             c.context_data.append(t)
 
-        c.__set_words_int()
+        c._set_words_int()
 
         return c
 
@@ -646,28 +646,22 @@ def align_corpora(old_corp, new_corp):
     to integer mapping agrees with that of `old_corp` and (2) words in
     `new_corp` which do not appear in `old_corp` are removed from the
     corpus. Empty documents are removed.
+
     """
-    int_words = new_corp.words
-    words_int = old_corp.words_int
-
-    stopwords = []
-    int_int = {}
-
-    for i in xrange(len(int_words)):
-        w = int_words[i]
-        if w in words_int:
-            int_int[i] = words_int[w]
-        else:
-            stopwords.append(w)
-
-    out = new_corp.apply_stoplist(stopwords)
+    new_words = [w for w in new_corp.words if w not in old_corp.words]
+    out = new_corp.apply_stoplist(new_words)
     out.remove_empty()
 
+    int_words = out.words
+    words_int = old_corp.words_int
+    int_int = {}
+    for i in xrange(len(int_words)):
+        int_int[i] = words_int[int_words[i]]
+
     for i in xrange(len(out.corpus)):
-        out.corpus[i] = int_int[i]
-    for i in xrange(len(out.words)):
-        out.words[i] = old_corp[words[int_int[i]]]
-    out.words_int = dict(zip(out.words, range(len(out.words))))
+        out.corpus[i] = int_int[out.corpus[i]]
+    out.words = old_corp.words.copy()
+    out._set_words_int()
 
     return out
 

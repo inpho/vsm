@@ -1,9 +1,10 @@
 import unittest2 as unittest
 import numpy as np
 import os
-from vsm.corpus import BaseCorpus, Corpus
+from vsm.corpus import *
 from vsm.split import split_corpus
 from tempfile import NamedTemporaryFile
+
 
 class TestCorpus(unittest.TestCase):
 
@@ -24,7 +25,8 @@ class TestCorpus(unittest.TestCase):
         self.corpus = Corpus(text, context_data=ctx_data,
                                     context_types=['sentence'])
         
-                            
+                        
+    #TODO: Move this test to vsm.split
     def test_SplitCorpus(self): 
         odd = split_corpus(self.corpus.corpus, [1,3,5])
         even = split_corpus(self.corpus.corpus, [2,4,6])
@@ -38,6 +40,37 @@ class TestCorpus(unittest.TestCase):
             np.testing.assert_array_equal(odd[i], odd_expected[i])
         for i in xrange(len(even)):
             np.testing.assert_array_equal(even[i], even_expected[i])
+
+
+    def test_align_corpora(self):
+        
+        out = align_corpora(self.corpus, Corpus([]))
+        self.assertTrue(len(out.corpus)==0)
+        self.assertTrue(len(out.words)==4)
+        self.assertTrue(len(out.words_int)==4)
+
+        out = align_corpora(Corpus([]), self.corpus)
+        self.assertTrue(len(out.corpus)==0)
+        self.assertTrue(len(out.words)==0)
+        self.assertTrue(len(out.words_int)==0)
+
+        out = align_corpora(self.corpus, self.corpus)
+        self.assertTrue(len(out.corpus)==len(self.corpus.corpus))
+        self.assertTrue((out.corpus==self.corpus.corpus).all())
+        self.assertTrue(len(out.words)==len(self.corpus.words))
+        self.assertTrue((out.words==self.corpus.words).all())
+        self.assertTrue(out.words_int==self.corpus.words_int)
+
+        new_corp = Corpus(
+            [ 'came', 'saw', 'and', 'conquered' ],
+            context_data=[ np.array([(4, )], dtype=[('idx', '<i8')]) ])
+        out = align_corpora(self.corpus, new_corp)
+        self.assertTrue(len(out.corpus)==3)
+        for w in out.corpus:
+            self.assertTrue(out.words[w]==self.corpus.words[w])
+        self.assertTrue(len(out.words)==4)
+        self.assertTrue((out.words==self.corpus.words).all())
+        self.assertTrue(out.words_int==self.corpus.words_int)
 
 
     def test_ValidateIndices(self):
