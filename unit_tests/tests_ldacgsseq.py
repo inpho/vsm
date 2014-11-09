@@ -2,14 +2,13 @@ import unittest2 as unittest
 import numpy as np
 
 from vsm.corpus.util.corpusbuilders import random_corpus
-from vsm.model.ldacgsseq import LdaCgsSeq
+from vsm.model.ldacgsseq import *
 
 
 class TestLdaCgsSeq(unittest.TestCase):
 
     def setUp(self):
-        self.c = random_corpus(1000, 20, 0, 50)
-        self.m = LdaCgsSeq(self.c, 'document', K=10)
+        pass
 
     ##TODO: write actual test cases.
 
@@ -46,6 +45,13 @@ class TestLdaCgsSeq(unittest.TestCase):
             self.assertTrue(not hasattr(m1, 'log_prob'))
         finally:
             os.remove(tmp.name)
+
+
+    def test_LdaCgsQuerySampler(self):
+
+        
+        pass
+
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestLdaCgsSeq)

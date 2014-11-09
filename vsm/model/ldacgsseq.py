@@ -1,6 +1,7 @@
 import numpy as np
 import time
 from vsm.split import split_corpus
+from vsm.corpus import align_corpora
 from ldafunctions import *
 from _cgs_update import cgs_update
 
@@ -179,12 +180,20 @@ class LdaCgsSeq(object):
 class LdaCgsQuerySampler(LdaCgsSeq):
     """
     """
-    def __init__(self, lda_obj, new_corp):
+    def __init__(self, lda_obj=None, new_corpus=None, 
+                 align_corpora=False, old_corpus=None):
 
-        kwargs = dict(corpus=new_corpus,
-                      context_type=lda_obj.context_type,
-                      K=lda_obj.K, V=lda_obj.V, 
-                      alpha=lda_obj.alpha, beta=lda_obj.beta)
+        if align_corpora:
+            new_corp = align_corpora(old_corpus, new_corpus)
+
+        if lda_obj:
+            kwargs = dict(corpus=new_corpus,
+                          context_type=lda_obj.context_type,
+                          K=lda_obj.K, V=lda_obj.V, 
+                          alpha=lda_obj.alpha, beta=lda_obj.beta)
+        else:
+            kwargs = dict(corpus=new_corpus)
+
 
         super(LdaCgsQuerySampler, self).__init__(**kwargs)
 

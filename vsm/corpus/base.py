@@ -640,27 +640,27 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
 
 
 
-def align_corpora(old_corp, new_corp):
-    """Takes two Corpus objects `old_corp` and `new_corp` and returns a
-    copy of `new_corp` with the following modifications: (1) the word
-    to integer mapping agrees with that of `old_corp` and (2) words in
-    `new_corp` which do not appear in `old_corp` are removed from the
-    corpus. Empty documents are removed.
+def align_corpora(old_corpus, new_corpus):
+    """Takes two Corpus objects `old_corpus` and `new_corpus` and returns
+    a copy of `new_corpus` with the following modifications: (1) the
+    word to integer mapping agrees with that of `old_corpus` and (2)
+    words in `new_corpus` which do not appear in `old_corpus` are
+    removed from the corpus. Empty documents are removed.
 
     """
-    new_words = [w for w in new_corp.words if w not in old_corp.words]
-    out = new_corp.apply_stoplist(new_words)
+    new_words = [w for w in new_corpus.words if w not in old_corpus.words]
+    out = new_corpus.apply_stoplist(new_words)
     out.remove_empty()
 
     int_words = out.words
-    words_int = old_corp.words_int
+    words_int = old_corpus.words_int
     int_int = {}
     for i in xrange(len(int_words)):
         int_int[i] = words_int[int_words[i]]
 
     for i in xrange(len(out.corpus)):
         out.corpus[i] = int_int[out.corpus[i]]
-    out.words = old_corp.words.copy()
+    out.words = old_corpus.words.copy()
     out._set_words_int()
 
     return out
