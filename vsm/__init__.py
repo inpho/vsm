@@ -27,6 +27,6 @@ import viewer
 from viewer import *
 
 
-__all__ = corpus.__all__
+__all__ = corpus.__all__[:]
 __all__ += model.__all__
 __all__ += viewer.__all__

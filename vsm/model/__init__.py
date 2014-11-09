@@ -24,7 +24,7 @@ import tfidf
 from tfidf import *
 
 
-__all__ = beaglecomposite.__all__
+__all__ = beaglecomposite.__all__[:]
 __all__ += beaglecontext.__all__
 __all__ += beagleenvironment.__all__
 __all__ += beagleorder.__all__
