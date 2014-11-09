@@ -1,7 +1,8 @@
 import unittest2 as unittest
 import numpy as np
 import os
-from vsm.corpus import *
+from vsm.corpus import BaseCorpus, Corpus
+from vsm.split import split_corpus
 from tempfile import NamedTemporaryFile
 
 class TestCorpus(unittest.TestCase):

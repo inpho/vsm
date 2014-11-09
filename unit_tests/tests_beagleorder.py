@@ -20,9 +20,10 @@ class TestBeagleOrder(unittest.TestCase):
 
         self.ms = BeagleOrderSeq(self.c, self.e.matrix)
         self.ms.train()
-
+        '''
         self.mm = BeagleOrderMulti(self.c, self.e.matrix)
         self.mm.train(2)
+        '''
 
 
     def test_BeagleOrderSeq(self):
@@ -40,6 +41,7 @@ class TestBeagleOrder(unittest.TestCase):
             os.remove(tmp.name)
 
 
+    '''
     def test_BeagleOrderMulti(self):
 
         from tempfile import NamedTemporaryFile
@@ -54,7 +56,7 @@ class TestBeagleOrder(unittest.TestCase):
     
         finally:
             os.remove(tmp.name)
-
+    '''
 
     #TODO: Construct a reference result for both models
     # def test_compare(self):

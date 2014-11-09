@@ -1,7 +1,7 @@
 import unittest2 as unittest
 
-from vsm.corpus import util
-from vsm.corpus.util import *
+from vsm.corpus import add_metadata
+from vsm.extensions.corpusbuilders.util import *
 import numpy as np
 
 class TestCorpusUtil(unittest.TestCase):

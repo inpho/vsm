@@ -27,7 +27,7 @@ class TestTf(unittest.TestCase):
         m.train()
         self.assertTrue((self.cnt_mat == m.matrix.toarray()).all())
 
-
+    '''
     def test_TfMulti_train(self):
         m = tf.TfMulti()
         m.corpus = self.corpus
@@ -36,6 +36,7 @@ class TestTf(unittest.TestCase):
         m.train(2)
 
         self.assertTrue((self.cnt_mat == m.matrix.toarray()).all())
+    '''
 
 
         

@@ -1,8 +1,7 @@
 import unittest2 as unittest
 
-from vsm.corpus import util
-from vsm.corpus.util.corpusbuilders import *
-from vsm.corpus.util.corpusbuilders import file_tokenize, coll_tokenize, dir_tokenize, corpus_fromlist
+from vsm.extensions.corpusbuilders import *
+from vsm.extensions.corpusbuilders.corpusbuilders import file_tokenize, coll_tokenize, dir_tokenize, corpus_fromlist
 import numpy as np
 
 
@@ -12,8 +11,8 @@ class TestCorpusbuilders(unittest.TestCase):
         
         c = empty_corpus()
         self.assertTrue((np.array([]) == c.corpus).all())
-        self.assertTrue(['context'] == c.context_types)
-        self.assertTrue((np.array([]) == c.view_contexts('context')).all())
+        self.assertTrue(['document'] == c.context_types)
+        self.assertTrue((np.array([]) == c.view_contexts('document')).all())
 
     def test_corpus_fromlist(self):
 
@@ -115,10 +114,14 @@ class TestCorpusbuilders(unittest.TestCase):
         labels = [str(i) for i in xrange(len(chunks))]
         words, context_data = dir_tokenize(chunks, labels)
 
+        print
+        print context_data['sentence']['idx']
+        print
+
         self.assertTrue(len(words) == 11)
         self.assertTrue(len(context_data['article']) == 4)
         self.assertTrue(len(context_data['paragraph']) == 6)
-        self.assertTrue(len(context_data['sentence']) == 7)
+        self.assertTrue(len(context_data['sentence']) == 6)
     
         self.assertTrue((context_data['article']['idx'] == [5, 9, 9, 11]).all())
         self.assertTrue((context_data['article']['article_label'] == 
@@ -130,13 +133,13 @@ class TestCorpusbuilders(unittest.TestCase):
         self.assertTrue((context_data['paragraph']['paragraph_label'] == 
                  ['0', '1', '2', '3', '4', '5']).all())
         self.assertTrue((context_data['sentence']['idx'] == 
-                [3, 5, 7, 9, 9, 10, 11]).all())
+                [3, 5, 7, 9, 10, 11]).all())
         self.assertTrue((context_data['sentence']['article_label'] == 
-                ['0', '0', '1', '1', '2', '3', '3']).all())
+                ['0', '0', '1', '1', '3', '3']).all())
         self.assertTrue((context_data['sentence']['paragraph_label'] == 
-                ['0', '1', '2', '2', '3', '4', '5']).all())
+                ['0', '1', '2', '2', '4', '5']).all())
         self.assertTrue((context_data['sentence']['sentence_label'] == 
-                ['0', '1', '2', '3', '4', '5', '6']).all())
+                ['0', '1', '2', '3', '4', '5']).all())
 
 
     def test_coll_tokenize(self):
@@ -152,7 +155,7 @@ class TestCorpusbuilders(unittest.TestCase):
         self.assertTrue(len(words) == 11)
         self.assertTrue(len(context_data['book']) == 2)
         self.assertTrue(len(context_data['page']) == 4)
-        self.assertTrue(len(context_data['sentence']) == 7)
+        self.assertTrue(len(context_data['sentence']) == 6)
         self.assertTrue((context_data['book']['idx'] == [9, 11]).all())
         self.assertTrue((context_data['book']['book_label'] == ['0', '1']).all())
         self.assertTrue((context_data['page']['idx'] == [5, 9, 9, 11]).all())
@@ -161,17 +164,17 @@ class TestCorpusbuilders(unittest.TestCase):
         self.assertTrue((context_data['page']['book_label'] == 
                             ['0', '0', '1', '1']).all())
         self.assertTrue((context_data['sentence']['idx'] == 
-                            [3, 5, 7, 9, 9, 10, 11]).all())
+                            [3, 5, 7, 9, 10, 11]).all())
         self.assertTrue((context_data['sentence']['sentence_label'] == 
-                ['0', '1', '2', '3', '4', '5', '6']).all())
+                ['0', '1', '2', '3', '4', '5']).all())
         self.assertTrue((context_data['sentence']['page_label'] == 
-               ['0', '0', '1', '1', '2', '3', '3']).all())
+               ['0', '0', '1', '1', '3', '3']).all())
         self.assertTrue((context_data['sentence']['book_label'] == 
-                ['0', '0', '0', '0', '1', '1', '1']).all())
+                ['0', '0', '0', '0', '1', '1']).all())
         self.assertTrue((context_data['page']['file'] ==
                 ['1','2','3','4']).all())
         self.assertTrue((context_data['sentence']['file'] ==
-                ['1','1','2','2','3','4','4']).all()) 
+                ['1','1','2','2','4','4']).all()) 
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestCorpusbuilders)
