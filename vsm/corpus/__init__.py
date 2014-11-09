@@ -7,4 +7,4 @@ from base import *
 import base
 
 
-__all__ = base.__all__
+__all__ = base.__all__[:]
