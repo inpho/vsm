@@ -195,15 +195,13 @@ class LdaCgsViewer(object):
             else:
                 ch = topic_labels[i]
 
-            if compact_view:
-                sch = ['Topic', 'Words']
-            else:
-                sch = ['Word', 'Prob']
-            col = LabeledColumn(k_arr[i], col_header=ch,
-                                subcol_headers=sch, col_len=print_len)
+            col = LabeledColumn(k_arr[i], col_header=ch, col_len=print_len)
             table.append(col)
 
-        return DataTable(table, th, compact_view=compact_view)
+        schc = ['Topic', 'Words']
+        schf = ['Word', 'Prob']
+        return DataTable(table, th, compact_view=compact_view,
+                     subcolhdr_compact=schc, subcolhdr_full=schf)
 
 
     def doc_topics(self, doc_or_docs, sort_by_entropy=False, compact_view=False,
@@ -267,15 +265,14 @@ class LdaCgsViewer(object):
                 ch = 'Doc: ' + labels[i]
             else:
                 ch = topic_labels[i] 
-            if compact_view:
-                sch = ['Doc', 'Topics']
-            else:
-                sch = ['Topic', 'Prob']
-            col = LabeledColumn(k_arr[docs[i]], col_header=ch,
-                                subcol_headers=sch, col_len=print_len)
+                
+            col = LabeledColumn(k_arr[docs[i]], col_header=ch, col_len=print_len)
             table.append(col)
 
-        return DataTable(table, th, compact_view=compact_view)
+        schc = ['Doc', 'Topics']
+        schf = ['Topic', 'Prob']
+        return DataTable(table, th, compact_view=compact_view,
+                        subcolhdr_compact=schc, subcolhdr_full=schf)
 
 
     def aggregate_doc_topics(self, docs, normed_sum=False, print_len=10):
@@ -427,15 +424,10 @@ class LdaCgsViewer(object):
             k_arr = self.topics(topic_indices=topic_indices, print_len=print_len,
                                 as_strings=as_strings, compact_view=compact_view,
                                 topic_labels=topic_labels)
-            # Retrieve topics
-            if compact_view:
-                k_arr.table_header = 'Sorted by Topic Distance'
-                return k_arr
-
-            # Relabel results
+            
             k_arr.table_header = 'Sorted by Topic Distance'
             for i in xrange(distances.size):
-                k_arr[i].col_header += ' ({0:.5f})'.format(distances[i][1])
+                k_arr[i].col_header += ' ({0:.3f})'.format(distances[i][1])
 
             return k_arr
 

@@ -376,11 +376,24 @@ class DataTable(list):
     >>>  arr = np.array(zip(words, values), 
             dtype=[('i', np.array(words).dtype), 
             ('value', np.array(values).dtype)])
-    >>>  lc = LabeledColumn(arr)
+    >>>  lc = LabeledColumn(arr, 'Lyrics')
     >>>  l = [lc.copy() for i in xrange(2)]
-    >>>  dt = DataTable(l, 'Let it be')
-    >>>  dt.table_header
-    Let it be
+    >>>  dt = DataTable(l, 'Let it be', subcolhdr_compact=['Topic', 'Words'],
+                   subcolhdr_full=['Word', 'Prob'], compact_view=True)
+    >>>  print dt
+    --------------------------------------------
+                     Let it be                  
+    --------------------------------------------
+    Topic      Words      
+    --------------------------------------------
+    Lyrics     there      will       be         
+               an         answer     
+    --------------------------------------------
+    Lyrics     there      will       be         
+               an         answer     
+    --------------------------------------------
+
+    >>> dt.compact_view = False
     >>>  print dt
         Let it be      
     ---------------------
@@ -405,28 +418,37 @@ class DataTable(list):
     answer     0.23083      
     """
     
-    def __init__(self, l, table_header=None, compact_view=True):
+    def __init__(self, l, table_header=None, compact_view=True,
+        subcolhdr_compact=None, subcolhdr_full=None):
+        """
+        """
         super(DataTable, self).__init__(l)
         self.table_header = table_header
         self.compact_view = compact_view
+        self.subcolhdr_compact = subcolhdr_compact
+        self.subcolhdr_full = subcolhdr_full
 
+    
     def __getslice__(self, i, j):
         """
         """
         return DataTable(list.__getslice__(self, i, j), 
                     table_header=self.table_header, 
-                    compact_view=self.compact_view)
+                    compact_view=self.compact_view,
+                    subcolhdr_compact=self.subcolhdr_compact,
+                    subcolhdr_full=self.subcolhdr_full)
                 
     def __str__(self):
         """
         Pretty prints the DataTable when `print` method is used.
         """
         if self.compact_view:
-            return self.__str_compact__()
+            return self.__str_compact__(self.subcolhdr_compact)
         else:
-            return self.__str_full__()
+            return self.__str_full__(self.subcolhdr_full)
 
-    def __str_compact__(self):
+
+    def __str_compact__(self, subcol_headers):
         """
         Prints DataTable when `compact_view` is `True`.
         """
@@ -441,12 +463,11 @@ class DataTable(list):
             out += '{0:^{1}}'.format(format_(self.table_header, col_width), 
                                      col_width) + '\n'
             out += line
-
-        if self[0].subcol_headers:
-            out += '{0:<{1}}'.format(format_(self[0].subcol_headers[0], w1), w1)  
-            out += '{0:<{1}}\n'.format(format_(self[0].subcol_headers[1], w2), w2)
-            out += line
- 
+        
+        out += '{0:<{1}}'.format(format_(subcol_headers[0], w1), w1)  
+        out += '{0:<{1}}\n'.format(format_(subcol_headers[1], w2), w2)
+        out += line
+        
         for i in xrange(len(self)):
             j = 0
             # topic info
@@ -466,7 +487,7 @@ class DataTable(list):
         return out
     
 
-    def __str_full__(self):
+    def __str_full__(self, subcol_headers):
         """
         Prints DataTable when `compact_view` is `False`.
         """
@@ -478,6 +499,7 @@ class DataTable(list):
                                      col_width) + '\n'
 
         for col in self:
+            col.subcol_headers = subcol_headers
             out += col.__str__()
 
         return out
@@ -487,13 +509,13 @@ class DataTable(list):
         """
         Returns a html table in ipython online session. 
         """
-        if self.compact_view:
-            return self._repr_html_compact_()
+        if self.compact_view:    
+            return self._repr_html_compact_(self.subcolhdr_compact)
         else:
-            return self._repr_html_full_()
+            return self._repr_html_full_(self.subcolhdr_full)
 
 
-    def _repr_html_compact_(self):
+    def _repr_html_compact_(self, subcol_headers):
         """
         Returns a html table in ipython online session when 
         `compact_view` is `True`.
@@ -504,13 +526,12 @@ class DataTable(list):
         if self.table_header:
             s += '<tr><th style="text-align: center; background: #CEE3F6" colspan\
             ="{0}">{1}</th></tr>'.format(1 + self[0].col_len, self.table_header)
-
-        if self[0].subcol_headers:
-            s += '<tr>'
-            for i, sch in enumerate(self[0].subcol_headers):
-                s += '<th style="text-align: center; background: #EFF2FB;" \
-                    >{0}</th>'.format(sch)
-            s += '</tr>'
+           
+        s += '<tr>'
+        for i, sch in enumerate(subcol_headers):
+            s += '<th style="text-align: center; background: #EFF2FB;" \
+                 >{0}</th>'.format(sch)
+        s += '</tr>'
         
         for i in xrange(len(self)):
             s += '<tr>'
@@ -533,7 +554,7 @@ class DataTable(list):
         return s
 
     
-    def _repr_html_full_(self):
+    def _repr_html_full_(self, subcol_headers):
         """
         Returns a html table in ipython online session when
         `compact_view` is `False`.
@@ -541,11 +562,14 @@ class DataTable(list):
         s = '<table>'
 
         col_in_row = 3
+        
+        n_cols = len(subcol_headers)
+        col_w = self[0].col_width
 
         if self.table_header:
             s += '<tr><th style="text-align: center; background: #A9D0F5;\
             fontsize: 14px;" colspan="{0}"> {1} </th></tr>'.format(col_in_row
-             * len(self[0].subcol_headers), self.table_header)
+             * n_cols, self.table_header)
      
         start = 0
         n_arr = len(self)
@@ -559,29 +583,25 @@ class DataTable(list):
             for i, lc in enumerate(group):
                 if lc.col_header:
                     s += '<th style="text-align: center; background: #CEE3F6;"\
-                 colspan="{0}">{1}</th>'.format(len(lc.subcol_headers), lc.col_header)
+                 colspan="{0}">{1}</th>'.format(n_cols, lc.col_header)
 
                 if end > n_arr and m and i == len(group)-1 and start > 0:
                     for j in xrange(end - n_arr):
                         s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
-                        colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
-                        ' ' * self[0].col_width)
+                        colspan="{0}"> {1}</th>'.format(n_cols, ' ' * col_w)
             s += '</tr>'
 
             s += '<tr>'
             for i, lc in enumerate(group):
-                
-                if lc.subcol_headers:
                     
-                    for sch in lc.subcol_headers:
-                        s += '<th style="text-align: center; background: #EFF2FB;">\
+                for sch in subcol_headers:
+                    s += '<th style="text-align: center; background: #EFF2FB;">\
                         {0}</th>'.format(sch)
 
                 if end > n_arr and m and i == len(group)-1 and start > 0:
                     for j in xrange(end - n_arr):
                         s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
-                         colspan="{0}"> {1}</th>'.format(len(lc.subcol_headers), 
-                            ' ' * self[0].col_width)
+                         colspan="{0}"> {1}</th>'.format(n_cols, ' ' * col_w)
             s += '</tr>'
             
             for i in xrange(self[0].col_len):
@@ -597,8 +617,7 @@ class DataTable(list):
                     if end > n_arr and m and k == len(group)-1 and start > 0:
                         for e in xrange(end - n_arr):
                             s += '<td style="border-color: #EFF2FB; background: #EFF2FB;"\
-                            colspan="{0}"> {1} </th>'.format(len(lc.subcol_headers),
-                                 ' ' * self[0].col_width)
+                            colspan="{0}"> {1} </th>'.format(n_cols, ' ' * col_w)
                 s += '</tr>'    
             
             start = end
