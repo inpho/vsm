@@ -1,7 +1,7 @@
 import numpy as np
 import time
 from vsm.split import split_corpus
-from vsm.corpus import align_corpora_
+from vsm.corpus import align_corpora as align
 from ldafunctions import *
 from _cgs_update import cgs_update
 
@@ -185,7 +185,7 @@ class LdaCgsQuerySampler(LdaCgsSeq):
                  context_type=None):
 
         if align_corpora:
-            new_corp = align_corpora_(old_corpus, new_corpus)
+            new_corp = align(old_corpus, new_corpus)
 
         if lda_obj:
             if context_type==None:
