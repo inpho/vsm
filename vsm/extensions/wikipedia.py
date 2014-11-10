@@ -7,42 +7,48 @@
 import os
 import json
 import re
-import unidecode as uni
+import errno
+import shutil
 
 import numpy as np
+import nltk
 
 from vsm.corpus import Corpus
 from vsm.extensions.corpusbuilders.util import word_tokenize, apply_stoplist
 
 
-
-def article_url(filenames):
-    
-    for filename in filenames:
-        with open(filename, 'r') as f:
-            records = f.read()
-        records = records.split('\n')
-        for r in records:
-            if len(r) > 0:
-                d = json.loads(r)
-                yield d['url']
-    
-
-def article_words(filenames):
-
-    for filename in filenames:
-        with open(filename, 'r') as f:
-            records = f.read()
-        records = records.split('\n')
-        for r in records:
-            if len(r) > 0:
-                d = json.loads(r)
-                words = word_tokenize(d['text'])
-                yield words
+__all__ = [ 'corpus_from_wikipedia', 'url_label_fn', 'title_label_fn' ]
 
 
-def corpus_from_wikipedia(src_dir='.', unidecode=True,
-                          nltk_stop=True, stop_freq=1, add_stop=None):
+
+def make_path(path):
+    """
+    Emulates mkdir -p
+    """
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if not (e.errno == errno.EEXIST and os.path.isdir(path)):
+            raise
+
+
+def build_tree(build_dir='build'):
+    """
+    """
+    make_path(build_dir)
+    build_dir = os.path.abspath(build_dir)
+
+    corpus_dir = os.path.join(build_dir, 'corpus')
+    make_path(corpus_dir)
+
+    metadata_dir = os.path.join(build_dir, 'metadata')
+    make_path(metadata_dir)
+
+    stats_dir = os.path.join(build_dir, 'stats')
+    make_path(stats_dir)
+
+
+def src_filelist(src_dir):
     """
     """
     src_dir = os.path.abspath(src_dir)
@@ -53,24 +59,313 @@ def corpus_from_wikipedia(src_dir='.', unidecode=True,
         files = os.listdir(d)
         for f in files:
             src_files.append(os.path.join(d, f))
+
+    return src_files
+
+
+def corpus_filelist(build_dir='build'):
+    """
+    """
+    corpus_dir = os.path.abspath(os.path.join(build_dir, 'corpus'))
+    build_files = os.listdir(corpus_dir)
+    return [os.path.join(corpus_dir, f) for f in build_files]
+
+
+def metadata_filelist(build_dir='build'):
+    """
+    """
+    metadata_dir = os.path.abspath(os.path.join(build_dir, 'metadata'))
+    build_files = os.listdir(metadata_dir)
+    return [os.path.join(metadata_dir, f) for f in build_files]
+
+
+
+def init_corpus_dir(build_dir='build', src_dir=None, filenames=None):
+    """
+    """
+    if filenames==None:
+        filenames = src_filelist(src_dir)
     
-    indices = []
-    corpus = []
-    for a in article_words(src_files):
-        corpus += a
-        indices.append(len(a))
-    indices = np.cumsum(indices)
-    urls = list(article_url(src_files))
-    dtype = [ ('idx', 'i'), ('url', np.array(urls).dtype) ]
-    context_data = [ np.array(zip(indices, urls), dtype=dtype) ]
+    for filename in filenames:
+        filename_split = os.path.split(filename)
+        src_subdir = os.path.split(filename_split[0])[1] 
+        file_out = os.path.join(build_dir, 'corpus', 
+                                src_subdir + filename_split[1] + '.text.json')
+
+        texts = []
+        with open(filename, 'r') as f:
+            records = f.read()
+            records = records.split('\n')
+        for r in records:
+            if len(r) > 0:
+                texts.append(json.loads(r)['text'])
+
+        with open(file_out, 'w') as f:
+            json.dump(texts, f)
+
+
+def init_metadata_dir(build_dir='build', src_dir=None, filenames=None):
+    """
+    """
+    if filenames==None:
+        filenames = src_filelist(src_dir)
     
-    if unidecode:
-        for i in xrange(len(corpus)):
-            if isinstance(corpus[i], unicode):
-                corpus[i] = uni.unidecode(corpus[i])
+    for filename in filenames:
+        filename_split = os.path.split(filename)
+        src_subdir = os.path.split(filename_split[0])[1] 
+        file_out = os.path.join(build_dir, 'metadata', 
+                                src_subdir + filename_split[1] + '.metadata.json')
 
-    c = Corpus(corpus, ['document'], context_data)
+        metadata = []
+        with open(filename, 'r') as f:
+            records = f.read()
+            records = records.split('\n')
+        for r in records:
+            if len(r) > 0:
+                metadata.append(json.loads(r)['url'])
 
-    return apply_stoplist(c, nltk_stop=nltk_stop,
-                          freq=stop_freq, add_stop=add_stop)
+        with open(file_out, 'w') as f:
+            json.dump(metadata, f)
 
+
+def tokenize(build_dir='build', filenames=None):
+    """
+    """
+    if filenames==None:
+        filenames = corpus_filelist(build_dir)
+    
+    for filename in filenames:
+        with open(filename, 'r+') as f:
+            texts = json.load(f)
+            texts = map(word_tokenize, texts)
+            f.seek(0)
+            json.dump(texts, f)
+            f.truncate()
+
+
+def stoplist(build_dir='build', filenames=None, nltk_stop=True, add_stop=None, 
+             stop_freq=2, word_counts=None):
+    """
+    """
+    stopwords = set()
+    if nltk_stop:
+        for w in nltk.corpus.stopwords.words('english'):
+            stopwords.add(w)
+    if add_stop:
+        for w in add_stop:
+            stopwords.add(w)
+
+    if stop_freq > 0:
+        for w,c in word_counts.iteritems():
+            if c <= stop_freq:
+                stopwords.add(w)
+
+    def stop(text, stopwords=stopwords):
+        return [w for w in text if w not in stopwords]
+
+    if filenames==None:
+        filenames = corpus_filelist(build_dir)
+    
+    for filename in filenames:
+        with open(filename, 'r+') as f:
+            texts = json.load(f)
+            texts = map(stop, texts)
+            f.seek(0)
+            json.dump(texts, f)
+            f.truncate()
+
+
+def vocabulary(build_dir='build', filenames=None):
+    """
+    """
+    if filenames==None:
+        filenames = corpus_filelist(build_dir)
+
+    subvocabs = []
+    for filename in filenames:
+        with open(filename, 'r') as f:
+            texts = json.load(f)
+        subvocabs += map(set, texts)
+
+    vocab = list(reduce(lambda a, b: a.union(b), subvocabs))
+    
+    file_out = os.path.join(build_dir, 'stats', 'vocabulary.json')
+    with open(file_out, 'w') as f:
+        json.dump(vocab, f)
+
+    return vocab
+
+
+
+def word_counts(build_dir='build', filenames=None):
+    """
+    """
+    if filenames==None:
+        filenames = corpus_filelist(build_dir)
+
+    def count(text):
+        wc = {}
+        for w in text:
+            if w in wc:
+                wc[w] += 1
+            else:
+                wc[w] = 1
+        return wc
+
+    def update_wc(wc, new_wc):
+        for w in new_wc:
+            if w in wc:
+                wc[w] += new_wc[w]
+            else:
+                wc[w] = new_wc[w]
+        return wc
+
+    local_word_counts = []
+    for filename in filenames:
+        with open(filename, 'r') as f:
+            texts = json.load(f)
+        local_word_counts.append(reduce(update_wc, map(count, texts)))
+
+    word_counts = reduce(update_wc, local_word_counts)
+
+    file_out = os.path.join(build_dir, 'stats', 'word_counts.json')
+    with open(file_out, 'w') as f:
+        json.dump(word_counts, f)
+
+    return word_counts
+
+
+def global_indices(build_dir='build', filenames=None):
+    """
+    """
+    if filenames==None:
+        filenames = corpus_filelist(build_dir)
+
+    lengths = []
+    for filename in filenames:
+        with open(filename, 'r') as f:
+            texts = json.load(f)
+        lengths += [len(t) for t in texts]
+
+    indices = np.cumsum(lengths)
+
+    file_out = os.path.join(build_dir, 'stats', 'indices.npy')
+    with open(file_out, 'w') as f:
+        np.save(f, indices)
+
+    return indices
+
+
+def encode_corpus(words, build_dir='build', filenames=None):
+    """
+    """
+    words_int = dict((words[i], i) for i in xrange(len(words)))
+
+    def map_fn(text):
+        return [words_int[w] for w in text]
+
+    if filenames==None:
+        filenames = corpus_filelist(build_dir)
+    
+    for filename in filenames:
+        with open(filename, 'r+') as f:
+            texts = json.load(f)
+            texts = map(map_fn, texts)
+            f.seek(0)
+            json.dump(texts, f)
+            f.truncate()
+    
+    return words_int
+
+
+def reduce_corpus(corpus_len, build_dir='build', filenames=None):
+    """
+    """
+    corpus = np.empty((corpus_len,), dtype='i')
+    
+    if filenames==None:
+        filenames = corpus_filelist(build_dir)
+    
+    idx = 0
+    for filename in filenames:
+        with open(filename, 'r') as f:
+            texts = json.load(f)
+            for text in texts:
+                next_idx = idx+len(text)
+                corpus[idx:next_idx] = text
+                idx = next_idx
+
+    return corpus
+
+
+def reduce_metadata(indices, build_dir='build', filenames=None):
+    """
+    """
+    if filenames==None:
+        filenames = metadata_filelist(build_dir)
+    
+    urls = []
+    for filename in filenames:
+        with open(filename, 'r') as f:
+            urls += json.load(f)
+    
+    url_dtype = np.array(urls).dtype
+    dtype = [('idx', 'i'), ('url', url_dtype)]
+    metadata = np.array(zip(indices, urls), dtype=dtype)
+
+    return metadata
+
+
+def clean(build_dir='build'):
+    """
+    """
+    shutil.rmtree(build_dir)
+
+
+def corpus_from_wikipedia(src_dir, build_dir='build',
+                          nltk_stop=True, stop_freq=2, add_stop=None):
+    """
+    """
+    src_files = src_filelist(src_dir)
+
+    build_tree(build_dir=build_dir)
+
+    init_corpus_dir(build_dir=build_dir, filenames=src_files)
+    init_metadata_dir(build_dir=build_dir, filenames=src_files)
+
+    corpus_files = corpus_filelist(build_dir=build_dir)
+    metadata_files = metadata_filelist(build_dir=build_dir)
+    tokenize(filenames=corpus_files)
+
+    wc = word_counts(filenames=corpus_files)
+    stoplist(filenames=corpus_files, nltk_stop=nltk_stop, 
+             add_stop=add_stop, stop_freq=stop_freq, word_counts=wc)
+    
+    indices = global_indices(filenames=corpus_files)
+    corpus_len = indices[-1]
+
+    words = vocabulary(filenames=corpus_files)
+    words_int = encode_corpus(words, filenames=corpus_files)
+
+    corpus = reduce_corpus(corpus_len, filenames=corpus_files)
+    metadata = reduce_metadata(indices, filenames=metadata_files)
+
+    corp_obj = Corpus([])
+    corp_obj.words = np.array(words)
+    corp_obj.words_int = words_int
+    corp_obj.corpus = corpus
+    corp_obj.context_data = [ metadata ]
+    corp_obj.context_types = [ 'document' ]
+    
+    file_out = os.path.join(build_dir, 'corpus', 'corpus.npz')
+    corp_obj.save(file_out)
+
+    return corp_obj
+
+
+def url_label_fn(metadata):
+    return metadata['url']
+
+
+def title_label_fn(metadata):
+    return os.path.split(metadata['url'])[1]
