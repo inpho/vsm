@@ -197,6 +197,11 @@ class LdaCgsQuerySampler(LdaCgsSeq):
 
         super(LdaCgsQuerySampler, self).__init__(**kwargs)
 
+        if lda_obj:
+            self.word_top[:] = lda_obj.word_top
+            self.inv_top_sums[:] = lda_obj.inv_top_sums
+        
+
 
 
 #################################################################
