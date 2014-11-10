@@ -181,14 +181,18 @@ class LdaCgsQuerySampler(LdaCgsSeq):
     """
     """
     def __init__(self, lda_obj=None, new_corpus=None, 
-                 align_corpora=False, old_corpus=None):
+                 align_corpora=False, old_corpus=None,
+                 context_type=None):
 
         if align_corpora:
             new_corp = align_corpora(old_corpus, new_corpus)
 
         if lda_obj:
+            if context_type==None:
+                context_type = lda_obj.context_type
+
             kwargs = dict(corpus=new_corpus,
-                          context_type=lda_obj.context_type,
+                          context_type=context_type,
                           K=lda_obj.K, V=lda_obj.V, 
                           alpha=lda_obj.alpha, beta=lda_obj.beta)
         else:
