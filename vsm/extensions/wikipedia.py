@@ -181,13 +181,15 @@ def vocabulary(build_dir='build', filenames=None):
     if filenames==None:
         filenames = corpus_filelist(build_dir)
 
-    subvocabs = []
+    vocab = set()
     for filename in filenames:
         with open(filename, 'r') as f:
             texts = json.load(f)
-        subvocabs += map(set, texts)
+        reduce(lambda a, b: a.union(b), map(set, texts), vocab)
 
-    vocab = list(reduce(lambda a, b: a.union(b), subvocabs))
+    print vocab
+
+    vocab = list(vocab)
     
     file_out = os.path.join(build_dir, 'stats', 'vocabulary.json')
     with open(file_out, 'w') as f:
@@ -220,13 +222,11 @@ def word_counts(build_dir='build', filenames=None):
                 wc[w] = new_wc[w]
         return wc
 
-    local_word_counts = []
+    word_counts = {}
     for filename in filenames:
         with open(filename, 'r') as f:
             texts = json.load(f)
-        local_word_counts.append(reduce(update_wc, map(count, texts)))
-
-    word_counts = reduce(update_wc, local_word_counts)
+        reduce(update_wc, map(count, texts), word_counts)
 
     file_out = os.path.join(build_dir, 'stats', 'word_counts.json')
     with open(file_out, 'w') as f:
@@ -338,6 +338,11 @@ def corpus_from_wikipedia(src_dir, build_dir='build',
     tokenize(filenames=corpus_files)
 
     wc = word_counts(filenames=corpus_files)
+
+    # wc_file = os.path.join(build_dir, 'stats', 'word_counts.json')
+    # with open(wc_file, 'r') as f:
+    #     wc = json.load(f)
+
     stoplist(filenames=corpus_files, nltk_stop=nltk_stop, 
              add_stop=add_stop, stop_freq=stop_freq, word_counts=wc)
     
