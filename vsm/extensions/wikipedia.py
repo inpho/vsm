@@ -185,9 +185,7 @@ def vocabulary(build_dir='build', filenames=None):
     for filename in filenames:
         with open(filename, 'r') as f:
             texts = json.load(f)
-        reduce(lambda a, b: a.union(b), map(set, texts), vocab)
-
-    print vocab
+        vocab.update(*map(set, texts))
 
     vocab = list(vocab)
     
@@ -196,7 +194,6 @@ def vocabulary(build_dir='build', filenames=None):
         json.dump(vocab, f)
 
     return vocab
-
 
 
 def word_counts(build_dir='build', filenames=None):
