@@ -376,7 +376,7 @@ def clean(build_dir='build'):
 
 def corpus_from_wikipedia(src_dir, build_dir='build',
                           nltk_stop=True, stop_freq=2, add_stop=None,
-                          trim_urls=True):
+                          full_urls=False):
     """
     """
     src_files = src_filelist(src_dir)
@@ -401,7 +401,7 @@ def corpus_from_wikipedia(src_dir, build_dir='build',
     words = vocabulary(filenames=corpus_files)
     words_int = encode_corpus(words, filenames=corpus_files)
 
-    if trim_urls:
+    if not full_urls:
         trim_urls(build_dir=build_dir)
 
     reduce_corpus(corpus_len, filenames=corpus_files)
