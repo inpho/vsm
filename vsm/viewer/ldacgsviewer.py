@@ -4,7 +4,7 @@ Provides the class `LdaCgsViewer`.
 
 import numpy as np
 
-from vsm.spatial import H, JS_dist
+from vsm.spatial import H, JS_dist, KL_div
 from vsm.structarr import *
 from vsm.split import split_corpus
 from vsm.exceptions import *
@@ -298,7 +298,32 @@ class LdaCgsViewer(object):
         k_arr.col_len = print_len
 
         return k_arr
-        
+
+
+    def osc_top_doc(self, topic_indices=None, div_fn=KL_div, as_strings=True,
+                    compact_view=True, topic_labels=None):
+        """Sorts topics by oscillation in the divergences of documents
+        from each topic k, represented as a categorical distribution
+        over topics with mass concentrated at index k.
+
+        Oscillation is computed as the difference between the maximum
+        and the minimum of the divergences.
+        """
+        if topic_indices==None:
+            topic_indices = np.arange(self.model.K)
+        else:
+            topic_indices = np.array(topic_indices)
+            
+        pseudo_docs = np.diag(np.ones(self.model.K, dtype='d'))[topic_indices, :]
+        rel_entropies = div_fn(pseudo_docs, self.theta)
+        oscillations = rel_entropies.max(axis=1) - rel_entropies.min(axis=1)
+
+        topic_indices = topic_indices[np.argsort(oscillations)]
+        topic_indices = topic_indices[::-1]
+
+        return self.topics(topic_indices=topic_indices, as_strings=as_strings,
+                           compact_view=compact_view, topic_labels=topic_labels)
+
 
 
     def word_topics(self, word, as_strings=True):
