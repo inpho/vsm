@@ -37,19 +37,20 @@ class TestLabeleddata(unittest.TestCase):
 
         v = LabeledColumn(self.v)
         v.subcol_widths = [30, 20]
-        v.subcol_headers = ['Word', 'Value']
         v.col_len = 10
         t = []
         for i in xrange(5):
             t.append(v.copy())
             t[i].col_header = 'Iteration ' + str(i)
-        t = DataTable(t, 'Song')
+        
+        schc = ['Topic', 'Word']
+        schf = ['Word', 'Value'] 
+        t = DataTable(t, 'Song', subcolhdr_compact=schc, subcolhdr_full=schf)
 
         self.assertTrue(type(t.__str__()) == str)
         self.assertTrue('Song', t.table_header)
 
-        t = DataTable(t, 'Song', compact_view=False)
-
+        t.compact_view = False
         self.assertTrue(type(t.__str__()) == str)
         self.assertTrue('Song', t.table_header)
 
