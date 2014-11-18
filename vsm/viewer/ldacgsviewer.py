@@ -4,7 +4,7 @@ Provides the class `LdaCgsViewer`.
 
 import numpy as np
 
-from vsm.spatial import H, JS_dist
+from vsm.spatial import H, JS_dist, KL_div
 from vsm.structarr import *
 from vsm.split import split_corpus
 from vsm.exceptions import *
@@ -130,10 +130,33 @@ class LdaCgsViewer(object):
         d_arr.col_len = print_len
         
         return d_arr[::-1]
+    
+    def topic_oscillations(self, print_len=10, div_fn=KL_div):
+        """Returns the oscillation in the divergences of documents
+        from each topic k, represented as a categorical distribution
+        over topics with mass concentrated at index k. 
+
+        Oscillation is computed as the difference between the maximum
+        and the minimum of the divergences.
+
+        Returns an array sorted by descending oscillation.
+        """
+        topic_indices = np.arange(self.model.K)
+            
+        pseudo_docs = np.diag(np.ones(self.model.K, dtype='d'))[topic_indices, :]
+        rel_entropies = div_fn(pseudo_docs, self.theta)
+        oscillations = rel_entropies.max(axis=1) - rel_entropies.min(axis=1)
+
+        k_arr = enum_sort(oscillations).view(LabeledColumn)
+        k_arr.col_header = 'Topic Oscillation'
+        k_arr.subcol_headers = ['Index', 'Oscillation']
+        k_arr.col_len = 10
+        return k_arr
 
     
     def topics(self, print_len=10, topic_indices=None, sort_by_entropy=False,
-               as_strings=True, compact_view=True, topic_labels=None):
+               sort_by_oscillation=False, as_strings=True, 
+               compact_view=True, topic_labels=None):
         """
         Returns a list of topics estimated by the model. 
         Each topic is represented by a list of words and the corresponding 
@@ -146,6 +169,9 @@ class LdaCgsViewer(object):
         :param sort_by_entropy: Sorts topics by entropies. Default is False.
         :type sort_by_entropy: boolean, optional
         
+        :param sort_by_oscillation: Sorts topics by oscillations. Default is False.
+        :type sort_by_oscillation: boolean, optional
+
         :param print_len: Number of words shown for each topic. Default is 10.
         :type print_len: int, optional
 
@@ -173,6 +199,14 @@ class LdaCgsViewer(object):
                 topic_indices = [k for k in ent_sort if k in ti]
             else:
                 topic_indices = ent_sort
+        elif sort_by_oscillation:
+            th = 'Topics Sorted by Oscillation'
+            osc_sort = self.topic_oscillations()['i']
+            if not topic_indices==None:
+                ti = set(topic_indices)
+                topic_indices = [k for k in osc_sort if k in ti]
+            else:
+                topic_indices = osc_sort
         elif not topic_indices==None:
             th = 'Topics Sorted by User'            
         else:
@@ -298,7 +332,32 @@ class LdaCgsViewer(object):
         k_arr.col_len = print_len
 
         return k_arr
-        
+
+
+    def osc_top_doc(self, topic_indices=None, div_fn=KL_div, as_strings=True,
+                    compact_view=True, topic_labels=None):
+        """Sorts topics by oscillation in the divergences of documents
+        from each topic k, represented as a categorical distribution
+        over topics with mass concentrated at index k.
+
+        Oscillation is computed as the difference between the maximum
+        and the minimum of the divergences.
+        """
+        if topic_indices==None:
+            topic_indices = np.arange(self.model.K)
+        else:
+            topic_indices = np.array(topic_indices)
+            
+        pseudo_docs = np.diag(np.ones(self.model.K, dtype='d'))[topic_indices, :]
+        rel_entropies = div_fn(pseudo_docs, self.theta)
+        oscillations = rel_entropies.max(axis=1) - rel_entropies.min(axis=1)
+
+        topic_indices = topic_indices[np.argsort(oscillations)]
+        topic_indices = topic_indices[::-1]
+
+        return self.topics(topic_indices=topic_indices, as_strings=as_strings,
+                           compact_view=compact_view, topic_labels=topic_labels)
+
 
 
     def word_topics(self, word, as_strings=True):
