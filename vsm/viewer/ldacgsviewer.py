@@ -333,23 +333,6 @@ class LdaCgsViewer(object):
 
         return k_arr
 
-
-    def osc_top_doc(self, topic_indices=None, div_fn=KL_div, as_strings=True,
-                    compact_view=True, topic_labels=None):
-        """Sorts topics by oscillation in the divergences of documents
-        from each topic k, represented as a categorical distribution
-        over topics with mass concentrated at index k.
-
-        Oscillation is computed as the difference between the maximum
-        and the minimum of the divergences.
-        """
-        topic_indices = self.topic_oscillations(topic_indices, div_fn=div_fn)['i']
-
-        return self.topics(topic_indices=topic_indices, as_strings=as_strings,
-                           compact_view=compact_view, topic_labels=topic_labels)
-
-
-
     def word_topics(self, word, as_strings=True):
         """
         Searches for every occurrence of `word` in the entire corpus and returns 
