@@ -343,17 +343,7 @@ class LdaCgsViewer(object):
         Oscillation is computed as the difference between the maximum
         and the minimum of the divergences.
         """
-        if topic_indices==None:
-            topic_indices = np.arange(self.model.K)
-        else:
-            topic_indices = np.array(topic_indices)
-            
-        pseudo_docs = np.diag(np.ones(self.model.K, dtype='d'))[topic_indices, :]
-        rel_entropies = div_fn(pseudo_docs, self.theta)
-        oscillations = rel_entropies.max(axis=1) - rel_entropies.min(axis=1)
-
-        topic_indices = topic_indices[np.argsort(oscillations)]
-        topic_indices = topic_indices[::-1]
+        topic_indices = self.topic_oscillations(topic_indices, div_fn=div_fn)['i']
 
         return self.topics(topic_indices=topic_indices, as_strings=as_strings,
                            compact_view=compact_view, topic_labels=topic_labels)
