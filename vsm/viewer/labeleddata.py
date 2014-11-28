@@ -464,9 +464,10 @@ class DataTable(list):
                                      col_width) + '\n'
             out += line
         
-        out += '{0:<{1}}'.format(format_(subcol_headers[0], w1), w1)  
-        out += '{0:<{1}}\n'.format(format_(subcol_headers[1], w2), w2)
-        out += line
+        if subcol_headers:
+            out += '{0:<{1}}'.format(format_(subcol_headers[0], w1), w1)  
+            out += '{0:<{1}}\n'.format(format_(subcol_headers[1], w2), w2)
+            out += line
         
         for i in xrange(len(self)):
             j = 0

@@ -9,6 +9,16 @@ Roadmap towards a first release
 
 * Functional tests
 
+* Refactoring
+  
+  * All models take corpus objects
+  
+  * Refactoring corpus builders - documentation, tutorial
+  
+  * Refactoring corpus metadata
+
+* Include sample corpus and use in documentation
+
 * Sphinx-generated documentation
 
   * Getting Started page (including how to install)
@@ -16,7 +26,6 @@ Roadmap towards a first release
   * Workflow
 
   * Tutorials and demos
-
 
 Wishlist
 --------

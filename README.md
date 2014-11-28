@@ -1,5 +1,7 @@
 #VSM
 
+[![Build Status](https://travis-ci.org/inpho/vsm.svg?branch=master)](https://travis-ci.org/inpho/vsm)
+
 Vector Space Model Framework developed for the 
 [InPhO Project](https://inpho.cogs.indiana.edu/)
 

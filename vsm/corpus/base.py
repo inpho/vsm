@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 
 from vsm.structarr import arr_add_field
@@ -496,37 +498,73 @@ class Corpus(BaseCorpus):
 
     
     @staticmethod
-    def load(file):
-        """
-	    Loads data into a Corpus object that has been stored using
-        `save`.
+    def load(file=None, corpus_dir=None,
+             corpus_file='corpus.npy',
+             words_file='words.npy',
+             metadata_file='metadata.npy'):
+        """Loads data into a Corpus object. 
         
-        :param file: Designates the file to read. If `file` is a string ending
-            in `.gz`, the file is first gunzipped. See `numpy.load`
-            for further details.
-        :type file: str-like or file-like object
+        :param file: The file to read. See `numpy.load` for further
+            details. Assumes file has been constructed as by
+            `Corpus.save`. This option is exclusive of `corpus_dir`.
+        :type file: str-like or file object
 
-        :returns: A Corpus object storing the data found in `file`.
+        :param corpus_dir: A directory containing the files
+        `corpus_file`, `words_file`, `metadata_file`, from which to
+        instantiate a Corpus object. This option is ignored if `file`
+        is not `None`.
+        :type corpus_dir: string
+
+        :param corpus_file: File under `corpus_dir` containing the
+        corpus data, stored as a numpy array of integers in an `npy`
+        file.
+        :type corpus_file: string or file object
+        
+        :param words_file: File under `corpus_dir` containing the
+        corpus vocabulary, stored as a numpy array of strings in an
+        `npy` file.  
+        :type words_file: string or file object
+        
+        :param metadata_file: File under `corpus_dir` containing the
+        corpus metadata, stored as a numpy stuctured array in an `npy`
+        file. Note that this structured array should contain a file
+        `idx` which stores the integer indices marking the document
+        boundaries.
+        :type corpus_file: string or file object
+        
+        :returns: A Corpus object.
 
         :See Also: :class:`Corpus`, :meth:`Corpus.save`, :meth:`numpy.load`
+
         """
-        print 'Loading corpus from', file
-        arrays_in = np.load(file)
+        if not file==None:
+            arrays_in = np.load(file)
 
-        c = Corpus([])
-        c.corpus = arrays_in['corpus']
-        c.words = arrays_in['words']
-        c.context_types = arrays_in['context_types'].tolist()
+            c = Corpus([])
+            c.corpus = arrays_in['corpus']
+            c.words = arrays_in['words']
+            c.context_types = arrays_in['context_types'].tolist()
 
-        c.context_data = list()
-        for n in c.context_types:
-            t = arrays_in['context_data_' + n]
-            c.context_data.append(t)
+            c.context_data = list()
+            for n in c.context_types:
+                t = arrays_in['context_data_' + n]
+                c.context_data.append(t)
 
-        c.__set_words_int()
+            c.__set_words_int()
 
-        return c
+            return c
 
+        if not corpus_dir==None:
+
+            c = Corpus([])
+
+            c.corpus = np.load(os.path.join(corpus_dir, corpus_file))
+            c.words = np.load(os.path.join(corpus_dir, words_file))
+            c.__set_words_int()
+            c.context_types = [ 'document' ]
+            c.context_data = [ np.load(os.path.join(corpus_dir, metadata_file)) ]
+
+            return c
 
 
     def save(self, file):
