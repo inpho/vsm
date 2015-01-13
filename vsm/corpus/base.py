@@ -6,7 +6,7 @@ from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
 
 
-__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata' ]
+__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata', 'align_corpora' ]
 
 
 
@@ -426,7 +426,7 @@ class Corpus(BaseCorpus):
                                      dtype=np.str_,
 				     remove_empty=remove_empty)
 
-        self.__set_words_int()
+        self._set_words_int()
 
         # Integer encoding of a string-type corpus
         self.dtype = np.int32
@@ -436,7 +436,7 @@ class Corpus(BaseCorpus):
 
 
 
-    def __set_words_int(self):
+    def _set_words_int(self):
         """
         Mapping of words to their integer representations.
         """
@@ -677,37 +677,29 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
     return corpus
 
 
-#
-# Testing
-#
 
+def align_corpora(old_corpus, new_corpus):
+    """Takes two Corpus objects `old_corpus` and `new_corpus` and returns
+    a copy of `new_corpus` with the following modifications: (1) the
+    word to integer mapping agrees with that of `old_corpus` and (2)
+    words in `new_corpus` which do not appear in `old_corpus` are
+    removed from the corpus. Empty documents are removed.
 
-    
-def test_file():
+    """
+    new_words = [w for w in new_corpus.words if w not in old_corpus.words]
+    out = new_corpus.apply_stoplist(new_words)
+    out.remove_empty()
 
-    from vsm.util.corpustools import random_corpus
+    int_words = out.words
+    words_int = old_corpus.words_int
+    int_int = {}
+    for i in xrange(len(int_words)):
+        int_int[i] = words_int[int_words[i]]
 
-    c = random_corpus(10000, 500, 1, 20, context_type='foo', metadata=True)
+    for i in xrange(len(out.corpus)):
+        out.corpus[i] = int_int[out.corpus[i]]
+    out.words = old_corpus.words.copy()
+    out._set_words_int()
 
-    from tempfile import NamedTemporaryFile
-    import os
-
-    try:
-        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
-        c.save(tmp.name)
-        tmp.close()
-        c_reloaded = c.load(tmp.name)
-
-        assert (c.corpus == c_reloaded.corpus).all()
-        assert (c.words == c_reloaded.words).all()
-        assert c.words_int == c_reloaded.words_int
-        assert c.context_types == c_reloaded.context_types
-        for i in xrange(len(c.context_data)):
-            assert (c.context_data[i] == c_reloaded.context_data[i]).all()
-    
-    finally:
-        os.remove(tmp.name)
-
-    return c_reloaded
-
+    return out
 
