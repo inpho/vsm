@@ -550,7 +550,7 @@ class Corpus(BaseCorpus):
                 t = arrays_in['context_data_' + n]
                 c.context_data.append(t)
 
-            c.__set_words_int()
+            c._set_words_int()
 
             return c
 
@@ -560,7 +560,7 @@ class Corpus(BaseCorpus):
 
             c.corpus = np.load(os.path.join(corpus_dir, corpus_file))
             c.words = np.load(os.path.join(corpus_dir, words_file))
-            c.__set_words_int()
+            c._set_words_int()
             c.context_types = [ 'document' ]
             c.context_data = [ np.load(os.path.join(corpus_dir, metadata_file)) ]
 
