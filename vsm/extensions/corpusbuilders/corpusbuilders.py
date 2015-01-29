@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 from unidecode import unidecode
+from codecs import open
 
 from vsm.corpus import Corpus
 from util import *
@@ -555,10 +556,12 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
 
     for filename in filenames:
         filename = os.path.join(plain_dir, filename)
-        with open(filename, mode='r') as f:
-            if decode:
-                chunks.append(unidecode(f.read()))
-            else:
+        if decode:
+            with open(filename, mode='r', encoding='utf-8') as f:
+                if decode:
+                    chunks.append(unidecode(f.read()))
+        else:
+            with open(filename, mode='r') as f:
                 chunks.append(f.read())
 
     words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
@@ -683,10 +686,11 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
         for page_name in page_names:
             page_file = book_name + '/' + page_name
             page_name = os.path.join(book_path, page_name)
-            with open(page_name, mode='r') as f:
-                if decode:
+            if decode:
+                with open(page_name, mode='r', encoding='utf-8') as f:
                     pages.append((unidecode(f.read()), page_file))
-                else:
+            else:
+                with open(page_name, mode='r') as f:
                     pages.append((f.read(), page_file))
 
         books.append(pages)
