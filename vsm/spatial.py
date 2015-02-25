@@ -281,6 +281,8 @@ def JS_div(P, Q, metric=False):
 
     out = .5 * (PM_KLdiv + QM_KLdiv)
 
+    out[out < 0] = 0.
+   
     if metric:
         out = np.sqrt(out)
 
