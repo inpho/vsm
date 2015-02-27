@@ -7,3 +7,10 @@ Vector Space Model Framework developed for the
 
 Documentation can be found in the module and [here](http://inpho.github.io/vsm/).
 
+##Installation
+
+```
+git clone git@github.com:inpho/vsm.git
+cd vsm
+python setup.py develop --user
+```
