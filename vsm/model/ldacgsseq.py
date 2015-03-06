@@ -4,6 +4,7 @@ from vsm.split import split_corpus
 from vsm.corpus import align_corpora as align
 from ldafunctions import *
 from _cgs_update import cgs_update
+from progressbar import ProgressBar, Percentage, Bar
 
 
 __all__ = [ 'LdaCgsSeq', 'LdaCgsQuerySampler' ]
@@ -21,18 +22,18 @@ class LdaCgsSeq(object):
 
         :param corpus: Source of observed data.
         :type corpus: `Corpus`
-    
+
         :param context_type: Name of tokenization stored in `corpus` whose tokens
             will be treated as documents.
         :type context_type: string, optional
 
         :param K: Number of topics. Default is `20`.
         :type K: int, optional
-    
+
         :param beta: Topic priors. Default is 0.01 for all words.
         :type beta: list, optional
-    
-        :param alpha: Document priors. Default is a flat prior of 0.01 
+
+        :param alpha: Document priors. Default is a flat prior of 0.01
             for all topics.
         :type alpha: list, optional
         """
@@ -79,7 +80,7 @@ class LdaCgsSeq(object):
 
 
     def _compute_word_top(self):
-        self.word_top = compute_word_top(self.docs, self.Z_split, self.K, 
+        self.word_top = compute_word_top(self.docs, self.Z_split, self.K,
                                          self.V, self.beta)
 
 
@@ -88,7 +89,7 @@ class LdaCgsSeq(object):
 
 
     def _compute_log_prob(self, increment=False):
-        log_prob = compute_log_prob(self.docs, self.Z_split, 
+        log_prob = compute_log_prob(self.docs, self.Z_split,
                                     self.word_top, self.top_doc)
         if increment:
             self.log_probs.append((self.iteration, log_prob))
@@ -115,6 +116,7 @@ class LdaCgsSeq(object):
         random_state = np.random.RandomState(seed)
         mtrand_state = random_state.get_state()
 
+
         if verbose > 0:
             print ('Begin LDA training for {0} iterations'\
                    .format(n_iterations))
@@ -123,27 +125,35 @@ class LdaCgsSeq(object):
 
         # Training loop
         stop = self.iteration + n_iterations
-        for itr in xrange(self.iteration, stop):
+        pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=stop).start()
+        #print("Stop ", stop)
+        for itr in xrange(self.iteration , stop):
 
             results = cgs_update(self.iteration, self.corpus, self.word_top,
-                                 self.inv_top_sums, self.top_doc, self.Z, 
-                                 self.indices, mtrand_state[0], 
-                                 mtrand_state[1], mtrand_state[2], 
+                                 self.inv_top_sums, self.top_doc, self.Z,
+                                 self.indices, mtrand_state[0],
+                                 mtrand_state[1], mtrand_state[2],
                                  mtrand_state[3], mtrand_state[4])
 
             lp = results[4]
             self.log_probs.append((self.iteration, lp))
 
-            if verbose > 0:
+            if verbose == 2:
                 itr_time = np.around(time.time()-t, decimals=1)
                 t = time.time()
                 if verbose > 1 or itr==stop-1:
-                    print ('Iteration {0} complete: log_prob={1}, time={2}'
+                    print ('\nIteration {0} complete: log_prob={1}, time={2}'
                            .format(self.iteration, lp, itr_time))
+
+            if verbose == 1:
+                #print("Self iteration", self.iteration)
+                pbar.update(self.iteration)
+                time.sleep(0.01)
+
             self.iteration += 1
 
             mtrand_state = results[5:]
-
+        pbar.finish();
         if verbose > 1:
             print '-'*60, ('\n\nWalltime per iteration: {0} seconds'
                            .format(np.around((t-start)/n_iterations, decimals=2)))
@@ -180,7 +190,7 @@ class LdaCgsSeq(object):
 class LdaCgsQuerySampler(LdaCgsSeq):
     """
     """
-    def __init__(self, lda_obj=None, new_corpus=None, 
+    def __init__(self, lda_obj=None, new_corpus=None,
                  align_corpora=False, old_corpus=None,
                  context_type=None):
 
@@ -193,7 +203,7 @@ class LdaCgsQuerySampler(LdaCgsSeq):
 
             kwargs = dict(corpus=new_corpus,
                           context_type=context_type,
-                          K=lda_obj.K, V=lda_obj.V, 
+                          K=lda_obj.K, V=lda_obj.V,
                           alpha=lda_obj.alpha, beta=lda_obj.beta)
         else:
             kwargs = dict(corpus=new_corpus)
@@ -204,7 +214,7 @@ class LdaCgsQuerySampler(LdaCgsSeq):
         if lda_obj:
             self.word_top[:] = lda_obj.word_top
             self.inv_top_sums[:] = lda_obj.inv_top_sums
-        
+
 
 
 
@@ -214,11 +224,11 @@ class LdaCgsQuerySampler(LdaCgsSeq):
 
 
 def demo_LdaCgsSeq(doc_len=500, V=100000, n_docs=100,
-                   K=20, n_iterations=5, 
+                   K=20, n_iterations=5,
                    corpus_seed=None, model_seed=None):
 
     from vsm.extensions.corpusbuilders import random_corpus
-    
+
     print 'Words per document:', doc_len
     print 'Words in vocabulary:', V
     print 'Documents in corpus:', n_docs
