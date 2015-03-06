@@ -249,10 +249,6 @@ class LdaCgsMulti(LdaCgsSeq):
             seeds = [None] * n_proc
         mtrand_states = [np.random.RandomState(seed).get_state() for seed in seeds]
 
-        # Check that there will be an adequate number of tasks for the number of
-        # processes
-        if n_proc > len(docs):
-            n_proc = len(docs)
         p = mp.Pool(n_proc)
 
         n_iterations += self.iteration
