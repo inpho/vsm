@@ -32,6 +32,7 @@ setup(
     install_requires=[
         "numpy>=1.6.1",
         "scipy>=0.13.0",
+        "progressbar>=2.3"
     ],
     packages=packages,
     ext_modules = [
