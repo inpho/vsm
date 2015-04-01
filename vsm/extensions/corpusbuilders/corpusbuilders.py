@@ -15,14 +15,14 @@ __all__ = ['empty_corpus', 'random_corpus',
 
 
 
-def corpus_from_strings(strings, metadata=[], unidecode=True,
+def corpus_from_strings(strings, metadata=[], decode=False,
                         nltk_stop=True, stop_freq=0, add_stop=None):
     """
     Takes a list of strings and returns a Corpus object whose document
     tokens are the strings.
 
     """
-    if unidecode:
+    if decode:
         import unidecode
         for i in xrange(len(strings)):
             if isinstance(strings[i], unicode):
@@ -216,7 +216,7 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         :meth:`vsm.corpus.util.apply_stoplist`
     """
     if is_filename:
-        with open(plain_corpus, 'r') as f:
+        with open(plain_corpus, 'r', encoding='utf8') as f:
             plain_corpus = f.read()
 
     docs = paragraph_tokenize(plain_corpus)
@@ -321,7 +321,7 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
         :meth:`file_tokenize`, 
         :meth:`vsm.corpus.util.apply_stoplist`
     """
-    with open(filename, mode='r') as f:
+    with open(filename, mode='r', encoding='utf8') as f:
         text = f.read()
 
     words, tok = file_tokenize(text)
@@ -377,7 +377,7 @@ def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
     """
     import json
 
-    with open(json_file, 'r') as f:
+    with open(json_file, 'r', encoding='utf8') as f:
         json_data = json.load(f)
 
     docs = []
@@ -499,7 +499,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
                ignore=['.json','.log','.pickle'], nltk_stop=True, stop_freq=1, 
-               add_stop=None, decode=True):
+               add_stop=None, decode=False):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -557,11 +557,11 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     for filename in filenames:
         filename = os.path.join(plain_dir, filename)
         if decode:
-            with open(filename, mode='r', encoding='utf-8') as f:
+            with open(filename, mode='r', encoding='utf8') as f:
                 if decode:
                     chunks.append(unidecode(f.read()))
         else:
-            with open(filename, mode='r') as f:
+            with open(filename, mode='r', encoding='utf8') as f:
                 chunks.append(f.read())
 
     words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
@@ -639,7 +639,7 @@ def coll_tokenize(books, book_names):
 #TODO: This should be a whitelist not a blacklist
 def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
                 nltk_stop=True, stop_freq=1, add_stop=None, 
-                decode=True):
+                decode=False):
     """
     `coll_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -687,10 +687,10 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
             page_file = book_name + '/' + page_name
             page_name = os.path.join(book_path, page_name)
             if decode:
-                with open(page_name, mode='r', encoding='utf-8') as f:
+                with open(page_name, mode='r', encoding='utf8') as f:
                     pages.append((unidecode(f.read()), page_file))
             else:
-                with open(page_name, mode='r') as f:
+                with open(page_name, mode='r', encoding='utf8') as f:
                     pages.append((f.read(), page_file))
 
         books.append(pages)

@@ -423,7 +423,7 @@ class Corpus(BaseCorpus):
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
                                      context_data=context_data,
-                                     dtype=np.str_,
+                                     dtype=np.unicode_,
 				     remove_empty=remove_empty)
 
         self._set_words_int()
