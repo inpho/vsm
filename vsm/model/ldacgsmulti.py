@@ -6,6 +6,8 @@ from ldafunctions import load_lda
 from ldacgsseq import *
 from _cgs_update import cgs_update
 
+from progressbar import ProgressBar, Percentage, Bar
+
 
 __all__ = [ 'LdaCgsMulti' ]
 
@@ -216,7 +218,7 @@ class LdaCgsMulti(LdaCgsSeq):
             self._iteration_local = iteration
 
 
-    def train(self, n_iterations=500, verbose=True, n_proc=2, seeds=None):
+    def train(self, n_iterations=500, verbose=1, n_proc=2, seeds=None):
         """
         Takes an optional argument, `n_iterations` and updates the model
         `n_iterations` times.
@@ -250,10 +252,13 @@ class LdaCgsMulti(LdaCgsSeq):
         mtrand_states = [np.random.RandomState(seed).get_state() for seed in seeds]
 
         p = mp.Pool(n_proc)
-
         n_iterations += self.iteration
+
+	if verbose == 1:
+            pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
+
         while self.iteration < n_iterations:
-            if verbose:
+            if verbose == 2:
                 stdout.write('\rIteration %d: mapping  ' % self.iteration)
                 stdout.flush()
         
@@ -264,9 +269,13 @@ class LdaCgsMulti(LdaCgsSeq):
 
             results = p.map(update, data)
 
-            if verbose:
+            if verbose == 2:
                 stdout.write('\rIteration %d: reducing ' % self.iteration)
                 stdout.flush()
+            
+	    if verbose == 1:
+                #print("Self iteration", self.iteration)
+                pbar.update(self.iteration)
 
             (Z_ls, top_doc_ls, word_top_ls, logp_ls, mtrand_str_ls, 
              mtrand_keys_ls, mtrand_pos_ls, mtrand_has_gauss_ls, 
@@ -284,12 +293,14 @@ class LdaCgsMulti(LdaCgsSeq):
             lp = np.sum(logp_ls)
             self.log_probs.append((self.iteration, lp))
 
-            if verbose:
+            if verbose == 2:
                 stdout.write('\rIteration %d: log_prob=' % self.iteration)
                 stdout.flush()
                 print '%f' % lp
 
             self.iteration += 1
+
+        pbar.finish()
 
         p.close()
         self._move_globals_to_locals()
