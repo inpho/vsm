@@ -7,6 +7,7 @@ from ldacgsseq import *
 from _cgs_update import cgs_update
 
 from progressbar import ProgressBar, Percentage, Bar
+import platform # For Windows workaround
 
 
 __all__ = [ 'LdaCgsMulti' ]
@@ -16,6 +17,11 @@ __all__ = [ 'LdaCgsMulti' ]
 class LdaCgsMulti(LdaCgsSeq):
     """
     An implementation of LDA using collapsed Gibbs sampling with multi-processing.
+
+    Note that on Windows platforms, LdaCgsMulti is basically LdaCgsSeq as we use a
+    serial map function due to issues with the current implementation's global 
+    variables. Present compatability workaround should be fixed for proper
+    multiprocessing support.
     """
     def __init__(self, corpus=None, context_type=None, K=20, V=0, 
                  alpha=[], beta=[]):
@@ -264,10 +270,14 @@ class LdaCgsMulti(LdaCgsSeq):
         
             data = zip(docs, doc_indices, mtrand_states)
 
-            # For debugging
-            # results = map(update, data)
-
-            results = p.map(update, data)
+            # NOTE: The following compatability code means that multiprocessing 
+	    # does not work on Windows machines. This is due to our use of global
+	    # variables, which may also prevent thread safety. Need to examine.
+	    if platform.system() == 'Windows':
+                # For debugging
+	        results = map(update, data)
+            else:
+                results = p.map(update, data)
 
             if verbose == 2:
                 stdout.write('\rIteration %d: reducing ' % self.iteration)
