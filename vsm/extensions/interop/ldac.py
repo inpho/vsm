@@ -10,6 +10,8 @@ import os, os.path
 from scipy.stats import itemfreq
 import numpy as np
 
+from vsm.extensions.corpusbuilders import corpus_fromlist
+
 def export_corpus(corpus, outfolder, context_type='document'):
     """
     Converts a vsm.corpus.Corpus object into a lda-c compatible data file.
@@ -56,8 +58,35 @@ def export_corpus(corpus, outfolder, context_type='document'):
             corpusfile.write("\n")
             
 
-def import_corpus(vocabfilename, corpusfilename):
-    pass
+def import_corpus(corpusfilename, vocabfilename, context_type='document'):
+    """
+    Converts an lda-c compatible data file into a VSM Corpus object.
+
+    :param corpusfilename: path to corpus file, as defined in lda-c
+    documentation.
+    :type string:
+
+    :param vocabfilename: path to vocabulary file, one word per line
+    :type string:
+    """
+    # process vocabulary file 
+    with open(vocabfilename) as vocabfile:
+        vocab = [line.strip() for line in vocabfile]
+
+    # process corpus file
+    corpus = []
+    with open(corpusfilename) as corpusfile:
+        for line in corpusfile:
+            tokens = line.split()[1:]
+            ctx = []
+            for token in tokens:
+                id, count = token.split(':')
+                id = int(id)
+                count = int(count)
+                ctx.extend([vocab[id]] * count)
+            corpus.append(ctx)
+
+    return corpus_fromlist(corpus, context_type=context_type)
 
 def import_model(filename):
     pass
