@@ -98,7 +98,7 @@ class LdaCgsSeq(object):
             return log_prob
 
 
-    def train(self, n_iterations=100, verbose=1, seed=None):
+    def train(self, n_iterations=100, verbose=1, seed=None, **kwargs):
         """
         Takes an optional argument, `n_iterations` and updates the model
         `n_iterations` times.
@@ -112,6 +112,9 @@ class LdaCgsSeq(object):
 
         :param seed: Seed for numpy's RandomState. Default is `None`.
         :type seed: int, optional
+        
+        :param kwargs: For compatability with calls to LdaCgsMulti.
+        :type kwargs: optional
         """
         random_state = np.random.RandomState(seed)
         mtrand_state = random_state.get_state()
