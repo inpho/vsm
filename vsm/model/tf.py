@@ -8,7 +8,7 @@ from vsm.split import *
 from base import *
 
 
-__all__ = ['TfSeq', 'TfMulti']
+__all__ = ['TF', 'TfSeq', 'TfMulti']
 
 
 
@@ -174,3 +174,26 @@ def tf_fn(ctx_sbls):
     corpus = _corpus[offset: ctx_sbls[-1].stop]
     slices = [slice(s.start-offset, s.stop-offset) for s in ctx_sbls]
     return count_matrix(corpus, slices, _V.value)
+
+
+class TF(object):
+    """
+    Depending on the boolean parameter `multiprocessing`, returns and
+    initializes an instance of either TfSeq or TfMulti.
+
+    Note that on Windows platforms, `multiprocessing` is not implemented.
+    In contrast to LdaCgsMulti, LDA always returns a valid object. Instead
+    of raising a NotImplementedError, LDA issues a RuntimeWarning, notifying 
+    the user the sequental algorithm is being used.
+    """
+    def __new__(cls, corpus=None, context_type=None, multiprocessing=False):
+
+        kwargs = dict(corpus=corpus, context_type=context_type)
+        
+        if multiprocessing and platform.system() != 'Windows':
+            return TfMulti(**kwargs)
+        else:
+            if platform.system() == 'Windows':
+                warnings.warn("""Multiprocessing is not implemented on Windows.
+                Defaulting to sequential algorithm.""", RuntimeWarning)
+            return TfSeq(**kwargs)
