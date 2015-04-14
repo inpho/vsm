@@ -39,12 +39,15 @@ class TfIdf(BaseModel):
         """
         Initialize TfIdf.
 
-        :param tf_matrix: A matrix containing the term-frequency data.
-        :type tf_matrix: scipy.sparse matrix
+        :param corpus: A Corpus object containing the training data.
+        :type corpus: Corpus
     
         :param context_type: A string specifying the type of context over
             which the model trainer is applied.
         :type context_type: string 
+
+        :param tf_matrix: A matrix containing the term-frequency data.
+        :type tf_matrix: scipy.sparse matrix
         """
 
         self.context_type = context_type

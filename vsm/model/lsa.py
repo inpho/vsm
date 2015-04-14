@@ -10,22 +10,29 @@ class Lsa(object):
     """
     """
     
-    def __init__(self, td_matrix=None, context_type=None):
+    def __init__(self, corpus=None, context_type=None, td_matrix=None):
         """
         Initialize Lsa.
 
-        :param td_matrix: Term-Document matrix. Default is `None`.
-        :type td_matrix: np.array, optional
+        :param corpus: A Corpus object containing the training data.
+        :type corpus: Corpus, optional
 
         :param context_type: Name of tokenization whose tokens will be
             treated as documents. Default is `None`.
         :type context_type: string, optional
+
+        :param td_matrix: Term-Document matrix. Default is `None`.
+        :type td_matrix: np.array, optional
         """
 
         self.word_matrix = None
         self.doc_matrix = None
         self.eigenvalues = None
         self.context_type = context_type
+        if corpus is not None:
+            self.corpus = corpus.corpus
+        else:
+            self.corpus = []
 
         if td_matrix==None:
             self.td_matrix = np.array([])
@@ -108,3 +115,13 @@ class Lsa(object):
         m.eigenvalues=arrays_in['eigenvalues']
         m.doc_matrix=arrays_in['doc_matrix']
         return m
+
+    @staticmethod
+    def from_tf(tf_model):
+        """
+        Takes a `Tf` model object and generates a `TfIdf` model.
+        """
+        model = Lsa(td_matrix=tf_model.matrix)
+        model.corpus = tf_model.corpus
+        model.context_type = tf_model.context_type
+        return model
