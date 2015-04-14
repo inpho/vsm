@@ -35,7 +35,7 @@ class TfIdf(BaseModel):
         the word type occurs in no document at all, in which case the IDF
         value is undefined.
     """
-    def __init__(self, tf_matrix=None, context_type=None):
+    def __init__(self, corpus=None, context_type=None, tf_matrix=None):
         """
         Initialize TfIdf.
 
@@ -48,6 +48,10 @@ class TfIdf(BaseModel):
         """
 
         self.context_type = context_type
+        if corpus is not None:
+            self.corpus = corpus.corpus
+        else:
+            self.corpus = []
 
         if tf_matrix==None:
             self.matrix = csr_matrix([], dtype=np.float64)
@@ -79,3 +83,13 @@ class TfIdf(BaseModel):
                     row = self.matrix.data[start:stop]
                     row *= np.log(n_docs / np.count_nonzero(row))
                     start = stop
+
+    @staticmethod
+    def from_tf(tf_model):
+        """
+        Takes a `Tf` model object and generates a `TfIdf` model.
+        """
+        model = TfIdf(tf_matrix=tf_model.matrix)
+        model.corpus = tf_model.corpus
+        model.context_type = tf_model.context_type
+        return model

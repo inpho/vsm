@@ -18,6 +18,13 @@ class TestTf(unittest.TestCase):
                                  [0, 0, 0, 0],
                                  [3, 1, 0, 1]])
         
+    def test_TF_train(self):
+        m = tf.TF()
+        m.corpus = self.corpus
+        m.docs = self.docs
+        m.V = self.V
+        m.train()
+        self.assertTrue((self.cnt_mat == m.matrix.toarray()).all())
 
     def test_TfSeq_train(self):
         m = tf.TfSeq()
