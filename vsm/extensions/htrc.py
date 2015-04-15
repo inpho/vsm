@@ -13,8 +13,39 @@ import enchant
 from vsm.extensions.corpusbuilders.util import filter_by_suffix
 
 
+import json
+from time import sleep
+from urllib2 import urlopen
+from urllib import quote_plus
 
-def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
+def metadata(id, sleep_time=1):
+    """
+    Given a HTRC ID, download the volume metadata from the Solr index.
+
+    
+    :param id: HTRC volume id.
+    :type id: string
+
+    :param sleep_time: Sleep time to prevent denial of service
+    :type sleep_time: int in seconds, default: 1
+
+    :returns: dict
+
+    """
+    solr ="http://chinkapin.pti.indiana.edu:9994/solr/meta/select/?q=id:%s" % id
+    solr += "&wt=json" ## retrieve JSON results
+    # TODO: exception handling
+    if sleep_time:
+        sleep(sleep_time) ## JUST TO MAKE SURE WE ARE THROTTLED
+    try:
+        data = json.load(urlopen(solr))
+        print id
+        return data['response']['docs'][0]
+    except ValueError, IndexError:
+        print "No result found for " + id 
+        return dict()
+
+def proc_htrc_coll(coll_dir, ignore=['.json', '.log', '.err']):
     """
     Given a collection, cleans up plain page files for books in the collection.
 
@@ -40,7 +71,7 @@ def proc_htrc_coll(coll_dir, ignore=['.json', '.log']):
             
 
 
-def proc_htrc_book(book, coll_dir, ignore=['.json', '.log']):
+def proc_htrc_book(book, coll_dir, ignore=['.json', '.log', '.err']):
     """
     Cleans up page headers, line breaks, and hyphens for all plain pages in the book directory. 
     Creates a log file for debugging purposes.  
@@ -79,7 +110,7 @@ def proc_htrc_book(book, coll_dir, ignore=['.json', '.log']):
 
 
 
-def rm_lb_hyphens(plain_root, logger, ignore=['.json', '.log']):
+def rm_lb_hyphens(plain_root, logger, ignore=['.json', '.log', '.err']):
     """
     Looks for a hyphen followed by whitespace or a line break.
 
@@ -134,7 +165,7 @@ def rm_lb_hyphens(plain_root, logger, ignore=['.json', '.log']):
 
 
 
-def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log']):
+def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log', '.err']):
     """
     Tries to detect repeated page headers (e.g., chapter titles). If
     found, removes them.
