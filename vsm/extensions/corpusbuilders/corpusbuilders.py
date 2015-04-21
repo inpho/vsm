@@ -7,6 +7,7 @@ from codecs import open
 from vsm.corpus import Corpus
 from util import *
 
+from progressbar import ProgressBar, Percentage, Bar
 
 __all__ = ['empty_corpus', 'random_corpus',
            'toy_corpus', 'corpus_fromlist',
@@ -408,7 +409,8 @@ def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
 
 
 
-def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
+def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
+                 verbose=1):
     """`dir_tokenize` is a helper function for :meth:`dir_corpus`.
 
     Takes a list of strings and labels and returns words and corpus data.
@@ -427,6 +429,9 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
     :param paragraphs: If `True`, a paragraph-level tokenization 
         is included. Defaults to `True`.
     :type paragraphs: boolean, optional
+
+    :param verbose: Verbosity level. 1 prints a progress bar.
+    :type verbose: int, default 1 
     
     :returns: words : List of words.
         words in the `chunks` tokenized by :meth: word_tokenize.
@@ -437,6 +442,9 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
     """
     words, chk_tokens, sent_tokens = [], [], []
     sent_break, chk_n, sent_n = 0, 0, 0
+    
+    if verbose == 1:
+        pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(chunks)).start()
 
     if paragraphs:
         par_tokens = []
@@ -458,6 +466,9 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
                 par_tokens.append((sent_break, label, par_n))
                 par_n += 1
+    
+            if verbose == 1:
+                pbar.update(chk_n)
 
             chk_tokens.append((sent_break, label))
             chk_n += 1
@@ -472,9 +483,13 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
                 sent_break += len(w)
                 sent_tokens.append((sent_break, label, sent_n))
                 sent_n += 1
+    
+            if verbose == 1:
+                pbar.update(chk_n)
 
             chk_tokens.append((sent_break, label))
             chk_n += 1
+
 
     idx_dt = ('idx', np.int32)
     label_dt = (chunk_name + '_label', np.array(labels).dtype)
@@ -492,6 +507,9 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
     else:
         dtype = [idx_dt, label_dt, sent_label_dt]
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+    
+    if verbose == 1:
+        pbar.finish()
 
     return words, corpus_data
 
@@ -499,7 +517,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
                ignore=['.json','.log','.pickle'], nltk_stop=True, stop_freq=1, 
-               add_stop=None, decode=False):
+               add_stop=None, decode=False, verbose=1):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -541,6 +559,9 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
     :param add_stop: A list of stop words. Default is `None`.
     :type add_stop: array-like, optional
 
+    :param verbose: Verbosity level. 1 prints a progress bar.
+    :type verbose: int, default 1 
+
     :returns: c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
@@ -565,7 +586,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
                 chunks.append(f.read())
 
     words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
-                              paragraphs=paragraphs)
+                              paragraphs=paragraphs, verbose=verbose)
     names, data = zip(*tok.items())
     
     c = Corpus(words, context_data=data, context_types=names)
@@ -576,7 +597,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
 
 
 
-def coll_tokenize(books, book_names):
+def coll_tokenize(books, book_names, verbose=1):
     """
     `coll_tokenize` is a helper function for :meth:`coll_corpus`.
 
@@ -589,6 +610,9 @@ def coll_tokenize(books, book_names):
     :param book_names: List of book names.
     :type book_names: list
 
+    :param verbose: Verbosity level. 1 prints a progress bar.
+    :type verbose: int, default 1 
+
     :returns: words : List of words.
         words in the `books` tokenized by :meth:`word_tokenize`.
         corpus_data : Dictionary with context type as keys and
@@ -598,6 +622,8 @@ def coll_tokenize(books, book_names):
     words, book_tokens, page_tokens, sent_tokens = [], [], [], []
     sent_break, book_n, page_n, sent_n = 0, 0, 0, 0
 
+    if verbose == 1:
+        pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(books)).start()
 
     for book, book_label in zip(books, book_names):
         # print 'Tokenizing', book_label
@@ -614,6 +640,9 @@ def coll_tokenize(books, book_names):
 
             page_tokens.append((sent_break, page_n, book_label, page_file))
             page_n += 1
+
+        if verbose == 1:
+            pbar.update(book_n)
             
         book_tokens.append((sent_break, book_label))
         book_n += 1
@@ -633,13 +662,16 @@ def coll_tokenize(books, book_names):
     dtype = [idx_dt, sent_label_dt, page_label_dt, book_label_dt, file_dt]
     corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
+    if verbose == 1:
+        pbar.finish()
+
     return words, corpus_data
 
 
 #TODO: This should be a whitelist not a blacklist
 def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
                 nltk_stop=True, stop_freq=1, add_stop=None, 
-                decode=False):
+                decode=False, verbose=1):
     """
     `coll_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -666,6 +698,9 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
     
     :param add_stop: A list of stop words. Default is `None`.
     :type add_stop: array-like, optional
+
+    :param verbose: Verbosity level. 1 prints a progress bar.
+    :type verbose: int, default 1 
 
     :returns: c : a Corpus object
         Contains the tokenized corpus built from the plain-text files
