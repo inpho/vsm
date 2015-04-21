@@ -74,15 +74,19 @@ def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
     return corp.apply_stoplist(stoplist=stoplist, freq=freq)
 
 
-def filter_by_suffix(l, ignore):
+def filter_by_suffix(l, ignore, filter_dotfiles=True):
     """
-    Returns elements in `l` that does not end with elements in `ignore`.
+    Returns elements in `l` that does not end with elements in `ignore`,
+    and filters dotfiles (files that start with '.').
 
     :param l: List of strings to filter.
     :type l: list
 
     :param ignore: List of suffix to be ignored or filtered out.
     :type ignore: list
+
+    :param filter_dotfiles: Filter dotfiles.
+    :type filter_dotfiles: boolean, default True
 
     :returns: List of elements in `l` whose suffix is not in `ignore`.
 
@@ -93,7 +97,10 @@ def filter_by_suffix(l, ignore):
     >>> filter_by_suffix(l, ignore)
     ['b.json']
     """
-    return [e for e in l if not sum([e.endswith(s) for s in ignore])]
+    filter_list = [e for e in l if not sum([e.endswith(s) for s in ignore])]
+    if filter_dotfiles:
+        filter_list = [e for e in filter_list if not e.startswith('.')]
+    return filter_list
 
 
 def word_tokenize(text):
