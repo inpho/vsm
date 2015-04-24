@@ -162,7 +162,7 @@ def corpus_fromlist(ls, context_type='context'):
 
 
 def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
-               stop_freq=0, add_stop=None, metadata=None):
+               stop_freq=0, add_stop=None, metadata=None, autolabel=False):
     """
     `toy_corpus` is a convenience function for generating Corpus
     objects from a given string or a single file.
@@ -208,6 +208,10 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         Default is `None`.
     :type metadata: array-like, optional
     
+    :param autolabel: A boolean specifying whether to automatically label
+        documents by position in file. Default is False
+    :type metadata: boolean, optional
+    
     :returns: c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
@@ -217,7 +221,7 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         :meth:`vsm.corpus.util.apply_stoplist`
     """
     if is_filename:
-        with open(plain_corpus, 'r', encoding='utf8') as f:
+        with open(plain_corpus, 'rb', encoding='utf8') as f:
             plain_corpus = f.read()
 
     docs = paragraph_tokenize(plain_corpus)
@@ -225,6 +229,9 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
 
     corpus = sum(docs, [])
     tok = np.cumsum(np.array([len(d) for d in docs]))
+
+    if not metadata and autolabel:
+        metadata = ['Document {0}'.format(i) for i in range(len(tok))]
 
     if metadata:
         if not len(metadata) == len(tok):
