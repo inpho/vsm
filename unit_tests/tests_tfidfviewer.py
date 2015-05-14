@@ -18,7 +18,7 @@ class TestTfIdfViewer(unittest.TestCase):
         tf = TfSeq(c, 'document')
         tf.train()
 
-        m = TfIdf(tf.matrix, 'document')
+        m = TfIdf.from_tf(tf)
         m.train()
 
         self.v = TfIdfViewer(c, m)
