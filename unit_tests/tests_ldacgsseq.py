@@ -50,7 +50,7 @@ class TestLdaCgsSeq(unittest.TestCase):
 
     def test_LdaCgsQuerySampler_init(self):
 
-        old_corp = Corpus([])
+        old_corp = Corpus([], remove_empty=False)
         old_corp.corpus = np.array([ 0, 1, 1, 0, 0, 1 ], dtype='i')
         old_corp.context_data = [ np.array([(3, ), (3, )], dtype=[('idx', 'i')]) ]
         old_corp.context_types = [ 'document' ]
