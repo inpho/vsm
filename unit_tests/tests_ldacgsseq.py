@@ -57,7 +57,7 @@ class TestLdaCgsSeq(unittest.TestCase):
         old_corp.words = np.array([ '0', '1' ], dtype='i')
         old_corp.words_int = { '0': 0, '1': 1 }
 
-        new_corp = Corpus([])
+        new_corp = Corpus([], remove_empty=False)
         new_corp.corpus = np.array([ 0, 0 ], dtype='i')
         new_corp.context_data = [ np.array([(2, )], dtype=[('idx', 'i')]) ]
         new_corp.context_types = [ 'document' ]
