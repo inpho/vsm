@@ -540,7 +540,7 @@ class Corpus(BaseCorpus):
         if not file==None:
             arrays_in = np.load(file)
 
-            c = Corpus([])
+            c = Corpus([], remove_empty=False)
             c.corpus = arrays_in['corpus']
             c.words = arrays_in['words']
             c.context_types = arrays_in['context_types'].tolist()
@@ -556,7 +556,7 @@ class Corpus(BaseCorpus):
 
         if not corpus_dir==None:
 
-            c = Corpus([])
+            c = Corpus([], remove_empty=False)
 
             c.corpus = np.load(os.path.join(corpus_dir, corpus_file))
             c.words = np.load(os.path.join(corpus_dir, words_file))
