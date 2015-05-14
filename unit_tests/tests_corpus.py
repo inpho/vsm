@@ -44,12 +44,12 @@ class TestCorpus(unittest.TestCase):
 
     def test_align_corpora(self):
         
-        out = align_corpora(self.corpus, Corpus([]))
+        out = align_corpora(self.corpus, Corpus([], remove_empty=False))
         self.assertTrue(len(out.corpus)==0)
         self.assertTrue(len(out.words)==4)
         self.assertTrue(len(out.words_int)==4)
 
-        out = align_corpora(Corpus([]), self.corpus)
+        out = align_corpora(Corpus([], remove_empty=False), self.corpus)
         self.assertTrue(len(out.corpus)==0)
         self.assertTrue(len(out.words)==0)
         self.assertTrue(len(out.words_int)==0)

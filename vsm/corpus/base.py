@@ -678,7 +678,7 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
 
 
 
-def align_corpora(old_corpus, new_corpus):
+def align_corpora(old_corpus, new_corpus, remove_empty=False):
     """Takes two Corpus objects `old_corpus` and `new_corpus` and returns
     a copy of `new_corpus` with the following modifications: (1) the
     word to integer mapping agrees with that of `old_corpus` and (2)
@@ -688,7 +688,8 @@ def align_corpora(old_corpus, new_corpus):
     """
     new_words = [w for w in new_corpus.words if w not in old_corpus.words]
     out = new_corpus.apply_stoplist(new_words)
-    out.remove_empty()
+    if remove_empty:
+        out.remove_empty()
 
     int_words = out.words
     words_int = old_corpus.words_int
