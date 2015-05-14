@@ -13,7 +13,7 @@ install:
   # command to install dependencies
   - pip install unidecode nltk
   - python2.7 -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
-  - pip install .
+  - python setup.py develop
 # command to run tests
 before_script: pip install unittest2 nose
 script: nosetests 
