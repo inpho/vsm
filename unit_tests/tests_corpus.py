@@ -122,7 +122,7 @@ class TestCorpus(unittest.TestCase):
             tmp = NamedTemporaryFile(delete=False, suffix='.npz')
             self.corpus.save(tmp.name)
             tmp.close()
-            c_reloaded = self.corpus.load(tmp.name)
+            c_reloaded = Corpus.load(tmp.name)
 
             self.assertTrue((self.corpus.corpus == c_reloaded.corpus).all())
             self.assertTrue((self.corpus.words == c_reloaded.words).all())
