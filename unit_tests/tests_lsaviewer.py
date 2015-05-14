@@ -18,10 +18,10 @@ class TestLsaViewer(unittest.TestCase):
         tf = TfSeq(c, 'document')
         tf.train()
 
-        tfidf = TfIdf(tf.matrix, 'document')
+        tfidf = TfIdf.from_tf(tf)
         tfidf.train()
 
-        m = Lsa(tfidf.matrix, 'document')
+        m = Lsa.from_tfidf(tfidf)
         m.train()
 
         self.v = LsaViewer(c, m)

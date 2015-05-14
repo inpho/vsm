@@ -125,3 +125,13 @@ class Lsa(object):
         model.corpus = tf_model.corpus
         model.context_type = tf_model.context_type
         return model
+    
+    @staticmethod
+    def from_tfidf(tfidf_model):
+        """
+        Takes a `Tf` model object and generates a `TfIdf` model.
+        """
+        model = Lsa(td_matrix=tfidf_model.matrix)
+        model.corpus = tfidf_model.corpus
+        model.context_type = tfidf_model.context_type
+        return model
