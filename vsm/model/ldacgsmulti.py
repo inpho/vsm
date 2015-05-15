@@ -423,8 +423,8 @@ def demo_LdaCgsMulti(doc_len=500, V=100000, n_docs=100,
     print 'Number of processors:', n_proc
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1, seed=corpus_seed)
-    m = LdaCgsMulti(c, 'document', K=K)
-    m.train(n_iterations=n_iterations, n_proc=n_proc, seeds=model_seeds)
+    m = LdaCgsMulti(c, 'document', K=K, n_proc=n_proc, seeds=model_seeds)
+    m.train(n_iterations=n_iterations)
 
     return m
 
