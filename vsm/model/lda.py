@@ -25,10 +25,18 @@ class LDA(object):
     def __new__(cls,
                 corpus=None, context_type=None,
                 K=20, V=0, alpha=[], beta=[],
-                multiprocessing=False):
+                multiprocessing=False, seeds=None, seed=None, n_proc=None):
 
         kwargs = dict(corpus=corpus, context_type=context_type,
                       K=K, V=V, alpha=alpha, beta=beta)
+
+        if n_proc is not None:
+            kwargs['n_proc'] = n_proc
+        if seed is not None:
+            kwargs['seed'] = seed
+        if seeds is not None:
+            kwargs['seeds'] = seeds
+
         
         if multiprocessing and platform.system() != 'Windows':
             return LdaCgsMulti(**kwargs)
