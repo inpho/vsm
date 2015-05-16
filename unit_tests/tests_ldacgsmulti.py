@@ -84,6 +84,10 @@ class MPTester:
         assert m0.word_top.all() == m1.word_top.all()
         assert m0.inv_top_sums.all() == m1.inv_top_sums.all()
 
+    def test_LdaCgsMulti_remove_Seq_props(self):
+        assert getattr(m0, 'seed', None) is None
+        assert getattr(m0, '_mtrand_state', None) is None
+
 
 class TestLdaCgsMulti(unittest.TestCase):
     def setUp(self):
@@ -104,6 +108,12 @@ class TestLdaCgsMulti(unittest.TestCase):
     def test_LdaCgsMulti_random_seeds(self):
         t = MPTester()
         p = Process(target=t.test_LdaCgsMulti_random_seeds, args=())
+        p.start()
+        p.join()
+    
+    def test_LdaCgsMulti_remove_Seq_props(self):
+        t = MPTester()
+        p = Process(target=t.test_LdaCgsMulti_remove_Seq_props, args=())
         p.start()
         p.join()
 

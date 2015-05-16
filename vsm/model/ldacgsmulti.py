@@ -80,6 +80,10 @@ class LdaCgsMulti(LdaCgsSeq):
 
         super(LdaCgsMulti, self).__init__(corpus=corpus, context_type=context_type,
                                           K=K, V=V, alpha=alpha, beta=beta)
+
+        # delete LdaCgsSeq seed and state
+        del self.seed
+        del self._mtrand_state
         
         
     def _move_globals_to_locals(self):
