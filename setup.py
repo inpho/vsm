@@ -8,7 +8,7 @@ packages.append('vsm')
 
 setup(
     name = "vsm",
-    version = "0.2.1",
+    version = "0.3a1",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
@@ -16,10 +16,11 @@ setup(
     url = "http://inpho.cogs.indiana.edu/",
     download_url = "http://www.github.com/inpho/vsm",
     keywords = [],
+    # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
-        "Development Status :: 4 - Beta",
+        "Development Status :: 3 - Alpha",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
@@ -29,6 +30,7 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Text Processing :: Linguistic",
         ],
+    license = 'MIT',
     install_requires=[
         "numpy>=1.6.1",
         "scipy>=0.13.0",
