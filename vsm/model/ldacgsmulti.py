@@ -66,7 +66,7 @@ class LdaCgsMulti(LdaCgsSeq):
 
         # set random seeds if unspecified
         if seeds is None:
-            maxint = np.iinfo(np.uint32).max
+            maxint = np.iinfo(np.int32).max
             seeds = [np.random.randint(0, maxint) for n in range(n_proc)]
 
         # check number of seeds == n_proc
