@@ -331,7 +331,8 @@ class LdaCgsMulti(LdaCgsSeq):
 
             self.iteration += 1
 
-        pbar.finish()
+        if verbose == 1:
+            pbar.finish()
 
         p.close()
         self._move_globals_to_locals()
