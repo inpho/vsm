@@ -72,7 +72,7 @@ class LdaCgsSeq(object):
         self.log_probs = []
 
         if seed is None:
-            maxint = np.iinfo(np.uint32).max
+            maxint = np.iinfo(np.int32).max
             self.seed = np.random.randint(0, maxint)
         else:
             self.seed = seed
