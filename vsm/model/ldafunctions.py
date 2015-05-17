@@ -108,6 +108,23 @@ def load_lda(filename, ldaclass):
     else:
         m.log_probs = arrays_in['log_probs'].tolist()
 
+    if 'seed' in arrays_in:
+        m.seed = arrays_in['seed']
+        m._mtrand_state = (arrays_in['mtrand_state0'],
+                           arrays_in['mtrand_state1'],
+                           arrays_in['mtrand_state2'],
+                           arrays_in['mtrand_state3'],
+                           arrays_in['mtrand_state4'])
+
+    if 'seeds' in arrays_in:
+        m.seeds = list(arrays_in['seeds'])
+        m._mtrand_states = zip(arrays_in['mtrand_states0'],
+                               arrays_in['mtrand_states1'],
+                               arrays_in['mtrand_states2'],
+                               arrays_in['mtrand_states3'],
+                               arrays_in['mtrand_states4'])
+
+
     return m
 
 
@@ -140,6 +157,20 @@ def save_lda(m, filename):
     arrays_out['top_doc'] = m.top_doc
     arrays_out['word_top'] = m.word_top
     arrays_out['inv_top_sums'] = m.inv_top_sums
+
+    if hasattr(m,'seed'):
+        arrays_out['seed'] = m.seed
+    if hasattr(m,'seeds'):
+        arrays_out['seeds'] = m.seeds
+    if hasattr(m, '_mtrand_state'):
+        for i,s in enumerate(m._mtrand_state):
+            key = 'mtrand_state{0}'.format(i)
+            arrays_out[key] = s
+    
+    if hasattr(m, '_mtrand_states'):
+        for i,s in enumerate(zip(*m._mtrand_states)):
+            key = 'mtrand_states{0}'.format(i)
+            arrays_out[key] = s
     
     print 'Saving LDA model to', filename
     np.savez(filename, **arrays_out)

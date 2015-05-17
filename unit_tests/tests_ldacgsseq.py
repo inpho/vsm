@@ -39,6 +39,13 @@ class TestLdaCgsSeq(unittest.TestCase):
             self.assertTrue(m0.top_doc.all() == m1.top_doc.all())
             self.assertTrue(m0.word_top.all() == m1.word_top.all())
             self.assertTrue(m0.inv_top_sums.all() == m1.inv_top_sums.all())
+
+            self.assertTrue(m0.seed == m1.seed)
+            self.assertTrue(m0._mtrand_state[0] == m1._mtrand_state[0])
+            self.assertTrue((m0._mtrand_state[1] == m1._mtrand_state[1]).all())
+            self.assertTrue(m0._mtrand_state[2:] == m1._mtrand_state[2:])
+            
+
             m0 = LdaCgsSeq(c, 'document', K=10)
             m0.train(n_iterations=20)
             m0.save(tmp.name)

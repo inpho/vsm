@@ -36,6 +36,13 @@ class MPTester:
             assert m0.top_doc.all() == m1.top_doc.all()
             assert m0.word_top.all() == m1.word_top.all()
             assert m0.inv_top_sums.all() == m1.inv_top_sums.all()
+
+            assert m0.seeds == m1.seeds
+            for s0, s1 in zip(m0._mtrand_states,m1._mtrand_states):
+                assert s0[0] == s1[0]
+                assert (s0[1] == s1[1]).all()
+                assert s0[2:] == s1[2:]
+
             m0 = LdaCgsMulti(c, 'document', K=10)
             m0.train(n_iterations=20)
             m0.save(tmp.name)
@@ -85,6 +92,13 @@ class MPTester:
         assert m0.inv_top_sums.all() == m1.inv_top_sums.all()
 
     def test_LdaCgsMulti_remove_Seq_props(self):
+        from vsm.corpus.util.corpusbuilders import random_corpus
+
+        c = random_corpus(1000, 50, 0, 20, context_type='document',
+                            metadata=True)
+
+        m0 = LdaCgsMulti(c, 'document', K=10)
+
         assert getattr(m0, 'seed', None) is None
         assert getattr(m0, '_mtrand_state', None) is None
 
