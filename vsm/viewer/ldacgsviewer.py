@@ -152,10 +152,30 @@ class LdaCgsViewer(object):
         k_arr.subcol_headers = ['Index', 'Oscillation']
         k_arr.col_len = 10
         return k_arr
+    
+    def topic_jsds(self, print_len=10):
+        """Returns the partial N-way JSD of each topic, where N is the number of
+        documents in the model. This measure captures the extent to which an
+        individual topic is a reliable signal of a document's overall topic
+        distribution.
+        
+        Returns an array sorted by descending partial JSD.
+        """
+        topic_indices = np.arange(self.model.K)
+
+        doc_tops = self.theta.T
+        M = np.sum(doc_tops, axis=0) / len(doc_tops)
+        pjsd = np.sum(np.array([(D_i * np.log(D_i / M)) / len(tops) 
+                                    for D_i in tops]), axis=0)
+
+        k_arr = enum_sort(pjsd).view(LabeledColumn)
+        k_arr.col_header = 'Topic Partial JSD'
+        k_arr.subcol_headers = ['Index', 'pJSD']
+        k_arr.col_len = 10
+        return k_arr
 
     
-    def topics(self, print_len=10, topic_indices=None, sort_by_entropy=False,
-               sort_by_oscillation=False, as_strings=True, 
+    def topics(self, print_len=10, topic_indices=None, sort=None, as_strings=True, 
                compact_view=True, topic_labels=None):
         """
         Returns a list of topics estimated by the model. 
@@ -166,8 +186,9 @@ class LdaCgsViewer(object):
             displayed. Default is all topics.
         :type topic_indices: list of integers
         
-        :param sort_by_entropy: Sorts topics by entropies. Default is False.
-        :type sort_by_entropy: boolean, optional
+        :param sort: Topic sort function.
+        :type sort: string, values are "entropy", "oscillation", "index", "jsd",
+            "user" (default if topic_indicies set), "index" (default)
         
         :param sort_by_oscillation: Sorts topics by oscillations. Default is False.
         :type sort_by_oscillation: boolean, optional
@@ -191,25 +212,36 @@ class LdaCgsViewer(object):
         :returns: an instance of :class:`DataTable`.
             A structured array of topics.
         """
-        if sort_by_entropy:
+        if sort == 'entropy':
             th = 'Topics Sorted by Entropy'
             ent_sort = self.topic_entropies()['i']
-            if not topic_indices==None:
+            if topic_indices is not None:
                 ti = set(topic_indices)
                 topic_indices = [k for k in ent_sort if k in ti]
             else:
                 topic_indices = ent_sort
-        elif sort_by_oscillation:
+        elif sort == 'oscillation':
             th = 'Topics Sorted by Oscillation'
             osc_sort = self.topic_oscillations()['i']
-            if not topic_indices==None:
+            if topic_indices is not None:
                 ti = set(topic_indices)
                 topic_indices = [k for k in osc_sort if k in ti]
             else:
                 topic_indices = osc_sort
-        elif not topic_indices==None:
+        elif sort == 'jsd':
+            th = 'Topics Sorted by Partial JSD'
+            jsd_sort = self.topic_jsds()['i']
+            if topic_indices is not None:
+                ti = set(topic_indices)
+                topic_indices = [k for k in jsd_sort if k in ti]
+            else:
+                topic_indices = jsd_sort
+
+        elif topic_indices is not None:
+            sort = 'user'
             th = 'Topics Sorted by User'            
         else:
+            sort = 'index'
             th = 'Topics Sorted by Index' 
             topic_indices = range(self.model.K)
 
