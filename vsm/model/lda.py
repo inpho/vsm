@@ -20,30 +20,43 @@ class LDA(object):
     Note that on Windows platforms, `multiprocessing` is not implemented.
     In contrast to LdaCgsMulti, LDA always returns a valid object. Instead
     of raising a NotImplementedError, LDA issues a RuntimeWarning, notifying 
-    the user the sequental algorithm is being used.
+    the user the sequental algorithm is being used. When `seed_or_seeds` is a
+    list in this instance, only the first seed is used. 
     """
     def __new__(cls,
                 corpus=None, context_type=None,
                 K=20, V=0, alpha=[], beta=[],
-                multiprocessing=False, seeds=None, seed=None, n_proc=None):
+                multiprocessing=False, seed_or_seeds=None, n_proc=None):
 
         kwargs = dict(corpus=corpus, context_type=context_type,
                       K=K, V=V, alpha=alpha, beta=beta)
-
-        if n_proc is not None:
-            kwargs['n_proc'] = n_proc
-        if seed is not None:
-            kwargs['seed'] = seed
-        if seeds is not None:
-            kwargs['seeds'] = seeds
-
         
         if multiprocessing and platform.system() != 'Windows':
+            if n_proc is not None:
+                kwargs['n_proc'] = n_proc
+            if seed_or_seeds is not None and not isinstance(seed_or_seeds, int):
+                kwargs['seeds'] = seed_or_seeds
+
             return LdaCgsMulti(**kwargs)
+
         else:
-            if platform.system() == 'Windows':
+            if multiprocessing and platform.system() == 'Windows':
                 warnings.warn("""Multiprocessing is not implemented on Windows.
                 Defaulting to sequential algorithm.""", RuntimeWarning)
+                
+                # extract single seed
+                if seed_or_seeds is not None and not isinstance(seed_or_seeds, int):
+                    seed_or_seeds = seed_or_seeds[0]
+                    warnings.warn("Windows is using only the first seed: " +
+                                  str(seed_or_seeds), RuntimeWarning)
+
+            # parse seed_or_seeds argument
+            if isinstance(seed_or_seeds, int):
+                kwargs['seed'] = seed_or_seeds
+            elif seed_or_seeds is not None:
+                raise ValueError("LDA(seed_or_seeds, ...) must take an" +
+                                 "integer in single-threaded mode.")
+
             return LdaCgsSeq(**kwargs)
 
     @staticmethod
