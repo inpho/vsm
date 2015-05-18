@@ -174,6 +174,53 @@ class LdaCgsViewer(object):
         k_arr.col_len = 10
         return k_arr
 
+    def _get_sort_header_topic_indicies(self, sort=None, topic_indices=None):
+        """ 
+        Returns a tuple of (str, seq) consisting of the column header and sort
+        order for a given sort method.
+
+        :param sort: Topic sort function.
+        :type sort: string, values are "entropy", "oscillation", "index", "jsd",
+            "user" (default if topic_indicies set), "index" (default)
+        
+        :param topic_indices: List of indices of topics to be
+            displayed. Default is all topics.
+        :type topic_indices: list of integers
+        """
+        if sort == 'entropy':
+            th = 'Topics Sorted by Entropy'
+            ent_sort = self.topic_entropies()['i']
+            if topic_indices is not None:
+                ti = set(topic_indices)
+                topic_indices = [k for k in ent_sort if k in ti]
+            else:
+                topic_indices = ent_sort
+        elif sort == 'oscillation':
+            th = 'Topics Sorted by Oscillation'
+            osc_sort = self.topic_oscillations()['i']
+            if topic_indices is not None:
+                ti = set(topic_indices)
+                topic_indices = [k for k in osc_sort if k in ti]
+            else:
+                topic_indices = osc_sort
+        elif sort == 'jsd':
+            th = 'Topics Sorted by Partial JSD'
+            jsd_sort = self.topic_jsds()['i']
+            if topic_indices is not None:
+                ti = set(topic_indices)
+                topic_indices = [k for k in jsd_sort if k in ti]
+            else:
+                topic_indices = jsd_sort
+
+        elif topic_indices is not None or sort == 'user':
+            sort = 'user'
+            th = 'Topics Sorted by User'
+        else:
+            sort = 'index'
+            th = 'Topics Sorted by Index' 
+            topic_indices = range(self.model.K)
+
+        return (th, topic_indices)
     
     def topics(self, print_len=10, topic_indices=None, sort=None, as_strings=True, 
                compact_view=True, topic_labels=None):
@@ -212,38 +259,8 @@ class LdaCgsViewer(object):
         :returns: an instance of :class:`DataTable`.
             A structured array of topics.
         """
-        if sort == 'entropy':
-            th = 'Topics Sorted by Entropy'
-            ent_sort = self.topic_entropies()['i']
-            if topic_indices is not None:
-                ti = set(topic_indices)
-                topic_indices = [k for k in ent_sort if k in ti]
-            else:
-                topic_indices = ent_sort
-        elif sort == 'oscillation':
-            th = 'Topics Sorted by Oscillation'
-            osc_sort = self.topic_oscillations()['i']
-            if topic_indices is not None:
-                ti = set(topic_indices)
-                topic_indices = [k for k in osc_sort if k in ti]
-            else:
-                topic_indices = osc_sort
-        elif sort == 'jsd':
-            th = 'Topics Sorted by Partial JSD'
-            jsd_sort = self.topic_jsds()['i']
-            if topic_indices is not None:
-                ti = set(topic_indices)
-                topic_indices = [k for k in jsd_sort if k in ti]
-            else:
-                topic_indices = jsd_sort
-
-        elif topic_indices is not None:
-            sort = 'user'
-            th = 'Topics Sorted by User'            
-        else:
-            sort = 'index'
-            th = 'Topics Sorted by Index' 
-            topic_indices = range(self.model.K)
+        th, topic_indicies = self._get_sort_header_topic_indices(
+            sort,topic_indicies=topic_indicies)
 
         phi = self.phi[:,topic_indices]
         
@@ -270,7 +287,7 @@ class LdaCgsViewer(object):
                      subcolhdr_compact=schc, subcolhdr_full=schf)
 
 
-    def doc_topics(self, doc_or_docs, sort_by_entropy=False, compact_view=False,
+    def doc_topics(self, doc_or_docs, compact_view=False,
                    aggregate=False, print_len=10, topic_labels=None):
         """
         Returns the distribution over topics for the given documents.
@@ -309,17 +326,6 @@ class LdaCgsViewer(object):
 
         docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
 
-        if sort_by_entropy:
-            ent_sort = self.doc_entropies(as_strings=False)['i']
-            docs_, labels_ = [], []
-            for j in xrange(len(ent_sort)):
-                d = ent_sort[j]
-                if d in docs:
-                    i = docs.index(d)
-                    docs_.append(d)
-                    labels_.append(labels[i])
-            docs, labels = docs_, labels_
-        
         k_arr = enum_matrix(self.theta.T, indices=range(self.model.K), 
                             field_name='topic')
 
