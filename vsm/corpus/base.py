@@ -537,7 +537,7 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`, :meth:`Corpus.save`, :meth:`numpy.load`
 
         """
-        if not file==None:
+        if not file is None:
             arrays_in = np.load(file)
 
             c = Corpus([], remove_empty=False)
@@ -554,7 +554,7 @@ class Corpus(BaseCorpus):
 
             return c
 
-        if not corpus_dir==None:
+        if not corpus_dir is None:
 
             c = Corpus([], remove_empty=False)
 

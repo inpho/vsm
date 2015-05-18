@@ -209,7 +209,7 @@ class LdaCgsQuerySampler(LdaCgsSeq):
             new_corp = align(old_corpus, new_corpus)
 
         if lda_obj:
-            if context_type==None:
+            if context_type is None:
                 context_type = lda_obj.context_type
 
             kwargs = dict(corpus=new_corpus,

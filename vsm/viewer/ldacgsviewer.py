@@ -60,7 +60,7 @@ class LdaCgsViewer(object):
         distributions).
 
         """
-        if self._phi==None:
+        if self._phi is None:
             self._phi = self.model.word_top / self.model.word_top.sum(0)
         return self._phi
 
@@ -72,7 +72,7 @@ class LdaCgsViewer(object):
         distributions.
 
         """
-        if self._theta==None:
+        if self._theta is None:
             self._theta =  self.model.top_doc / self.model.top_doc.sum(0)
         return self._theta
 
@@ -82,7 +82,7 @@ class LdaCgsViewer(object):
         """Returns the entropies of the columns of phi (i.e., topics)
 
         """
-        if self._H_phi==None:
+        if self._H_phi is None:
             self._H_phi = H(self.phi.T)
         return self._H_phi
 
@@ -92,7 +92,7 @@ class LdaCgsViewer(object):
         """Returns the entropies of the columns of theta.
 
         """
-        if self._H_theta==None:
+        if self._H_theta is None:
             self._H_theta = H(self.theta.T)
         return self._H_theta
 
@@ -172,7 +172,7 @@ class LdaCgsViewer(object):
         k_arr.col_header = 'Topic Partial JSD'
         k_arr.subcol_headers = ['Index', 'pJSD']
         k_arr.col_len = 10
-        return k_arr
+        return k_arr[::-1]
 
     def _get_sort_header_topic_indices(self, sort=None, topic_indices=None):
         """ 
@@ -260,7 +260,7 @@ class LdaCgsViewer(object):
             A structured array of topics.
         """
         th, topic_indices = self._get_sort_header_topic_indices(
-            sort,topic_indices=topic_indices)
+                                     sort,topic_indices=topic_indices)
 
         phi = self.phi[:,topic_indices]
 
@@ -273,7 +273,7 @@ class LdaCgsViewer(object):
        
         table = []
         for i,k in enumerate(topic_indices):
-            if topic_labels==None:
+            if topic_labels is None:
                 ch = 'Topic ' + str(k)
             else:
                 ch = topic_labels[i]
@@ -333,7 +333,7 @@ class LdaCgsViewer(object):
         
         table = []
         for i in xrange(len(docs)):
-            if topic_labels==None: 
+            if topic_labels is None: 
                 ch = 'Doc: ' + labels[i]
             else:
                 ch = topic_labels[i] 

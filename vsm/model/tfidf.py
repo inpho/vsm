@@ -56,7 +56,7 @@ class TfIdf(BaseModel):
         else:
             self.corpus = []
 
-        if tf_matrix==None:
+        if tf_matrix is None:
             self.matrix = csr_matrix([], dtype=np.float64)
         else:
             self.matrix = tf_matrix.copy()

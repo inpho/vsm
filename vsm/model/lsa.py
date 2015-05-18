@@ -34,7 +34,7 @@ class Lsa(object):
         else:
             self.corpus = []
 
-        if td_matrix==None:
+        if td_matrix is None:
             self.td_matrix = np.array([])
         else:
             td_matrix = sparse.coo_matrix(td_matrix)
