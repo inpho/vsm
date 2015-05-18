@@ -165,8 +165,8 @@ class LdaCgsViewer(object):
 
         doc_tops = self.theta.T
         M = np.sum(doc_tops, axis=0) / len(doc_tops)
-        pjsd = np.sum(np.array([(D_i * np.log(D_i / M)) / len(tops) 
-                                    for D_i in tops]), axis=0)
+        pjsd = np.sum(np.array([(D_i * np.log(D_i / M)) / len(doc_tops) 
+                                    for D_i in doc_tops]), axis=0)
 
         k_arr = enum_sort(pjsd).view(LabeledColumn)
         k_arr.col_header = 'Topic Partial JSD'
@@ -174,14 +174,14 @@ class LdaCgsViewer(object):
         k_arr.col_len = 10
         return k_arr
 
-    def _get_sort_header_topic_indicies(self, sort=None, topic_indices=None):
+    def _get_sort_header_topic_indices(self, sort=None, topic_indices=None):
         """ 
         Returns a tuple of (str, seq) consisting of the column header and sort
         order for a given sort method.
 
         :param sort: Topic sort function.
         :type sort: string, values are "entropy", "oscillation", "index", "jsd",
-            "user" (default if topic_indicies set), "index" (default)
+            "user" (default if topic_indices set), "index" (default)
         
         :param topic_indices: List of indices of topics to be
             displayed. Default is all topics.
@@ -220,7 +220,7 @@ class LdaCgsViewer(object):
             th = 'Topics Sorted by Index' 
             topic_indices = range(self.model.K)
 
-        return (th, topic_indices)
+        return (th, np.array(topic_indices))
     
     def topics(self, print_len=10, topic_indices=None, sort=None, as_strings=True, 
                compact_view=True, topic_labels=None):
@@ -235,7 +235,7 @@ class LdaCgsViewer(object):
         
         :param sort: Topic sort function.
         :type sort: string, values are "entropy", "oscillation", "index", "jsd",
-            "user" (default if topic_indicies set), "index" (default)
+            "user" (default if topic_indices set), "index" (default)
         
         :param sort_by_oscillation: Sorts topics by oscillations. Default is False.
         :type sort_by_oscillation: boolean, optional
@@ -259,14 +259,14 @@ class LdaCgsViewer(object):
         :returns: an instance of :class:`DataTable`.
             A structured array of topics.
         """
-        th, topic_indicies = self._get_sort_header_topic_indices(
-            sort,topic_indicies=topic_indicies)
+        th, topic_indices = self._get_sort_header_topic_indices(
+            sort,topic_indices=topic_indices)
 
         phi = self.phi[:,topic_indices]
-        
+
         if as_strings:
 	        k_arr = enum_matrix(phi.T, indices=self.corpus.words,
-                                field_name='word')
+                                    field_name='word')
         else:
             ind = [self.corpus.words_int[word] for word in self.corpus.words]
             k_arr = enum_matrix(phi.T, indices=ind, field_name='word')
