@@ -231,7 +231,9 @@ class BaseCorpus(object):
 
         n = np.count_nonzero(ind_set)
         if n == 0:
-            raise Exception('No token fits that description.')
+            raise Exception('No token fits the description: ' +
+                ', '.join(['{q}:{l}'.format(q=k, l=v) 
+                                for k,v in query.iteritems()]))
         elif n > 1:
             msg = ('Multiple tokens fit that description:\n'
                    + str(tok[ind_set]))
