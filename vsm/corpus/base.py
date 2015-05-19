@@ -219,6 +219,8 @@ class BaseCorpus(object):
         :type query: dictionary-like
 
         :returns: The index of the metadata found in the query.
+        
+        :raises: KeyError
 
         :See Also: :class:`BaseCorpus`
         """
@@ -231,13 +233,13 @@ class BaseCorpus(object):
 
         n = np.count_nonzero(ind_set)
         if n == 0:
-            raise Exception('No token fits the description: ' +
+            raise KeyError('No token fits the description: ' +
                 ', '.join(['{q}:{l}'.format(q=k, l=v) 
                                 for k,v in query.iteritems()]))
         elif n > 1:
             msg = ('Multiple tokens fit that description:\n'
                    + str(tok[ind_set]))
-            raise Exception(msg)
+            raise KeyError(msg)
 
         return ind_set.nonzero()[0][0]
 
