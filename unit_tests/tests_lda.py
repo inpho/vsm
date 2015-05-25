@@ -25,7 +25,7 @@ class TestLda(unittest.TestCase):
             m=LDA(multiprocessing=False, seed_or_seeds=[2,4])
     
     
-    def test_Lda_LdaCgsMulti(self):
+    def test_Lda_proper_class(self):
         m=LDA(multiprocessing=True)
         if platform.system() == 'Windows':
             self.assertTrue(isinstance(m,LdaCgsSeq))
