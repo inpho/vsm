@@ -26,7 +26,10 @@ from model import *
 import viewer
 from viewer import *
 
+__version__ = '0.3'
 
-__all__ = corpus.__all__[:]
+__all__ = ['__version__']
+__all__ += corpus.__all__[:]
 __all__ += model.__all__
 __all__ += viewer.__all__
+
