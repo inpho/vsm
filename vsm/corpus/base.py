@@ -134,6 +134,14 @@ class BaseCorpus(object):
 		if remove_empty:
 			self.remove_empty()
 
+    def __len__(self):
+        """
+        Returns the number of tokens in the corpus.
+
+        :See Also: `len(self.words)` for the number of unique tokens.
+        """
+
+        return len(self.corpus)
 
     def _gen_context_types(self, context_types):
         """
@@ -181,13 +189,14 @@ class BaseCorpus(object):
     
     def remove_empty(self):
         """
-        Removes empty tokenizations.
+        Removes empty tokenizations, if `Corpus` object is not empty.
         """	
-        for j, t in enumerate(self.context_types):
-            token_list = self.view_contexts(t)
-            
-            indices = np.array([ctx.size != 0 for ctx in token_list], dtype=np.bool)
-            self.context_data[j] = self.context_data[j][indices]
+        if self:
+            for j, t in enumerate(self.context_types):
+                token_list = self.view_contexts(t)
+                
+                indices = np.array([ctx.size != 0 for ctx in token_list], dtype=np.bool)
+                self.context_data[j] = self.context_data[j][indices]
 
 
     def view_metadata(self, ctx_type):
@@ -682,7 +691,7 @@ def add_metadata(corpus, ctx_type, new_field, metadata):
 
 
 
-def align_corpora(old_corpus, new_corpus, remove_empty=False):
+def align_corpora(old_corpus, new_corpus, remove_empty=True):
     """Takes two Corpus objects `old_corpus` and `new_corpus` and returns
     a copy of `new_corpus` with the following modifications: (1) the
     word to integer mapping agrees with that of `old_corpus` and (2)
