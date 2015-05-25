@@ -222,8 +222,8 @@ class LdaCgsViewer(object):
 
         return (th, np.array(topic_indices))
     
-    def topics(self, print_len=10, topic_indices=None, sort=None, as_strings=True, 
-               compact_view=True, topic_labels=None):
+    def topics(self, topic_indices=None, sort=None, print_len=10, 
+               as_strings=True, compact_view=True, topic_labels=None):
         """
         Returns a list of topics estimated by the model. 
         Each topic is represented by a list of words and the corresponding 
@@ -236,9 +236,6 @@ class LdaCgsViewer(object):
         :param sort: Topic sort function.
         :type sort: string, values are "entropy", "oscillation", "index", "jsd",
             "user" (default if topic_indices set), "index" (default)
-        
-        :param sort_by_oscillation: Sorts topics by oscillations. Default is False.
-        :type sort_by_oscillation: boolean, optional
 
         :param print_len: Number of words shown for each topic. Default is 10.
         :type print_len: int, optional
@@ -259,6 +256,12 @@ class LdaCgsViewer(object):
         :returns: an instance of :class:`DataTable`.
             A structured array of topics.
         """
+        if topic_indices is not None\
+            and (not hasattr(topic_indices, '__len__') or\
+                isinstance(topic_indices, (str, unicode))):
+            raise ValueError("Invalid value for topic_indices," + 
+                             "must be a list of integers")
+
         th, topic_indices = self._get_sort_header_topic_indices(
                                      sort,topic_indices=topic_indices)
 

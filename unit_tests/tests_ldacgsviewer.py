@@ -67,6 +67,23 @@ class TestLdaCgsViewer(unittest.TestCase):
         self.assertEqual(type(dismatd), IndexedSymmArray)
         self.assertEqual(type(dismatt), IndexedSymmArray)
 
+    def test_LdaCgsViewer_topics_args(self):
+        # test calls of ldav.topics()
+        t = self.ldav.topics()
+        self.assertEqual(type(t), DataTable)
+        self.assertEqual(len(t), self.ldav.model.K)
+
+        with self.assertRaises(ValueError):
+            self.ldav.topics(2)
+        
+        t=self.ldav.topics([2])
+        self.assertEqual(type(t), DataTable)
+        self.assertEqual(len(t), 1)
+
+        t = self.ldav.topics([2,4])
+        self.assertEqual(type(t), DataTable)
+        self.assertEqual(len(t), 2)
+
         
 
 #Define and run test suite
