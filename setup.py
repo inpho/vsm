@@ -40,4 +40,5 @@ setup(
     ext_modules = [
         Extension('_cgs_update', ['vsm/model/_cgs_update.c']),
     ],
+    test_suite = "unit_tests"
 )

@@ -12,8 +12,10 @@ install:
   - export PATH=$HOME/py/bin:$PATH
   # command to install dependencies
   - pip install unidecode nltk
+  - pip install coveralls
   - python2.7 -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
   - python setup.py develop
 # command to run tests
 before_script: pip install unittest2 nose
-script: nosetests 
+script: coverage run --source vsm setup.py test
+after_success: coveralls
