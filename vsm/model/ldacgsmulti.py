@@ -284,10 +284,12 @@ class LdaCgsMulti(LdaCgsSeq):
                                 doc_indices[i][1] + len(docs[i+1])))
 
         p = mp.Pool(self.n_proc)
-        n_iterations += self.iteration
 
 	if verbose == 1:
             pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
+        
+        n_iterations += self.iteration
+        iteration = 0
 
         while self.iteration < n_iterations:
             if verbose == 2:
@@ -310,7 +312,7 @@ class LdaCgsMulti(LdaCgsSeq):
             
 	    if verbose == 1:
                 #print("Self iteration", self.iteration)
-                pbar.update(self.iteration)
+                pbar.update(iteration)
 
             (Z_ls, top_doc_ls, word_top_ls, logp_ls, mtrand_str_ls, 
              mtrand_keys_ls, mtrand_pos_ls, mtrand_has_gauss_ls, 
@@ -333,6 +335,7 @@ class LdaCgsMulti(LdaCgsSeq):
                 stdout.flush()
                 print '%f' % lp
 
+            iteration += 1
             self.iteration += 1
 
         if verbose == 1:

@@ -135,7 +135,7 @@ class LdaCgsSeq(object):
 
         # Training loop
         stop = self.iteration + n_iterations
-        pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=stop).start()
+        pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
         #print("Stop ", stop)
         for itr in xrange(self.iteration , stop):
 
@@ -157,7 +157,7 @@ class LdaCgsSeq(object):
 
             if verbose == 1:
                 #print("Self iteration", self.iteration)
-                pbar.update(self.iteration)
+                pbar.update(self.iteration - (stop - n_iterations))
                 time.sleep(0.01)
 
             self.iteration += 1
