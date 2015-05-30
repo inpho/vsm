@@ -109,21 +109,21 @@ def load_lda(filename, ldaclass):
         m.log_probs = arrays_in['log_probs'].tolist()
 
     if 'seed' in arrays_in:
-        m.seed = arrays_in['seed']
-        m._mtrand_state = (arrays_in['mtrand_state0'],
+        m.seed = int(arrays_in['seed'])
+        m._mtrand_state = (str(arrays_in['mtrand_state0']),
                            arrays_in['mtrand_state1'],
-                           arrays_in['mtrand_state2'],
-                           arrays_in['mtrand_state3'],
-                           arrays_in['mtrand_state4'])
+                           int(arrays_in['mtrand_state2']),
+                           int(arrays_in['mtrand_state3']),
+                           float(arrays_in['mtrand_state4']))
 
     if 'seeds' in arrays_in:
-        m.seeds = list(arrays_in['seeds'])
-        m._mtrand_states = zip(arrays_in['mtrand_states0'],
+        m.seeds = map(int, list(arrays_in['seeds']))
+        m._mtrand_states = zip(map(str, arrays_in['mtrand_states0']),
                                arrays_in['mtrand_states1'],
-                               arrays_in['mtrand_states2'],
-                               arrays_in['mtrand_states3'],
-                               arrays_in['mtrand_states4'])
-
+                               map(int, arrays_in['mtrand_states2']),
+                               map(int, arrays_in['mtrand_states3']),
+                               map(float, arrays_in['mtrand_states4']))
+        m.n_proc = len(m.seeds)
 
     return m
 

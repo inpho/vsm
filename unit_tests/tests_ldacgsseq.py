@@ -53,6 +53,29 @@ class TestLdaCgsSeq(unittest.TestCase):
             self.assertTrue(not hasattr(m1, 'log_prob'))
         finally:
             os.remove(tmp.name)
+    
+    def test_LdaCgsSeq_SeedTypes(self):
+        """ Test for issue #74 issues. """
+
+        from tempfile import NamedTemporaryFile
+        import os
+    
+        c = random_corpus(1000, 50, 6, 100)
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        try:
+            m0 = LdaCgsSeq(c, 'document', K=10)
+            m0.train(n_iterations=20)
+            m0.save(tmp.name)
+            m1 = LdaCgsSeq.load(tmp.name)
+
+            self.assertTrue(type(m0.seed) == type(m1.seed))
+            self.assertTrue(type(m0._mtrand_state[0]) == type(m1._mtrand_state[0]))
+            self.assertTrue(type(m0._mtrand_state[1]) == type(m1._mtrand_state[1]))
+            self.assertTrue(type(m0._mtrand_state[2]) == type(m1._mtrand_state[2]))
+            self.assertTrue(type(m0._mtrand_state[3]) == type(m1._mtrand_state[3]))
+            self.assertTrue(type(m0._mtrand_state[4]) == type(m1._mtrand_state[4]))
+        finally:
+            os.remove(tmp.name)
 
 
     def test_LdaCgsQuerySampler_init(self):

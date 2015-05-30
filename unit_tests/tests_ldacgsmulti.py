@@ -51,6 +51,28 @@ class MPTester:
         finally:
             os.remove(tmp.name)
 
+    def test_LdaCgsMulti_SeedTypes(self):
+        """ Test for issue #74 issues. """
+
+        from tempfile import NamedTemporaryFile
+        import os
+    
+        c = random_corpus(1000, 50, 6, 100)
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        try:
+            m0 = LdaCgsMulti(c, 'document', K=10)
+            m0.train(n_iterations=20)
+            m0.save(tmp.name)
+            m1 = LdaCgsMulti.load(tmp.name)
+
+            for s0, s1 in zip(m0.seeds, m1.seeds):
+                assert type(s0) == type(s1)
+            for s0, s1 in zip(m0._mtrand_states,m1._mtrand_states):
+                for i in range(5):
+                    assert type(s0[i]) == type(s1[i])
+        finally:
+            os.remove(tmp.name)
+
     def test_LdaCgsMulti_random_seeds(self):
         from vsm.corpus.util.corpusbuilders import random_corpus
 
@@ -162,6 +184,12 @@ class TestLdaCgsMulti(unittest.TestCase):
     def test_LdaCgsMulti_IO(self):
         t = MPTester()
         p = Process(target=t.test_LdaCgsMulti_IO, args=())
+        p.start()
+        p.join()
+    
+    def test_LdaCgsMulti_SeedTypes(self):
+        t = MPTester()
+        p = Process(target=t.test_LdaCgsMulti_SeedTypes, args=())
         p.start()
         p.join()
     
