@@ -1,13 +1,12 @@
 import re
 
-import numpy as np
-
+from chardet.universaldetector import UniversalDetector
 import nltk
-
+import numpy as np
 
 __all__ = ['strip_punc', 'rem_num', 'rehyph',
            'apply_stoplist', 'filter_by_suffix', 'word_tokenize',
-           'sentence_tokenize', 'paragraph_tokenize']
+           'sentence_tokenize', 'paragraph_tokenize', 'detect_encoding']
 
 
 
@@ -163,3 +162,23 @@ def paragraph_tokenize(text):
     return par_break.split(text)
 
 
+def detect_encoding(filename):
+    """
+    Takes a filename and attempts to detect the character encoding of the file
+    using `chardet`.
+     
+    :param filename: Name of the file to process
+    :type filename: string
+
+    :returns: encoding : string
+    """
+    detector = UniversalDetector()
+    with open(filename, 'rb') as unknown_file:
+        for line in unknown_file:
+            detector.feed(line)
+            if detector.done:
+                break
+    detector.close()
+
+    return detector.result['encoding']
+     

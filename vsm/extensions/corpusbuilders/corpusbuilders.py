@@ -221,7 +221,8 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         :meth:`vsm.corpus.util.apply_stoplist`
     """
     if is_filename:
-        with open(plain_corpus, 'rb', encoding='utf8') as f:
+        encoding = detect_encoding(plain_corpus)
+        with open(plain_corpus, 'rb', encoding=encoding) as f:
             plain_corpus = f.read()
 
     docs = paragraph_tokenize(plain_corpus)
@@ -329,7 +330,8 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
         :meth:`file_tokenize`, 
         :meth:`vsm.corpus.util.apply_stoplist`
     """
-    with open(filename, mode='r', encoding='utf8') as f:
+    encoding = detect_encoding(filename)
+    with open(filename, mode='r', encoding=encoding) as f:
         text = f.read()
 
     words, tok = file_tokenize(text)
@@ -385,7 +387,8 @@ def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
     """
     import json
 
-    with open(json_file, 'r', encoding='utf8') as f:
+    encoding = detect_encoding(json_file)
+    with open(json_file, 'r', encoding=encoding) as f:
         json_data = json.load(f)
 
     docs = []
@@ -584,12 +587,13 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
 
     for filename in filenames:
         filename = os.path.join(plain_dir, filename)
+        encoding = detect_encoding(filename)
         if decode:
-            with open(filename, mode='r', encoding='utf8') as f:
+            with open(filename, mode='r', encoding=encoding) as f:
                 if decode:
                     chunks.append(unidecode(f.read()))
         else:
-            with open(filename, mode='r', encoding='utf8') as f:
+            with open(filename, mode='r', encoding=encoding) as f:
                 chunks.append(f.read())
 
     words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
@@ -728,11 +732,12 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
         for page_name in page_names:
             page_file = book_name + '/' + page_name
             page_name = os.path.join(book_path, page_name)
+            encoding = detect_encoding(page_name)
             if decode:
-                with open(page_name, mode='r', encoding='utf8') as f:
+                with open(page_name, mode='r', encoding=encoding) as f:
                     pages.append((unidecode(f.read()), page_file))
             else:
-                with open(page_name, mode='r', encoding='utf8') as f:
+                with open(page_name, mode='r', encoding=encoding) as f:
                     pages.append((f.read(), page_file))
 
         books.append(pages)

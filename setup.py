@@ -8,7 +8,7 @@ packages.append('vsm')
 
 setup(
     name = "vsm",
-    version = "0.3.1",
+    version = "0.3.2",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
@@ -34,7 +34,8 @@ setup(
     install_requires=[
         "numpy>=1.6.1",
         "scipy>=0.13.0",
-        "progressbar>=2.3"
+        "progressbar>=2.3",
+        "chardet>=2.3.0"
     ],
     packages=packages,
     ext_modules = [
