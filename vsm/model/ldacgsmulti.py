@@ -284,20 +284,6 @@ class LdaCgsMulti(LdaCgsSeq):
             doc_indices.append((doc_indices[i][1],
                                 doc_indices[i][1] + len(docs[i+1])))
 
-        """
-        print len(docs)
-        old_stop = 0
-        for i,start_stop in enumerate(doc_indices):
-            start, stop = start_stop
-            if old_stop != start:
-                print "ERROR", i, old_stop, start
-
-            old_stop = stop
-
-        print docs
-        """
-
-
 	if verbose == 1:
             pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
         
@@ -338,7 +324,6 @@ class LdaCgsMulti(LdaCgsSeq):
 
             for t in xrange(len(results)):
                 start, stop = docs[t][0][0], docs[t][-1][1]
-                #start,stop = 0, len(self.corpus)
                 self.Z[start:stop] = Z_ls[t]
                 self.top_doc[:, doc_indices[t][0]:doc_indices[t][1]] = top_doc_ls[t]
             self.word_top = self.word_top + np.sum(word_top_ls, axis=0)
@@ -386,7 +371,7 @@ def update((docs, doc_indices, mtrand_state)):
     For LdaCgsMulti
     """
     start, stop = docs[0][0], docs[-1][1]
-    #start, stop = 0, len(np.frombuffer(_corpus, dtype='i'))
+    total_corpus_len = len(np.frombuffer(_corpus, dtype='i'))
 
     corpus = np.frombuffer(_corpus, dtype='i')[start:stop]
     Z = np.frombuffer(_Z, dtype='i')[start:stop].copy()
@@ -405,7 +390,6 @@ def update((docs, doc_indices, mtrand_state)):
     log_kc = np.log(top_doc / top_doc.sum(0)[np.newaxis, :])
 
     indices = np.array([(j - start) for (i,j) in docs], dtype='i')
-    #print corpus.shape
 
     results = cgs_update(_iteration.value,
                          corpus,
@@ -418,7 +402,9 @@ def update((docs, doc_indices, mtrand_state)):
                          mtrand_state[1],
                          mtrand_state[2],
                          mtrand_state[3],
-                         mtrand_state[4])
+                         mtrand_state[4],
+                         total_corpus_len,
+                         start)
 
     (loc_word_top, inv_top_sums, top_doc, Z, log_p, mtrand_str, mtrand_keys, 
      mtrand_pos, mtrand_has_gauss, mtrand_cached_gaussian) = results
