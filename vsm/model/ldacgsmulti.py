@@ -274,7 +274,8 @@ class LdaCgsMulti(LdaCgsSeq):
             raise RuntimeError("Model seeded with more cores than available." +
                                " Requires {0} cores.".format(self.n_proc))
 
-        self._move_locals_to_globals()
+
+        #self._move_locals_to_globals()
 
         docs = split_documents(self.corpus, self.indices, self.n_proc)
 
@@ -283,15 +284,15 @@ class LdaCgsMulti(LdaCgsSeq):
             doc_indices.append((doc_indices[i][1],
                                 doc_indices[i][1] + len(docs[i+1])))
 
-        p = mp.Pool(self.n_proc)
-
 	if verbose == 1:
             pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
         
         n_iterations += self.iteration
-        iteration = 0
 
         while self.iteration < n_iterations:
+            self._move_locals_to_globals()
+            p = mp.Pool(self.n_proc)
+
             if verbose == 2:
                 stdout.write('\rIteration %d: mapping  ' % self.iteration)
                 stdout.flush()
@@ -312,7 +313,7 @@ class LdaCgsMulti(LdaCgsSeq):
             
 	    if verbose == 1:
                 #print("Self iteration", self.iteration)
-                pbar.update(iteration)
+                pbar.update(self.iteration)
 
             (Z_ls, top_doc_ls, word_top_ls, logp_ls, mtrand_str_ls, 
              mtrand_keys_ls, mtrand_pos_ls, mtrand_has_gauss_ls, 
@@ -335,14 +336,15 @@ class LdaCgsMulti(LdaCgsSeq):
                 stdout.flush()
                 print '%f' % lp
 
-            iteration += 1
             self.iteration += 1
+
+            #self._move_globals_to_locals()
+            p.close()
+            self._move_globals_to_locals()
 
         if verbose == 1:
             pbar.finish()
 
-        p.close()
-        self._move_globals_to_locals()
 
 
     @staticmethod
@@ -369,6 +371,7 @@ def update((docs, doc_indices, mtrand_state)):
     For LdaCgsMulti
     """
     start, stop = docs[0][0], docs[-1][1]
+    total_corpus_len = len(np.frombuffer(_corpus, dtype='i'))
 
     corpus = np.frombuffer(_corpus, dtype='i')[start:stop]
     Z = np.frombuffer(_Z, dtype='i')[start:stop].copy()
@@ -399,7 +402,9 @@ def update((docs, doc_indices, mtrand_state)):
                          mtrand_state[1],
                          mtrand_state[2],
                          mtrand_state[3],
-                         mtrand_state[4])
+                         mtrand_state[4],
+                         total_corpus_len,
+                         start)
 
     (loc_word_top, inv_top_sums, top_doc, Z, log_p, mtrand_str, mtrand_keys, 
      mtrand_pos, mtrand_has_gauss, mtrand_cached_gaussian) = results

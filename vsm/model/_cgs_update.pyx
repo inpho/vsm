@@ -15,9 +15,11 @@ def cgs_update(int itr,
                unsigned int [:] mtrand_keys,
                int mtrand_pos,
                int mtrand_has_gauss,
-               float mtrand_cached_gaussian):
+               float mtrand_cached_gaussian,
+               int total_corpus_len = 0,
+               int sample_offset = 0):
 
-    cdef int V = corpus.shape[0]
+    cdef int V = total_corpus_len or corpus.shape[0]
     cdef int N = indices.shape[0]
     cdef int K = word_top.shape[1]
 
@@ -32,6 +34,8 @@ def cgs_update(int itr,
                                mtrand_pos, mtrand_has_gauss, 
                                mtrand_cached_gaussian))
     cdef double [:] samples = np_random_state.uniform(size=V)
+    if sample_offset:
+        samples = samples[sample_offset:]
     cdef object mtrand_state = np_random_state.get_state()
     cdef double [:] dist = np.zeros((K,), dtype=np.float64)
     cdef double [:] cum_dist = np.zeros((K,), dtype=np.float64)

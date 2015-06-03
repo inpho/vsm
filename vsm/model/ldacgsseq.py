@@ -135,7 +135,8 @@ class LdaCgsSeq(object):
 
         # Training loop
         stop = self.iteration + n_iterations
-        pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
+        if verbose == 1:
+            pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
         #print("Stop ", stop)
         for itr in xrange(self.iteration , stop):
 
@@ -145,6 +146,10 @@ class LdaCgsSeq(object):
                                  self._mtrand_state[1], self._mtrand_state[2],
                                  self._mtrand_state[3], self._mtrand_state[4])
 
+            self.word_top = results[0]
+            self.inv_top_sums = results[1]
+            self.top_doc = results[2]
+            self.Z = results[3]
             lp = results[4]
             self.log_probs.append((self.iteration, lp))
 
@@ -163,8 +168,8 @@ class LdaCgsSeq(object):
             self.iteration += 1
 
             self._mtrand_state = results[5:]
-
-        pbar.finish();
+        if verbose == 1:
+            pbar.finish()
         if verbose > 1:
             print '-'*60, ('\n\nWalltime per iteration: {0} seconds'
                            .format(np.around((t-start)/n_iterations, decimals=2)))
