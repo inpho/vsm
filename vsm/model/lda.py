@@ -60,7 +60,7 @@ class LDA(object):
             return LdaCgsSeq(**kwargs)
 
     @staticmethod
-    def load(filename, multiprocessing=False):
+    def load(filename, multiprocessing=False, n_proc=None):
         """
         A static method for loading a saved LdaCgsMulti model.
 
