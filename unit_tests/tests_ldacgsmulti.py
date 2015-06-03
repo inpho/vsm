@@ -193,11 +193,10 @@ class MPTester:
                 assert m0.corpus[i].all() == m1.corpus[i].all()
             assert m0.V == m1.V
             assert m0.iteration == m1.iteration
-            #for i in xrange(max(len(m0.Z), len(m1.Z))):
-            #    assert m0.Z[i].all() == m1.Z[i].all()
-            assert m0.top_doc.all() == m1.top_doc.all()
-            assert m0.word_top.all() == m1.word_top.all()
-            assert m0.inv_top_sums.all() == m1.inv_top_sums.all()
+            assert (m0.Z[i] == m1.Z[i]).all()
+            assert (m0.top_doc == m1.top_doc).all()
+            assert (m0.word_top == m1.word_top).all()
+            assert (np.isclose(m0.inv_top_sums, m1.inv_top_sums)).all()
     
             assert m0.seeds[0] == m1.seed
             assert m0._mtrand_states[0][0] == m1._mtrand_state[0]
@@ -232,11 +231,10 @@ class MPTester:
                 assert m0.corpus[i].all() == m1.corpus[i].all()
             assert m0.V == m1.V
             assert m0.iteration == m1.iteration
-            #for i in xrange(max(len(m0.Z), len(m1.Z))):
-            #    assert m0.Z[i].all() == m1.Z[i].all()
-            assert m0.top_doc.all() == m1.top_doc.all()
-            assert m0.word_top.all() == m1.word_top.all()
-            assert m0.inv_top_sums.all() == m1.inv_top_sums.all()
+            assert (m0.Z[i] == m1.Z[i]).all()
+            assert (m0.top_doc == m1.top_doc).all()
+            assert (m0.word_top == m1.word_top).all()
+            assert (np.isclose(m0.inv_top_sums, m1.inv_top_sums)).all()
     
             assert m0.seeds[0] == m1.seed
             assert m0._mtrand_states[0][0] == m1._mtrand_state[0]
@@ -260,17 +258,14 @@ class MPTester:
         m0 = LdaCgsMulti(c, 'document', K=10, n_proc=2, seeds=[2,2])
         m1 = LdaCgsSeq(c, 'document', K=10, seed=2)
         for iteration in range(20):
-            """
             for i,state in enumerate(m0._mtrand_states):
                 print i,iteration,state[2],state[3],state[4]
-            """
 
             m0.train(n_iterations=1, verbose=0)
             m1.train(n_iterations=1, verbose=0)
-            """ 
+
             for i,state in enumerate(m0._mtrand_states):
                 print i,iteration,"POST",state[2],state[3],state[4]
-            """
 
             assert m0.context_type == m1.context_type
             assert m0.K == m1.K
@@ -280,11 +275,14 @@ class MPTester:
                 assert m0.corpus[i].all() == m1.corpus[i].all()
             assert m0.V == m1.V
             assert m0.iteration == m1.iteration
-            #for i in xrange(max(len(m0.Z), len(m1.Z))):
-            #    assert m0.Z[i].all() == m1.Z[i].all()
-            assert m0.top_doc.all() == m1.top_doc.all()
-            assert m0.word_top.all() == m1.word_top.all()
+            assert (m0.top_doc == m1.top_doc).all()
+            assert (m0.word_top == m1.word_top).all()
             assert m0.inv_top_sums.all() == m1.inv_top_sums.all()
+            for i in xrange(len(m1.Z)):
+                assert m0.Z[i] == m1.Z[i], "error at {0}: {1} != {2}".format(i,
+                m0.Z[i], m1.Z[i])
+            for i in xrange(max(len(m0.Z), len(m1.Z))):
+                assert m0.Z[i].all() == m1.Z[i].all()
     
             assert m0.seeds[0] == m1.seed
             assert m0._mtrand_states[0][0] == m1._mtrand_state[0]
