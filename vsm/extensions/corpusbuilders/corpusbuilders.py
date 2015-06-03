@@ -161,7 +161,7 @@ def corpus_fromlist(ls, context_type='context'):
                   context_types=[context_type])
 
 
-def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
+def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False,
                stop_freq=0, add_stop=None, metadata=None, autolabel=False):
     """
     `toy_corpus` is a convenience function for generating Corpus
@@ -191,6 +191,11 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         a filename. Otherwise, `plain_corpus` is presumed to contain 
         the corpus. Default is `False`.
     :type is_filename: boolean, optional
+
+    :param encoding: A string indicating the file encoding or 'detect',
+        in which case `chardet` is used to automatically guess the encoding.
+        Default is `utf8`.
+    :type encoding: string, optional
     
     :param nltk_stop: If `True` then the corpus object is masked using
         the NLTK English stop words. Default is `False`.
@@ -221,7 +226,8 @@ def toy_corpus(plain_corpus, is_filename=False, nltk_stop=False,
         :meth:`vsm.corpus.util.apply_stoplist`
     """
     if is_filename:
-        encoding = detect_encoding(plain_corpus)
+        if encoding == 'detect':
+            encoding = detect_encoding(plain_corpus)
         with open(plain_corpus, 'rb', encoding=encoding) as f:
             plain_corpus = f.read()
 
@@ -300,7 +306,8 @@ def file_tokenize(text):
     return words, corpus_data
 
 
-def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
+def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1, 
+                add_stop=None):
     """
     `file_corpus` is a convenience function for generating Corpus
     objects from a a plain text corpus contained in a single string.
@@ -310,6 +317,11 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
 
     :param filename: File name of the plain text file.
     :type plain_dir: string-like
+
+    :param encoding: A string indicating the file encoding or 'detect',
+        in which case `chardet` is used to automatically guess the encoding.
+        Default is `utf8`.
+    :type encoding: string, optional
     
     :param nltk_stop: If `True` then the corpus object is masked 
         using the NLTK English stop words. Default is `False`.
@@ -330,7 +342,8 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
         :meth:`file_tokenize`, 
         :meth:`vsm.corpus.util.apply_stoplist`
     """
-    encoding = detect_encoding(filename)
+    if encoding == 'detect':
+        encoding = detect_encoding(filename)
     with open(filename, mode='r', encoding=encoding) as f:
         text = f.read()
 
@@ -344,8 +357,8 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     return c
 
 
-def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
-               stop_freq=0, add_stop=None):
+def json_corpus(json_file, doc_key, label_key, encoding='utf8',
+                nltk_stop=False, stop_freq=0, add_stop=None):
     """
     `json_corpus` is a convenience function for generating Corpus
     objects from a json file. It construct a corpus, document labels
@@ -365,6 +378,11 @@ def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
     used when a viewer function outputs a list of documents. Any field other
     than `doc_key` and `label_key` is stored as metadata.
     :type label_key: string-like
+
+    :param encoding: A string indicating the file encoding or 'detect',
+        in which case `chardet` is used to automatically guess the encoding.
+        Default is `utf8`.
+    :type encoding: string, optional
     
     :param nltk_stop: If `True` then the corpus object is masked using
         the NLTK English stop words. Default is `False`.
@@ -387,7 +405,8 @@ def json_corpus(json_file, doc_key, label_key, nltk_stop=False,
     """
     import json
 
-    encoding = detect_encoding(json_file)
+    if encoding == 'detect':
+        encoding = detect_encoding(json_file)
     with open(json_file, 'r', encoding=encoding) as f:
         json_data = json.load(f)
 
@@ -525,9 +544,10 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
 
 
-def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
-               ignore=['.json','.log','.pickle'], nltk_stop=True, stop_freq=1, 
-               add_stop=None, decode=False, verbose=1):
+def dir_corpus(plain_dir, chunk_name='article', encoding='utf8', 
+               paragraphs=True, ignore=['.json','.log','.pickle'], 
+               nltk_stop=True, stop_freq=1, add_stop=None, decode=False, 
+               verbose=1):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -548,6 +568,11 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
         of a book, one might set `chunk_name` to `pages`. Default 
         is `articles`.
     :type chunk_name: string-like, optional
+    
+    :param encoding: A string indicating the file encoding or 'detect',
+        in which case `chardet` is used to automatically guess the encoding.
+        Default is `utf8`.
+    :type encoding: string, optional
     
     :param paragraphs: If `True`, a paragraph-level tokenization 
         is included. Defaults to `True`.
@@ -587,7 +612,8 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True,
 
     for filename in filenames:
         filename = os.path.join(plain_dir, filename)
-        encoding = detect_encoding(filename)
+        if encoding == 'detect':
+            encoding = detect_encoding(filename)
         if decode:
             with open(filename, mode='r', encoding=encoding) as f:
                 if decode:
@@ -680,7 +706,7 @@ def coll_tokenize(books, book_names, verbose=1):
 
 
 #TODO: This should be a whitelist not a blacklist
-def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
+def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
                 nltk_stop=True, stop_freq=1, add_stop=None, 
                 decode=False, verbose=1):
     """
@@ -693,6 +719,11 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
     :param coll_dir: Directory containing a collections of books
         which contain pages as plain-text files.
     :type coll_dir: string-like
+    
+    :param encoding: A string indicating the file encoding or 'detect',
+        in which case `chardet` is used to automatically guess the encoding.
+        Default is `utf8`.
+    :type encoding: string, optional
     
     :param ignore: The list containing suffixes of files to be filtered.
         The suffix strings are normally file types. Default is ['.json',
@@ -732,7 +763,8 @@ def coll_corpus(coll_dir, ignore=['.json', '.log', '.pickle'],
         for page_name in page_names:
             page_file = book_name + '/' + page_name
             page_name = os.path.join(book_path, page_name)
-            encoding = detect_encoding(page_name)
+            if encoding == 'detect':
+                encoding = detect_encoding(page_name)
             if decode:
                 with open(page_name, mode='r', encoding=encoding) as f:
                     pages.append((unidecode(f.read()), page_file))
