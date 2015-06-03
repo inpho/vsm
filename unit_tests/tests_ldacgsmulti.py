@@ -4,6 +4,7 @@ import numpy as np
 from vsm.corpus import Corpus
 from vsm.corpus.util.corpusbuilders import random_corpus
 from vsm.model.ldacgsmulti import *
+from vsm.model.ldacgsseq import *
 from multiprocessing import Process
 
 class MPTester:
@@ -170,6 +171,44 @@ class MPTester:
         assert getattr(m0, 'seed', None) is None
         assert getattr(m0, '_mtrand_state', None) is None
 
+    def test_LdaCgsMulti_eq_LdaCgsSeq(self):
+        """ Test for issue #74 issues. """
+
+        from tempfile import NamedTemporaryFile
+        import os
+    
+        c = random_corpus(1000, 50, 6, 100)
+        tmp = NamedTemporaryFile(delete=False, suffix='.npz')
+        m0 = LdaCgsMulti(c, 'document', K=10, n_proc=1, seeds=[2])
+        m0.train(n_iterations=20)
+        m1 = LdaCgsSeq(c, 'document', K=10, seed=2)
+        m1.train(n_iterations=20)
+        
+        assert m0.context_type == m1.context_type
+        assert m0.K == m1.K
+        assert (m0.alpha == m1.alpha).all()
+        assert (m0.beta == m1.beta).all()
+        print m0.log_probs
+        print m1.log_probs
+        #assert m0.log_probs == m1.log_probs
+        for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+            assert m0.corpus[i].all() == m1.corpus[i].all()
+        assert m0.V == m1.V
+        assert m0.iteration == m1.iteration
+        #for i in xrange(max(len(m0.Z), len(m1.Z))):
+        #    assert m0.Z[i].all() == m1.Z[i].all()
+        assert m0.top_doc.all() == m1.top_doc.all()
+        assert m0.word_top.all() == m1.word_top.all()
+        assert m0.inv_top_sums.all() == m1.inv_top_sums.all()
+
+        assert m0.seeds[0] == m1.seed
+        assert m0._mtrand_states[0][0] == m1._mtrand_state[0]
+        for s0,s1 in zip(m0._mtrand_states[0][1], m1._mtrand_state[1]):
+            assert s0 == s1
+        assert m0._mtrand_states[0][2] == m1._mtrand_state[2]
+        assert m0._mtrand_states[0][3] == m1._mtrand_state[3]
+        assert m0._mtrand_states[0][4] == m1._mtrand_state[4]
+
 
 class TestLdaCgsMulti(unittest.TestCase):
     def setUp(self):
@@ -208,6 +247,12 @@ class TestLdaCgsMulti(unittest.TestCase):
     def test_LdaCgsMulti_continue_training(self):
         t = MPTester()
         p = Process(target=t.test_LdaCgsMulti_continue_training, args=())
+        p.start()
+        p.join()
+    
+    def test_LdaCgsMulti_eq_LdaCgsSeq(self):
+        t = MPTester()
+        p = Process(target=t.test_LdaCgsMulti_eq_LdaCgsSeq, args=())
         p.start()
         p.join()
 

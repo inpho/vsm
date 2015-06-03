@@ -145,6 +145,10 @@ class LdaCgsSeq(object):
                                  self._mtrand_state[1], self._mtrand_state[2],
                                  self._mtrand_state[3], self._mtrand_state[4])
 
+            self.word_top = results[0]
+            self.inv_top_sums = results[1]
+            self.top_doc = results[2]
+            self.Z = results[3]
             lp = results[4]
             self.log_probs.append((self.iteration, lp))
 

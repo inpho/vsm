@@ -283,6 +283,19 @@ class LdaCgsMulti(LdaCgsSeq):
             doc_indices.append((doc_indices[i][1],
                                 doc_indices[i][1] + len(docs[i+1])))
 
+        """
+        print len(docs)
+        old_stop = 0
+        for i,start_stop in enumerate(doc_indices):
+            start, stop = start_stop
+            if old_stop != start:
+                print "ERROR", i, old_stop, start
+
+            old_stop = stop
+
+        print docs
+        """
+
         p = mp.Pool(self.n_proc)
 
 	if verbose == 1:
