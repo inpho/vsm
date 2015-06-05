@@ -223,7 +223,9 @@ class LdaCgsMulti(LdaCgsSeq):
     def K(self, K):
         if self._write_globals:
             global _K
-            _K = mp.Value('i', K, lock=False)
+            if not '_K' in globals():
+                _K = mp.Value('i')
+            _K.value = K
         else:
             self._K_local = K
 
@@ -238,7 +240,9 @@ class LdaCgsMulti(LdaCgsSeq):
     def V(self, V):
         if self._write_globals:
             global _V
-            _V = mp.Value('i', V, lock=False)
+            if not '_V' in globals():
+                _V = mp.Value('i')
+            _V.value = V
         else:
             self._V_local = V
 
@@ -253,7 +257,9 @@ class LdaCgsMulti(LdaCgsSeq):
     def iteration(self, iteration):
         if self._write_globals:
             global _iteration
-            _iteration = mp.Value('i', iteration, lock=False)
+            if not '_iteration' in globals():
+                _iteration = mp.Value('i')
+            _iteration.value = iteration
         else:
             self._iteration_local = iteration
 
@@ -432,7 +438,7 @@ def demo_LdaCgsMulti(doc_len=500, V=100000, n_docs=100,
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1, seed=corpus_seed)
     m = LdaCgsMulti(c, 'document', K=K, n_proc=n_proc, seeds=model_seeds)
-    m.train(n_iterations=n_iterations)
+    m.train(n_iterations=n_iterations, verbose=2)
 
     return m
 

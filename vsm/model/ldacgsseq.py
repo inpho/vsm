@@ -247,7 +247,7 @@ def demo_LdaCgsSeq(doc_len=500, V=100000, n_docs=100,
     print 'Iterations:', n_iterations
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1, seed=corpus_seed)
-    m = LdaCgsSeq(c, 'document', K=K)
-    m.train(n_iterations=n_iterations, verbose=2, seed=model_seed)
+    m = LdaCgsSeq(c, 'document', K=K, seed=model_seed)
+    m.train(n_iterations=n_iterations, verbose=2)
 
     return m
