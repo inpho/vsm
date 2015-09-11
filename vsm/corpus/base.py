@@ -447,6 +447,8 @@ class Corpus(BaseCorpus):
                                   for word in self.corpus],
                                  dtype=self.dtype)
 
+        self.stopped_words = set()
+
 
 
     def _set_words_int(self):
@@ -637,9 +639,10 @@ class Corpus(BaseCorpus):
         else:
             stop = set()
 
+        # filter stoplist
+        stoplist = [t for t in stoplist if t in self.words]
         for t in stoplist:
-            if t in self.words:
-                stop.add(self.words_int[t])
+            stop.add(self.words_int[t])
 
         if not stop:
             # print 'Stop list is empty.'
@@ -660,7 +663,11 @@ class Corpus(BaseCorpus):
             tok['idx'] = np.cumsum(spans)
             context_data.append(tok)
 
-        return Corpus(corpus, context_data=context_data, context_types=self.context_types)
+        c = Corpus(corpus, context_data=context_data, context_types=self.context_types)
+        if self.stopped_words:
+            c.stopped_words.update(self.stopped_words)
+        c.stopped_words.update(stoplist)
+        return c
 
 
 def add_metadata(corpus, ctx_type, new_field, metadata):

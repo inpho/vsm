@@ -41,6 +41,12 @@ class TestCorpus(unittest.TestCase):
         for i in xrange(len(even)):
             np.testing.assert_array_equal(even[i], even_expected[i])
 
+    def test_apply_stoplist(self):
+        stopped_corpus = self.corpus.apply_stoplist(['I'])
+        new_ctx = np.equal(stopped_corpus.context_data[0], np.array([(1,'Veni'), (2,'Vidi'), 
+                (3,'Vici')], dtype=[('idx', '<i8'), ('sent', '|S6')]))
+        self.assertTrue(new_ctx, msg=None)
+        self.assertItemsEqual(['I'], stopped_corpus.stopped_words)
 
     def test_align_corpora(self):
         
