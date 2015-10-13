@@ -119,20 +119,23 @@ class BaseCorpus(object):
                  context_data=[],
                  remove_empty=True):
 
-		self.corpus = np.asarray(corpus, dtype=dtype)
-		self.dtype = self.corpus.dtype
+        self.corpus = np.asarray(corpus, dtype=dtype)
+        self.dtype = self.corpus.dtype
 
-		self.words = np.unique(self.corpus)
+        # Since np.unique attempts to make a whole contiguous copy of the
+        # corpus array, we instead use a sorted set and cast to a np array
+        # equivalent to self.words = np.unique(self.corpus)
+        self.words = np.asarray(sorted(set(self.corpus)), dtype=dtype)
 
-		self.context_data = []
-		for t in context_data:
-			if self._validate_indices(t['idx']):
-				self.context_data.append(t)
-		
-		self._gen_context_types(context_types)
+        self.context_data = []
+        for t in context_data:
+            if self._validate_indices(t['idx']):
+                self.context_data.append(t)
+        
+        self._gen_context_types(context_types)
 
-		if remove_empty:
-			self.remove_empty()
+        if remove_empty:
+            self.remove_empty()
 
     def __len__(self):
         """
@@ -190,7 +193,7 @@ class BaseCorpus(object):
     def remove_empty(self):
         """
         Removes empty tokenizations, if `Corpus` object is not empty.
-        """	
+        """    
         if self:
             for j, t in enumerate(self.context_types):
                 token_list = self.view_contexts(t)
@@ -218,7 +221,7 @@ class BaseCorpus(object):
 
     def meta_int(self, ctx_type, query):
         """
-	    Returns the index of the metadata found in the query.
+        Returns the index of the metadata found in the query.
 
         :param ctx_type: The type of a tokenization.
         :type ctx_type: string-like
@@ -255,7 +258,7 @@ class BaseCorpus(object):
 
     def get_metadatum(self, ctx_type, query, field):
         """
-	    Returns the metadatum corresponding to the query and the field.
+        Returns the metadatum corresponding to the query and the field.
 
         :param ctx_type: The type of a tokenization.
         :type ctx_type: string-like
@@ -264,7 +267,7 @@ class BaseCorpus(object):
             in metadata.
         :type query: dictionary-like
         
-	    :param field: Field of the metadata
+        :param field: Field of the metadata
         :type field: string
 
         :returns: The metadatum corresponding to the query and the field.
@@ -305,7 +308,7 @@ class BaseCorpus(object):
             slices.append(slice(0, indices[0]))
             for i in xrange(len(indices) - 1):
                 slices.append(slice(indices[i], indices[i+1]))
-            return slices	    
+            return slices        
             
         return split_corpus(self.corpus, indices)
 
@@ -410,12 +413,12 @@ class Corpus(BaseCorpus):
      array([0, 1], dtype=int32)]
 
     >>> c.view_contexts('sentences', as_strings=True)
-	[array(['I', 'came'], 
-	      dtype='|S9'),
-	 array(['I', 'saw'], 
-	      dtype='|S9'),
-	 array(['I', 'conquered'], 
-	      dtype='|S9')]
+    [array(['I', 'came'], 
+          dtype='|S9'),
+     array(['I', 'saw'], 
+          dtype='|S9'),
+     array(['I', 'conquered'], 
+          dtype='|S9')]
 
     >>> c.view_metadata('sentences')[1]['sent_label']
     'Vidi'
@@ -437,7 +440,7 @@ class Corpus(BaseCorpus):
                                      context_types=context_types,
                                      context_data=context_data,
                                      dtype=np.unicode_,
-				     remove_empty=remove_empty)
+                     remove_empty=remove_empty)
 
         self._set_words_int()
 
@@ -478,7 +481,7 @@ class Corpus(BaseCorpus):
         :returns: A tokenized view of `corpus`.
 
         :See Also: :class:`Corpus`, :class:`BaseCorpus`
-        """	 
+        """     
         if as_strings:
             token_list = super(Corpus, self).view_contexts(ctx_type)
             token_list_ = []
@@ -491,8 +494,8 @@ class Corpus(BaseCorpus):
         return super(Corpus, self).view_contexts(ctx_type,
                                                  as_slices=as_slices,
                                                  as_indices=as_indices)
-	
-	
+    
+    
     def tolist(self, context_type, as_strings=False):
         """
         Returns Corpus object as a list of lists of either integers or
