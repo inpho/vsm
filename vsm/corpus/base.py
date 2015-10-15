@@ -451,7 +451,7 @@ class Corpus(BaseCorpus):
                                      context_types=context_types,
                                      context_data=context_data,
                                      dtype=np.unicode_,
-                                     remove_empty=remove_empty,
+                                     remove_empty=False,
                                      to_array=False)
 
         self._set_words_int()
@@ -463,6 +463,9 @@ class Corpus(BaseCorpus):
                                  dtype=self.dtype)
 
         self.stopped_words = set()
+
+        if remove_empty:
+            self.remove_empty()
 
 
 
