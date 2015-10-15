@@ -123,7 +123,7 @@ class BaseCorpus(object):
                  dtype=None,
                  context_types=[],
                  context_data=[],
-                 remove_empty=True,
+                 remove_empty=False,
                  to_array=True):
 
         if to_array:

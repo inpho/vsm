@@ -16,7 +16,8 @@ class TestCorpus(unittest.TestCase):
                 dtype=[('idx', '<i8'), ('doc', '|S4')])
 
         self.bc = BaseCorpus(corpus, context_data=[contextData],
-                                     context_types=['document'])
+                                     context_types=['document'],
+                                     remove_empty=True)
         
         text = ['I', 'came', 'I', 'saw', 'I', 'conquered']
         ctx_data = [np.array([(2, 'Veni'), (4, 'Vidi'), (6, 'Vici')],
