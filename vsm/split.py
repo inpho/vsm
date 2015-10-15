@@ -37,12 +37,16 @@ def split_corpus(arr, indices):
 
     out = np.split(arr, indices)
     
-    if (indices >= arr.size).any():
+    if (indices >= len(arr)).any():
         out = out[:-1]
-
-    for i in xrange(len(out)):
-        if out[i].size == 0:
-            out[i] = np.array([], dtype=arr.dtype)
+    try:
+        for i in xrange(len(out)):
+            if out[i].size == 0:
+                out[i] = np.array([], dtype=arr.dtype)
+    except AttributeError:
+        for i in xrange(len(out)):
+            if out[i].size == 0:
+                out[i] = np.array([])
 
     return out
 

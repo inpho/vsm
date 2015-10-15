@@ -42,13 +42,19 @@ class BaseCorpus(object):
         'dogs'. Default is `None`.
     :type context_data:  list with 1-D array-like elements, optional
 
-    :param context_types: Each element in `context_types` is a type of a i
+    :param context_types: Each element in `context_types` is a type of a
         tokenization in `context_data`.
     :type context_types: array-like, optional
 
-    :param remove_empty: If True, empty tokenizations are removed. Default it
+    :param remove_empty: If True, empty tokenizations are removed. Default is
         `True`.
     :type remove_empty: boolean, optional
+
+    :param to_array: If True, converts all values to a numpy array. If False,
+        data is left in input format. False is used when `BaseCorpus` is used
+        in a constructor for an advanced tokenization like `Corpus`. Default is
+        `True`.
+    :type to_array: boolean, optional
 
     :attributes: 
         * **corpus**  (1-dimensional array)
@@ -117,10 +123,15 @@ class BaseCorpus(object):
                  dtype=None,
                  context_types=[],
                  context_data=[],
-                 remove_empty=True):
+                 remove_empty=True,
+                 to_array=True):
 
-        self.corpus = np.asarray(corpus, dtype=dtype)
-        self.dtype = self.corpus.dtype
+        if to_array:
+            self.corpus = np.asarray(corpus, dtype=dtype)
+            self.dtype = self.corpus.dtype
+        else:
+            self.corpus = corpus[:]
+            self.dtype = dtype
 
         # Since np.unique attempts to make a whole contiguous copy of the
         # corpus array, we instead use a sorted set and cast to a np array
@@ -180,10 +191,10 @@ class BaseCorpus(object):
 
                 raise Exception(msg)
                     
-            if j > self.corpus.shape[0]:
+            if j > len(self.corpus):
                 msg = 'invalid tokenization'\
                       ' : ' + str(j) + ' is out of range ('\
-                      + str(self.corpus.shape[0]) + ')'
+                      + str(len(self.corpus)) + ')'
                 
                 raise Exception(msg)
 
@@ -440,13 +451,14 @@ class Corpus(BaseCorpus):
                                      context_types=context_types,
                                      context_data=context_data,
                                      dtype=np.unicode_,
-                     remove_empty=remove_empty)
+                                     remove_empty=remove_empty,
+                                     to_array=False)
 
         self._set_words_int()
 
         # Integer encoding of a string-type corpus
         self.dtype = np.int32
-        self.corpus = np.asarray([self.words_int[word]
+        self.corpus = np.asarray([self.words_int[unicode(word)] 
                                   for word in self.corpus],
                                  dtype=self.dtype)
 
