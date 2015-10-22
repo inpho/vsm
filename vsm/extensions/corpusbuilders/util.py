@@ -6,7 +6,8 @@ import numpy as np
 
 __all__ = ['strip_punc', 'rem_num', 'rehyph',
            'apply_stoplist', 'filter_by_suffix', 'word_tokenize',
-           'sentence_tokenize', 'paragraph_tokenize', 'detect_encoding']
+           'sentence_tokenize', 'paragraph_tokenize', 'detect_encoding',
+           'sentence_span_tokenize', 'in_place_stoplist']
 
 
 
@@ -71,6 +72,39 @@ def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
             stoplist.add(w)
 
     return corp.apply_stoplist(stoplist=stoplist, freq=freq)
+
+def in_place_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
+    """
+    Returns a Corpus object with stop words eliminated.
+
+    :param corp: Corpus object to apply stoplist to.
+    :type corp: Corpus
+
+    :param nltk_stop: If `True` English stopwords from nltk are included
+        in the stoplist. Default is `True`.
+    :type nltk_stop: boolean, optional
+    
+    :param add_stop: list of words to eliminate from `corp` words.
+        Default is `None`.
+    :type add_stop: List, optional
+
+    :param freq: Eliminates words that appear <= `freq` times. Default is
+        0.
+    :type freq: int
+
+    :returns: Corpus with words in the stoplist removed.
+
+    :See Also: :class:`vsm.corpus.Corpus`, :meth:`vsm.corpus.Corpus.apply_stoplist`
+    """
+    stoplist = set()
+    if nltk_stop:
+        for w in nltk.corpus.stopwords.words('english'):
+            stoplist.add(w)
+    if add_stop:
+        for w in add_stop:
+            stoplist.add(w)
+
+    corp.in_place_stoplist(stoplist=stoplist, freq=freq)
 
 
 def filter_by_suffix(l, ignore, filter_dotfiles=True):
@@ -143,6 +177,24 @@ def sentence_tokenize(text):
 
     return tokenizer.tokenize(text)
 
+def sentence_span_tokenize(text):
+    """
+    Takes a string and returns a list of strings. Intended use: the
+    input string is English text and the output consists of the
+    sentences in this text.
+
+    This is a wrapper for NLTK's pre-trained Punkt Tokenizer.
+     
+    :param text: Text to be tokeized.
+    :type text: string
+
+    :returns: token_spans : iterator of (start,stop) tuples.
+    """
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+
+    return tokenizer.span_tokenize(text)
+
+
 
 def paragraph_tokenize(text):
     """
@@ -158,8 +210,13 @@ def paragraph_tokenize(text):
     """
 
     par_break = re.compile(r'[\r\n]{2,}')
-    
-    return par_break.split(text)
+    span_start = 0
+    for match in par_break.finditer(text):
+        span_end = match.span()[0]
+        yield text[span_start:span_end]
+        span_start = match.span()[1]
+    yield text[span_start:]
+    #return par_break.split(text)
 
 
 def detect_encoding(filename):

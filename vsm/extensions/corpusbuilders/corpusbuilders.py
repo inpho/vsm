@@ -633,7 +633,6 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
     return c
 
 
-
 def coll_tokenize(books, book_names, verbose=1):
     """
     `coll_tokenize` is a helper function for :meth:`coll_corpus`.
@@ -665,10 +664,8 @@ def coll_tokenize(books, book_names, verbose=1):
     for book, book_label in zip(books, book_names):
         # print 'Tokenizing', book_label
         for page, page_file in book:
-            sents = sentence_tokenize(page)
-
-            for sent in sents:
-                w = word_tokenize(sent)
+            for sent_start, sent_stop in sentence_span_tokenize(page):
+                w = word_tokenize(page[sent_start:sent_stop])
                 words.extend(w)
                 sent_break += len(w)
                 sent_tokens.append((sent_break, sent_n,
@@ -703,7 +700,6 @@ def coll_tokenize(books, book_names, verbose=1):
         pbar.finish()
 
     return words, corpus_data
-
 
 #TODO: This should be a whitelist not a blacklist
 def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
@@ -778,7 +774,7 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
     names, data = zip(*tok.items())
     
     c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
+    in_place_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
 
     return c
