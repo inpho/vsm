@@ -8,6 +8,7 @@ from vsm.split import split_corpus
 __all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata', 'align_corpora' ]
 
 from bisect import bisect_left
+from datetime import datetime
 
 def binary_search(a, x, lo=0, hi=None):   # can't use a to specify default for hi
     hi = hi if hi is not None else len(a) # hi defaults to len(a)   
@@ -665,9 +666,9 @@ class Corpus(BaseCorpus):
             stop = set()
 
         # filter stoplist
-        print len(stoplist), "filtering to",
+        # print len(stoplist), "filtering to",
         stoplist = [t for t in stoplist if binary_search(self.words, t) >= 0]
-        print len(stoplist)
+        # print len(stoplist)
         for t in stoplist:
             stop.add(self.words_int[t])
 
@@ -675,19 +676,19 @@ class Corpus(BaseCorpus):
             # print 'Stop list is empty.'
             return self
 
-        # print 'sorting stopwords' 
+        # print 'sorting stopwords', datetime.now() 
         stoplist = sorted(stoplist)
         stop = sorted(stop)
     
-        # print 'Removing stop words'
+        # print 'Removing stop words', datetime.now()
         f = np.vectorize(lambda x: binary_search(stop, x) < 0)
 
-        # print 'Rebuilding context data'
+        # print 'Rebuilding context data', datetime.now()
         context_data = []
         for i in xrange(len(self.context_data)):
             # print 'Recomputing token breaks:', self.context_types[i]
             tokens = self.view_contexts(self.context_types[i])
-            print self.context_types[i], len(stoplist), len(stop)
+            # print self.context_types[i], len(stoplist), len(stop), datetime.now()
             spans = [t[f(t)].size if t.size else 0 for t in tokens]
             tok = self.context_data[i].copy()
             tok['idx'] = np.cumsum(spans)
@@ -696,25 +697,26 @@ class Corpus(BaseCorpus):
         del self.context_data
         self.context_data = context_data
 
-        # print 'Rebuilding corpus and updating stop words'
+        # print 'Rebuilding corpus and updating stop words', datetime.now()
         self.corpus = self.corpus[f(self.corpus)]
         self.stopped_words.update(stoplist)
 
-        # print 'adjusting words list'
-        self.words = np.array([t for t in self.words if binary_search(stoplist,t) < 0])
+        # print 'adjusting words list', datetime.now()
+        new_words = np.array([t for t in self.words if binary_search(stoplist,t) < 0])
 
-        # print 'rebuilding word dictionary'
-        new_words_int = dict((word,i) for i, word in enumerate(self.words))
+        # print 'rebuilding word dictionary', datetime.now()
+        new_words_int = dict((word,i) for i, word in enumerate(new_words))
+
+        # print "remapping corpus", datetime.now()
         current_offset = 0
-        for word in self.words:
-            if self.words_int[word] != new_words_int.get(word, None):
-                diff = int(self.words_int[word] - current_offset - new_words_int.get(word, None))
-                if diff > 0:
-                    self.corpus[self.corpus >= self.words_int[word] - current_offset] -= diff
-                    current_offset += diff
-        print len(self.words_int), len(new_words_int), current_offset
-        
+        for i, tok in enumerate(self.corpus):
+            self.corpus[i] = new_words_int[self.words[tok]] 
+        # print len(self.words), len(self.words_int), len(new_words), len(new_words_int)
+
+        # print 'storing new word dicts', datetime.now()
+        self.words = new_words
         self.words_int = new_words_int
+
         return self
 
     def apply_stoplist(self, stoplist=[], freq=0):
