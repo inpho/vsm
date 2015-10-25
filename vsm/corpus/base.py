@@ -7,6 +7,12 @@ from vsm.split import split_corpus
 
 __all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata', 'align_corpora' ]
 
+from bisect import bisect_left
+
+def binary_search(a, x, lo=0, hi=None):   # can't use a to specify default for hi
+    hi = hi if hi is not None else len(a) # hi defaults to len(a)   
+    pos = bisect_left(a,x,lo,hi)          # find insertion position
+    return (pos if pos != hi and a[pos] == x else -1) # don't walk off the end
 
 
 class BaseCorpus(object):
@@ -623,7 +629,7 @@ class Corpus(BaseCorpus):
         np.savez(file, **arrays_out)
 
 
-    def in_place_stoplist(self, stoplist=[], freq=0):
+    def in_place_stoplist(self, stoplist=None, freq=0):
         """ 
         Changes a Corpus object with words in the stoplist removed and with 
         words of frequency <= `freq` removed.
@@ -640,6 +646,9 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
+        if stoplist is None:
+            stoplist = list()
+
         if freq:
             #TODO: Use the TF model instead
 
@@ -656,23 +665,30 @@ class Corpus(BaseCorpus):
             stop = set()
 
         # filter stoplist
-        stoplist = [t for t in stoplist if t in self.words]
+        print len(stoplist), "filtering to",
+        stoplist = [t for t in stoplist if binary_search(self.words, t) >= 0]
+        print len(stoplist)
         for t in stoplist:
             stop.add(self.words_int[t])
 
         if not stop:
             # print 'Stop list is empty.'
             return self
+
+        # print 'sorting stopwords' 
+        stoplist = sorted(stoplist)
+        stop = sorted(stop)
     
         # print 'Removing stop words'
-        f = np.vectorize(lambda x: x not in stop)
+        f = np.vectorize(lambda x: binary_search(stop, x) < 0)
 
         # print 'Rebuilding context data'
         context_data = []
         for i in xrange(len(self.context_data)):
             # print 'Recomputing token breaks:', self.context_types[i]
             tokens = self.view_contexts(self.context_types[i])
-            spans = [t[f(t)].size for t in tokens]
+            print self.context_types[i], len(stoplist), len(stop)
+            spans = [t[f(t)].size if t.size else 0 for t in tokens]
             tok = self.context_data[i].copy()
             tok['idx'] = np.cumsum(spans)
             context_data.append(tok)
@@ -685,8 +701,7 @@ class Corpus(BaseCorpus):
         self.stopped_words.update(stoplist)
 
         # print 'adjusting words list'
-        f = np.vectorize(lambda x: x not in stoplist)
-        self.words = self.words[f(t)]
+        self.words = np.array([t for t in self.words if binary_search(stoplist,t) < 0])
 
         # print 'rebuilding word dictionary'
         new_words_int = dict((word,i) for i, word in enumerate(self.words))
@@ -697,8 +712,10 @@ class Corpus(BaseCorpus):
                 if diff > 0:
                     self.corpus[self.corpus >= self.words_int[word] - current_offset] -= diff
                     current_offset += diff
+        print len(self.words_int), len(new_words_int), current_offset
         
         self.words_int = new_words_int
+        return self
 
     def apply_stoplist(self, stoplist=[], freq=0):
         """ 
