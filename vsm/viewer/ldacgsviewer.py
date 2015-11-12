@@ -37,6 +37,7 @@ class LdaCgsViewer(object):
         self._theta = None
         self._H_phi = None
         self._H_theta = None
+        self._labels = None
 
 
     @property
@@ -398,10 +399,10 @@ class LdaCgsViewer(object):
         if (isstr(doc_or_docs) or isint(doc_or_docs) 
             or isinstance(doc_or_docs, dict)):
             doc, label = self._res_doc_type(doc_or_docs)
-            k_arr = self.theta[:, doc]
+            k_arr = self.theta[:, doc].T
         else:
             docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
-            k_arr = self.theta[:, docs]
+            k_arr = self.theta[:, docs].T
 
         return k_arr
 
@@ -784,7 +785,6 @@ class LdaCgsViewer(object):
                             print_len=print_len, filter_nan=filter_nan, 
                             label_fn=label_fn, as_strings=as_strings,
                             dist_fn=dist_fn, order=order)
-    
 
     @deprecated_meth("dismat_doc")
     def simmat_docs(self, docs=[], dist_fn=JS_dist):
@@ -848,6 +848,27 @@ class LdaCgsViewer(object):
 
         return dismat_top(topics, Q, dist_fn=dist_fn)
 
+    def dist(self, doc1, doc2, dist_fn=JS_dist):
+        """Computes the distance between 2 documents in topic space.
+ 
+        :param doc1: Query document        
+        :type doc1: string/integer
+ 
+        :param doc2: Query document        
+        :type doc2: string/integer
+
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`JS_dist`.
+        :type dist_fn: string, optional
+       
+        :returns: an instance of `LabeledColumn`.
+            A 2-dim array containing documents and their distances to 
+            `doc_or_docs`. 
+        """
+        d1, d2 = self.doc_topic_matrix([doc1,doc2])
+        return dist_fn(d1,d2)
+        
+        
 
     ######################################################################
 
