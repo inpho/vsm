@@ -52,6 +52,15 @@ class LdaCgsViewer(object):
     def _res_word_type(self, word):
         return res_word_type(self.corpus, word)
 
+    @property
+    def labels(self):
+        """Returns the list of document labels."""
+        if self._labels is None:
+            self._labels = self.corpus.view_metadata(self.model.context_type)
+            self._labels = self._labels[self._doc_label_name]
+
+        return self._labels
+
 
     @property
     def phi(self):
