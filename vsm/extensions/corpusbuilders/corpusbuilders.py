@@ -24,10 +24,9 @@ def corpus_from_strings(strings, metadata=[], decode=False,
 
     """
     if decode:
-        import unidecode
         for i in xrange(len(strings)):
             if isinstance(strings[i], unicode):
-                strings[i] = unidecode.unidecode(strings[i])
+                strings[i] = unidecode(strings[i])
 
     documents = [word_tokenize(s) for s in strings]
     corpus = sum(documents, [])
@@ -161,8 +160,9 @@ def corpus_fromlist(ls, context_type='context'):
                   context_types=[context_type])
 
 
-def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False,
-               stop_freq=0, add_stop=None, metadata=None, autolabel=False):
+def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', 
+               nltk_stop=False, stop_freq=0, add_stop=None, decode=False, 
+               metadata=None, autolabel=False):
     """
     `toy_corpus` is a convenience function for generating Corpus
     objects from a given string or a single file.
@@ -207,6 +207,10 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False
 
     :param add_stop: A list of stop words. Default is `None`.
     :type add_stop: array-like, optional
+    
+    :param decode: If `True` then unicode characters are converted to
+        ASCII. Default is `False`.
+    :type decode: boolean, optional
 
     :param metadata: A list of strings providing metadata about the documents. If
         provided, must have length equal to the number of documents.
@@ -228,8 +232,12 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False
     if is_filename:
         if encoding == 'detect':
             encoding = detect_encoding(plain_corpus)
+
         with open(plain_corpus, 'rb', encoding=encoding) as f:
             plain_corpus = f.read()
+
+    if decode:
+        plain_corpus = unidecode(plain_corpus)
 
     docs = paragraph_tokenize(plain_corpus)
     docs = [word_tokenize(d) for d in docs]
@@ -307,7 +315,7 @@ def file_tokenize(text):
 
 
 def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1, 
-                add_stop=None):
+                add_stop=None, decode=False):
     """
     `file_corpus` is a convenience function for generating Corpus
     objects from a a plain text corpus contained in a single string.
@@ -333,6 +341,10 @@ def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1,
     
     :param add_stop: A list of stop words. Default is `None`.
     :type add_stop: array-like, optional
+    
+    :param decode: If `True` then unicode characters are converted to
+        ASCII. Default is `False`.
+    :type decode: boolean, optional
 
     :returns: c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
@@ -346,6 +358,9 @@ def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1,
         encoding = detect_encoding(filename)
     with open(filename, mode='r', encoding=encoding) as f:
         text = f.read()
+
+    if decode:
+        text = unidecode(text)
 
     words, tok = file_tokenize(text)
     names, data = zip(*tok.items())
@@ -593,6 +608,10 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
     
     :param add_stop: A list of stop words. Default is `None`.
     :type add_stop: array-like, optional
+    
+    :param decode: If `True` then unicode characters are converted to
+        ASCII. Default is `False`.
+    :type decode: boolean, optional
 
     :param verbose: Verbosity level. 1 prints a progress bar.
     :type verbose: int, default 1 
@@ -736,6 +755,10 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
     
     :param add_stop: A list of stop words. Default is `None`.
     :type add_stop: array-like, optional
+    
+    :param decode: If `True` then unicode characters are converted to
+        ASCII. Default is `False`.
+    :type decode: boolean, optional
 
     :param verbose: Verbosity level. 1 prints a progress bar.
     :type verbose: int, default 1 
@@ -779,6 +802,181 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
 
     return c
 
+
+def record_tokenize(records, record_names, verbose=1):
+    """
+    `record_tokenize` is a helper function for :meth:`record_corpus`.
+
+    Takes a list of books and `book_names`, and returns words 
+    and corpus data.
+
+    :param books: List of books.
+    :type books: list
+
+    :param book_names: List of book names.
+    :type book_names: list
+
+    :param verbose: Verbosity level. 1 prints a progress bar.
+    :type verbose: int, default 1 
+
+    :returns: words : List of words.
+        words in the `books` tokenized by :meth:`word_tokenize`.
+        corpus_data : Dictionary with context type as keys and
+        corresponding tokenizations as values. The tokenizations
+        are np.arrays.
+    """
+    words, record_tokens, book_tokens, page_tokens, sent_tokens = [], [], [], [], []
+    sent_break, record_n, book_n, page_n, sent_n = 0, 0, 0, 0, 0
+
+    if verbose == 1:
+        pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(books)).start()
+
+    for record, record_label, book_labels in zip(records, record_names, record_book_names):
+        # TODO extract book data
+
+        for book, book_label in zip(record, book_labels):
+            # print 'Tokenizing', book_label
+            for page, page_file in book:
+                sents = sentence_tokenize(page)
+
+                for sent in sents:
+                    w = word_tokenize(sent)
+                    words.extend(w)
+                    sent_break += len(w)
+                    sent_tokens.append((sent_break, sent_n, page_n, book_label, 
+                                        record_label, page_file))
+                    sent_n += 1
+    
+                page_tokens.append((sent_break, page_n, book_label,
+                                    record_label, page_file))
+                page_n += 1
+
+    
+            if verbose == 1:
+                pbar.update(book_n)
+                
+            book_tokens.append((sent_break, book_label, record_label))
+            book_n += 1
+
+        record_tokens.append((sent_break, record_label))
+        record_n += 1
+
+    idx_dt = ('idx', np.int32)
+    record_label_dt = ('record_label', np.array(record_names).dtype)
+    book_label_dt = ('book_label', np.array(book_names).dtype)
+    page_label_dt = ('page_label', np.array(page_n, np.str_).dtype)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    files = [f for (a,b,c,f) in page_tokens]
+    file_dt = ('file', np.array(files, np.str_).dtype)
+
+    corpus_data = dict()
+    dtype = [idx_dt, record_label_dt]
+    corpus_data['record'] = np.array(record_tokens, dtype=dtype)
+    dtype = [idx_dt, book_label_dt, record_label_dt]
+    corpus_data['book'] = np.array(book_tokens, dtype=dtype)
+    dtype = [idx_dt, page_label_dt, book_label_dt, record_label_dt, file_dt]
+    corpus_data['page'] = np.array(page_tokens, dtype=dtype)
+    dtype = [idx_dt, sent_label_dt, page_label_dt, book_label_dt, record_label_dt, file_dt]
+    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+
+    if verbose == 1:
+        pbar.finish()
+
+    return words, corpus_data
+
+
+#TODO: This should be a whitelist not a blacklist
+def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
+                nltk_stop=True, stop_freq=1, add_stop=None, 
+                decode=False, verbose=1):
+    """
+    `record_corpus` is a convenience function for generating Corpus
+    objects from a directory of plain text files.
+
+    It will also strip punctuation and arabic numerals outside the
+    range 1-29. All letters are made lowercase.
+
+    :param base_dir: Directory containing a recordections of books
+        which contain pages as plain-text files.
+    :type base_dir: string-like
+    
+    :param encoding: A string indicating the file encoding or 'detect',
+        in which case `chardet` is used to automatically guess the encoding.
+        Default is `utf8`.
+    :type encoding: string, optional
+    
+    :param ignore: The list containing suffixes of files to be filtered.
+        The suffix strings are normally file types. Default is ['.json',
+        '.log','.pickle'].
+    :type ignore: list of strings, optional
+
+    :param nltk_stop: If `True` then the corpus object is masked 
+        using the NLTK English stop words. Default is `False`.
+    :type nltk_stop: boolean, optional
+    
+    :param stop_freq: The upper bound for a word to be masked on 
+        the basis of its recordection frequency. Default is 1.
+    :type stop_freq: int, optional
+    
+    :param add_stop: A list of stop words. Default is `None`.
+    :type add_stop: array-like, optional
+    
+    :param decode: If `True` then unicode characters are converted to
+        ASCII. Default is `False`.
+    :type decode: boolean, optional
+
+    :param verbose: Verbosity level. 1 prints a progress bar.
+    :type verbose: int, default 1 
+
+    :returns: c : a Corpus object
+        Contains the tokenized corpus built from the plain-text files
+        in `record_dir` corpus. Document tokens are named `documents`.
+    """
+
+    records = []
+    record_names = os.listdir(base_dir)
+    record_names = filter_by_suffix(record_names, ignore)
+    record_names.sort()
+    record_book_names = []
+
+    for record_dir in record_names:
+        books = []
+        book_names = os.listdir(record_dir)
+        book_names = filter_by_suffix(book_names, ignore)
+        book_names.sort()
+    
+        for book_name in book_names:
+            pages = []
+            book_path = os.path.join(record_dir, book_name)
+            page_names = os.listdir(book_path)
+            page_names = filter_by_suffix(page_names, ignore)
+            page_names.sort()
+    
+            for page_name in page_names:
+                page_file = book_name + '/' + page_name
+                page_name = os.path.join(book_path, page_name)
+                if encoding == 'detect':
+                    encoding = detect_encoding(page_name)
+                if decode:
+                    with open(page_name, mode='r', encoding=encoding) as f:
+                        pages.append((unidecode(f.read()), page_file))
+                else:
+                    with open(page_name, mode='r', encoding=encoding) as f:
+                        pages.append((f.read(), page_file))
+    
+            books.append(pages)
+
+        record_book_names.append(book_names)
+        records.append(books)
+
+    words, tok = record_tokenize(records, record_names, record_book_names)
+    names, data = zip(*tok.items())
+    
+    c = Corpus(words, context_data=data, context_types=names)
+    c = apply_stoplist(c, nltk_stop=nltk_stop,
+                       freq=stop_freq, add_stop=add_stop)
+
+    return c
 
 
 
