@@ -405,6 +405,33 @@ class LdaCgsViewer(object):
             k_arr = self.theta[:, docs].T
 
         return k_arr
+    
+    def view_documents(self, doc_or_docs, as_strings=False):
+        """
+        Returns the distribution over topics for the given documents.
+
+        :param doc: Specifies the document whose distribution over topics is 
+             returned. It can either be the ID number (integer) or the 
+             name (string) of the document.
+        :type doc: int or string
+
+        :returns: an instance of :class:`np.array`.
+            An array of topics
+        """
+        documents = []
+        if (isstr(doc_or_docs) or isint(doc_or_docs) 
+            or isinstance(doc_or_docs, dict)):
+            doc, label = self._res_doc_type(doc_or_docs)
+            docs = list(doc)
+        else:
+            docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
+        
+        all_docs = self.corpus.view_contexts(self.model.context_type,
+                        as_strings=as_strings)
+        for doc in docs:
+            documents.append(all_docs[doc])
+
+        return documents
 
     def word_topics(self, word, as_strings=True):
         """
