@@ -582,6 +582,10 @@ class Corpus(BaseCorpus):
             c.corpus = arrays_in['corpus']
             c.words = arrays_in['words']
             c.context_types = arrays_in['context_types'].tolist()
+            try:
+                c.stopped_words = set(arrays_in['stopped_words'].tolist())
+            except:
+                c.stopped_words = set()
 
             c.context_data = list()
             for n in c.context_types:
@@ -622,6 +626,7 @@ class Corpus(BaseCorpus):
         arrays_out['corpus'] = self.corpus
         arrays_out['words'] = self.words
         arrays_out['context_types'] = np.asarray(self.context_types)
+        arrays_out['stopped_words'] = np.asarray(self.stopped_words)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]
@@ -649,6 +654,9 @@ class Corpus(BaseCorpus):
         """
         if stoplist is None:
             stoplist = list()
+        else:
+            # convert to raw list from set, array, etc.
+            stoplist = [word for word in stoplist]
 
         if freq:
             #TODO: Use the TF model instead
@@ -662,6 +670,8 @@ class Corpus(BaseCorpus):
             # print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
             stop = set(freq_stop)
+            for word in stop:
+                stoplist.append(self.words[word])
         else:
             stop = set()
 
@@ -736,6 +746,7 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
+        print "Using apply_stoplist for some reason"
         if freq:
             #TODO: Use the TF model instead
 
@@ -748,6 +759,8 @@ class Corpus(BaseCorpus):
             # print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
             stop = set(freq_stop)
+            for word in stop:
+                stoplist.append(self.words[word])
         else:
             stop = set()
 
