@@ -8,7 +8,7 @@ packages.append('vsm')
 
 setup(
     name = "vsm",
-    version = "0.4.0a5",
+    version = "0.4.0a6",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
