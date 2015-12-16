@@ -760,7 +760,7 @@ class Corpus(BaseCorpus):
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
             stop = set(freq_stop)
             for word in stop:
-                stoplist.append(self.words[word])
+                stop.add(self.words[word])
         else:
             stop = set()
 
