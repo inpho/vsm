@@ -1,4 +1,5 @@
 import re
+import string
 
 from chardet.universaldetector import UniversalDetector
 import nltk
@@ -14,8 +15,8 @@ __all__ = ['strip_punc', 'rem_num', 'rehyph',
 def strip_punc(tsent):
     """
     """
-    p1 = re.compile(r'^([^a-zA-Z0-9]*)')
-    p2 = re.compile(r'([^a-zA-Z0-9]*)$')
+    p1 = re.compile(ur'^([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)'.format(string.punctuation))
+    p2 = re.compile(ur'([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$'.format(string.punctuation))
 
     out = []
     for word in tsent:
