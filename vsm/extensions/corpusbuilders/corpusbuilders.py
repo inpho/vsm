@@ -166,7 +166,8 @@ def corpus_fromlist(ls, context_type='context'):
 
 
 def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False,
-               stop_freq=0, add_stop=None, metadata=None, autolabel=False, tokenizer=word_tokenize):
+               stop_freq=0, add_stop=None, decode=False,
+               metadata=None, autolabel=False, tokenizer=word_tokenize):
     """
     `toy_corpus` is a convenience function for generating Corpus
     objects from a given string or a single file.
