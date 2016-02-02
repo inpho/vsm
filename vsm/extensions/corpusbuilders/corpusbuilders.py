@@ -17,10 +17,12 @@ __all__ = ['empty_corpus', 'random_corpus',
 
 
 def corpus_from_strings(strings, metadata=[], decode=False,
-                        nltk_stop=True, stop_freq=0, add_stop=None):
+                        nltk_stop=True, stop_freq=0, add_stop=None, tokenizer=word_tokenize):
     """
     Takes a list of strings and returns a Corpus object whose document
     tokens are the strings.
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     """
     if decode:
@@ -28,7 +30,7 @@ def corpus_from_strings(strings, metadata=[], decode=False,
             if isinstance(strings[i], unicode):
                 strings[i] = unidecode(strings[i])
 
-    documents = [word_tokenize(s) for s in strings]
+    documents = [tokenizer(s) for s in strings]
     corpus = sum(documents, [])
     indices = np.cumsum([len(d) for d in documents])
     del documents
@@ -91,6 +93,9 @@ def random_corpus(corpus_len,
     :param metadata: If `True` generates metadata. If `False` the only
         metadata for the corpus is the index information.
     :type metadata: boolean, optional
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     :returns: Corpus object with random integers as its entries. 
 
@@ -160,9 +165,8 @@ def corpus_fromlist(ls, context_type='context'):
                   context_types=[context_type])
 
 
-def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', 
-               nltk_stop=False, stop_freq=0, add_stop=None, decode=False, 
-               metadata=None, autolabel=False):
+def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False,
+               stop_freq=0, add_stop=None, metadata=None, autolabel=False, tokenizer=word_tokenize):
     """
     `toy_corpus` is a convenience function for generating Corpus
     objects from a given string or a single file.
@@ -221,6 +225,9 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8',
         documents by position in file. Default is False
     :type metadata: boolean, optional
     
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
+    
     :returns: c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
@@ -240,7 +247,7 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8',
         plain_corpus = unidecode(plain_corpus)
 
     docs = paragraph_tokenize(plain_corpus)
-    docs = [word_tokenize(d) for d in docs]
+    docs = [tokenizer(d) for d in docs]
 
     corpus = sum(docs, [])
     tok = np.cumsum(np.array([len(d) for d in docs]))
@@ -267,7 +274,7 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8',
 
     return c
 
-def file_tokenize(text):
+def file_tokenize(text, tokenizer=word_tokenize):
     """
     `file_tokenize` is a helper function for :meth:`file_corpus`.
     
@@ -276,6 +283,9 @@ def file_tokenize(text):
 
     :param text: Content in a plain text file.
     :type text: string
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     :returns: words : List of words.
         Words in the `text` tokenized by :meth:`vsm.corpus.util.word_tokenize`.
@@ -292,7 +302,7 @@ def file_tokenize(text):
         sents = sentence_tokenize(par)
 
         for sent in sents:
-            w = word_tokenize(sent)
+            w = tokenizer(sent)
             words.extend(w)
             sent_break += len(w)
             sent_tokens.append((sent_break, par_n, sent_n))
@@ -373,7 +383,7 @@ def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1,
 
 
 def json_corpus(json_file, doc_key, label_key, encoding='utf8',
-                nltk_stop=False, stop_freq=0, add_stop=None):
+                nltk_stop=False, stop_freq=0, add_stop=None, tokenizer=word_tokenize):
     """
     `json_corpus` is a convenience function for generating Corpus
     objects from a json file. It construct a corpus, document labels
@@ -409,6 +419,9 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
 
     :param add_stop: A list of stop words. Default is `None`.
     :type add_stop: array-like, optional
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     :returns: c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
@@ -433,7 +446,7 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
         label.append(i.pop(label_key, None))
         metadata.append(i)   # metadata are all the rest
 
-    docs = [word_tokenize(d) for d in docs]
+    docs = [tokenizer(d) for d in docs]
 
     corpus = sum(docs, [])
     tok = np.cumsum(np.array([len(d) for d in docs]))
@@ -454,7 +467,7 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
 
 
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
-                 verbose=1):
+                 verbose=1, tokenizer=word_tokenize):
     """`dir_tokenize` is a helper function for :meth:`dir_corpus`.
 
     Takes a list of strings and labels and returns words and corpus data.
@@ -475,7 +488,10 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
     :type paragraphs: boolean, optional
 
     :param verbose: Verbosity level. 1 prints a progress bar.
-    :type verbose: int, default 1 
+    :type verbose: int, default 1
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
     
     :returns: words : List of words.
         words in the `chunks` tokenized by :meth: word_tokenize.
@@ -502,7 +518,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
                 sents = sentence_tokenize(par)
 
                 for sent in sents:
-                    w = word_tokenize(sent)
+                    w = tokenizer(sent)
                     words.extend(w)
                     sent_break += len(w)
                     sent_tokens.append((sent_break, label, par_n, sent_n))
@@ -522,7 +538,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
             sents = sentence_tokenize(chk)
 
             for sent in sents:
-                w = word_tokenize(sent)
+                w = tokenizer(sent)
                 words.extend(w)
                 sent_break += len(w)
                 sent_tokens.append((sent_break, label, sent_n))
@@ -653,7 +669,7 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
 
 
 
-def coll_tokenize(books, book_names, verbose=1):
+def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize):
     """
     `coll_tokenize` is a helper function for :meth:`coll_corpus`.
 
@@ -667,7 +683,10 @@ def coll_tokenize(books, book_names, verbose=1):
     :type book_names: list
 
     :param verbose: Verbosity level. 1 prints a progress bar.
-    :type verbose: int, default 1 
+    :type verbose: int, default 1
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     :returns: words : List of words.
         words in the `books` tokenized by :meth:`word_tokenize`.
@@ -687,7 +706,7 @@ def coll_tokenize(books, book_names, verbose=1):
             sents = sentence_tokenize(page)
 
             for sent in sents:
-                w = word_tokenize(sent)
+                w = tokenizer(sent)
                 words.extend(w)
                 sent_break += len(w)
                 sent_tokens.append((sent_break, sent_n,
