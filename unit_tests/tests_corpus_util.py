@@ -42,11 +42,12 @@ class TestCorpusUtil(unittest.TestCase):
         from vsm.corpus.util.corpusbuilders import random_corpus, corpus_fromlist
 
         c = random_corpus(1000, 50, 0, 20, context_type='sentence', metadata=True)
-        new_c = apply_stoplist(c, nltk_stop=False, add_stop=['0','1'], freq=0)
+        new_c = apply_stoplist(c, nltk_stop=False, add_stop=['0','1'], 
+                               freq=0, in_place=False)
 
         li = [[],['he','said'],['he','said','bar'],['bar','ate'],['I','foo']]
         wc = corpus_fromlist(li, context_type='sentence')
-        new_wc = apply_stoplist(wc, nltk_stop=True, freq=1)
+        new_wc = apply_stoplist(wc, nltk_stop=True, freq=1, in_place=False)
         
         self.assertTrue('0' in c.words)
         self.assertTrue('1' in c.words)
