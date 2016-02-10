@@ -41,7 +41,7 @@ def rehyph(sent):
     return re.sub(r'(?P<x1>.)--(?P<x2>.)', '\g<x1> - \g<x2>', sent)
 
 
-def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
+def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0, in_place=True):
     """
     Returns a Corpus object with stop words eliminated.
 
@@ -72,7 +72,11 @@ def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
         for w in add_stop:
             stoplist.add(w)
 
-    return corp.apply_stoplist(stoplist=stoplist, freq=freq)
+    if not in_place:
+        return corp.apply_stoplist(stoplist=stoplist, freq=freq)
+    else:
+        corp.in_place_stoplist(stoplist=stoplist, freq=freq)
+        return corp
 
 def in_place_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
     """
