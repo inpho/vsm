@@ -129,7 +129,7 @@ class TfIdfViewer(object):
         :See Also: :meth:`vsm.viewer.wrappers.dist_doc_doc`
         """
         return dist_doc_doc(doc_or_docs, self.corpus, self.model.context_type, 
-                              self.model.matrix, weights=weights,
+                              self.model.matrix.toarray(), weights=weights,
                               print_len=print_len, filter_nan=filter_nan, 
                               label_fn=def_label_fn, as_strings=True,
                               dist_fn=dist_fn, order=order)
