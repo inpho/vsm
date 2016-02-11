@@ -212,11 +212,11 @@ def dist_word_doc(word_or_words, corp, context_type, mat, weights=[],
         raise Exception('At least one target word is needed.')
 
     # Generate pseudo-document
-    doc = np.zeros((mat.shape[0],1), dtype=np.float)
+    doc = np.zeros(mat.shape[0], dtype=np.float)
     if len(weights) == 0:
-        doc[words,:] = np.ones(len(words))
+        doc[words] = np.ones(len(words))
     else:
-        doc[words,:] = weights
+        doc[words] = weights
     if issparse(mat):
         doc = coo_matrix(doc)
 
