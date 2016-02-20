@@ -15,8 +15,8 @@ __all__ = ['strip_punc', 'rem_num', 'rehyph',
 def strip_punc(tsent):
     """
     """
-    p1 = re.compile(ur'^([{}\u0000-0020\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)'.format(string.punctuation))
-    p2 = re.compile(ur'([{}\u0000-0020\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$'.format(string.punctuation))
+    p1 = re.compile(ur'^([{}\u0000-\u0020\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)'.format(string.punctuation))
+    p2 = re.compile(ur'([{}\u0000-\u0020\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$'.format(string.punctuation))
 
     out = []
     for word in tsent:
