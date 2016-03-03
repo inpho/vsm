@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest2 as unittest
 import numpy as np
 
@@ -203,7 +204,7 @@ class MPTester:
             assert m0._mtrand_states[0][2] == m1._mtrand_state[2]
             assert m0._mtrand_states[0][3] == m1._mtrand_state[3]
             assert m0._mtrand_states[0][4] == m1._mtrand_state[4]
-            print iteration, m0.log_probs[-1], m1.log_probs[-1] 
+            print(iteration, m0.log_probs[-1], m1.log_probs[-1]) 
             for i in range(iteration):
                 assert np.isclose(m0.log_probs[i][1], m1.log_probs[i][1])
     
@@ -239,7 +240,7 @@ class MPTester:
             assert m0._mtrand_states[0][2] == m1._mtrand_state[2]
             assert m0._mtrand_states[0][3] == m1._mtrand_state[3]
             assert m0._mtrand_states[0][4] == m1._mtrand_state[4]
-            print iteration, m0.log_probs[-1], m1.log_probs[-1] 
+            print(iteration, m0.log_probs[-1], m1.log_probs[-1]) 
             for i in range(iteration):
                 assert np.isclose(m0.log_probs[i][1], m1.log_probs[i][1])
 

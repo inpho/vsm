@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest2 as unittest
 
 from vsm.extensions.corpusbuilders import *
@@ -114,9 +115,9 @@ class TestCorpusbuilders(unittest.TestCase):
         labels = [str(i) for i in xrange(len(chunks))]
         words, context_data = dir_tokenize(chunks, labels)
 
-        print
-        print context_data['sentence']['idx']
-        print
+        print()
+        print(context_data['sentence']['idx'])
+        print()
 
         self.assertTrue(len(words) == 11)
         self.assertTrue(len(context_data['article']) == 4)
