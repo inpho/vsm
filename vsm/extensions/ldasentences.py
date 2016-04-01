@@ -34,65 +34,166 @@ class CorpusSent(Corpus):
         """
         self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
+    def in_place_stoplist(self, stoplist=None, freq=0):
+        """ 
+        Changes a Corpus object with words in the stoplist removed and with 
+        words of frequency <= `freq` removed.
+        
+        :param stoplist: The list of words to be removed.
+        :type stoplist: list
+
+        :param freq: A threshold where words of frequency <= 'freq' are
+            removed. Default is 0.
+        :type freq: integer, optional
+            
+        :returns: Copy of corpus with words in the stoplist and words
+            of frequnecy <= 'freq' removed.
+
+        :See Also: :class:`Corpus`
+        """
+        if stoplist is None:
+            stoplist = list()
+        else:
+            # convert to raw list from set, array, etc.
+            stoplist = [word for word in stoplist]
+
+        if freq:
+            #TODO: Use the TF model instead
+
+            # print 'Computing collection frequencies'
+            cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
+    
+            for word in self.corpus:
+                cfs[word] += 1
+
+            # print 'Selecting words of frequency <=', freq
+            freq_stop = np.arange(cfs.size)[(cfs <= freq)]
+            stop = set(freq_stop)
+            for word in stop:
+                stoplist.append(self.words[word])
+        else:
+            stop = set()
+
+        # filter stoplist
+        # print len(stoplist), "filtering to",
+        stoplist = [t for t in stoplist if binary_search(self.words, t) >= 0]
+        # print len(stoplist)
+        for t in stoplist:
+            stop.add(self.words_int[t])
+
+        if not stop:
+            # print 'Stop list is empty.'
+            return self
+
+        # print 'sorting stopwords', datetime.now() 
+        stoplist = sorted(stoplist)
+        stop = sorted(stop)
+    
+        # print 'Removing stop words', datetime.now()
+        f = np.vectorize(lambda x: binary_search(stop, x) < 0)
+
+        # print 'Rebuilding context data', datetime.now()
+        context_data = []
+        for i in xrange(len(self.context_data)):
+            # print 'Recomputing token breaks:', self.context_types[i]
+            tokens = self.view_contexts(self.context_types[i])
+            # print self.context_types[i], len(stoplist), len(stop), datetime.now()
+            spans = [t[f(t)].size if t.size else 0 for t in tokens]
+            tok = self.context_data[i].copy()
+            tok['idx'] = np.cumsum(spans)
+            context_data.append(tok)
+
+        del self.context_data
+        self.context_data = context_data
+
+        # print 'Rebuilding corpus and updating stop words', datetime.now()
+        self.corpus = self.corpus[f(self.corpus)]
+        self.stopped_words.update(stoplist)
+
+        # print 'adjusting words list', datetime.now()
+        new_words = np.array([t for t in self.words if binary_search(stoplist,t) < 0])
+
+        # print 'rebuilding word dictionary', datetime.now()
+        new_words_int = dict((word,i) for i, word in enumerate(new_words))
+
+        # print "remapping corpus", datetime.now()
+        current_offset = 0
+        for i, tok in enumerate(self.corpus):
+            self.corpus[i] = new_words_int[self.words[tok]] 
+        # print len(self.words), len(self.words_int), len(new_words), len(new_words_int)
+
+        # print 'storing new word dicts', datetime.now()
+        self.words = new_words
+        self.words_int = new_words_int
+
+        return self
 
     def apply_stoplist(self, stoplist=[], freq=0):
         """ 
         Takes a Corpus object and returns a copy of it with words in the
         stoplist removed and with words of frequency <= `freq` removed.
         
-	    :param stoplist: The list of words to be removed.
+        :param stoplist: The list of words to be removed.
         :type stoplist: list
-        
-        :type freq: integer, optional
-	    :param freq: A threshold where words of frequency <= 'freq' are 
+
+        :param freq: A threshold where words of frequency <= 'freq' are
             removed. Default is 0.
+        :type freq: integer, optional
             
-        :returns: Copy of corpus with words in the stoplist and words of
-            frequnecy <= 'freq' removed.
+        :returns: Copy of corpus with words in the stoplist and words
+            of frequnecy <= 'freq' removed.
 
         :See Also: :class:`Corpus`
         """
+        print "Using apply_stoplist for some reason"
+        stoplist = set(stoplist)
         if freq:
             #TODO: Use the TF model instead
 
-            print 'Computing collection frequencies'
+            # print 'Computing collection frequencies'
             cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
     
             for word in self.corpus:
                 cfs[word] += 1
 
-            print 'Selecting words of frequency <=', freq
+            # print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
             stop = set(freq_stop)
+            for word in stop:
+                stoplist.add(self.words[word])
         else:
             stop = set()
 
+        # filter stoplist
+        stoplist = [t for t in stoplist if t in self.words]
         for t in stoplist:
-            if t in self.words:
-                stop.add(self.words_int[t])
+            stop.add(self.words_int[t])
 
         if not stop:
-            print 'Stop list is empty.'
+            # print 'Stop list is empty.'
             return self
     
-        print 'Removing stop words'
+        # print 'Removing stop words'
         f = np.vectorize(lambda x: x not in stop)
         corpus = self.corpus[f(self.corpus)]
 
-        print 'Rebuilding corpus'
+        # print 'Rebuilding corpus'
         corpus = [self.words[i] for i in corpus]
         context_data = []
         for i in xrange(len(self.context_data)):
-            print 'Recomputing token breaks:', self.context_types[i]
+            # print 'Recomputing token breaks:', self.context_types[i]
             tokens = self.view_contexts(self.context_types[i])
             spans = [t[f(t)].size for t in tokens]
             tok = self.context_data[i].copy()
             tok['idx'] = np.cumsum(spans)
             context_data.append(tok)
 
-        return CorpusSent(corpus, self.sentences, context_data=context_data,
-                            context_types=self.context_types)
-
+        c = CorpusSent(corpus, self.sentences, context_data=context_data, 
+            context_types=self.context_types)
+        if self.stopped_words:
+            c.stopped_words.update(self.stopped_words)
+        c.stopped_words.update(stoplist)
+        return c
 
     @staticmethod
     def load(file):
