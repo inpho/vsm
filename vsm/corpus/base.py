@@ -5,7 +5,8 @@ import numpy as np
 from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
 
-__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata', 'align_corpora' ]
+__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
+            'align_corpora','binary_search' ]
 
 from bisect import bisect_left
 from datetime import datetime

@@ -1,6 +1,7 @@
 import numpy as np
-from vsm.corpus import Corpus
+from vsm.corpus import Corpus, binary_search
 from vsm.extensions.corpusbuilders import *
+from vsm.extensions.corpusbuilders.util import *
 from vsm.extensions.corpuscleanup import apply_stoplist_len
 from vsm.extensions.htrc import vol_link_fn, add_link_
 import os
@@ -218,6 +219,10 @@ class CorpusSent(Corpus):
         c.words = arrays_in['words']
         c.sentences = arrays_in['sentences']
         c.context_types = arrays_in['context_types'].tolist()
+        try:
+            c.stopped_words = set(arrays_in['stopped_words'].tolist())
+        except:
+            c.stopped_words = set()
 
         c.context_data = list()
         for n in c.context_types:
@@ -247,6 +252,7 @@ class CorpusSent(Corpus):
         arrays_out['words'] = self.words
         arrays_out['sentences'] = self.sentences
         arrays_out['context_types'] = np.asarray(self.context_types)
+        arrays_out['stopped_words'] = np.asarray(self.stopped_words)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]
@@ -521,6 +527,7 @@ def file_tokenize(text):
     pars = paragraph_tokenize(text)
 
     for par in pars:
+        par = par.replace('\n',' ')
         sents = sentence_tokenize(par)
 
         for sent in sents:
@@ -546,6 +553,12 @@ def file_tokenize(text):
 
     return words, corpus_data, sent_orig
 
+
+def toy_corpus(filename, is_filename=True, nltk_stop=True, stop_freq=1,
+    add_stop=None, decode=False, autolabel=False):
+    if is_filename:
+        return file_corpus(filename, nltk_stop=nltk_stop, stop_freq=stop_freq,
+        add_stop=add_stop)
 
 def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     """
@@ -584,7 +597,7 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     
     c = CorpusSent(words, sent, context_data=data, context_types=names,
                     remove_empty=False)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
+    in_place_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
 
     return c
@@ -736,7 +749,8 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True, word_len=2,
 			remove_empty=False)
     else:
         c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist_len(c, nltk_stop=nltk_stop, add_stop=add_stop,
+    
+    in_place_stoplist_len(c, nltk_stop=nltk_stop, add_stop=add_stop,
                        word_len=word_len, freq=stop_freq)
 
     return c

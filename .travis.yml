@@ -24,6 +24,7 @@ install:
   - python2.7 -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
   - python setup.py develop
 # command to run tests
-before_script: pip install unittest2 nose
+before_script: 
+  - pip install unittest2 nose
 script: coverage run --source vsm.model,vsm.viewer,vsm.corpus,vsm.spatial,vsm.split,vsm.structarr,vsm.exceptions setup.py test
 after_success: coveralls
