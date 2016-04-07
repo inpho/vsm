@@ -2,7 +2,6 @@ import numpy as np
 from vsm.corpus import Corpus, binary_search
 from vsm.extensions.corpusbuilders import *
 from vsm.extensions.corpusbuilders.util import *
-from vsm.extensions.corpuscleanup import apply_stoplist_len
 from vsm.extensions.htrc import vol_link_fn, add_link_
 import os
 import re
@@ -684,7 +683,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True, word_len=2,
                nltk_stop=True, stop_freq=1, add_stop=None, corpus_sent=True,
-               ignore=['.log', '.pickle', '.xml']):
+               ignore=['.log', '.pickle', '.xml'], decode=False):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -761,7 +760,6 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True, word_len=2,
     else:
         c = Corpus(words, context_data=data, context_types=names)
     
-    in_place_stoplist_len(c, nltk_stop=nltk_stop, add_stop=add_stop,
-                       word_len=word_len, freq=stop_freq)
+    in_place_stoplist(c, nltk_stop=nltk_stop, add_stop=add_stop, freq=stop_freq)
 
     return c
