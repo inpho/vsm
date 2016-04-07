@@ -281,8 +281,13 @@ class CorpusSent(Corpus):
             return keys
         return keys[0] 
 
+def make_sent_view_fn(corp):
+    return (lambda md: 
+        np.array(['{0}, {1}'.format(id, sent) 
+            for id, sent in zip(md['sentence_label'], corp.sentences)]))
+    
 
-def sim_sent_sent(ldaviewer, sent, print_len=10):
+def sim_sent_sent(ldaviewer, sent, print_len=10, min_sent_len=0):
     """
     ldaviewer : ldaviewer object
     sent : sentence index or sentence as a list of words
@@ -302,16 +307,22 @@ def sim_sent_sent(ldaviewer, sent, print_len=10):
     ind = sent
     if isinstance(sent, list) and isinstance(sent[0], str):
         ind = corp.sent_int(sent)
-    sim_sents = ldaviewer.sim_doc_doc(ind, print_len=print_len)
-    lc = sim_sents['doc'][:print_len]
+
+    sentence_toks = corp.view_contexts('sentence', as_strings=True)
+    sim_sents = ldaviewer.sim_doc_doc(ind, label_fn=make_sent_view_fn(corp), print_len=print_len)
+    lc = sim_sents['doc']
     lc = [s.split(', ') for s in lc]
-    lc = [int(s[-1]) for s in lc]
-    
+    lc = [int(s[0]) for s in lc]
+
     # only returns print_len length
     tokenized_sents, orig_sents = [], []
     for i in lc:
-        tokenized_sents.append(corp.view_contexts('sentence', as_strings=True)[i])
-        orig_sents.append(corp.sentences[i])
+        if len(sentence_toks[i]) > min_sent_len and len(tokenized_sents) < print_len:
+            tokenized_sents.append(sentence_toks[i])
+            orig_sents.append(corp.sentences[i])
+
+    mask = np.array([len(sentence_toks[i]) > min_sent_len for i in lc])
+    sim_sents = sim_sents[mask]
 
     return tokenized_sents, orig_sents, sim_sents
 
@@ -590,7 +601,7 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
         :meth:`vsm.corpus.util.apply_stoplist`
     """
     with open(filename, mode='r') as f:
-        text = f.read()
+        text = f.read().replace('\r\n','\n')
 
     words, tok, sent = file_tokenize(text)
     names, data = zip(*tok.items())
