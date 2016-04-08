@@ -1,10 +1,20 @@
 from setuptools import setup, Extension, Command, find_packages
+import platform
 
 
 # find packages in vsm subdirectory
 # this will skip the unittests, etc.
 packages = ['vsm.'+pkg for pkg in find_packages('vsm')]
 packages.append('vsm')
+
+install_requires=[
+        "numpy>=1.6.1",
+        "scipy>=0.13.0",
+        "progressbar>=2.3",
+        "chardet>=2.3.0"]
+
+if platform.system() == 'Windows':
+    install_requires.append('pywin32')
 
 setup(
     name = "vsm",
@@ -30,13 +40,8 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Text Processing :: Linguistic",
         ],
+    install_requires=install_requires,
     license = 'MIT',
-    install_requires=[
-        "numpy>=1.6.1",
-        "scipy>=0.13.0",
-        "progressbar>=2.3",
-        "chardet>=2.3.0"
-    ],
     packages=packages,
     ext_modules = [
         Extension('_cgs_update', ['vsm/model/_cgs_update.c']),

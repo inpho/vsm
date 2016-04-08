@@ -1,5 +1,6 @@
 import re
 import string
+import platform
 
 from chardet.universaldetector import UniversalDetector
 import nltk
@@ -135,6 +136,9 @@ def filter_by_suffix(l, ignore, filter_dotfiles=True):
     >>> filter_by_suffix(l, ignore)
     ['b.json']
     """
+    if platform.system() == 'Windows':
+        import win32api
+        l = [win32api.GetShortPathName(filename) for filename in l]
     filter_list = [e for e in l if not sum([e.endswith(s) for s in ignore])]
     if filter_dotfiles:
         filter_list = [e for e in filter_list if not e.startswith('.')]
