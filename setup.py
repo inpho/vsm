@@ -13,12 +13,9 @@ install_requires=[
         "progressbar>=2.3",
         "chardet>=2.3.0"]
 
-if platform.system() == 'Windows':
-    install_requires.append('pywin32')
-
 setup(
     name = "vsm",
-    version = "0.4.0a15",
+    version = "0.4.0a16",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
