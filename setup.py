@@ -18,7 +18,7 @@ if platform.system() == 'Windows':
 
 setup(
     name = "vsm",
-    version = "0.4.0a14",
+    version = "0.4.0a15",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
