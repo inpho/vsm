@@ -300,35 +300,33 @@ def file_tokenize(text, tokenizer=word_tokenize, simple=False):
     pars = paragraph_tokenize(text)
 
     for par in pars:
-#        sents = sentence_tokenize(par) #This is no longer necessary
-
         if simple == True:
             w = tokenizer(par)
             words.extend(w)
             par_break += len(w)
-            par_tokens.append((par_break, par_n)
-            par_n += 1
-            
         else:
+            sents = sentence_tokenize(par)
             for sent in sents:
-    #            w = tokenizer(sent)
-    #            words.extend(w)
+                w = tokenizer(sent)
+                words.extend(w)
                 sent_break += len(w)
                 sent_tokens.append((sent_break, par_n, sent_n))
                 sent_n += 1
 
-            par_tokens.append((sent_break, par_n))
-            par_n += 1
+        par_tokens.append((sent_break, par_n))
+        par_n += 1
 
     idx_dt = ('idx', np.int32)
-    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    if simple == False:
+        sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
     par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
 
     corpus_data = dict()
     dtype = [idx_dt, par_label_dt]
     corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
-    dtype = [idx_dt, par_label_dt, sent_label_dt]
-    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+    if simple == False:
+        dtype = [idx_dt, par_label_dt, sent_label_dt]
+        corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
     return words, corpus_data
 
