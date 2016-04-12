@@ -508,10 +508,13 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
     """
     words, chk_tokens, sent_tokens = [], [], []
-    par_break, sent_break, chk_n, sent_n = 0, 0, 0, 0
+    chk_break, sent_break, chk_n, sent_n = 0, 0, 0, 0
     
     if verbose == 1:
         pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(chunks)).start()
+
+    if simple:
+        paragraphs = False;
 
     if paragraphs:
         par_tokens = []
@@ -522,52 +525,56 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
             pars = paragraph_tokenize(chk)
 
             for par in pars:
-                if simple:
-                    w=tokenizer(par)
+                sents = sentence_tokenize(par)
+                
+                for sent in sents:
+                    w = tokenizer(sent)
                     words.extend(w)
-                    par_break += len(w)
-                    par_tokens.append((par_break, label, par_n))
-                else:
-                    sents = sentence_tokenize(par)
-                    for sent in sents:
-                        w = tokenizer(sent)
-                        words.extend(w)
-                        sent_break += len(w)
-                        sent_tokens.append((sent_break, label, par_n, sent_n))
-                        sent_n += 1
-                        par_tokens.append((sent_break, label, par_n))
+                    sent_break += len(w)
+                    sent_tokens.append((sent_break, label, par_n, sent_n))
+                    sent_n += 1
+
+                par_tokens.append((sent_break, label, par_n))
                 par_n += 1
     
             if verbose == 1:
                 pbar.update(chk_n)
 
-            if simple:
-                chk_tokens.append((par_break, label))
-            else:
-                chk_tokens.append((sent_break, label))
+            chk_tokens.append((par_break, label))
+            chk_tokens.append((sent_break, label))
             chk_n += 1
     else:
         for chk, label in zip(chunks, labels):
             # print 'Tokenizing', label
-            sents = sentence_tokenize(chk)
-
-            for sent in sents:
-                w = tokenizer(sent)
+            if simple:
+                w = tokenizer(chk)
                 words.extend(w)
-                sent_break += len(w)
-                sent_tokens.append((sent_break, label, sent_n))
-                sent_n += 1
+                chk_break += len(w)
+                chk_tokens.append((chk_break, label))
+  
+
+            else:
+                sents = sentence_tokenize(chk)
+
+                for sent in sents:
+                    w = tokenizer(sent)
+                    words.extend(w)
+                    sent_break += len(w)
+                    sent_tokens.append((sent_break, label, sent_n))
+                    sent_n += 1
+                chk_tokens.append((sent_break, label))
     
             if verbose == 1:
                 pbar.update(chk_n)
 
-            chk_tokens.append((sent_break, label))
+  
             chk_n += 1
 
 
     idx_dt = ('idx', np.int32)
     label_dt = (chunk_name + '_label', np.array(labels).dtype)
-    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    if not simple:
+        sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
     corpus_data = dict()
     dtype = [idx_dt, label_dt]
     corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
@@ -578,7 +585,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
         corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
         dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
-    else:
+    elif not simple:
         dtype = [idx_dt, label_dt, sent_label_dt]
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
     
