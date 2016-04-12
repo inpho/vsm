@@ -508,7 +508,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
     """
     words, chk_tokens, sent_tokens = [], [], []
-    chk_break, sent_break, chk_n, sent_n = 0, 0, 0, 0
+    chk_break, par_break, sent_break, chk_n, par_n, sent_n = 0, 0, 0, 0, 0, 0
     
     if verbose == 1:
         pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(chunks)).start()
@@ -540,7 +540,6 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
             if verbose == 1:
                 pbar.update(chk_n)
 
-            chk_tokens.append((par_break, label))
             chk_tokens.append((sent_break, label))
             chk_n += 1
     else:
