@@ -1,4 +1,5 @@
 from setuptools import setup, Extension, Command, find_packages
+import platform
 
 
 # find packages in vsm subdirectory
@@ -6,9 +7,15 @@ from setuptools import setup, Extension, Command, find_packages
 packages = ['vsm.'+pkg for pkg in find_packages('vsm')]
 packages.append('vsm')
 
+install_requires=[
+        "numpy>=1.6.1",
+        "scipy>=0.13.0",
+        "progressbar>=2.3",
+        "chardet>=2.3.0"]
+
 setup(
     name = "vsm",
-    version = "0.3.8",
+    version = "0.4.0a16",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
@@ -30,13 +37,8 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Text Processing :: Linguistic",
         ],
+    install_requires=install_requires,
     license = 'MIT',
-    install_requires=[
-        "numpy>=1.6.1",
-        "scipy>=0.13.0",
-        "progressbar>=2.3",
-        "chardet>=2.3.0"
-    ],
     packages=packages,
     ext_modules = [
         Extension('_cgs_update', ['vsm/model/_cgs_update.c']),

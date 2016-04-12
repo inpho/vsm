@@ -1,7 +1,7 @@
 import numpy as np
-from vsm.corpus import Corpus
+from vsm.corpus import Corpus, binary_search
 from vsm.extensions.corpusbuilders import *
-from vsm.extensions.corpuscleanup import apply_stoplist_len
+from vsm.extensions.corpusbuilders.util import *
 from vsm.extensions.htrc import vol_link_fn, add_link_
 import os
 import re
@@ -34,65 +34,166 @@ class CorpusSent(Corpus):
         """
         self.words_int = dict((t,i) for i,t in enumerate(self.words))
 
+    def in_place_stoplist(self, stoplist=None, freq=0):
+        """ 
+        Changes a Corpus object with words in the stoplist removed and with 
+        words of frequency <= `freq` removed.
+        
+        :param stoplist: The list of words to be removed.
+        :type stoplist: list
+
+        :param freq: A threshold where words of frequency <= 'freq' are
+            removed. Default is 0.
+        :type freq: integer, optional
+            
+        :returns: Copy of corpus with words in the stoplist and words
+            of frequnecy <= 'freq' removed.
+
+        :See Also: :class:`Corpus`
+        """
+        if stoplist is None:
+            stoplist = list()
+        else:
+            # convert to raw list from set, array, etc.
+            stoplist = [word for word in stoplist]
+
+        if freq:
+            #TODO: Use the TF model instead
+
+            # print 'Computing collection frequencies'
+            cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
+    
+            for word in self.corpus:
+                cfs[word] += 1
+
+            # print 'Selecting words of frequency <=', freq
+            freq_stop = np.arange(cfs.size)[(cfs <= freq)]
+            stop = set(freq_stop)
+            for word in stop:
+                stoplist.append(self.words[word])
+        else:
+            stop = set()
+
+        # filter stoplist
+        # print len(stoplist), "filtering to",
+        stoplist = [t for t in stoplist if binary_search(self.words, t) >= 0]
+        # print len(stoplist)
+        for t in stoplist:
+            stop.add(self.words_int[t])
+
+        if not stop:
+            # print 'Stop list is empty.'
+            return self
+
+        # print 'sorting stopwords', datetime.now() 
+        stoplist = sorted(stoplist)
+        stop = sorted(stop)
+    
+        # print 'Removing stop words', datetime.now()
+        f = np.vectorize(lambda x: binary_search(stop, x) < 0)
+
+        # print 'Rebuilding context data', datetime.now()
+        context_data = []
+        for i in xrange(len(self.context_data)):
+            # print 'Recomputing token breaks:', self.context_types[i]
+            tokens = self.view_contexts(self.context_types[i])
+            # print self.context_types[i], len(stoplist), len(stop), datetime.now()
+            spans = [t[f(t)].size if t.size else 0 for t in tokens]
+            tok = self.context_data[i].copy()
+            tok['idx'] = np.cumsum(spans)
+            context_data.append(tok)
+
+        del self.context_data
+        self.context_data = context_data
+
+        # print 'Rebuilding corpus and updating stop words', datetime.now()
+        self.corpus = self.corpus[f(self.corpus)]
+        self.stopped_words.update(stoplist)
+
+        # print 'adjusting words list', datetime.now()
+        new_words = np.array([t for t in self.words if binary_search(stoplist,t) < 0])
+
+        # print 'rebuilding word dictionary', datetime.now()
+        new_words_int = dict((word,i) for i, word in enumerate(new_words))
+
+        # print "remapping corpus", datetime.now()
+        current_offset = 0
+        for i, tok in enumerate(self.corpus):
+            self.corpus[i] = new_words_int[self.words[tok]] 
+        # print len(self.words), len(self.words_int), len(new_words), len(new_words_int)
+
+        # print 'storing new word dicts', datetime.now()
+        self.words = new_words
+        self.words_int = new_words_int
+
+        return self
 
     def apply_stoplist(self, stoplist=[], freq=0):
         """ 
         Takes a Corpus object and returns a copy of it with words in the
         stoplist removed and with words of frequency <= `freq` removed.
         
-	    :param stoplist: The list of words to be removed.
+        :param stoplist: The list of words to be removed.
         :type stoplist: list
-        
-        :type freq: integer, optional
-	    :param freq: A threshold where words of frequency <= 'freq' are 
+
+        :param freq: A threshold where words of frequency <= 'freq' are
             removed. Default is 0.
+        :type freq: integer, optional
             
-        :returns: Copy of corpus with words in the stoplist and words of
-            frequnecy <= 'freq' removed.
+        :returns: Copy of corpus with words in the stoplist and words
+            of frequnecy <= 'freq' removed.
 
         :See Also: :class:`Corpus`
         """
+        print "Using apply_stoplist for some reason"
+        stoplist = set(stoplist)
         if freq:
             #TODO: Use the TF model instead
 
-            print 'Computing collection frequencies'
+            # print 'Computing collection frequencies'
             cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
     
             for word in self.corpus:
                 cfs[word] += 1
 
-            print 'Selecting words of frequency <=', freq
+            # print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
             stop = set(freq_stop)
+            for word in stop:
+                stoplist.add(self.words[word])
         else:
             stop = set()
 
+        # filter stoplist
+        stoplist = [t for t in stoplist if t in self.words]
         for t in stoplist:
-            if t in self.words:
-                stop.add(self.words_int[t])
+            stop.add(self.words_int[t])
 
         if not stop:
-            print 'Stop list is empty.'
+            # print 'Stop list is empty.'
             return self
     
-        print 'Removing stop words'
+        # print 'Removing stop words'
         f = np.vectorize(lambda x: x not in stop)
         corpus = self.corpus[f(self.corpus)]
 
-        print 'Rebuilding corpus'
+        # print 'Rebuilding corpus'
         corpus = [self.words[i] for i in corpus]
         context_data = []
         for i in xrange(len(self.context_data)):
-            print 'Recomputing token breaks:', self.context_types[i]
+            # print 'Recomputing token breaks:', self.context_types[i]
             tokens = self.view_contexts(self.context_types[i])
             spans = [t[f(t)].size for t in tokens]
             tok = self.context_data[i].copy()
             tok['idx'] = np.cumsum(spans)
             context_data.append(tok)
 
-        return CorpusSent(corpus, self.sentences, context_data=context_data,
-                            context_types=self.context_types)
-
+        c = CorpusSent(corpus, self.sentences, context_data=context_data, 
+            context_types=self.context_types)
+        if self.stopped_words:
+            c.stopped_words.update(self.stopped_words)
+        c.stopped_words.update(stoplist)
+        return c
 
     @staticmethod
     def load(file):
@@ -117,6 +218,10 @@ class CorpusSent(Corpus):
         c.words = arrays_in['words']
         c.sentences = arrays_in['sentences']
         c.context_types = arrays_in['context_types'].tolist()
+        try:
+            c.stopped_words = set(arrays_in['stopped_words'].tolist())
+        except:
+            c.stopped_words = set()
 
         c.context_data = list()
         for n in c.context_types:
@@ -146,6 +251,7 @@ class CorpusSent(Corpus):
         arrays_out['words'] = self.words
         arrays_out['sentences'] = self.sentences
         arrays_out['context_types'] = np.asarray(self.context_types)
+        arrays_out['stopped_words'] = np.asarray(self.stopped_words)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]
@@ -174,8 +280,13 @@ class CorpusSent(Corpus):
             return keys
         return keys[0] 
 
+def make_sent_view_fn(corp):
+    return (lambda md: 
+        np.array(['{0}, {1}'.format(id, sent) 
+            for id, sent in zip(md['sentence_label'], corp.sentences)]))
+    
 
-def sim_sent_sent(ldaviewer, sent, print_len=10):
+def sim_sent_sent(ldaviewer, sent, print_len=10, min_sent_len=0):
     """
     ldaviewer : ldaviewer object
     sent : sentence index or sentence as a list of words
@@ -195,16 +306,22 @@ def sim_sent_sent(ldaviewer, sent, print_len=10):
     ind = sent
     if isinstance(sent, list) and isinstance(sent[0], str):
         ind = corp.sent_int(sent)
-    sim_sents = ldaviewer.sim_doc_doc(ind, print_len=print_len)
-    lc = sim_sents['doc'][:print_len]
+
+    sentence_toks = corp.view_contexts('sentence', as_strings=True)
+    sim_sents = ldaviewer.sim_doc_doc(ind, label_fn=make_sent_view_fn(corp), print_len=print_len)
+    lc = sim_sents['doc']
     lc = [s.split(', ') for s in lc]
-    lc = [int(s[-1]) for s in lc]
-    
+    lc = [int(s[0]) for s in lc]
+
     # only returns print_len length
     tokenized_sents, orig_sents = [], []
     for i in lc:
-        tokenized_sents.append(corp.view_contexts('sentence', as_strings=True)[i])
-        orig_sents.append(corp.sentences[i])
+        if len(sentence_toks[i]) > min_sent_len and len(tokenized_sents) < print_len:
+            tokenized_sents.append(sentence_toks[i])
+            orig_sents.append(corp.sentences[i])
+
+    mask = np.array([len(sentence_toks[i]) > min_sent_len for i in lc])
+    sim_sents = sim_sents[mask]
 
     return tokenized_sents, orig_sents, sim_sents
 
@@ -420,6 +537,7 @@ def file_tokenize(text):
     pars = paragraph_tokenize(text)
 
     for par in pars:
+        par = par.replace('\n',' ')
         sents = sentence_tokenize(par)
 
         for sent in sents:
@@ -445,6 +563,12 @@ def file_tokenize(text):
 
     return words, corpus_data, sent_orig
 
+
+def toy_corpus(filename, is_filename=True, nltk_stop=True, stop_freq=1,
+    add_stop=None, decode=False, autolabel=False):
+    if is_filename:
+        return file_corpus(filename, nltk_stop=nltk_stop, stop_freq=stop_freq,
+        add_stop=add_stop)
 
 def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
     """
@@ -476,14 +600,14 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
         :meth:`vsm.corpus.util.apply_stoplist`
     """
     with open(filename, mode='r') as f:
-        text = f.read()
+        text = f.read().replace('\r\n','\n')
 
     words, tok, sent = file_tokenize(text)
     names, data = zip(*tok.items())
     
     c = CorpusSent(words, sent, context_data=data, context_types=names,
                     remove_empty=False)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
+    in_place_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
 
     return c
@@ -559,7 +683,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True, word_len=2,
                nltk_stop=True, stop_freq=1, add_stop=None, corpus_sent=True,
-               ignore=['.log', '.pickle', '.xml']):
+               ignore=['.log', '.pickle', '.xml'], decode=False):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -635,7 +759,7 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True, word_len=2,
 			remove_empty=False)
     else:
         c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist_len(c, nltk_stop=nltk_stop, add_stop=add_stop,
-                       word_len=word_len, freq=stop_freq)
+    
+    in_place_stoplist(c, nltk_stop=nltk_stop, add_stop=add_stop, freq=stop_freq)
 
     return c

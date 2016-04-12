@@ -5,9 +5,16 @@ import numpy as np
 from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
 
+__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
+            'align_corpora','binary_search' ]
 
-__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata', 'align_corpora' ]
+from bisect import bisect_left
+from datetime import datetime
 
+def binary_search(a, x, lo=0, hi=None):   # can't use a to specify default for hi
+    hi = hi if hi is not None else len(a) # hi defaults to len(a)   
+    pos = bisect_left(a,x,lo,hi)          # find insertion position
+    return (pos if pos != hi and a[pos] == x else -1) # don't walk off the end
 
 
 class BaseCorpus(object):
@@ -440,7 +447,6 @@ class Corpus(BaseCorpus):
       dtype='|S9')
 
     """
-    
     def __init__(self,
                  corpus,
                  context_types=[],
@@ -577,6 +583,10 @@ class Corpus(BaseCorpus):
             c.corpus = arrays_in['corpus']
             c.words = arrays_in['words']
             c.context_types = arrays_in['context_types'].tolist()
+            try:
+                c.stopped_words = set(arrays_in['stopped_words'].tolist())
+            except:
+                c.stopped_words = set()
 
             c.context_data = list()
             for n in c.context_types:
@@ -617,6 +627,7 @@ class Corpus(BaseCorpus):
         arrays_out['corpus'] = self.corpus
         arrays_out['words'] = self.words
         arrays_out['context_types'] = np.asarray(self.context_types)
+        arrays_out['stopped_words'] = np.asarray(self.stopped_words)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]
@@ -624,6 +635,100 @@ class Corpus(BaseCorpus):
 
         np.savez(file, **arrays_out)
 
+
+    def in_place_stoplist(self, stoplist=None, freq=0):
+        """ 
+        Changes a Corpus object with words in the stoplist removed and with 
+        words of frequency <= `freq` removed.
+        
+        :param stoplist: The list of words to be removed.
+        :type stoplist: list
+
+        :param freq: A threshold where words of frequency <= 'freq' are
+            removed. Default is 0.
+        :type freq: integer, optional
+            
+        :returns: Copy of corpus with words in the stoplist and words
+            of frequnecy <= 'freq' removed.
+
+        :See Also: :class:`Corpus`
+        """
+        if stoplist is None:
+            stoplist = list()
+        else:
+            # convert to raw list from set, array, etc.
+            stoplist = [word for word in stoplist]
+
+        if freq:
+            #TODO: Use the TF model instead
+
+            # print 'Computing collection frequencies'
+            cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
+    
+            for word in self.corpus:
+                cfs[word] += 1
+
+            # print 'Selecting words of frequency <=', freq
+            freq_stop = np.arange(cfs.size)[(cfs <= freq)]
+            stop = set(freq_stop)
+            for word in stop:
+                stoplist.append(self.words[word])
+        else:
+            stop = set()
+
+        # filter stoplist
+        # print len(stoplist), "filtering to",
+        stoplist = [t for t in stoplist if binary_search(self.words, t) >= 0]
+        # print len(stoplist)
+        for t in stoplist:
+            stop.add(self.words_int[t])
+
+        if not stop:
+            # print 'Stop list is empty.'
+            return self
+
+        # print 'sorting stopwords', datetime.now() 
+        stoplist = sorted(stoplist)
+        stop = sorted(stop)
+    
+        # print 'Removing stop words', datetime.now()
+        f = np.vectorize(lambda x: binary_search(stop, x) < 0)
+
+        # print 'Rebuilding context data', datetime.now()
+        context_data = []
+        for i in xrange(len(self.context_data)):
+            # print 'Recomputing token breaks:', self.context_types[i]
+            tokens = self.view_contexts(self.context_types[i])
+            # print self.context_types[i], len(stoplist), len(stop), datetime.now()
+            spans = [t[f(t)].size if t.size else 0 for t in tokens]
+            tok = self.context_data[i].copy()
+            tok['idx'] = np.cumsum(spans)
+            context_data.append(tok)
+
+        del self.context_data
+        self.context_data = context_data
+
+        # print 'Rebuilding corpus and updating stop words', datetime.now()
+        self.corpus = self.corpus[f(self.corpus)]
+        self.stopped_words.update(stoplist)
+
+        # print 'adjusting words list', datetime.now()
+        new_words = np.array([t for t in self.words if binary_search(stoplist,t) < 0])
+
+        # print 'rebuilding word dictionary', datetime.now()
+        new_words_int = dict((word,i) for i, word in enumerate(new_words))
+
+        # print "remapping corpus", datetime.now()
+        current_offset = 0
+        for i, tok in enumerate(self.corpus):
+            self.corpus[i] = new_words_int[self.words[tok]] 
+        # print len(self.words), len(self.words_int), len(new_words), len(new_words_int)
+
+        # print 'storing new word dicts', datetime.now()
+        self.words = new_words
+        self.words_int = new_words_int
+
+        return self
 
     def apply_stoplist(self, stoplist=[], freq=0):
         """ 
@@ -642,6 +747,8 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
+        print "Using apply_stoplist for some reason"
+        stoplist = set(stoplist)
         if freq:
             #TODO: Use the TF model instead
 
@@ -654,6 +761,8 @@ class Corpus(BaseCorpus):
             # print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
             stop = set(freq_stop)
+            for word in stop:
+                stoplist.add(self.words[word])
         else:
             stop = set()
 

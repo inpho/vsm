@@ -4,9 +4,17 @@ python:
 # command to install dependencies
 install:
   # Install conda
-  - sudo pip install conda
-  # install deps
-  - sudo conda init
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+
   # sudo conda update conda --yes
   - conda create -p $HOME/py --yes pip numpy scipy scikit-learn "python=$TRAVIS_PYTHON_VERSION"
   - export PATH=$HOME/py/bin:$PATH
@@ -16,6 +24,7 @@ install:
   - python2.7 -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
   - python setup.py develop
 # command to run tests
-before_script: pip install unittest2 nose
+before_script: 
+  - pip install unittest2 nose
 script: coverage run --source vsm.model,vsm.viewer,vsm.corpus,vsm.spatial,vsm.split,vsm.structarr,vsm.exceptions setup.py test
 after_success: coveralls

@@ -1,6 +1,6 @@
 import numpy as np
 
-from vsm.spatial import angle_sparse
+from vsm.spatial import angle
 from vsm.structarr import *
 from vsm.exceptions import *
 from types import *
@@ -32,12 +32,12 @@ class TfViewer(object):
     @deprecated_meth("dist_word_word")
     def sim_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True,
-                       dist_fn=angle_sparse, order='i'):
+                       dist_fn=angle, order='i'):
         pass
 
     def dist_word_word(self, word_or_words, weights=[], 
                        filter_nan=True, print_len=10, as_strings=True,
-                       dist_fn=angle_sparse, order='i'):
+                       dist_fn=angle, order='i'):
         """
         Returns words sorted by the distances between word(s) and every word.
 
@@ -60,7 +60,7 @@ class TfViewer(object):
         :type as_strings: boolean, optional
         
         :param dist_fn: A distance function from functions in vsm.spatial. 
-            Default is :meth:`angle_sparse`.
+            Default is :meth:`angle`.
         :type dist_fn: string, optional
         
         :param order: Order of sorting. 'i' for increasing and 'd' for
@@ -73,7 +73,8 @@ class TfViewer(object):
         
         :See Also: :meth:`vsm.viewer.wrappers.dist_word_word`
         """
-        return dist_word_word(word_or_words, self.corpus, self.model.matrix.T,
+        return dist_word_word(word_or_words, self.corpus,
+                                self.model.matrix.T.toarray(),
                                 weights=weights, filter_nan=filter_nan, 
                                 print_len=print_len, as_strings=True,
                                 dist_fn=dist_fn, order=order)
@@ -81,12 +82,12 @@ class TfViewer(object):
     @deprecated_meth("dist_doc_doc")
     def sim_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
                      filter_nan=True, label_fn=def_label_fn, as_strings=True,
-                     dist_fn=angle_sparse, order='i'):
+                     dist_fn=angle, order='i'):
         pass
 
     def dist_doc_doc(self, doc_or_docs, weights=[], print_len=10, 
                      filter_nan=True, label_fn=def_label_fn, as_strings=True,
-                     dist_fn=angle_sparse, order='i'):
+                     dist_fn=angle, order='i'):
         """ 
         Computes and sorts the distances between a document or list of documents
         and every document.
@@ -115,7 +116,7 @@ class TfViewer(object):
         :type as_strings: boolean, optional
 
         :param dist_fn: A distance function from functions in vsm.spatial.
-            Default is :meth:`angle_sparse`.
+            Default is :meth:`angle`.
         :type dist_fn: string, optional
         
         :param order: Order of sorting. 'i' for increasing and 'd' for
@@ -129,7 +130,8 @@ class TfViewer(object):
         :See Also: :meth:`vsm.viewer.wrappers.dist_doc_doc`
         """
         return dist_doc_doc(doc_or_docs, self.corpus, 
-                              self.model.context_type, self.model.matrix, 
+                              self.model.context_type,
+                              self.model.matrix.toarray(), 
                               weights=weights, print_len=print_len,
                               filter_nan=filter_nan, label_fn=label_fn, 
                               as_strings=True, 
@@ -139,12 +141,12 @@ class TfViewer(object):
     @deprecated_meth("dist_word_doc") 
     def sim_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
                       filter_nan=True, print_len=10, as_strings=True, 
-                      dist_fn=angle_sparse, order='i'):   
+                      dist_fn=angle, order='i'):   
         pass
 
     def dist_word_doc(self, word_or_words, weights=[], label_fn=def_label_fn, 
                       filter_nan=True, print_len=10, as_strings=True, 
-                      dist_fn=angle_sparse, order='i'):
+                      dist_fn=angle, order='i'):
         """
         Computes and sorts distances between a word or a list of words to
         every document.
@@ -174,7 +176,7 @@ class TfViewer(object):
         :type as_strings: boolean, optional
 
         :param dist_fn: A distance function from functions in vsm.spatial.
-            Default is :meth:`angle_sparse`.
+            Default is :meth:`angle`.
         :type dist_fn: string, optional
         
         :param order: Order of sorting. 'i' for increasing and 'd' for decreasing
@@ -189,7 +191,7 @@ class TfViewer(object):
         """
         return dist_word_doc(word_or_words, self.corpus, 
                                self.model.context_type, 
-                               self.model.matrix, weights=weights, 
+                               self.model.matrix.toarray(), weights=weights, 
                                label_fn=label_fn,
                                filter_nan=filter_nan, 
                                print_len=print_len, as_strings=as_strings,
@@ -197,10 +199,10 @@ class TfViewer(object):
 
 
     @deprecated_meth("dismat_word")
-    def simmat_words(self, word_list, dist_fn=angle_sparse):
+    def simmat_words(self, word_list, dist_fn=angle):
         pass
     
-    def dismat_word(self, word_list, dist_fn=angle_sparse):
+    def dismat_word(self, word_list, dist_fn=angle):
         """
         Calculates a distance matrix for a given list of words.
 
@@ -209,7 +211,7 @@ class TfViewer(object):
         :type word_list: list strings/integers.
  
         :param dist_fn: A distance function from functions in vsm.spatial.
-            Default is :meth:`angle_sparse`.
+            Default is :meth:`angle`.
         :type dist_fn: string, optional
         
         :returns: an instance of :class:`IndexedSymmArray`.
@@ -220,14 +222,14 @@ class TfViewer(object):
         """
         
         return dismat_word(word_list, self.corpus, 
-                             self.model.matrix.T.tocsc(), dist_fn=dist_fn)
+                             self.model.matrix.T.toarray(), dist_fn=dist_fn)
 
 
     @deprecated_meth("dismat_doc")
-    def simmat_docs(self, doc_list, dist_fn=angle_sparse):
+    def simmat_docs(self, doc_list, dist_fn=angle):
         pass
     
-    def dismat_doc(self, doc_list, dist_fn=angle_sparse):
+    def dismat_doc(self, doc_list, dist_fn=angle):
         """
         Calculates a distance matrix for a given list of documents.
 
@@ -236,7 +238,7 @@ class TfViewer(object):
         :type docs: list of strings/integers.
         
         :param dist_fn: A distance function from functions in vsm.spatial.
-            Default is :meth:`angle_sparse`.
+            Default is :meth:`angle`.
         :type dist_fn: string, optional
         
         :returns: an instance of :class:`IndexedSymmArray`.
@@ -246,7 +248,7 @@ class TfViewer(object):
         :See Also: :meth:`vsm.viewer.wrappers.dismat_doc`
         """
         return dismat_doc(doc_list, self.corpus, self.model.context_type, 
-                            self.model.matrix.tocsc(), dist_fn=dist_fn)
+                            self.model.matrix.toarray(), dist_fn=dist_fn)
 
 
     def coll_freq(self, word):

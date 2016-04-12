@@ -367,8 +367,11 @@ def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1,
     """
     if encoding == 'detect':
         encoding = detect_encoding(filename)
-    with open(filename, mode='r', encoding=encoding) as f:
-        text = f.read()
+    try:
+        with open(filename, mode='r', encoding=encoding) as f:
+            text = f.read()
+    except UnicodeDecodeError: 
+        encoding = detect_encoding(filename)
 
     if decode:
         text = unidecode(text)
@@ -650,13 +653,21 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
         filename = os.path.join(plain_dir, filename)
         if encoding == 'detect':
             encoding = detect_encoding(filename)
-        if decode:
-            with open(filename, mode='r', encoding=encoding) as f:
-                if decode:
+        try:
+            if decode:
+                with open(filename, mode='r', encoding=encoding) as f:
                     chunks.append(unidecode(f.read()))
-        else:
-            with open(filename, mode='r', encoding=encoding) as f:
-                chunks.append(f.read())
+            else:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    chunks.append(f.read())
+        except UnicodeDecodeError:
+            encoding = detect_encoding(filename)
+            if decode:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    chunks.append(unidecode(f.read()))
+            else:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    chunks.append(f.read())
 
     words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
                               paragraphs=paragraphs, verbose=verbose)
@@ -667,7 +678,6 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
                        freq=stop_freq, add_stop=add_stop)
 
     return c
-
 
 
 def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize):
@@ -743,7 +753,6 @@ def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize):
 
     return words, corpus_data
 
-
 #TODO: This should be a whitelist not a blacklist
 def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
                 nltk_stop=True, stop_freq=1, add_stop=None, 
@@ -808,12 +817,22 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
             page_name = os.path.join(book_path, page_name)
             if encoding == 'detect':
                 encoding = detect_encoding(page_name)
-            if decode:
-                with open(page_name, mode='r', encoding=encoding) as f:
-                    pages.append((unidecode(f.read()), page_file))
-            else:
-                with open(page_name, mode='r', encoding=encoding) as f:
-                    pages.append((f.read(), page_file))
+            try:
+                if decode:
+                    with open(page_name, mode='r', encoding=encoding) as f:
+                        pages.append((unidecode(f.read()), page_file))
+                else:
+                    with open(page_name, mode='r', encoding=encoding) as f:
+                        pages.append((f.read(), page_file))
+            except UnicodeDecodeError:
+                encoding = detect_encoding(page_name)
+                if decode:
+                    with open(page_name, mode='r', encoding=encoding) as f:
+                        pages.append((unidecode(f.read()), page_file))
+                else:
+                    with open(page_name, mode='r', encoding=encoding) as f:
+                        pages.append((f.read(), page_file))
+
 
         books.append(pages)
 
@@ -821,7 +840,7 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
     names, data = zip(*tok.items())
     
     c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
+    in_place_stoplist(c, nltk_stop=nltk_stop,
                        freq=stop_freq, add_stop=add_stop)
 
     return c

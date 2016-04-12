@@ -26,7 +26,7 @@ from model import *
 import viewer
 from viewer import *
 
-__version__ = '0.3.3'
+__version__ = '0.4.0a11'
 
 __all__ = ['__version__']
 __all__ += corpus.__all__[:]

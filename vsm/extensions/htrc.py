@@ -131,12 +131,15 @@ def rm_lb_hyphens(plain_root, logger, ignore=['.json', '.log', '.err']):
     :returns: None
     """
 
-    d = enchant.Dict('en_US')
+    try:
+        d = enchant.Dict('en_US')
+    except ImportError:
+        d = None
 
     def recon(match_obj):
         rc_word = match_obj.group(1) + match_obj.group(2)
         
-        if wn.synsets(rc_word) or d.check(rc_word):
+        if wn.synsets(rc_word) or (d and d.check(rc_word)):
             logger.info('\nbook: %s\nreconstructed word:\n%s\n',
                          plain_root, rc_word)
             return rc_word

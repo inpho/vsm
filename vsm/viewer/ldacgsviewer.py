@@ -37,6 +37,7 @@ class LdaCgsViewer(object):
         self._theta = None
         self._H_phi = None
         self._H_theta = None
+        self._labels = None
 
 
     @property
@@ -51,6 +52,15 @@ class LdaCgsViewer(object):
 
     def _res_word_type(self, word):
         return res_word_type(self.corpus, word)
+
+    @property
+    def labels(self):
+        """Returns the list of document labels."""
+        if self._labels is None:
+            self._labels = self.corpus.view_metadata(self.model.context_type)
+            self._labels = self._labels[self._doc_label_name]
+
+        return self._labels
 
 
     @property
@@ -373,6 +383,55 @@ class LdaCgsViewer(object):
         k_arr.col_len = print_len
 
         return k_arr
+    
+    def doc_topic_matrix(self, doc_or_docs):
+        """
+        Returns the distribution over topics for the given documents.
+
+        :param doc: Specifies the document whose distribution over topics is 
+             returned. It can either be the ID number (integer) or the 
+             name (string) of the document.
+        :type doc: int or string
+
+        :returns: an instance of :class:`np.array`.
+            An array of topics
+        """
+        if (isstr(doc_or_docs) or isint(doc_or_docs) 
+            or isinstance(doc_or_docs, dict)):
+            doc, label = self._res_doc_type(doc_or_docs)
+            k_arr = self.theta[:, doc].T
+        else:
+            docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
+            k_arr = self.theta[:, docs].T
+
+        return k_arr
+    
+    def view_documents(self, doc_or_docs, as_strings=False):
+        """
+        Returns the distribution over topics for the given documents.
+
+        :param doc: Specifies the document whose distribution over topics is 
+             returned. It can either be the ID number (integer) or the 
+             name (string) of the document.
+        :type doc: int or string
+
+        :returns: an instance of :class:`np.array`.
+            An array of topics
+        """
+        documents = []
+        if (isstr(doc_or_docs) or isint(doc_or_docs) 
+            or isinstance(doc_or_docs, dict)):
+            doc, label = self._res_doc_type(doc_or_docs)
+            docs = list(doc)
+        else:
+            docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
+        
+        all_docs = self.corpus.view_contexts(self.model.context_type,
+                        as_strings=as_strings)
+        for doc in docs:
+            documents.append(all_docs[doc])
+
+        return documents
 
     def word_topics(self, word, as_strings=True):
         """
@@ -753,7 +812,6 @@ class LdaCgsViewer(object):
                             print_len=print_len, filter_nan=filter_nan, 
                             label_fn=label_fn, as_strings=as_strings,
                             dist_fn=dist_fn, order=order)
-    
 
     @deprecated_meth("dismat_doc")
     def simmat_docs(self, docs=[], dist_fn=JS_dist):
@@ -817,6 +875,27 @@ class LdaCgsViewer(object):
 
         return dismat_top(topics, Q, dist_fn=dist_fn)
 
+    def dist(self, doc1, doc2, dist_fn=JS_dist):
+        """Computes the distance between 2 documents in topic space.
+ 
+        :param doc1: Query document        
+        :type doc1: string/integer
+ 
+        :param doc2: Query document        
+        :type doc2: string/integer
+
+        :param dist_fn: A distance function from functions in vsm.spatial. 
+            Default is :meth:`JS_dist`.
+        :type dist_fn: string, optional
+       
+        :returns: an instance of `LabeledColumn`.
+            A 2-dim array containing documents and their distances to 
+            `doc_or_docs`. 
+        """
+        d1, d2 = self.doc_topic_matrix([doc1,doc2])
+        return dist_fn(d1,d2)
+        
+        
 
     ######################################################################
 
