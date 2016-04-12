@@ -10,14 +10,14 @@ class TestCorpusUtil(unittest.TestCase):
         
         tsent = ['foo-foo',',','3','foo','bars','bar_foo','2to1','.']
         out = strip_punc(tsent)
-        self.assertEqual(out, ['foo-foo','3','foo','bars','bar_foo','2to1'])
+        self.assertEqual(out, ['foofoo','3','foo','bars','barfoo','2to1'])
 
 
     def test_rem_num(self):
  
         tsent = ['foo-foo',',','3','foo','bars','2-parts','2-to-1','3words','.']
         out = rem_num(tsent)
-        self.assertEqual(out, ['foo-foo',',','3','foo','bars','2-parts','3words','.'])
+        self.assertEqual(out, ['foo-foo',',','foo','bars','-parts','-to-','words','.'])
 
     def test_rehyph(self):
         

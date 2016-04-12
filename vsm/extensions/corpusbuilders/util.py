@@ -27,7 +27,10 @@ def strip_punc(tsent):
 
     out = []
     for word in tsent:
-        w = word.translate(PUNC_TABLE)
+        if isinstance(word, unicode):
+            w = word.translate(PUNC_TABLE)
+        elif isinstance(word, str):
+            w = word.translate(None, string.punctuation)
         #w = re.sub(p2, '', re.sub(p1, '', word))
         if w:
             out.append(w)
@@ -44,7 +47,10 @@ def rem_num(tsent):
     #p = re.compile(r'(^\D+$)|(^\D*[1-2]\d\D*$|^\D*\d\D*$)')
     out = []
     for word in tsent:
-        w = word.translate(NUMS_TABLE)
+        if isinstance(word, unicode):
+            w = word.translate(NUMS_TABLE)
+        elif isinstance(word, str):
+            w = word.translate(None, string.digits)
         if w:
             out.append(w)
 
