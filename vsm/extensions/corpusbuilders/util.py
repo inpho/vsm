@@ -11,29 +11,44 @@ __all__ = ['strip_punc', 'rem_num', 'rehyph',
            'sentence_span_tokenize', 'in_place_stoplist']
 
 
+def _unicode_range(start, stop):
+    return u''.join([unichr(i) for i in range(int(start,16), int(stop,16))])
+
+PUNCTUATION_START = re.compile(ur'^([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)'.format(string.punctuation))
+PUNCTUATION_END = re.compile(ur'([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$'.format(string.punctuation))
+PUNC = unicode(string.punctuation) + _unicode_range('2000','206F') + _unicode_range('3000', '303F') + _unicode_range('FF00', 'FFFF')
+PUNC_TABLE = {ord(c): None for c in PUNC}
 
 def strip_punc(tsent):
     """
     """
-    p1 = re.compile(ur'^([{}\u0000-\u0020\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)'.format(string.punctuation))
-    p2 = re.compile(ur'([{}\u0000-\u0020\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$'.format(string.punctuation))
+    p1 = PUNCTUATION_START
+    p2 = PUNCTUATION_END
 
     out = []
     for word in tsent:
-        w = re.sub(p2, '', re.sub(p1, '', word))
+        w = word.translate(PUNC_TABLE)
+        #w = re.sub(p2, '', re.sub(p1, '', word))
         if w:
             out.append(w)
 
     return out
 
 
+NUMS = string.digits
+NUMS_TABLE =  {ord(c): None for c in NUMS}
+
 def rem_num(tsent):
     """
     """
-    p = re.compile(r'(^\D+$)|(^\D*[1-2]\d\D*$|^\D*\d\D*$)')
+    #p = re.compile(r'(^\D+$)|(^\D*[1-2]\d\D*$|^\D*\d\D*$)')
+    out = []
+    for word in tsent:
+        w = word.translate(NUMS_TABLE)
+        if w:
+            out.append(w)
 
-    return [word for word in tsent if re.search(p, word)]
-
+    return out
 
 def rehyph(sent):
     """
@@ -140,7 +155,11 @@ def filter_by_suffix(l, ignore, filter_dotfiles=True):
         filter_list = [e for e in filter_list if not e.startswith('.')]
     return filter_list
 
+class _tokenizer:
+    def tokenize(self, text):
+        return text.split()
 
+word_tokenizer = _tokenizer()
 def word_tokenize(text):
     """Takes a string and returns a list of strings. Intended use: the
     input string is English text and the output consists of the
@@ -154,9 +173,12 @@ def word_tokenize(text):
 
     :returns: tokens : list of strings
     """
+    global word_tokenizer
+    if word_tokenizer is None:
+        word_tokenizer = nltk.TreebankWordTokenizer()
 
     text = rehyph(text)
-    text = nltk.TreebankWordTokenizer().tokenize(text)
+    text = word_tokenizer.tokenize(text)
 
     tokens = [word.lower() for word in text]
     tokens = strip_punc(tokens)
@@ -165,6 +187,7 @@ def word_tokenize(text):
     return tokens
 
 
+sent_tokenizer = None
 def sentence_tokenize(text):
     """
     Takes a string and returns a list of strings. Intended use: the
@@ -178,9 +201,11 @@ def sentence_tokenize(text):
 
     :returns: tokens : list of strings
     """
-    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    global sent_tokenizer
+    if sent_tokenizer is None:
+        sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
-    return tokenizer.tokenize(text)
+    return sent_tokenizer.tokenize(text)
 
 def sentence_span_tokenize(text):
     """
@@ -195,9 +220,11 @@ def sentence_span_tokenize(text):
 
     :returns: token_spans : iterator of (start,stop) tuples.
     """
-    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    global sent_tokenizer
+    if sent_tokenizer is None:
+        sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
-    return tokenizer.span_tokenize(text)
+    return sent_tokenizer.span_tokenize(text)
 
 
 
