@@ -332,7 +332,8 @@ def file_tokenize(text, tokenizer=word_tokenize, simple=False):
 
 
 def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1, 
-                add_stop=None, decode=False, simple=False):
+                add_stop=None, decode=False, simple=False,
+                tokenizer=word_tokenize):
     """
     `file_corpus` is a convenience function for generating Corpus
     objects from a a plain text corpus contained in a single string.
@@ -382,7 +383,7 @@ def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1,
     if decode:
         text = unidecode(text)
 
-    words, tok = file_tokenize(text, simple=simple)
+    words, tok = file_tokenize(text, simple=simple, tokenizer=tokenizer)
     names, data = zip(*tok.items())
     
     c = Corpus(words, context_data=data, context_types=names)
@@ -603,7 +604,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 def dir_corpus(plain_dir, chunk_name='article', encoding='utf8', 
                paragraphs=True, ignore=['.json','.log','.pickle'], 
                nltk_stop=True, stop_freq=1, add_stop=None, decode=False, 
-               verbose=1, simple=False):
+               verbose=1, simple=False, tokenizer=word_tokenize):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -691,7 +692,8 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
                     chunks.append(f.read())
 
     words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
-                              paragraphs=paragraphs, verbose=verbose, simple=simple)
+                              paragraphs=paragraphs, verbose=verbose,
+                              simple=simple, tokenizer=tokenizer)
     names, data = zip(*tok.items())
     
     c = Corpus(words, context_data=data, context_types=names)
@@ -789,7 +791,7 @@ def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize, simple=
 #TODO: This should be a whitelist not a blacklist
 def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
                 nltk_stop=True, stop_freq=1, add_stop=None, 
-                decode=False, verbose=1, simple=False):
+                decode=False, verbose=1, simple=False, tokenizer=word_tokenize):
     """
     `coll_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -869,7 +871,8 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
 
         books.append(pages)
 
-    words, tok = coll_tokenize(books, book_names, simple=simple)
+    words, tok = coll_tokenize(books, book_names, simple=simple,
+                               tokenizer=tokenizer)
     names, data = zip(*tok.items())
     
     c = Corpus(words, context_data=data, context_types=names)
