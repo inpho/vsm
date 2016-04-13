@@ -772,7 +772,7 @@ def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize, simple=
     if not simple:
         sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
     files = [f for (a,b,c,f) in page_tokens]
-    file_dt = ('file', np.array(files, np.str_).dtype)
+    file_dt = ('file', np.array(files, np.unicode_).dtype)
 
     corpus_data = dict()
     dtype = [idx_dt, book_label_dt]

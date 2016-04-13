@@ -22,21 +22,19 @@ PUNC_TABLE = {ord(c): None for c in PUNC}
 def strip_punc(tsent):
     """
     """
-    p1 = PUNCTUATION_START
-    p2 = PUNCTUATION_END
-
     out = []
     for word in tsent:
-        if isinstance(word, unicode):
-            w = word.translate(PUNC_TABLE)
-        elif isinstance(word, str):
-            w = word.translate(None, string.punctuation)
-        #w = re.sub(p2, '', re.sub(p1, '', word))
+        w = strip_punc_word(w)
         if w:
             out.append(w)
 
     return out
 
+def strip_punc_word(word):
+    if isinstance(word, unicode):
+        return word.translate(PUNC_TABLE)
+    elif isinstance(word, str):
+        return word.translate(None, string.punctuation)
 
 NUMS = string.digits
 NUMS_TABLE =  {ord(c): None for c in NUMS}
@@ -55,6 +53,12 @@ def rem_num(tsent):
             out.append(w)
 
     return out
+
+def rem_num_word(word):
+    if isinstance(word, unicode):
+        return word.translate(NUMS_TABLE)
+    elif isinstance(word, str):
+        return word.translate(None, string.digits)
 
 def rehyph(sent):
     """
@@ -184,12 +188,15 @@ def word_tokenize(text):
         word_tokenizer = nltk.TreebankWordTokenizer()
 
     text = rehyph(text)
-    text = word_tokenizer.tokenize(text)
+    text = strip_punc_word(text)
+    text = rem_num_word(text)
+    text = text.replace(u'\x00','')
+    text = text.lower()
+    tokens = word_tokenizer.tokenize(text)
 
-    tokens = [word.lower() for word in text]
-    tokens = strip_punc(tokens)
-    tokens = rem_num(tokens)
-    
+    #process_word = lambda x: strip_punc_word(rem_num_word(word)).lower().replace(u'\x00','')
+    #tokens = [process_word(word) for word in text]
+
     return tokens
 
 
