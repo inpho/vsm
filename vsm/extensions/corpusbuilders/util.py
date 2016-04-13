@@ -24,7 +24,7 @@ def strip_punc(tsent):
     """
     out = []
     for word in tsent:
-        w = strip_punc_word(w)
+        w = strip_punc_word(word)
         if w:
             out.append(w)
 
@@ -45,10 +45,7 @@ def rem_num(tsent):
     #p = re.compile(r'(^\D+$)|(^\D*[1-2]\d\D*$|^\D*\d\D*$)')
     out = []
     for word in tsent:
-        if isinstance(word, unicode):
-            w = word.translate(NUMS_TABLE)
-        elif isinstance(word, str):
-            w = word.translate(None, string.digits)
+        w = rem_num_word(word)
         if w:
             out.append(w)
 
