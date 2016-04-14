@@ -2,7 +2,6 @@ import re
 import string
 
 from chardet.universaldetector import UniversalDetector
-import nltk
 import numpy as np
 
 __all__ = ['strip_punc', 'rem_num', 'rehyph',
@@ -97,6 +96,7 @@ def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0, in_place=True):
     """
     stoplist = set()
     if nltk_stop:
+        import nltk
         for w in nltk.corpus.stopwords.words('english'):
             stoplist.add(w)
     if add_stop:
@@ -134,6 +134,7 @@ def in_place_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
     """
     stoplist = set()
     if nltk_stop:
+        import nltk
         for w in nltk.corpus.stopwords.words('english'):
             stoplist.add(w)
     if add_stop:
@@ -191,6 +192,7 @@ def word_tokenize(text):
     """
     global word_tokenizer
     if word_tokenizer is None:
+        import nltk
         word_tokenizer = nltk.TreebankWordTokenizer()
 
     text = rehyph(text)
@@ -221,6 +223,7 @@ def sentence_tokenize(text):
     """
     global sent_tokenizer
     if sent_tokenizer is None:
+        import nltk
         sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
     return sent_tokenizer.tokenize(text)
@@ -240,6 +243,7 @@ def sentence_span_tokenize(text):
     """
     global sent_tokenizer
     if sent_tokenizer is None:
+        import nltk
         sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
     return sent_tokenizer.span_tokenize(text)
