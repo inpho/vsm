@@ -42,8 +42,10 @@ def corpus_from_strings(strings, metadata=[], decode=False,
     context_data = [np.array(zip(indices, metadata), dtype=dtype)]
 
     c = Corpus(corpus, context_data=context_data, context_types=['document'])
-    return apply_stoplist(c, nltk_stop=nltk_stop,
-                          freq=stop_freq, add_stop=add_stop)
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
+    return c
 
 
 
@@ -270,9 +272,9 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False
         tok = np.array([(i,) for i in tok], dtype=dtype)
     
     c = Corpus(corpus, context_data=[tok], context_types=['document'])
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
 def file_tokenize(text, tokenizer=word_tokenize, simple=False):
@@ -387,9 +389,9 @@ def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1,
     names, data = zip(*tok.items())
     
     c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
 
@@ -470,9 +472,9 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
 
     
     c = Corpus(corpus, context_data=[tok], context_types=['document'])
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
 
@@ -697,9 +699,9 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
     names, data = zip(*tok.items())
     
     c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
 
@@ -1052,9 +1054,9 @@ def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle']
     names, data = zip(*tok.items())
     
     c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
 
