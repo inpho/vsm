@@ -690,6 +690,9 @@ class Corpus(BaseCorpus):
         # print 'sorting stopwords', datetime.now() 
         stoplist = sorted(stoplist)
         stop = sorted(stop)
+        #stop = np.array(sorted(stop), np.int_)
+        #print stop.dtype, stop.size,self.words.dtype, self.corpus.dtype
+        #stop.sort()
     
         # print 'Removing stop words', datetime.now()
         f = np.vectorize(lambda x: binary_search(stop, x) < 0)

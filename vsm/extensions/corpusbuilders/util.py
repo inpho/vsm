@@ -63,6 +63,15 @@ def rehyph(sent):
     return re.sub(r'(?P<x1>.)--(?P<x2>.)', '\g<x1> - \g<x2>', sent)
 
 
+BIG_TABLE = NUMS_TABLE.copy()
+BIG_TABLE.update(PUNC_TABLE)
+BIG_LIST = string.digits + string.punctuation
+def process_word(word):
+    if isinstance(word, unicode):
+        return word.translate(BIG_TABLE)
+    elif isinstance(word, str):
+        return word.translate(None, BIG_LIST)
+
 def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0, in_place=True):
     """
     Returns a Corpus object with stop words eliminated.
@@ -185,8 +194,7 @@ def word_tokenize(text):
         word_tokenizer = nltk.TreebankWordTokenizer()
 
     text = rehyph(text)
-    text = strip_punc_word(text)
-    text = rem_num_word(text)
+    text = process_word(text)
     text = text.replace(u'\x00','')
     text = text.lower()
     tokens = word_tokenizer.tokenize(text)
