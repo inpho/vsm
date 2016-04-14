@@ -703,7 +703,8 @@ class Corpus(BaseCorpus):
         new_corpus = []
         spans = []
         for t in tokens:
-            new_t = t[np.logical_not(f(t))]
+            new_t = t[np.logical_not(f(t))] if t.size else t
+            
             # TODO: append to new_corpus as well
             spans.append(new_t.size if new_t.size else 0)
             if new_t.size:
