@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import sparse
-from scipy.sparse import linalg as linalgs
 
 
 __all__ = [ 'Lsa' ]
@@ -57,6 +56,7 @@ class Lsa(object):
         :param k_factors: Default is 300.
         :type k_factors: int, optional
         """
+        from scipy.sparse import linalg as linalgs
 
         u,s,v = np.array([]), np.array([]), np.array([])
 

@@ -668,7 +668,7 @@ class Corpus(BaseCorpus):
         if freq:
             cfs = np.bincount(self.corpus)
             freq_stop = np.where(cfs <= freq)[0]
-            stop.add(freq_stop)
+            stop.update(freq_stop)
 
 
         if not stop:
@@ -738,7 +738,7 @@ class Corpus(BaseCorpus):
 
         #print "remapping corpus", datetime.now()
         f = np.vectorize(old_to_new.__getitem__)
-        self.corpus = f(self.corpus)
+        self.corpus[:] = f(self.corpus)
 
         #print 'storing new word dicts', datetime.now()
         self.words = new_words
