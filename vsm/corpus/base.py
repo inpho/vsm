@@ -668,6 +668,7 @@ class Corpus(BaseCorpus):
             #TODO: Use the TF model instead
 
             # print 'Computing collection frequencies'
+            """
             cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
     
             for word in self.corpus:
@@ -675,6 +676,9 @@ class Corpus(BaseCorpus):
 
             # print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
+            """
+            cfs = np.bincount(self.corpus)
+            freq_stop = np.where(cfs <= freq)[0]
             stop = SortedSet(freq_stop)
             for word in stop:
                 stoplist.append(self.words[word])
