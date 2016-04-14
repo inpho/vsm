@@ -746,21 +746,25 @@ class Corpus(BaseCorpus):
         # print 'Rebuilding corpus and updating stop words', datetime.now()
         self.corpus = np.concatenate(new_corpus)
         #self.corpus[f(self.corpus)]
-        self.stopped_words.update(self.words[t] for t in stop)
+        self.stopped_words.update(self.words[stop])
 
-        # print 'adjusting words list', datetime.now()
-        new_words = np.array([t for t in self.words if self.words_int[t] not in stop])
+        #print 'adjusting words list', datetime.now()
+        new_words = np.delete(self.words, stop)
 
         # print 'rebuilding word dictionary', datetime.now()
-        new_words_int = dict((word,i) for i, word in enumerate(new_words))
+        new_words_int = dict((word,i) for i, word in enumerate(new_words)) 
 
-        # print "remapping corpus", datetime.now()
-        current_offset = 0
-        for i, tok in enumerate(self.corpus):
-            self.corpus[i] = new_words_int[self.words[tok]] 
+        print "remapping corpus", datetime.now()
+        
+        for k in xrange(len(self.words)):
+            if k not in stop:
+                self.corpus[self.corpus == k] = new_words_int[self.words[k]]
+        
+        # f = np.vectorize(lambda x: new_words_int[self.words[x]])
+        # self.corpus = f(self.corpus)
         # print len(self.words), len(self.words_int), len(new_words), len(new_words_int)
 
-        # print 'storing new word dicts', datetime.now()
+        print 'storing new word dicts', datetime.now()
         self.words = new_words
         self.words_int = new_words_int
 
