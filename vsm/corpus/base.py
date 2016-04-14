@@ -695,7 +695,7 @@ class Corpus(BaseCorpus):
         #stop.sort()
     
         # print 'Removing stop words', datetime.now()
-        f = np.vectorize(lambda x: x not in stop)
+        f = np.vectorize(stop.__contains__)
 
         # print 'Rebuilding context data', datetime.now()
         context_data = []
@@ -722,7 +722,7 @@ class Corpus(BaseCorpus):
         new_corpus = []
         spans = []
         for t in tokens:
-            new_t = t[f(t)]
+            new_t = t[np.logical_not(f(t))]
             # TODO: append to new_corpus as well
             spans.append(new_t.size if new_t.size else 0)
             if new_t.size:
@@ -753,15 +753,16 @@ class Corpus(BaseCorpus):
 
         # print 'rebuilding word dictionary', datetime.now()
         new_words_int = dict((word,i) for i, word in enumerate(new_words)) 
+        old_to_new =  dict((self.words_int[word],i) for i, word in enumerate(new_words)) 
 
         print "remapping corpus", datetime.now()
         
-        for k in xrange(len(self.words)):
-            if k not in stop:
-                self.corpus[self.corpus == k] = new_words_int[self.words[k]]
+        #for i in xrange(len(self.corpus)):
+        #    self.corpus[i] = new_words_int[self.words[self.corpus[i]]]
         
         # f = np.vectorize(lambda x: new_words_int[self.words[x]])
-        # self.corpus = f(self.corpus)
+        f = np.vectorize(old_to_new.__getitem__)
+        self.corpus = f(self.corpus)
         # print len(self.words), len(self.words_int), len(new_words), len(new_words_int)
 
         print 'storing new word dicts', datetime.now()
