@@ -696,14 +696,43 @@ class Corpus(BaseCorpus):
 
         # print 'Rebuilding context data', datetime.now()
         context_data = []
+
+        BASE = len(self.context_data) - 1
+        # gathering list of new indicies from narrowest tokenization
+        def find_new_indexes(INTO, BASE=-1):
+            locs = np.where(np.in1d(self.context_data[BASE]['idx'], self.context_data[INTO]['idx']))[0]
+
+            # creating a list of lcoations that are non-identical
+            new_locs = np.array([loc for i, loc in enumerate(locs)
+                                     if i+1 == len(locs) or self.context_data[BASE]['idx'][locs[i]] != self.context_data[BASE]['idx'][locs[i+1]]])
+
+            # creating a search for locations that ARE identical
+            idxs = np.insert(self.context_data[INTO]['idx'], [0,-1], [-1,-1])
+            same_spots = np.where(np.equal(idxs[:-1], idxs[1:]))[0]
+
+            # readding the identical locations
+            really_new_locs = np.insert(new_locs, same_spots, new_locs[same_spots-1])
+            return really_new_locs
+
+        # Calculate new base tokens
+        tokens = self.view_contexts(self.context_types[BASE])
+        spans = []
+        for t in tokens:
+            new_t = t[f(t)]
+            # TODO: append to new_corpus as well
+            spans.append(new_t.size if new_t.size else 0)
+        new_base = self.context_data[BASE].copy()
+        new_base['idx'] = np.cumsum(spans)
+
+        context_data = []
+        # calculate new tokenizations for every context_type
         for i in xrange(len(self.context_data)):
-            # print 'Recomputing token breaks:', self.context_types[i]
-            tokens = self.view_contexts(self.context_types[i])
-            # print self.context_types[i], len(stoplist), len(stop), datetime.now()
-            spans = [t[f(t)].size if t.size else 0 for t in tokens]
-            tok = self.context_data[i].copy()
-            tok['idx'] = np.cumsum(spans)
-            context_data.append(tok)
+            if i == BASE:
+                context_data.append(new_base)
+            else:
+                context = self.context_data[i].copy()
+                context['idx'] = new_base['idx'][find_new_indexes(i, BASE)]
+                context_data.append(context)
 
         del self.context_data
         self.context_data = context_data
