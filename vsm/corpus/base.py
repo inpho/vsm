@@ -658,11 +658,10 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`
         """
         from sortedcontainers import SortedSet, SortedList
-        if stoplist is None:
-            stoplist = list()
-        else:
-            # convert to raw list from set, array, etc.
-            stoplist = [word for word in stoplist]
+        if stoplist:
+            for t in stoplist:
+                if t in self.words_int:
+                    stop.add(self.words_int[t])
 
         if freq:
             #TODO: Use the TF model instead
@@ -680,24 +679,15 @@ class Corpus(BaseCorpus):
             cfs = np.bincount(self.corpus)
             freq_stop = np.where(cfs <= freq)[0]
             stop = SortedSet(freq_stop)
-            for word in stop:
-                stoplist.append(self.words[word])
         else:
             stop = SortedSet()
 
-        # filter stoplist
-        # print len(stoplist), "filtering to",
-        stoplist = [t for t in stoplist if binary_search(self.words, t) >= 0]
-        # print len(stoplist)
-        for t in stoplist:
-            stop.add(self.words_int[t])
 
         if not stop:
             # print 'Stop list is empty.'
             return self
 
         # print 'sorting stopwords', datetime.now() 
-        stoplist = sorted(stoplist)
         #stop = sorted(stop)
         #stop = np.sort(stop)
         #stop = np.array(sorted(stop), np.int_)
@@ -756,10 +746,10 @@ class Corpus(BaseCorpus):
         # print 'Rebuilding corpus and updating stop words', datetime.now()
         self.corpus = np.concatenate(new_corpus)
         #self.corpus[f(self.corpus)]
-        self.stopped_words.update(stoplist)
+        self.stopped_words.update(self.words[t] for t in stop)
 
         # print 'adjusting words list', datetime.now()
-        new_words = np.array([t for t in self.words if binary_search(stoplist,t) < 0])
+        new_words = np.array([t for t in self.words if self.words_int[t] not in stop])
 
         # print 'rebuilding word dictionary', datetime.now()
         new_words_int = dict((word,i) for i, word in enumerate(new_words))
