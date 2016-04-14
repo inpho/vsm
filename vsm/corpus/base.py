@@ -658,41 +658,22 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`
         """
         from sortedcontainers import SortedSet, SortedList
+        stop = SortedSet()
+
         if stoplist:
             for t in stoplist:
                 if t in self.words_int:
                     stop.add(self.words_int[t])
 
         if freq:
-            #TODO: Use the TF model instead
-
-            # print 'Computing collection frequencies'
-            """
-            cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
-    
-            for word in self.corpus:
-                cfs[word] += 1
-
-            # print 'Selecting words of frequency <=', freq
-            freq_stop = np.arange(cfs.size)[(cfs <= freq)]
-            """
             cfs = np.bincount(self.corpus)
             freq_stop = np.where(cfs <= freq)[0]
-            stop = SortedSet(freq_stop)
-        else:
-            stop = SortedSet()
+            stop.add(freq_stop)
 
 
         if not stop:
             # print 'Stop list is empty.'
             return self
-
-        # print 'sorting stopwords', datetime.now() 
-        #stop = sorted(stop)
-        #stop = np.sort(stop)
-        #stop = np.array(sorted(stop), np.int_)
-        #print stop.dtype, stop.size,self.words.dtype, self.corpus.dtype
-        #stop.sort()
     
         # print 'Removing stop words', datetime.now()
         f = np.vectorize(stop.__contains__)
@@ -755,17 +736,11 @@ class Corpus(BaseCorpus):
         new_words_int = dict((word,i) for i, word in enumerate(new_words)) 
         old_to_new =  dict((self.words_int[word],i) for i, word in enumerate(new_words)) 
 
-        print "remapping corpus", datetime.now()
-        
-        #for i in xrange(len(self.corpus)):
-        #    self.corpus[i] = new_words_int[self.words[self.corpus[i]]]
-        
-        # f = np.vectorize(lambda x: new_words_int[self.words[x]])
+        #print "remapping corpus", datetime.now()
         f = np.vectorize(old_to_new.__getitem__)
         self.corpus = f(self.corpus)
-        # print len(self.words), len(self.words_int), len(new_words), len(new_words_int)
 
-        print 'storing new word dicts', datetime.now()
+        #print 'storing new word dicts', datetime.now()
         self.words = new_words
         self.words_int = new_words_int
 
