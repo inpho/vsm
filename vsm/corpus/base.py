@@ -716,11 +716,14 @@ class Corpus(BaseCorpus):
 
         # Calculate new base tokens
         tokens = self.view_contexts(self.context_types[BASE])
+        new_corpus = []
         spans = []
         for t in tokens:
             new_t = t[f(t)]
             # TODO: append to new_corpus as well
             spans.append(new_t.size if new_t.size else 0)
+            if new_t.size:
+                new_corpus.append(new_t)
         new_base = self.context_data[BASE].copy()
         new_base['idx'] = np.cumsum(spans)
 
@@ -738,7 +741,8 @@ class Corpus(BaseCorpus):
         self.context_data = context_data
 
         # print 'Rebuilding corpus and updating stop words', datetime.now()
-        self.corpus = self.corpus[f(self.corpus)]
+        self.corpus = np.concatenate(new_corpus)
+        #self.corpus[f(self.corpus)]
         self.stopped_words.update(stoplist)
 
         # print 'adjusting words list', datetime.now()
