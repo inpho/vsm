@@ -11,7 +11,8 @@ install_requires=[
         "numpy>=1.6.1",
         "scipy>=0.13.0",
         "progressbar>=2.3",
-        "chardet>=2.3.0"]
+        "chardet>=2.3.0",
+        "sortedcollections>=1.4.0]
 
 setup(
     name = "vsm",

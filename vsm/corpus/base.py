@@ -15,7 +15,11 @@ def binary_search(a, x, lo=0, hi=None):   # can't use a to specify default for h
     hi = hi if hi is not None else len(a) # hi defaults to len(a)   
     pos = bisect_left(a,x,lo,hi)          # find insertion position
     return (pos if pos != hi and a[pos] == x else -1) # don't walk off the end
-
+"""
+def binary_search_set(a,x):
+    pos = a.bisect_left(x)
+    return (pos if pos != len(a)  and a[pos] == x else -1) # don't walk off the end
+"""
 
 class BaseCorpus(object):
     """
@@ -653,6 +657,7 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
+        from sortedcontainers import SortedSet, SortedList
         if stoplist is None:
             stoplist = list()
         else:
@@ -670,11 +675,11 @@ class Corpus(BaseCorpus):
 
             # print 'Selecting words of frequency <=', freq
             freq_stop = np.arange(cfs.size)[(cfs <= freq)]
-            stop = set(freq_stop)
+            stop = SortedSet(freq_stop)
             for word in stop:
                 stoplist.append(self.words[word])
         else:
-            stop = set()
+            stop = SortedSet()
 
         # filter stoplist
         # print len(stoplist), "filtering to",
@@ -689,13 +694,14 @@ class Corpus(BaseCorpus):
 
         # print 'sorting stopwords', datetime.now() 
         stoplist = sorted(stoplist)
-        stop = sorted(stop)
+        #stop = sorted(stop)
+        #stop = np.sort(stop)
         #stop = np.array(sorted(stop), np.int_)
         #print stop.dtype, stop.size,self.words.dtype, self.corpus.dtype
         #stop.sort()
     
         # print 'Removing stop words', datetime.now()
-        f = np.vectorize(lambda x: binary_search(stop, x) < 0)
+        f = np.vectorize(lambda x: x not in stop)
 
         # print 'Rebuilding context data', datetime.now()
         context_data = []
