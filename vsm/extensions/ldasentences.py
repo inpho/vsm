@@ -565,12 +565,13 @@ def file_tokenize(text):
 
 
 def toy_corpus(filename, is_filename=True, nltk_stop=True, stop_freq=1,
-    add_stop=None, decode=False, autolabel=False):
+    add_stop=None, decode=False, autolabel=False, simple=False):
     if is_filename:
         return file_corpus(filename, nltk_stop=nltk_stop, stop_freq=stop_freq,
         add_stop=add_stop)
 
-def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None):
+def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None,
+                simple=False):
     """
     `file_corpus` is a convenience function for generating Corpus
     objects from a a plain text corpus contained in a single string
@@ -683,7 +684,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 def dir_corpus(plain_dir, chunk_name='article', paragraphs=True, word_len=2,
                nltk_stop=True, stop_freq=1, add_stop=None, corpus_sent=True,
-               ignore=['.log', '.pickle', '.xml'], decode=False):
+               ignore=['.log', '.pickle', '.xml'], decode=False, simple=False):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
