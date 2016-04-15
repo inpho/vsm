@@ -5,6 +5,7 @@ import numpy as np
 from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
 
+
 __all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
             'align_corpora','binary_search' ]
 
@@ -580,23 +581,40 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`, :meth:`Corpus.save`, :meth:`numpy.load`
 
         """
-        if not file is None:
-            arrays_in = np.load(file)
 
+        import concurrent.futures
+        def load_npz(filename, obj):
+            zipfile = np.load(filename)
+            return zipfile.__getitem__(obj)
+
+        if not file is None:
             c = Corpus([], remove_empty=False)
-            c.corpus = arrays_in['corpus']
-            c.words = arrays_in['words']
-            c.context_types = arrays_in['context_types'].tolist()
+
+            # submit futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                arrays_in = np.load(file)
+    
+                c.corpus = executor.submit(load_npz, file, 'corpus')
+                c.words =  executor.submit(load_npz, file, 'words')
+                c.context_types = executor.submit(load_npz, file, 'context_types')
+                c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
+                context_data = dict()
+                for n in arrays_in.files:
+                    if n.startswith('context_data_'):
+                        context_data[n] = executor.submit(load_npz, file, n)
+
+            # get futures results
+            c.corpus = c.corpus.result()
+            c.words = c.words.result()
+            c.context_types = c.context_types.result().tolist()
             try:
-                c.stopped_words = set(arrays_in['stopped_words'].tolist())
+                c.stopped_words = set([word for word in c.stopped_words.result()])
             except:
                 c.stopped_words = set()
 
-            c.context_data = list()
-            for n in c.context_types:
-                t = arrays_in['context_data_' + n]
-                c.context_data.append(t)
+            c.context_data = [context_data['context_data_' + n].result() for n in c.context_types]
 
+            # reset words_int dictionary
             c._set_words_int()
 
             return c

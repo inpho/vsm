@@ -14,9 +14,12 @@ install_requires=[
         "chardet>=2.3.0",
         "sortedcontainers>=1.4.0"]
 
+if platform.python_version_tuple()[0] == 2:
+    install_requires.append("futures>=3.0.0")
+
 setup(
     name = "vsm",
-    version = "0.4.0a24",
+    version = "0.4.0a25",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
