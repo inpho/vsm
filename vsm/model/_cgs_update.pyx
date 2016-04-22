@@ -5,7 +5,7 @@ import cython
 
 
 def cgs_update(int itr, 
-               int [:] corpus,
+               unsigned short [:] corpus,
                double [:,:] word_top,
                double [:] inv_top_sums,
                double [:,:] top_doc,
