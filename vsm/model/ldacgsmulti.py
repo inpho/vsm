@@ -81,6 +81,17 @@ class LdaCgsMulti(LdaCgsSeq):
         super(LdaCgsMulti, self).__init__(corpus=corpus, context_type=context_type,
                                           K=K, V=V, alpha=alpha, beta=beta)
 
+        self.dtype = 'H' 
+        """
+        if self.corpus.dtype in ['H', 'I', 'i']:
+            self.dtype = self.corpus.dtype
+        elif self.corpus.dtype == 'uint16':
+            self.dtype = 'H'
+        elif self.corpus.dtype == 'uint32':
+            self.dtype = 'I'
+        else:
+            self.dtype = 'i'
+        """
         # delete LdaCgsSeq seed and state
         del self.seed
         del self._mtrand_state
@@ -98,13 +109,14 @@ class LdaCgsMulti(LdaCgsSeq):
         self.inv_top_sums = self.inv_top_sums
         self.top_doc = self.top_doc
         self.iteration = self.iteration
+        self.dtype = self.dtype
 
         self._read_globals = False
 
         global _K, _V, _corpus, _Z, _word_top, _inv_top_sums
-        global _top_doc, _iteration
+        global _top_doc, _iteration, _dtype
         del (_K, _V, _corpus, _Z, _word_top, _inv_top_sums,
-             _top_doc, _iteration)
+             _top_doc, _iteration, _dtype)
 
 
     def _move_locals_to_globals(self):
@@ -119,12 +131,13 @@ class LdaCgsMulti(LdaCgsSeq):
         self.inv_top_sums = self.inv_top_sums
         self.top_doc = self.top_doc
         self.iteration = self.iteration
+        self.dtype = self.dtype
 
         self._read_globals = True
 
         del (self._K_local, self._V_local, self._corpus_local, self._Z_local,
              self._word_top_local, self._inv_top_sums_local,
-             self._top_doc_local, self._iteration_local)
+             self._top_doc_local, self._iteration_local, self._dtype_local)
         
 
     @property
@@ -182,7 +195,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def corpus(self):
         if self._read_globals:
-            return np.frombuffer(_corpus, np.int32)
+            return np.frombuffer(_corpus, self.dtype)
         return self._corpus_local
 
     @corpus.setter
@@ -190,11 +203,56 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _corpus
             if not '_corpus' in globals():
+                if self.dtype in ['H', 'I', 'i']:
+                    dtype = self.dtype
+                elif self.dtype == 'uint16':
+                    dtype = 'H'
+                elif self.dtype == 'uint32':
+                    dtype = 'I'
+                else:
+                    dtype = 'i'
+
                 _corpus = mp.Array('i', len(a), lock=False)
             _corpus[:] = a
         else:
             self._corpus_local = a
 
+    @property
+    def dtype(self):
+        if self._read_globals:
+            return _dtype.value
+        return self._dtype_local
+
+    @dtype.setter
+    def dtype(self, dtype):
+        if self._write_globals:
+            global _dtype
+            if dtype in ['H', 'I', 'i']:
+                dtype = dtype
+            elif dtype == 'uint16':
+                dtype = 'H'
+            elif dtype == 'uint32':
+                dtype = 'I'
+            else:
+                dtype = 'i'
+
+            if not '_dtype' in globals():
+                _dtype = mp.Value('c', lock=False)
+
+            _dtype.value = 'H'
+
+        else:
+            self._dtype_local = 'H'
+            '''
+            if dtype in ['H', 'I', 'i']:
+                self._dtype_local = dtype
+            elif dtype == 'uint16':
+                self._dtype_local = 'H'
+            elif dtype == 'uint32':
+                self._dtype_local = 'I'
+            else:
+                self._dtype_local = 'i'
+            '''
 
     @property
     def Z(self):
@@ -376,7 +434,7 @@ def update((docs, doc_indices, mtrand_state)):
     """
     start, stop = docs[0][0], docs[-1][1]
 
-    corpus = np.frombuffer(_corpus, dtype='i')[start:stop]
+    corpus = np.frombuffer(_corpus, dtype=_dtype)[start:stop]
     Z = np.frombuffer(_Z, dtype='i')[start:stop].copy()
 
     gbl_word_top = np.frombuffer(_word_top, dtype='d')
