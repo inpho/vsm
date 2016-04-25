@@ -156,6 +156,8 @@ class BaseCorpus(object):
                 self.context_data.append(t)
         
         self._gen_context_types(context_types)
+        
+        self.stopped_words = set()
 
         if remove_empty:
             self.remove_empty()
@@ -581,13 +583,12 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`, :meth:`Corpus.save`, :meth:`numpy.load`
 
         """
-
         import concurrent.futures
         def load_npz(filename, obj):
             zipfile = np.load(filename)
             return zipfile.__getitem__(obj)
 
-        if not file is None:
+        if file is not None:
             c = Corpus([], remove_empty=False)
 
             # submit futures

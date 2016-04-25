@@ -7,6 +7,9 @@ import platform
 packages = ['vsm.'+pkg for pkg in find_packages('vsm')]
 packages.append('vsm')
 
+
+
+
 install_requires=[
         "numpy>=1.6.1",
         "scipy>=0.13.0",
@@ -47,5 +50,6 @@ setup(
     ext_modules = [
         Extension('_cgs_update', ['vsm/model/_cgs_update.c']),
     ],
-    test_suite = "unit_tests"
+    tests_require=['unittest2'],
+    test_suite = "unit_tests",
 )
