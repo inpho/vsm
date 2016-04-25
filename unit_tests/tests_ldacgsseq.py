@@ -43,7 +43,8 @@ class TestLdaCgsSeq(unittest.TestCase):
             self.assertTrue(m0.seed == m1.seed)
             self.assertTrue(m0._mtrand_state[0] == m1._mtrand_state[0])
             self.assertTrue((m0._mtrand_state[1] == m1._mtrand_state[1]).all())
-            self.assertTrue(m0._mtrand_state[2:] == m1._mtrand_state[2:])
+            for s1,s2 in zip(m0._mtrand_state[2:], m1._mtrand_state[2:]):
+                self.assertTrue(s1 == s2)
             
 
             m0 = LdaCgsSeq(c, 'document', K=10)
