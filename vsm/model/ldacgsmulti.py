@@ -199,7 +199,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def Z(self):
         if self._read_globals:
-            return np.frombuffer(_Z, np.int32)
+            return np.frombuffer(_Z, np.uint8)
         return self._Z_local
 
     @Z.setter
@@ -377,7 +377,7 @@ def update((docs, doc_indices, mtrand_state)):
     start, stop = docs[0][0], docs[-1][1]
 
     corpus = np.frombuffer(_corpus, dtype='i')[start:stop]
-    Z = np.frombuffer(_Z, dtype='i')[start:stop].copy()
+    Z = np.frombuffer(_Z, dtype=np.uint8)[start:stop].copy()
 
     gbl_word_top = np.frombuffer(_word_top, dtype='d')
     gbl_word_top = gbl_word_top.reshape(_V.value, _K.value)

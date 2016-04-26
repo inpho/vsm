@@ -54,7 +54,7 @@ class LdaCgsSeq(object):
             self.corpus = []
 
         self.indices = np.array(self.indices, dtype='i')
-        self.Z = np.zeros_like(self.corpus, dtype='i')
+        self.Z = np.zeros_like(self.corpus, dtype=np.uint8)
 
         priors = init_priors(self.V, self.K, beta, alpha)
         self.beta, self.alpha = priors

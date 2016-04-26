@@ -9,7 +9,7 @@ def cgs_update(int itr,
                double [:,:] word_top,
                double [:] inv_top_sums,
                double [:,:] top_doc,
-               int [:] Z,
+               unsigned char [:] Z,
                int [:] indices,
                str mtrand_str,
                unsigned int [:] mtrand_keys,
@@ -38,7 +38,8 @@ def cgs_update(int itr,
 
     cdef double r, s
     cdef long start, stop, doc_len, offset
-    cdef Py_ssize_t i, j, idx, w, k, t
+    cdef unsigned char k,t
+    cdef Py_ssize_t i, j, idx, w
 
     for i in range(N):
 
