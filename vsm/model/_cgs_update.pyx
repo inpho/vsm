@@ -1,5 +1,6 @@
 import numpy as np
 import cython
+@cython.wraparound(False)
 @cython.boundscheck(False)
 @cython.cdivision(True)
 
