@@ -194,10 +194,10 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _corpus
             if not '_corpus' in globals():
-                if self.corpus.dtype == 'uint16':
-                    dtype = 'H'
-                elif self.corpus.dtype == 'uint32':
-                    dtype = 'I'
+                if self.corpus.dtype == 'int16':
+                    dtype = 'h'
+                elif self.corpus.dtype == 'int32':
+                    dtype = 'i'
                 else:
                     raise NotImplementedError
 
@@ -405,9 +405,9 @@ def update((docs, doc_indices, mtrand_state, dtype)):
 
     indices = np.array([(j - start) for (i,j) in docs], dtype='i')
 
-    if dtype == np.uint16:
+    if dtype == np.int16:
         update_fn = cgs_update_short
-    elif dtype == np.uint32:
+    elif dtype == np.int32:
         update_fn = cgs_update
     else:
         raise NotImplementedError

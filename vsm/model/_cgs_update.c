@@ -1005,15 +1005,15 @@ static int __Pyx_ValidateAndInit_memviewslice(
                 __Pyx_memviewslice *memviewslice,
                 PyObject *original_obj);
 
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_unsigned_int(PyObject *);
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_int(PyObject *);
 
 static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_double(PyObject *);
 
 static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_double(PyObject *);
 
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_int(PyObject *);
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_unsigned_int(PyObject *);
 
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_unsigned_short(PyObject *);
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_short(PyObject *);
 
 static PyObject *__pyx_memview_get_double(const char *itemp);
 static int __pyx_memview_set_double(const char *itemp, PyObject *obj);
@@ -1111,10 +1111,10 @@ static void __pyx_memoryview_refcount_objects_in_slice_with_gil(char *, Py_ssize
 static void __pyx_memoryview_refcount_objects_in_slice(char *, Py_ssize_t *, Py_ssize_t *, int, int); /*proto*/
 static void __pyx_memoryview_slice_assign_scalar(__Pyx_memviewslice *, int, size_t, void *, int); /*proto*/
 static void __pyx_memoryview__slice_assign_scalar(char *, Py_ssize_t *, Py_ssize_t *, int, size_t, void *); /*proto*/
-static __Pyx_TypeInfo __Pyx_TypeInfo_unsigned_int = { "unsigned int", NULL, sizeof(unsigned int), { 0 }, 0, IS_UNSIGNED(unsigned int) ? 'U' : 'I', IS_UNSIGNED(unsigned int), 0 };
-static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_int = { "int", NULL, sizeof(int), { 0 }, 0, IS_UNSIGNED(int) ? 'U' : 'I', IS_UNSIGNED(int), 0 };
-static __Pyx_TypeInfo __Pyx_TypeInfo_unsigned_short = { "unsigned short", NULL, sizeof(unsigned short), { 0 }, 0, IS_UNSIGNED(unsigned short) ? 'U' : 'I', IS_UNSIGNED(unsigned short), 0 };
+static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
+static __Pyx_TypeInfo __Pyx_TypeInfo_unsigned_int = { "unsigned int", NULL, sizeof(unsigned int), { 0 }, 0, IS_UNSIGNED(unsigned int) ? 'U' : 'I', IS_UNSIGNED(unsigned int), 0 };
+static __Pyx_TypeInfo __Pyx_TypeInfo_short = { "short", NULL, sizeof(short), { 0 }, 0, IS_UNSIGNED(short) ? 'U' : 'I', IS_UNSIGNED(short), 0 };
 #define __Pyx_MODULE_NAME "vsm.model._cgs_update"
 int __pyx_module_is_main_vsm__model___cgs_update = 0;
 
@@ -1425,7 +1425,7 @@ static PyObject *__pyx_codeobj__19;
  * @cython.cdivision(True)
  * 
  * def cgs_update(int itr,             # <<<<<<<<<<<<<<
- *                unsigned int [:] corpus,
+ *                int [:] corpus,
  *                double [:,:] word_top,
  */
 
@@ -1554,7 +1554,7 @@ static PyObject *__pyx_pw_3vsm_5model_11_cgs_update_1cgs_update(PyObject *__pyx_
       values[11] = PyTuple_GET_ITEM(__pyx_args, 11);
     }
     __pyx_v_itr = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_itr == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 6; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_corpus = __Pyx_PyObject_to_MemoryviewSlice_ds_unsigned_int(values[1]); if (unlikely(!__pyx_v_corpus.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_corpus = __Pyx_PyObject_to_MemoryviewSlice_ds_int(values[1]); if (unlikely(!__pyx_v_corpus.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_word_top = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[2]); if (unlikely(!__pyx_v_word_top.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_inv_top_sums = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[3]); if (unlikely(!__pyx_v_inv_top_sums.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_top_doc = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[4]); if (unlikely(!__pyx_v_top_doc.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
@@ -1632,7 +1632,7 @@ static PyObject *__pyx_pf_3vsm_5model_11_cgs_update_cgs_update(CYTHON_UNUSED PyO
   long __pyx_t_18;
   Py_ssize_t __pyx_t_19;
   Py_ssize_t __pyx_t_20;
-  unsigned int __pyx_t_21;
+  int __pyx_t_21;
   Py_ssize_t __pyx_t_22;
   int __pyx_t_23;
   Py_ssize_t __pyx_t_24;
@@ -2372,7 +2372,7 @@ static PyObject *__pyx_pf_3vsm_5model_11_cgs_update_cgs_update(CYTHON_UNUSED PyO
  */
       __pyx_t_20 = __pyx_v_idx;
       if (__pyx_t_20 < 0) __pyx_t_20 += __pyx_v_corpus.shape[0];
-      __pyx_t_21 = (*((unsigned int *) ( /* dim=0 */ (__pyx_v_corpus.data + __pyx_t_20 * __pyx_v_corpus.strides[0]) )));
+      __pyx_t_21 = (*((int *) ( /* dim=0 */ (__pyx_v_corpus.data + __pyx_t_20 * __pyx_v_corpus.strides[0]) )));
       __pyx_t_22 = __pyx_v_idx;
       if (__pyx_t_22 < 0) __pyx_t_22 += __pyx_v_Z.shape[0];
       __pyx_t_23 = (*((int *) ( /* dim=0 */ (__pyx_v_Z.data + __pyx_t_22 * __pyx_v_Z.strides[0]) )));
@@ -2888,7 +2888,7 @@ static PyObject *__pyx_pf_3vsm_5model_11_cgs_update_cgs_update(CYTHON_UNUSED PyO
  * @cython.cdivision(True)
  * 
  * def cgs_update(int itr,             # <<<<<<<<<<<<<<
- *                unsigned int [:] corpus,
+ *                int [:] corpus,
  *                double [:,:] word_top,
  */
 
@@ -2933,7 +2933,7 @@ static PyObject *__pyx_pf_3vsm_5model_11_cgs_update_cgs_update(CYTHON_UNUSED PyO
  *             mtrand_state[3], mtrand_state[4])
  * 
  * def cgs_update_short(int itr,             # <<<<<<<<<<<<<<
- *                unsigned short [:] corpus,
+ *                short [:] corpus,
  *                double [:,:] word_top,
  */
 
@@ -3062,7 +3062,7 @@ static PyObject *__pyx_pw_3vsm_5model_11_cgs_update_3cgs_update_short(PyObject *
       values[11] = PyTuple_GET_ITEM(__pyx_args, 11);
     }
     __pyx_v_itr = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_itr == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_corpus = __Pyx_PyObject_to_MemoryviewSlice_ds_unsigned_short(values[1]); if (unlikely(!__pyx_v_corpus.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_corpus = __Pyx_PyObject_to_MemoryviewSlice_ds_short(values[1]); if (unlikely(!__pyx_v_corpus.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_word_top = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[2]); if (unlikely(!__pyx_v_word_top.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_inv_top_sums = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[3]); if (unlikely(!__pyx_v_inv_top_sums.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     __pyx_v_top_doc = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[4]); if (unlikely(!__pyx_v_top_doc.memview)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
@@ -3141,7 +3141,7 @@ static PyObject *__pyx_pf_3vsm_5model_11_cgs_update_2cgs_update_short(CYTHON_UNU
   long __pyx_t_19;
   Py_ssize_t __pyx_t_20;
   Py_ssize_t __pyx_t_21;
-  unsigned short __pyx_t_22;
+  short __pyx_t_22;
   Py_ssize_t __pyx_t_23;
   Py_ssize_t __pyx_t_24;
   Py_ssize_t __pyx_t_25;
@@ -3922,7 +3922,7 @@ static PyObject *__pyx_pf_3vsm_5model_11_cgs_update_2cgs_update_short(CYTHON_UNU
         __Pyx_RaiseBufferIndexError(__pyx_t_15);
         {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       }
-      __pyx_t_22 = (*((unsigned short *) ( /* dim=0 */ (__pyx_v_corpus.data + __pyx_t_21 * __pyx_v_corpus.strides[0]) )));
+      __pyx_t_22 = (*((short *) ( /* dim=0 */ (__pyx_v_corpus.data + __pyx_t_21 * __pyx_v_corpus.strides[0]) )));
       __pyx_t_23 = __pyx_v_idx;
       __pyx_t_15 = -1;
       if (__pyx_t_23 < 0) {
@@ -4661,7 +4661,7 @@ static PyObject *__pyx_pf_3vsm_5model_11_cgs_update_2cgs_update_short(CYTHON_UNU
  *             mtrand_state[3], mtrand_state[4])
  * 
  * def cgs_update_short(int itr,             # <<<<<<<<<<<<<<
- *                unsigned short [:] corpus,
+ *                short [:] corpus,
  *                double [:,:] word_top,
  */
 
@@ -17209,7 +17209,7 @@ static int __Pyx_InitCachedConstants(void) {
  * @cython.cdivision(True)
  * 
  * def cgs_update(int itr,             # <<<<<<<<<<<<<<
- *                unsigned int [:] corpus,
+ *                int [:] corpus,
  *                double [:,:] word_top,
  */
   __pyx_tuple__16 = PyTuple_Pack(35, __pyx_n_s_itr, __pyx_n_s_corpus, __pyx_n_s_word_top, __pyx_n_s_inv_top_sums, __pyx_n_s_top_doc, __pyx_n_s_Z, __pyx_n_s_indices, __pyx_n_s_mtrand_str, __pyx_n_s_mtrand_keys, __pyx_n_s_mtrand_pos, __pyx_n_s_mtrand_has_gauss, __pyx_n_s_mtrand_cached_gaussian, __pyx_n_s_V, __pyx_n_s_N, __pyx_n_s_K, __pyx_n_s_log_p, __pyx_n_s_log_wk, __pyx_n_s_log_kd, __pyx_n_s_np_random_state, __pyx_n_s_samples, __pyx_n_s_mtrand_state, __pyx_n_s_dist, __pyx_n_s_cum_dist, __pyx_n_s_r, __pyx_n_s_s, __pyx_n_s_start, __pyx_n_s_stop, __pyx_n_s_doc_len, __pyx_n_s_offset, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_idx, __pyx_n_s_w, __pyx_n_s_k, __pyx_n_s_t); if (unlikely(!__pyx_tuple__16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 6; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -17221,7 +17221,7 @@ static int __Pyx_InitCachedConstants(void) {
  *             mtrand_state[3], mtrand_state[4])
  * 
  * def cgs_update_short(int itr,             # <<<<<<<<<<<<<<
- *                unsigned short [:] corpus,
+ *                short [:] corpus,
  *                double [:,:] word_top,
  */
   __pyx_tuple__18 = PyTuple_Pack(35, __pyx_n_s_itr, __pyx_n_s_corpus, __pyx_n_s_word_top, __pyx_n_s_inv_top_sums, __pyx_n_s_top_doc, __pyx_n_s_Z, __pyx_n_s_indices, __pyx_n_s_mtrand_str, __pyx_n_s_mtrand_keys, __pyx_n_s_mtrand_pos, __pyx_n_s_mtrand_has_gauss, __pyx_n_s_mtrand_cached_gaussian, __pyx_n_s_V, __pyx_n_s_N, __pyx_n_s_K, __pyx_n_s_log_p, __pyx_n_s_log_wk, __pyx_n_s_log_kd, __pyx_n_s_np_random_state, __pyx_n_s_samples, __pyx_n_s_mtrand_state, __pyx_n_s_dist, __pyx_n_s_cum_dist, __pyx_n_s_r, __pyx_n_s_s, __pyx_n_s_start, __pyx_n_s_stop, __pyx_n_s_doc_len, __pyx_n_s_offset, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_idx, __pyx_n_s_w, __pyx_n_s_k, __pyx_n_s_t); if (unlikely(!__pyx_tuple__18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -17440,7 +17440,7 @@ PyMODINIT_FUNC PyInit__cgs_update(void)
  * @cython.cdivision(True)
  * 
  * def cgs_update(int itr,             # <<<<<<<<<<<<<<
- *                unsigned int [:] corpus,
+ *                int [:] corpus,
  *                double [:,:] word_top,
  */
   __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_3vsm_5model_11_cgs_update_1cgs_update, NULL, __pyx_n_s_vsm_model__cgs_update); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 6; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -17452,7 +17452,7 @@ PyMODINIT_FUNC PyInit__cgs_update(void)
  *             mtrand_state[3], mtrand_state[4])
  * 
  * def cgs_update_short(int itr,             # <<<<<<<<<<<<<<
- *                unsigned short [:] corpus,
+ *                short [:] corpus,
  *                double [:,:] word_top,
  */
   __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_3vsm_5model_11_cgs_update_3cgs_update_short, NULL, __pyx_n_s_vsm_model__cgs_update); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -20017,7 +20017,7 @@ no_fail:
     return retval;
 }
 
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_unsigned_int(PyObject *obj) {
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_int(PyObject *obj) {
     __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
     __Pyx_BufFmt_StackElem stack[1];
     int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
@@ -20028,7 +20028,7 @@ static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_uns
     }
     retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
                                                  PyBUF_RECORDS, 1,
-                                                 &__Pyx_TypeInfo_unsigned_int, stack,
+                                                 &__Pyx_TypeInfo_int, stack,
                                                  &result, obj);
     if (unlikely(retcode == -1))
         goto __pyx_fail;
@@ -20083,7 +20083,7 @@ __pyx_fail:
     return result;
 }
 
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_int(PyObject *obj) {
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_unsigned_int(PyObject *obj) {
     __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
     __Pyx_BufFmt_StackElem stack[1];
     int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
@@ -20094,7 +20094,7 @@ static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_int
     }
     retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
                                                  PyBUF_RECORDS, 1,
-                                                 &__Pyx_TypeInfo_int, stack,
+                                                 &__Pyx_TypeInfo_unsigned_int, stack,
                                                  &result, obj);
     if (unlikely(retcode == -1))
         goto __pyx_fail;
@@ -20105,7 +20105,7 @@ __pyx_fail:
     return result;
 }
 
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_unsigned_short(PyObject *obj) {
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_short(PyObject *obj) {
     __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
     __Pyx_BufFmt_StackElem stack[1];
     int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
@@ -20116,7 +20116,7 @@ static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_uns
     }
     retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
                                                  PyBUF_RECORDS, 1,
-                                                 &__Pyx_TypeInfo_unsigned_short, stack,
+                                                 &__Pyx_TypeInfo_short, stack,
                                                  &result, obj);
     if (unlikely(retcode == -1))
         goto __pyx_fail;

@@ -4,7 +4,7 @@ import cython
 @cython.cdivision(True)
 
 def cgs_update(int itr, 
-               unsigned int [:] corpus,
+               int [:] corpus,
                double [:,:] word_top,
                double [:] inv_top_sums,
                double [:,:] top_doc,
@@ -87,7 +87,7 @@ def cgs_update(int itr,
             mtrand_state[3], mtrand_state[4])
 
 def cgs_update_short(int itr, 
-               unsigned short [:] corpus,
+               short [:] corpus,
                double [:,:] word_top,
                double [:] inv_top_sums,
                double [:,:] top_doc,

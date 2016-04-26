@@ -468,9 +468,9 @@ class Corpus(BaseCorpus):
 
         # Integer encoding of a string-type corpus
         if len(self.words) < 2 ** 16:
-            self.dtype = np.uint16
+            self.dtype = np.int16
         else:
-            self.dtype = np.uint32
+            self.dtype = np.int32
 
         self.corpus = np.asarray([self.words_int[unicode(word)] 
                                   for word in self.corpus],

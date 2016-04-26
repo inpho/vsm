@@ -125,9 +125,9 @@ class LdaCgsSeq(object):
         :param kwargs: For compatability with calls to LdaCgsMulti.
         :type kwargs: optional
         """
-        if self.corpus.dtype == np.uint16:
+        if self.corpus.dtype == np.int16:
             update = cgs_update_short
-        elif self.corpus.dtype == np.uint32:
+        elif self.corpus.dtype == np.int32:
             update = cgs_update
         else:
             raise NotImplementedError(
