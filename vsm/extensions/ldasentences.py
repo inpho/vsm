@@ -3,8 +3,11 @@ from vsm.corpus import Corpus, binary_search
 from vsm.extensions.corpusbuilders import *
 from vsm.extensions.corpusbuilders.util import *
 from vsm.extensions.htrc import vol_link_fn, add_link_
+
 import os
 import re
+from unidecode import unidecode
+from codecs import open
 
 __all__ = ['CorpusSent', 'sim_sent_sent', 'sim_sent_sent_across',
         'file_tokenize', 'file_corpus', 'dir_tokenize', 'dir_corpus',
@@ -570,8 +573,8 @@ def toy_corpus(filename, is_filename=True, nltk_stop=True, stop_freq=1,
         return file_corpus(filename, nltk_stop=nltk_stop, stop_freq=stop_freq,
         add_stop=add_stop)
 
-def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None,
-                simple=False):
+def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1, 
+                add_stop=None, decode=False, simple=False):
     """
     `file_corpus` is a convenience function for generating Corpus
     objects from a a plain text corpus contained in a single string
@@ -600,8 +603,16 @@ def file_corpus(filename, nltk_stop=True, stop_freq=1, add_stop=None,
         :meth:`file_tokenize`, 
         :meth:`vsm.corpus.util.apply_stoplist`
     """
-    with open(filename, mode='r') as f:
-        text = f.read().replace('\r\n','\n')
+    if encoding == 'detect':
+        encoding = detect_encoding(filename)
+    try:
+        with open(filename, mode='r', encoding=encoding) as f:
+            text = f.read()
+    except UnicodeDecodeError: 
+        encoding = detect_encoding(filename)
+
+    if decode:
+        text = unidecode(text)
 
     words, tok, sent = file_tokenize(text)
     names, data = zip(*tok.items())
@@ -682,8 +693,9 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
 
 
 
-def dir_corpus(plain_dir, chunk_name='article', paragraphs=True, word_len=2,
-               nltk_stop=True, stop_freq=1, add_stop=None, corpus_sent=True,
+def dir_corpus(plain_dir, chunk_name='article', encoding='utf8', 
+               paragraphs=True, word_len=2, nltk_stop=True, stop_freq=1, 
+               add_stop=None, corpus_sent=True, 
                ignore=['.log', '.pickle', '.xml'], decode=False, simple=False):
     """
     `dir_corpus` is a convenience function for generating Corpus
@@ -748,8 +760,23 @@ def dir_corpus(plain_dir, chunk_name='article', paragraphs=True, word_len=2,
 
     for filename in filenames:
         filename = os.path.join(plain_dir, filename)
-        with open(filename, mode='r') as f:
-            chunks.append(f.read())
+        if encoding == 'detect':
+            encoding = detect_encoding(filename)
+        try:
+            if decode:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    chunks.append(unidecode(f.read()))
+            else:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    chunks.append(f.read())
+        except UnicodeDecodeError:
+            encoding = detect_encoding(filename)
+            if decode:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    chunks.append(unidecode(f.read()))
+            else:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    chunks.append(f.read())
 
     words, tok, sent = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
                               paragraphs=paragraphs)
