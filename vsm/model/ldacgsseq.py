@@ -55,8 +55,15 @@ class LdaCgsSeq(object):
             self.corpus = []
             self.dtype = None
 
+        if self.K < 2 ** 8:
+            self.Ktype = np.uint8
+        elif self.K < 2 ** 16:
+            self.Ktype = np.uint16
+        else:
+            raise RuntimeError("More than 65536 topics are not supported")
+
         self.indices = np.array(self.indices, dtype='i')
-        self.Z = np.zeros_like(self.corpus, dtype='i')
+        self.Z = np.zeros_like(self.corpus, dtype=self.Ktype)
 
         priors = init_priors(self.V, self.K, beta, alpha)
         self.beta, self.alpha = priors
@@ -84,7 +91,6 @@ class LdaCgsSeq(object):
     @property
     def Z_split(self):
         return split_corpus(self.Z, self.indices)
-
 
     @property
     def docs(self):
@@ -125,13 +131,18 @@ class LdaCgsSeq(object):
         :param kwargs: For compatability with calls to LdaCgsMulti.
         :type kwargs: optional
         """
-        if self.corpus.dtype == np.uint16:
-            update = cgs_update_short
-        elif self.corpus.dtype == np.uint32:
-            update = cgs_update
+        if self.corpus.dtype == np.uint16 and self.Ktype == np.uint8:
+            update = cgs_update_short_char
+        elif self.corpus.dtype == np.uint16 and self.Ktype == np.uint16:
+            update = cgs_update_short_short
+        elif self.corpus.dtype == np.uint32 and self.Ktype == np.uint8:
+            update = cgs_update_int_char
+        elif self.corpus.dtype == np.uint32 and self.Ktype == np.uint16:
+            update = cgs_update_int_short
         else:
             raise NotImplementedError(
-                "Unsupported corpus dtype: {}".format(self.corpus.dtype))
+                "Unsupported corpus dtype ({}) and topic dtype ({}) combination".format(
+                    self.corpus.dtype, self.Ktype))
 
         random_state = np.random.RandomState(self.seed)
         random_state.set_state(self._mtrand_state)

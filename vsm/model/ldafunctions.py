@@ -83,6 +83,11 @@ def load_lda(filename, ldaclass):
         m.Z = arrays_in['Z_corpus']        
     else:
         m.Z = arrays_in['Z']
+    
+    if 'Ktype' in arrays_in:
+        m.Ktype = arrays_in['Ktype']        
+    else:
+        m.Ktype = m.Z.dtype
 
     if 'top_word' in arrays_in:
         m.word_top = arrays_in['top_word'].T
@@ -147,6 +152,8 @@ def save_lda(m, filename):
     arrays_out['context_type'] = m.context_type
     if hasattr(m, 'dtype'):
         arrays_out['dtype'] = m.dtype
+    if hasattr(m, 'Ktype'):
+        arrays_out['Ktype'] = m.Ktype
 
     arrays_out['alpha'] = m.alpha
     arrays_out['beta'] = m.beta
