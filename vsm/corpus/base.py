@@ -588,6 +588,7 @@ class Corpus(BaseCorpus):
             arrays_in = np.load(file)
 
             c = Corpus([], remove_empty=False)
+            c.dtype = arrays_in['dtype']
             c.corpus = arrays_in['corpus']
             c.words = arrays_in['words']
             c.context_types = arrays_in['context_types'].tolist()
@@ -636,6 +637,7 @@ class Corpus(BaseCorpus):
         arrays_out['words'] = self.words
         arrays_out['context_types'] = np.asarray(self.context_types)
         arrays_out['stopped_words'] = np.asarray(self.stopped_words)
+        arrays_out['dtype'] = str(self.dtype)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]
