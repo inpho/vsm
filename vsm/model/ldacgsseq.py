@@ -3,7 +3,7 @@ import time
 from vsm.split import split_corpus
 from vsm.corpus import align_corpora as align
 from ldafunctions import *
-from _cgs_update import cgs_update
+from _cgs_update import cgs_update, cgs_update_short
 from progressbar import ProgressBar, Percentage, Bar
 
 
@@ -48,10 +48,12 @@ class LdaCgsSeq(object):
             self.V = corpus.words.size
             self.indices = corpus.view_contexts(self.context_type, as_indices=True)
             self.corpus = corpus.corpus
+            self.dtype = corpus.corpus.dtype
         else:
             self.V = V
             self.indices = []
             self.corpus = []
+            self.dtype = None
 
         self.indices = np.array(self.indices, dtype='i')
         self.Z = np.zeros_like(self.corpus, dtype='i')
@@ -123,6 +125,14 @@ class LdaCgsSeq(object):
         :param kwargs: For compatability with calls to LdaCgsMulti.
         :type kwargs: optional
         """
+        if self.corpus.dtype == np.uint16:
+            update = cgs_update_short
+        elif self.corpus.dtype == np.uint32:
+            update = cgs_update
+        else:
+            raise NotImplementedError(
+                "Unsupported corpus dtype: {}".format(self.corpus.dtype))
+
         random_state = np.random.RandomState(self.seed)
         random_state.set_state(self._mtrand_state)
 
@@ -141,7 +151,7 @@ class LdaCgsSeq(object):
         #print("Stop ", stop)
         for itr in xrange(self.iteration , stop):
 
-            results = cgs_update(self.iteration, self.corpus, self.word_top,
+            results = update(self.iteration, self.corpus, self.word_top,
                                  self.inv_top_sums, self.top_doc, self.Z,
                                  self.indices, self._mtrand_state[0],
                                  self._mtrand_state[1], self._mtrand_state[2],

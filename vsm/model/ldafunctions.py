@@ -74,6 +74,11 @@ def load_lda(filename, ldaclass):
     else:
         m.corpus = arrays_in['corpus']        
 
+    if 'dtype' in arrays_in:
+        m.dtype = arrays_in['dtype']
+    else:
+        m.dtype = m.corpus.dtype
+
     if 'Z_corpus' in arrays_in:
         m.Z = arrays_in['Z_corpus']        
     else:
@@ -140,6 +145,8 @@ def save_lda(m, filename):
     arrays_out = dict()
 
     arrays_out['context_type'] = m.context_type
+    if hasattr(m, 'dtype'):
+        arrays_out['dtype'] = m.dtype
 
     arrays_out['alpha'] = m.alpha
     arrays_out['beta'] = m.beta
