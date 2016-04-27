@@ -68,15 +68,17 @@ class LdaCgsSeq(object):
 
         priors = init_priors(self.V, self.K, beta, alpha)
         self.beta, self.alpha = priors
+        self.beta = self.beta.astype(np.float32)
+        self.alpha = self.alpha.astype(np.float32)
 
-        self.word_top = (np.zeros((self.V, self.K), dtype=np.float)
+        self.word_top = (np.zeros((self.V, self.K), dtype=np.float32)
                          + self.beta)
         if self.V==0:
             self.inv_top_sums = np.inf
         else:
             self.inv_top_sums = 1. / self.word_top.sum(0)
         self.top_doc = (np.zeros((self.K, len(self.indices)),
-                                 dtype=np.float) + self.alpha)
+                                 dtype=np.float32) + self.alpha)
 
         self.iteration = 0
         self.log_probs = []
@@ -87,6 +89,11 @@ class LdaCgsSeq(object):
         else:
             self.seed = seed
         self._mtrand_state = np.random.RandomState(self.seed).get_state()
+
+        print "word_top: {}; top_doc: {}; inv_top_sums: {}".format(
+            self.word_top.dtype,
+            self.top_doc.dtype,
+            self.inv_top_sums.dtype)
 
 
     @property
@@ -162,7 +169,6 @@ class LdaCgsSeq(object):
 
         #print("Stop ", stop)
         for itr in xrange(self.iteration , stop):
-
             results = update(self.iteration, self.corpus, self.word_top,
                                  self.inv_top_sums, self.top_doc, self.Z,
                                  self.indices, self._mtrand_state[0],
