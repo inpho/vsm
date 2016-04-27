@@ -42,7 +42,9 @@ setup(
     license = 'MIT',
     packages=packages,
     ext_modules = [
-        Extension('_cgs_update', ['vsm/model/_cgs_update.c']),
+        Extension('_cgs_update', ['vsm/model/_cgs_update.c'],
+                  extra_compile_args=['-fopenmp'],
+                  extra_link_args=['-fopenmp'])
     ],
     test_suite = "unit_tests"
 )

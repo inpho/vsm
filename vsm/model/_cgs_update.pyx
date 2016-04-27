@@ -1,5 +1,7 @@
 import numpy as np
 import cython
+cimport numpy as np
+from cython.parallel import prange
 
 @cython.wraparound(False)
 @cython.boundscheck(False)
@@ -41,47 +43,48 @@ def cgs_update_int_char(int itr,
     cdef unsigned char k,t
     cdef Py_ssize_t i, j, idx, w
 
-    for i in range(N):
-
-        if i==0:
-            doc_len = indices[0]
-            offset = 0
-        else:
-            start = indices[i-1]
-            stop = indices[i]
-            doc_len = stop - start 
-            offset = indices[i-1]
-
-        for j in range(doc_len):
-
-            idx = offset + j
-            w,k = corpus[idx], Z[idx]
-
-            log_p += log_wk[w, k] + log_kd[k, i]
-
-            if itr > 0:
-                word_top[w, k] -= 1
+    with nogil:
+        for i in range(N):
+    
+            if i==0:
+                doc_len = indices[0]
+                offset = 0
+            else:
+                start = indices[i-1]
+                stop = indices[i]
+                doc_len = stop - start 
+                offset = indices[i-1]
+    
+            for j in range(doc_len):
+    
+                idx = offset + j
+                w,k = corpus[idx], Z[idx]
+    
+                log_p += log_wk[w, k] + log_kd[k, i]
+    
+                if itr > 0:
+                    word_top[w, k] -= 1
+                    s = inv_top_sums[k]
+                    inv_top_sums[k] = s / (1 - s)
+                    top_doc[k, i] -= 1
+    
+                for t in range(K):
+                    dist[t] = inv_top_sums[t] * word_top[w,t] * top_doc[t,i]
+                    if t==0:
+                        cum_dist[t] = dist[t]
+                    else:
+                        cum_dist[t] = cum_dist[t-1] + dist[t]
+                r = samples[idx] * cum_dist[K-1]
+                for k in range(K):
+                    if r < cum_dist[k]:
+                        break
+    
+                word_top[w, k] += 1
                 s = inv_top_sums[k]
-                inv_top_sums[k] = s / (1 - s)
-                top_doc[k, i] -= 1
-
-            for t in range(K):
-                dist[t] = inv_top_sums[t] * word_top[w,t] * top_doc[t,i]
-                if t==0:
-                    cum_dist[t] = dist[t]
-                else:
-                    cum_dist[t] = cum_dist[t-1] + dist[t]
-            r = samples[idx] * cum_dist[K-1]
-            for k in range(K):
-                if r < cum_dist[k]:
-                    break
-
-            word_top[w, k] += 1
-            s = inv_top_sums[k]
-            inv_top_sums[k] = s / (1 + s) 
-            top_doc[k, i] += 1
-
-            Z[idx] = k
+                inv_top_sums[k] = s / (1 + s) 
+                top_doc[k, i] += 1
+    
+                Z[idx] = k
             
     return (np.asarray(word_top), np.asarray(inv_top_sums), 
             np.asarray(top_doc), np.asarray(Z), log_p, 
@@ -175,15 +178,20 @@ def cgs_update_int_short(int itr,
             mtrand_state[0], mtrand_state[1], mtrand_state[2], 
             mtrand_state[3], mtrand_state[4])
 
+DTYPE_8 = np.uint8
+ctypedef np.uint8_t DTYPE_8_t
+DTYPE_16 = np.uint16
+ctypedef np.uint16_t DTYPE_16_t
+
 @cython.wraparound(False)
 @cython.boundscheck(False)
 @cython.cdivision(True)
 def cgs_update_short_char(int itr, 
-               unsigned short [:] corpus,
+               np.ndarray[DTYPE_16_t] corpus,
                double [:,:] word_top,
                double [:] inv_top_sums,
                double [:,:] top_doc,
-               unsigned char [:] Z,
+               np.ndarray[DTYPE_8_t] Z,
                int [:] indices,
                str mtrand_str,
                unsigned int [:] mtrand_keys,
@@ -212,8 +220,9 @@ def cgs_update_short_char(int itr,
 
     cdef double r, s
     cdef long start, stop, doc_len, offset
-    cdef unsigned char k,t
-    cdef Py_ssize_t i, j, idx, w
+    cdef DTYPE_8_t k,t
+    cdef DTYPE_16_t w
+    cdef Py_ssize_t i, j, idx
 
     for i in range(N):
 
@@ -229,7 +238,7 @@ def cgs_update_short_char(int itr,
         for j in range(doc_len):
 
             idx = offset + j
-            w,k = corpus[idx], Z[idx]
+            w,k = <DTYPE_16_t>(corpus[idx]), <DTYPE_8_t>(Z[idx])
 
             log_p += log_wk[w, k] + log_kd[k, i]
 
