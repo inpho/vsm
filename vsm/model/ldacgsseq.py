@@ -3,7 +3,8 @@ import time
 from vsm.split import split_corpus
 from vsm.corpus import align_corpora as align
 from ldafunctions import *
-from _cgs_update import cgs_update, cgs_update_short
+from _cgs_update import (cgs_update_int_char, cgs_update_short_char,
+                         cgs_update_int_short, cgs_update_short_short)
 from progressbar import ProgressBar, Percentage, Bar
 
 

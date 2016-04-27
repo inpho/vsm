@@ -4,7 +4,8 @@ import numpy as np
 from vsm.split import split_documents
 from ldafunctions import load_lda
 from ldacgsseq import *
-from _cgs_update import cgs_update, cgs_update_short
+from _cgs_update import (cgs_update_int_char, cgs_update_short_char,
+                         cgs_update_int_short, cgs_update_short_short)
 
 import platform # For Windows comaptability
 import itertools
@@ -405,10 +406,19 @@ def update((docs, doc_indices, mtrand_state, dtype)):
 
     indices = np.array([(j - start) for (i,j) in docs], dtype='i')
 
-    if dtype == np.uint16:
-        update_fn = cgs_update_short
-    elif dtype == np.uint32:
-        update_fn = cgs_update
+    if _K < 2 ** 8:
+        Ktype = np.uint8
+    elif _K < 2 ** 16:
+        Ktype = np.uint16
+
+    if dtype == np.uint16 and Ktype == np.uint8:
+        update_fn = cgs_update_short_char
+    elif dtype == np.uint32 and Ktype == np.uint8:
+        update_fn = cgs_update_int_char
+    elif dtype == np.uint16 and Ktype == np.uint16:
+        update_fn = cgs_update_short_short
+    elif dtype == np.uint32 and Ktype == np.uint16:
+        update_fn = cgs_update_int_short
     else:
         raise NotImplementedError
 

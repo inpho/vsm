@@ -1,8 +1,9 @@
 import numpy as np
 import cython
+
+@cython.wraparound(False)
 @cython.boundscheck(False)
 @cython.cdivision(True)
-
 def cgs_update_int_char(int itr, 
                unsigned int [:] corpus,
                double [:,:] word_top,
@@ -87,6 +88,9 @@ def cgs_update_int_char(int itr,
             mtrand_state[0], mtrand_state[1], mtrand_state[2], 
             mtrand_state[3], mtrand_state[4])
 
+@cython.wraparound(False)
+@cython.boundscheck(False)
+@cython.cdivision(True)
 def cgs_update_int_short(int itr, 
                unsigned int [:] corpus,
                double [:,:] word_top,
@@ -171,6 +175,9 @@ def cgs_update_int_short(int itr,
             mtrand_state[0], mtrand_state[1], mtrand_state[2], 
             mtrand_state[3], mtrand_state[4])
 
+@cython.wraparound(False)
+@cython.boundscheck(False)
+@cython.cdivision(True)
 def cgs_update_short_char(int itr, 
                unsigned short [:] corpus,
                double [:,:] word_top,
@@ -255,6 +262,9 @@ def cgs_update_short_char(int itr,
             mtrand_state[0], mtrand_state[1], mtrand_state[2], 
             mtrand_state[3], mtrand_state[4])
 
+@cython.wraparound(False)
+@cython.boundscheck(False)
+@cython.cdivision(True)
 def cgs_update_short_short(int itr, 
                unsigned short [:] corpus,
                double [:,:] word_top,
