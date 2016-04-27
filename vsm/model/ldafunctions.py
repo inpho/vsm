@@ -151,9 +151,9 @@ def save_lda(m, filename):
 
     arrays_out['context_type'] = m.context_type
     if hasattr(m, 'dtype'):
-        arrays_out['dtype'] = m.dtype
+        arrays_out['dtype'] = str(m.dtype)
     if hasattr(m, 'Ktype'):
-        arrays_out['Ktype'] = m.Ktype
+        arrays_out['Ktype'] = str(m.Ktype)
 
     arrays_out['alpha'] = m.alpha
     arrays_out['beta'] = m.beta
