@@ -210,7 +210,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def Z(self):
         if self._read_globals:
-            return np.frombuffer(_Z, np.int32)
+            return np.frombuffer(_Z, np.uint8)
         return self._Z_local
 
     @Z.setter
@@ -388,8 +388,13 @@ def update((docs, doc_indices, mtrand_state, dtype)):
     """
     start, stop = docs[0][0], docs[-1][1]
 
+    if _K < 2 ** 8:
+        Ktype = np.uint8
+    elif _K < 2 ** 16:
+        Ktype = np.uint16
+
     corpus = np.frombuffer(_corpus, dtype=dtype)[start:stop]
-    Z = np.frombuffer(_Z, dtype='i')[start:stop].copy()
+    Z = np.frombuffer(_Z, dtype=Ktype)[start:stop].copy()
 
     gbl_word_top = np.frombuffer(_word_top, dtype='d')
     gbl_word_top = gbl_word_top.reshape(_V.value, _K.value)
@@ -405,11 +410,6 @@ def update((docs, doc_indices, mtrand_state, dtype)):
     log_kc = np.log(top_doc / top_doc.sum(0)[np.newaxis, :])
 
     indices = np.array([(j - start) for (i,j) in docs], dtype='i')
-
-    if _K < 2 ** 8:
-        Ktype = np.uint8
-    elif _K < 2 ** 16:
-        Ktype = np.uint16
 
     if dtype == np.uint16 and Ktype == np.uint8:
         update_fn = cgs_update_short_char
