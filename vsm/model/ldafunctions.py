@@ -85,9 +85,10 @@ def load_lda(filename, ldaclass):
 
     m.indices = indices.result()
     m.corpus = corpus.result()
-    m.dtype = dtype.result()
+
+    m.dtype = np.dtype(str(dtype.result()))
     m.Z = Z.result()
-    m.Ktype = Ktype.result()
+    m.Ktype = np.dtype(str(Ktype.result()))
 
     m.word_top = word_top.result()
     m.top_doc = top_doc.result()

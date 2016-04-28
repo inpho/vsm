@@ -4,13 +4,8 @@ Provides a convenient alias for the LdaCgs* classes
 import platform # For Windows workaround
 import warnings
 
-from ldacgsseq import *
-from ldacgsmulti import *
-from ldafunctions import load_lda
-
 
 __all__ = [ 'LDA' ]
-
 
 class LDA(object):
     """
@@ -37,6 +32,8 @@ class LDA(object):
             if seed_or_seeds is not None and not isinstance(seed_or_seeds, int):
                 kwargs['seeds'] = seed_or_seeds
 
+
+            from ldacgsmulti import LdaCgsMulti
             return LdaCgsMulti(**kwargs)
 
         else:
@@ -57,6 +54,7 @@ class LDA(object):
                 raise ValueError("LDA(seed_or_seeds, ...) must take an" +
                                  "integer in single-threaded mode.")
 
+            from ldacgsseq import LdaCgsSeq
             return LdaCgsSeq(**kwargs)
 
     @staticmethod
@@ -71,10 +69,14 @@ class LDA(object):
 
         :See Also: :class:`numpy.load`
         """
+        from ldafunctions import load_lda
+
         if multiprocessing and platform.system() != 'Windows':
+            from ldacgsmulti import LdaCgsMulti
             return load_lda(filename, LdaCgsMulti)
         else:
             if platform.system() == 'Windows':
                 warnings.warn("""Multiprocessing is not implemented on Windows.
                 Defaulting to sequential algorithm.""", RuntimeWarning)
+            from ldacgsseq import LdaCgsSeq 
             return load_lda(filename, LdaCgsSeq)

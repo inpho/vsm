@@ -21,6 +21,9 @@ def binary_search_set(a,x):
     pos = a.bisect_left(x)
     return (pos if pos != len(a)  and a[pos] == x else -1) # don't walk off the end
 """
+def load_npz(filename, obj):
+    zipfile = np.load(filename)
+    return zipfile.__getitem__(obj)
 
 class BaseCorpus(object):
     """
@@ -130,6 +133,8 @@ class BaseCorpus(object):
     >>> c.view_metadata('sentences')[0]['sent_label']
     'transitive'
     """
+    __slots__ = ['words', 'context_data', 'corpus','dtype','stopped_words',
+                 'context_types']
     def __init__(self,
                  corpus,
                  dtype=None,
@@ -454,6 +459,9 @@ class Corpus(BaseCorpus):
       dtype='|S9')
 
     """
+    __slots__ = ['words', 'context_data', 'corpus','dtype','stopped_words',
+                 'words_int', 'context_types']
+
     def __init__(self,
                  corpus,
                  context_types=[],
@@ -546,8 +554,8 @@ class Corpus(BaseCorpus):
         ls = self.view_contexts(context_type, as_strings=as_strings)
         return [arr.tolist() for arr in ls]
 
-    
     @staticmethod
+    @profile
     def load(file=None, corpus_dir=None,
              corpus_file='corpus.npy',
              words_file='words.npy',
@@ -588,41 +596,62 @@ class Corpus(BaseCorpus):
 
         """
         import concurrent.futures
-        def load_npz(filename, obj):
-            zipfile = np.load(filename)
-            return zipfile.__getitem__(obj)
+        import functools
+        def set_from_future(obj, future):
+            setattr(c, obj, future.result())
+        def set_list_from_future(obj, future):
+            setattr(c, obj, future.result().tolist())
+        def set_set_from_future(obj, future):
+            setattr(c, obj, set(future.result().tolist()))
+        def set_list_item_from_future(obj, i, future):
+            getattr(c, obj)[i] = future.result()
+
+            
+        assign = functools.partial(set_from_future)
 
         if file is not None:
             c = Corpus([], remove_empty=False)
             # submit futures
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-                arrays_in = np.load(file)
-    
+            with concurrent.futures.ProcessPoolExecutor(max_workers=2) as executor:
                 c.corpus = executor.submit(load_npz, file, 'corpus')
+                c.corpus.add_done_callback(functools.partial(set_from_future, 'corpus'))
+
                 c.words =  executor.submit(load_npz, file, 'words')
+                c.words.add_done_callback(
+                    functools.partial(set_from_future, 'words'))
+
                 c.context_types = executor.submit(load_npz, file, 'context_types')
+
                 c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
+                c.stopped_words.add_done_callback(
+                    functools.partial(set_set_from_future, 'stopped_words'))
+
                 c.dtype = executor.submit(load_npz, file, 'dtype')
-                context_data = dict()
-                for n in arrays_in.files:
+                c.dtype.add_done_callback(
+                    functools.partial(set_from_future, 'dtype'))
+
+                concurrent.futures.wait([c.context_types])
+                c.context_types = c.context_types.result().tolist()
+                c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
+                c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
+                for i,f in enumerate(c.context_data):
+                    f.add_done_callback(
+                        functools.partial(set_list_item_from_future, 'context_data', i))
+                """
+                
+                for n in files.result():
                     if n.startswith('context_data_'):
                         context_data[n] = executor.submit(load_npz, file, n)
+                """
+
 
             # get futures results
-            c.corpus = c.corpus.result()
-            c.words = c.words.result()
-            c.context_types = c.context_types.result().tolist()
-            c.dtype = c.dtype.result()
-
-            try:
-                c.stopped_words = set([word for word in c.stopped_words.result()])
-            except:
-                c.stopped_words = set()
-
-            c.context_data = [context_data['context_data_' + n].result() for n in c.context_types]
+            #c.corpus = c.corpus.result()
+            #c.context_data = [d.result() for d in c.context_data]
 
             # reset words_int dictionary
             c._set_words_int()
+
 
             return c
 

@@ -3,8 +3,6 @@ import time
 from vsm.split import split_corpus
 from vsm.corpus import align_corpora as align
 from ldafunctions import *
-from _cgs_update import (cgs_update_int_char, cgs_update_short_char,
-                         cgs_update_int_short, cgs_update_short_short)
 from progressbar import ProgressBar, Percentage, Bar
 
 
@@ -50,6 +48,7 @@ class LdaCgsSeq(object):
             self.indices = corpus.view_contexts(self.context_type, as_indices=True)
             self.corpus = corpus.corpus
             self.dtype = corpus.corpus.dtype
+            print np.dtype(str(self.dtype))
         else:
             self.V = V
             self.indices = []
@@ -169,13 +168,17 @@ class LdaCgsSeq(object):
         :param kwargs: For compatability with calls to LdaCgsMulti.
         :type kwargs: optional
         """
-        if self.corpus.dtype == np.uint16 and self.Ktype == np.uint8:
+        if self.dtype == np.uint16 and self.Ktype == np.uint8:
+            from _cgs_update import cgs_update_short_char
             update = cgs_update_short_char
-        elif self.corpus.dtype == np.uint16 and self.Ktype == np.uint16:
+        elif self.dtype == np.uint16 and self.Ktype == np.uint16:
+            from _cgs_update import cgs_update_short_short
             update = cgs_update_short_short
-        elif self.corpus.dtype == np.uint32 and self.Ktype == np.uint8:
+        elif self.dtype == np.uint32 and self.Ktype == np.uint8:
+            from _cgs_update import cgs_update_int_char
             update = cgs_update_int_char
-        elif self.corpus.dtype == np.uint32 and self.Ktype == np.uint16:
+        elif self.dtype == np.uint32 and self.Ktype == np.uint16:
+            from _cgs_update import cgs_update_int_short
             update = cgs_update_int_short
         else:
             raise NotImplementedError(
