@@ -259,7 +259,7 @@ def cgs_update_short_char(int itr,
             
             r = samples[idx] * dist[K-1]
             for t in range(K):
-                if r < dist[k]:
+                if r < dist[t]:
                     k = <unsigned char>(t)
                     break
 
