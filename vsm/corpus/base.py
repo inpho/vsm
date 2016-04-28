@@ -596,6 +596,7 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`, :meth:`Corpus.save`, :meth:`numpy.load`
 
         """
+        import vsm.zipfile
         import concurrent.futures
         import functools
         def set_from_future(obj, future):
@@ -684,6 +685,7 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`, :meth:`Corpus.load`, :meth:`np.savez`
         """
+        import vsm.zipfile
         print 'Saving corpus as', file
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus

@@ -35,6 +35,7 @@ def load_lda(filename, ldaclass):
     
     :See Also: :class:`numpy.load`
     """
+    import vsm.zipfile
     import concurrent.futures
     def load_npz(filename, obj):
         zipfile = np.load(filename)
@@ -123,6 +124,7 @@ def save_lda(m, filename):
     
     :See Also: :class:`numpy.savez`
     """
+    import vsm.zipfile
     arrays_out = dict()
 
     arrays_out['context_type'] = m.context_type
