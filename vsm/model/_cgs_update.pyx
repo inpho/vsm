@@ -188,8 +188,6 @@ cdef extern from "math.h":
     float logf(float n)
 cdef inline int int_min(int a, int b): return a if a <= b else b
 
-@cython.linetrace(True)
-@cython.profile(True)
 @cython.binding(True)
 @cython.wraparound(False)
 @cython.boundscheck(False)

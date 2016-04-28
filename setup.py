@@ -47,7 +47,7 @@ setup(
             include_dirs=[numpy.get_include()],
             extra_compile_args=['-fopenmp', '-march=native'],
             extra_link_args=['-fopenmp', '-march=native'],
-            define_macros=[('CYTHON_TRACE','1')]
+        #    define_macros=[('CYTHON_TRACE','1')]
         ),
     ],
     test_suite = "unit_tests"
