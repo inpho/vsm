@@ -1,5 +1,6 @@
 from setuptools import setup, Extension, Command, find_packages
 import platform
+import numpy
 
 
 # find packages in vsm subdirectory
@@ -42,7 +43,10 @@ setup(
     license = 'MIT',
     packages=packages,
     ext_modules = [
-        Extension('_cgs_update', ['vsm/model/_cgs_update.c']),
+        Extension('_cgs_update', ['vsm/model/_cgs_update.c'],
+            include_dirs=[numpy.get_include()],
+            define_macros=[('CYTHON_TRACE','1')]
+        ),
     ],
     test_suite = "unit_tests"
 )

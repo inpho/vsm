@@ -184,13 +184,15 @@ cimport numpy as np
 DTYPE = np.float32
 ctypedef np.float32_t DTYPE_t
 
+cdef extern from "math.h":
+    float logf(float n)
 
-@cython.wraparound(False)
-@cython.boundscheck(False)
-@cython.cdivision(True)
 @cython.linetrace(True)
 @cython.profile(True)
 @cython.binding(True)
+@cython.wraparound(False)
+@cython.boundscheck(False)
+@cython.cdivision(True)
 def cgs_update_short_char(int itr, 
                unsigned short [:] corpus,
                np.ndarray[DTYPE_t, ndim=2] word_top,
@@ -207,26 +209,27 @@ def cgs_update_short_char(int itr,
     cdef int V = corpus.shape[0]
     cdef int N = indices.shape[0]
     cdef int K = word_top.shape[1]
+    cdef int W = word_top.shape[0]
+    
+    cdef Py_ssize_t i, j, idx, w, t
+    cdef int first, last
 
-    cdef float log_p = 0
-    cdef float [:,:] log_wk = np.log(np.asarray(word_top) * 
-                                      np.asarray(inv_top_sums))
-    cdef float [:,:] log_kd = np.log(np.asarray(top_doc) /
-                                      np.asarray(top_doc).sum(0))
+    cdef DTYPE_t log_p = 0
+    cdef np.ndarray[DTYPE_t, ndim=2] log_wk = np.log(word_top * inv_top_sums)
+    cdef np.ndarray[DTYPE_t, ndim=2] log_kd = np.log(top_doc / top_doc.sum(0))
 
     cdef object np_random_state = np.random.RandomState()
     np_random_state.set_state((mtrand_str, mtrand_keys, 
                                mtrand_pos, mtrand_has_gauss, 
                                mtrand_cached_gaussian))
-    cdef float [:] samples = np_random_state.uniform(size=V).astype(np.float32)
+    cdef np.ndarray[DTYPE_t] samples = np_random_state.uniform(size=V).astype(DTYPE)
     cdef object mtrand_state = np_random_state.get_state()
     cdef np.ndarray[DTYPE_t] dist = np.zeros((K,), dtype=DTYPE)
-    cdef np.ndarray[DTYPE_t] cum_dist = np.zeros((K,), dtype=DTYPE)
 
-    cdef float r, s
+
+    cdef DTYPE_t r, s
     cdef long start, stop, doc_len, offset
     cdef unsigned char k
-    cdef Py_ssize_t i, j, idx, w,t
 
     for i in range(N):
 
@@ -258,6 +261,18 @@ def cgs_update_short_char(int itr,
                 dist[t] = dist[t-1] + <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
             
             r = samples[idx] * dist[K-1]
+            """ 
+            first = 0
+            last = K - 1
+            while first < last:
+                t = first + (last / 2)
+                if r < dist[t]:
+                    last = t
+                else:
+                    first = t + 1
+            k = <unsigned char>(t)
+            """
+
             for t in range(K):
                 if r < dist[t]:
                     k = <unsigned char>(t)
@@ -270,8 +285,8 @@ def cgs_update_short_char(int itr,
 
             Z[idx] = k
             
-    return (np.asarray(word_top), np.asarray(inv_top_sums), 
-            np.asarray(top_doc), np.asarray(Z), log_p, 
+    return (word_top, inv_top_sums, 
+            top_doc, Z, log_p, 
             mtrand_state[0], mtrand_state[1], mtrand_state[2], 
             mtrand_state[3], mtrand_state[4])
 
