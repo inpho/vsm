@@ -129,6 +129,7 @@ class TestCorpus(unittest.TestCase):
             tmp = NamedTemporaryFile(delete=False, suffix='.npz')
             self.corpus.save(tmp.name)
             tmp.close()
+
             c_reloaded = Corpus.load(tmp.name)
 
             self.assertTrue((self.corpus.corpus == c_reloaded.corpus).all())
@@ -143,6 +144,6 @@ class TestCorpus(unittest.TestCase):
         finally:
             os.remove(tmp.name)
 
-
-suite = unittest.TestLoader().loadTestsFromTestCase(TestCorpus)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestCorpus)
+    unittest.TextTestRunner(verbosity=2).run(suite)

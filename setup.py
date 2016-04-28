@@ -8,12 +8,18 @@ import numpy
 packages = ['vsm.'+pkg for pkg in find_packages('vsm')]
 packages.append('vsm')
 
+
+
+
 install_requires=[
         "numpy>=1.6.1",
         "scipy>=0.13.0",
         "progressbar>=2.3",
         "chardet>=2.3.0",
         "sortedcontainers>=1.4.0"]
+
+if platform.python_version_tuple()[0] == '2':
+    install_requires.append("futures>=3.0.0")
 
 setup(
     name = "vsm",
@@ -50,5 +56,6 @@ setup(
         #    define_macros=[('CYTHON_TRACE','1')]
         ),
     ],
-    test_suite = "unit_tests"
+    tests_require=['unittest2'],
+    test_suite = "unit_tests",
 )

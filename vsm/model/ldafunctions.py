@@ -35,104 +35,79 @@ def load_lda(filename, ldaclass):
     
     :See Also: :class:`numpy.load`
     """
+    import concurrent.futures
+    def load_npz(filename, obj):
+        zipfile = np.load(filename)
+        return zipfile.__getitem__(obj)
+
     print 'Loading LDA data from', filename
+
     arrays_in = np.load(filename)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        # load context types
+        context_type = executor.submit(load_npz, filename, 'context_type')
+        K = executor.submit(load_npz, filename, 'K')
+        V = executor.submit(load_npz, filename, 'V')
 
-    context_type = arrays_in['context_type'][()]
-    K = arrays_in['K'][()]
+        # load priors
+        alpha = executor.submit(load_npz, filename, 'alpha')
+        beta = executor.submit(load_npz, filename, 'beta')
 
-    if 'm_words' in arrays_in:
-        V = arrays_in['m_words'][()]
-    else:
-        V = arrays_in['V'][()]
+        # load data
+        indices = executor.submit(load_npz, filename, 'indices')
+        corpus = executor.submit(load_npz, filename, 'corpus')
+        dtype = executor.submit(load_npz, filename, 'dtype')
+        Z = executor.submit(load_npz, filename, 'Z')
+        Ktype = executor.submit(load_npz, filename, 'Ktype')
 
-    if 'ctx_prior' in arrays_in:
-        alpha = arrays_in['ctx_prior']
-    elif arrays_in['alpha'].size==1:
-        alpha = np.ones(K, dtype=np.float64) * arrays_in['alpha'][()]
-    else:
-        alpha = arrays_in['alpha']
+        iteration = executor.submit(load_npz, filename, 'iteration')
+        log_probs = executor.submit(load_npz, filename, 'log_probs')
 
-    if 'top_prior' in arrays_in:
-        beta = arrays_in['top_prior']
-    elif arrays_in['beta'].size==1:
-        beta = np.ones(V, dtype=np.float64) * arrays_in['beta'][()]
-    else:
-        beta = arrays_in['beta']
-        
-    m = ldaclass(context_type=context_type, K=K, V=V, alpha=alpha, beta=beta)
+        top_doc = executor.submit(load_npz, filename, 'top_doc')
+        word_top = executor.submit(load_npz, filename, 'word_top')
+        inv_top_sums = executor.submit(load_npz, filename, 'inv_top_sums')
 
-    if 'W_indices' in arrays_in:
-        m.indices = arrays_in['W_indices']
-    elif 'contexts' in arrays_in: 
-        m.indices = [s.stop for s in arrays_in['contexts']]
-    else:
-        m.indices = arrays_in['indices']
+        if 'seed' in arrays_in.files:
+            seed = executor.submit(load_npz, filename, 'seed')
+            mtrand_state = [executor.submit(load_npz, filename, 
+                                            'mtrand_state{}'.format(i)) 
+                                for i in range(5)]
 
-    if 'W_corpus' in arrays_in:
-        m.corpus = arrays_in['W_corpus']
-    else:
-        m.corpus = arrays_in['corpus']        
+        elif 'seeds' in arrays_in.files:
+            seeds =  executor.submit(load_npz, filename, 'seeds')
+            mtrand_states = [executor.submit(load_npz, filename, 
+                                             'mtrand_states{}'.format(i)) 
+                                 for i in range(5)]
 
-    if 'dtype' in arrays_in:
-        m.dtype = arrays_in['dtype']
-    else:
-        m.dtype = m.corpus.dtype
+    m = ldaclass(context_type=context_type.result(), 
+                 K=K.result(), V=V.result(), 
+                 alpha=alpha.result(), beta=beta.result())
 
-    if 'Z_corpus' in arrays_in:
-        m.Z = arrays_in['Z_corpus']        
-    else:
-        m.Z = arrays_in['Z']
-    
-    if 'Ktype' in arrays_in:
-        m.Ktype = arrays_in['Ktype']        
-    else:
-        m.Ktype = m.Z.dtype
+    m.indices = indices.result()
+    m.corpus = corpus.result()
+    m.dtype = dtype.result()
+    m.Z = Z.result()
+    m.Ktype = Ktype.result()
 
-    if 'top_word' in arrays_in:
-        m.word_top = arrays_in['top_word'].T
-    else:
-        m.word_top = arrays_in['word_top']
+    m.word_top = word_top.result()
+    m.top_doc = top_doc.result()
+    m.inv_top_sums = inv_top_sums.result()
 
-    if 'doc_top' in arrays_in:
-        m.top_doc = arrays_in['doc_top'].T
-    elif 'top_ctx' in arrays_in:
-        m.top_doc = arrays_in['top_ctx']
-    else:
-        m.top_doc = arrays_in['top_doc']
+    m.iteration = iteration.result()
+    m.log_probs = log_probs.result().tolist()
 
-    if 'sum_word_top' in arrays_in:
-        m.inv_top_sums = 1. / arrays_in['sum_word_top']
-    elif 'top_norms' in arrays_in:
-        m.inv_top_sums = arrays_in['top_norms']
-    else:
-        m.inv_top_sums = arrays_in['inv_top_sums']
+    if 'seed' in arrays_in.files:
+        m.seed = int(seed.result())
+        m._mtrand_state = [s.result() for s in mtrand_state]
+        fns = (str, lambda x: x, int, int, float)
+        m._mtrand_state = [f(s) for f, s in zip(fns, m._mtrand_state)]
 
-    if 'iterations' in arrays_in:
-        m.iteration = arrays_in['iterations'][()]
-    else:
-        m.iteration = arrays_in['iteration'][()]
-
-    if 'log_prob' in arrays_in:
-        m.log_probs = arrays_in['log_prob'].tolist()
-    else:
-        m.log_probs = arrays_in['log_probs'].tolist()
-
-    if 'seed' in arrays_in:
-        m.seed = int(arrays_in['seed'])
-        m._mtrand_state = (str(arrays_in['mtrand_state0']),
-                           arrays_in['mtrand_state1'],
-                           int(arrays_in['mtrand_state2']),
-                           int(arrays_in['mtrand_state3']),
-                           float(arrays_in['mtrand_state4']))
-
-    if 'seeds' in arrays_in:
-        m.seeds = map(int, list(arrays_in['seeds']))
-        m._mtrand_states = zip(map(str, arrays_in['mtrand_states0']),
-                               arrays_in['mtrand_states1'],
-                               map(int, arrays_in['mtrand_states2']),
-                               map(int, arrays_in['mtrand_states3']),
-                               map(float, arrays_in['mtrand_states4']))
+    if 'seeds' in arrays_in.files:
+        m.seeds = map(int, seeds.result())
+        m._mtrand_states = [s.result() for s in mtrand_states]
+        fns = (str, lambda x: x, int, int, float)
+        m._mtrand_states = [map(f, s) for f, s in zip(fns, m._mtrand_states)]
+        m._mtrand_states = zip(*m._mtrand_states)
         m.n_proc = len(m.seeds)
 
     return m
