@@ -45,6 +45,8 @@ setup(
     ext_modules = [
         Extension('_cgs_update', ['vsm/model/_cgs_update.c'],
             include_dirs=[numpy.get_include()],
+            extra_compile_args=['-fopenmp', '-march=native'],
+            extra_link_args=['-fopenmp', '-march=native'],
             define_macros=[('CYTHON_TRACE','1')]
         ),
     ],

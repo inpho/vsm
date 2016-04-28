@@ -232,59 +232,60 @@ def cgs_update_short_char(int itr,
     cdef long start, stop, doc_len, offset
     cdef unsigned char k
 
-    for i in range(N):
-
-        if i==0:
-            doc_len = indices[0]
-            offset = 0
-        else:
-            start = indices[i-1]
-            stop = indices[i]
-            doc_len = stop - start 
-            offset = indices[i-1]
-
-        for j in range(doc_len):
-
-            idx = offset + j
-            w,k = corpus[idx], Z[idx]
-
-            log_p += log_wk[w, k] + log_kd[k, i]
-
-            if itr > 0:
-                word_top[w, k] -= 1
+    with nogil:
+        for i in range(N):
+    
+            if i==0:
+                doc_len = indices[0]
+                offset = 0
+            else:
+                start = indices[i-1]
+                stop = indices[i]
+                doc_len = stop - start 
+                offset = indices[i-1]
+    
+            for j in range(doc_len):
+    
+                idx = offset + j
+                w,k = corpus[idx], Z[idx]
+    
+                log_p += log_wk[w, k] + log_kd[k, i]
+    
+                if itr > 0:
+                    word_top[w, k] -= 1
+                    s = inv_top_sums[k]
+                    inv_top_sums[k] = s / (1 - s)
+                    top_doc[k, i] -= 1
+    
+                t = 0
+                dist[t] = <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
+                for t in range(1,K):
+                    dist[t] = dist[t-1] + <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
+                
+                r = samples[idx] * dist[K-1]
+    
+                first = 0
+                last = K - 1
+                while first < last:
+                    k = (first + last) / 2
+                    if r < dist[k]:
+                        last = k
+                    else:
+                        first = k + 1
+    
+                """
+                for t in range(K):
+                    if r < dist[t]:
+                        k = <unsigned char>(t)
+                        break
+                """
+    
+                word_top[w, k] += 1
                 s = inv_top_sums[k]
-                inv_top_sums[k] = s / (1 - s)
-                top_doc[k, i] -= 1
-
-            t = 0
-            dist[t] = <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
-            for t in range(1,K):
-                dist[t] = dist[t-1] + <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
-            
-            r = samples[idx] * dist[K-1]
-
-            first = 0
-            last = K - 1
-            while first < last:
-                k = (first + last) / 2
-                if r < dist[k]:
-                    last = k
-                else:
-                    first = k + 1
-
-            """
-            for t in range(K):
-                if r < dist[t]:
-                    k = <unsigned char>(t)
-                    break
-            """
-
-            word_top[w, k] += 1
-            s = inv_top_sums[k]
-            inv_top_sums[k] = s / (1 + s) 
-            top_doc[k, i] += 1
-
-            Z[idx] = k
+                inv_top_sums[k] = s / (1 + s) 
+                top_doc[k, i] += 1
+    
+                Z[idx] = k
             
     return (word_top, inv_top_sums, 
             top_doc, Z, log_p, 
