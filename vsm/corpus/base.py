@@ -12,6 +12,8 @@ __all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
 from bisect import bisect_left
 from datetime import datetime
 
+
+
 def binary_search(a, x, lo=0, hi=None):   # can't use a to specify default for hi
     hi = hi if hi is not None else len(a) # hi defaults to len(a)   
     pos = bisect_left(a,x,lo,hi)          # find insertion position
@@ -555,7 +557,6 @@ class Corpus(BaseCorpus):
         return [arr.tolist() for arr in ls]
 
     @staticmethod
-    @profile
     def load(file=None, corpus_dir=None,
              corpus_file='corpus.npy',
              words_file='words.npy',
@@ -637,8 +638,11 @@ class Corpus(BaseCorpus):
                 for i,f in enumerate(c.context_data):
                     f.add_done_callback(
                         functools.partial(set_list_item_from_future, 'context_data', i))
+
+                if c.stopped_words.exception() is not None:
+                    c.stopped_words = set()
+
                 """
-                
                 for n in files.result():
                     if n.startswith('context_data_'):
                         context_data[n] = executor.submit(load_npz, file, n)
