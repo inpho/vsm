@@ -1,3 +1,5 @@
+# cython: binding=True
+
 import numpy as np
 import cython
 
@@ -178,14 +180,22 @@ def cgs_update_int_short(int itr,
             mtrand_state[0], mtrand_state[1], mtrand_state[2], 
             mtrand_state[3], mtrand_state[4])
 
+cimport numpy as np
+DTYPE = np.float32
+ctypedef np.float32_t DTYPE_t
+
+
 @cython.wraparound(False)
 @cython.boundscheck(False)
 @cython.cdivision(True)
+@cython.linetrace(True)
+@cython.profile(True)
+@cython.binding(True)
 def cgs_update_short_char(int itr, 
                unsigned short [:] corpus,
-               float [:,:] word_top,
-               float [:] inv_top_sums,
-               float [:,:] top_doc,
+               np.ndarray[DTYPE_t, ndim=2] word_top,
+               np.ndarray[DTYPE_t] inv_top_sums,
+               np.ndarray[DTYPE_t, ndim=2] top_doc,
                unsigned char [:] Z,
                int [:] indices,
                str mtrand_str,
@@ -210,13 +220,13 @@ def cgs_update_short_char(int itr,
                                mtrand_cached_gaussian))
     cdef float [:] samples = np_random_state.uniform(size=V).astype(np.float32)
     cdef object mtrand_state = np_random_state.get_state()
-    cdef float [:] dist = np.zeros((K,), dtype=np.float32)
-    cdef float [:] cum_dist = np.zeros((K,), dtype=np.float32)
+    cdef np.ndarray[DTYPE_t] dist = np.zeros((K,), dtype=DTYPE)
+    cdef np.ndarray[DTYPE_t] cum_dist = np.zeros((K,), dtype=DTYPE)
 
     cdef float r, s
     cdef long start, stop, doc_len, offset
-    cdef unsigned char k,t
-    cdef Py_ssize_t i, j, idx, w
+    cdef unsigned char k
+    cdef Py_ssize_t i, j, idx, w,t
 
     for i in range(N):
 
@@ -243,14 +253,16 @@ def cgs_update_short_char(int itr,
                 top_doc[k, i] -= 1
 
             for t in range(K):
-                dist[t] = inv_top_sums[t] * word_top[w,t] * top_doc[t,i]
-                if t==0:
-                    cum_dist[t] = dist[t]
-                else:
-                    cum_dist[t] = cum_dist[t-1] + dist[t]
+                dist[t] = <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
+            
+            cum_dist = dist
+            for t in range(1,K):
+                cum_dist[t] = cum_dist[t-1] + cum_dist[t] 
+            
             r = samples[idx] * cum_dist[K-1]
-            for k in range(K):
+            for t in range(K):
                 if r < cum_dist[k]:
+                    k = <unsigned char>(t)
                     break
 
             word_top[w, k] += 1
