@@ -254,14 +254,13 @@ def cgs_update_short_char(int itr,
 
             for t in range(K):
                 dist[t] = <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
-            
-            cum_dist = dist
+
             for t in range(1,K):
-                cum_dist[t] = cum_dist[t-1] + cum_dist[t] 
+                dist[t] = dist[t-1] + dist[t] 
             
-            r = samples[idx] * cum_dist[K-1]
+            r = samples[idx] * dist[K-1]
             for t in range(K):
-                if r < cum_dist[k]:
+                if r < dist[k]:
                     k = <unsigned char>(t)
                     break
 
