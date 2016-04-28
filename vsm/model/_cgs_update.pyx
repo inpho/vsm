@@ -186,6 +186,7 @@ ctypedef np.float32_t DTYPE_t
 
 cdef extern from "math.h":
     float logf(float n)
+cdef inline int int_min(int a, int b): return a if a <= b else b
 
 @cython.linetrace(True)
 @cython.profile(True)
@@ -261,22 +262,22 @@ def cgs_update_short_char(int itr,
                 dist[t] = dist[t-1] + <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
             
             r = samples[idx] * dist[K-1]
-            """ 
+
             first = 0
             last = K - 1
             while first < last:
-                t = first + (last / 2)
-                if r < dist[t]:
-                    last = t
+                k = (first + last) / 2
+                if r < dist[k]:
+                    last = k
                 else:
-                    first = t + 1
-            k = <unsigned char>(t)
-            """
+                    first = k + 1
 
+            """
             for t in range(K):
                 if r < dist[t]:
                     k = <unsigned char>(t)
                     break
+            """
 
             word_top[w, k] += 1
             s = inv_top_sums[k]
