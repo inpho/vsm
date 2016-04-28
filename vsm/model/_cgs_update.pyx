@@ -252,11 +252,10 @@ def cgs_update_short_char(int itr,
                 inv_top_sums[k] = s / (1 - s)
                 top_doc[k, i] -= 1
 
-            for t in range(K):
-                dist[t] = <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
-
+            t = 0
+            dist[t] = <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
             for t in range(1,K):
-                dist[t] = dist[t-1] + dist[t] 
+                dist[t] = dist[t-1] + <DTYPE_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
             
             r = samples[idx] * dist[K-1]
             for t in range(K):
