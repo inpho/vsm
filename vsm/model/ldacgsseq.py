@@ -5,6 +5,8 @@ from vsm.corpus import align_corpora as align
 from ldafunctions import *
 from progressbar import ProgressBar, Percentage, Bar
 
+from _cgs_update import cgs_update
+
 
 __all__ = [ 'LdaCgsSeq', 'LdaCgsQuerySampler' ]
 
@@ -89,12 +91,6 @@ class LdaCgsSeq(object):
             self.seed = seed
         self._mtrand_state = np.random.RandomState(self.seed).get_state()
 
-        print "word_top: {}; top_doc: {}; inv_top_sums: {}".format(
-            self.word_top.dtype,
-            self.top_doc.dtype,
-            self.inv_top_sums.dtype)
-
-
     @property
     def Z_split(self):
         return split_corpus(self.Z, self.indices)
@@ -168,18 +164,15 @@ class LdaCgsSeq(object):
         :param kwargs: For compatability with calls to LdaCgsMulti.
         :type kwargs: optional
         """
+        import cython
         if self.dtype == np.uint16 and self.Ktype == np.uint8:
-            from _cgs_update import cgs_update_short_char
-            update = cgs_update_short_char
+            update = cgs_update[cython.ushort,cython.uchar]
         elif self.dtype == np.uint16 and self.Ktype == np.uint16:
-            from _cgs_update import cgs_update_short_short
-            update = cgs_update_short_short
+            update = cgs_update[cython.ushort,cython.ushort]
         elif self.dtype == np.uint32 and self.Ktype == np.uint8:
-            from _cgs_update import cgs_update_int_char
-            update = cgs_update_int_char
+            update = cgs_update[cython.uint,cython.uchar]
         elif self.dtype == np.uint32 and self.Ktype == np.uint16:
-            from _cgs_update import cgs_update_int_short
-            update = cgs_update_int_short
+            update = cgs_update[cython.uint,cython.ushort]
         else:
             raise NotImplementedError(
                 "Unsupported corpus dtype ({}) and topic dtype ({}) combination".format(
@@ -208,7 +201,7 @@ class LdaCgsSeq(object):
                                  self._mtrand_state[1], self._mtrand_state[2],
                                  self._mtrand_state[3], self._mtrand_state[4])
     
-            lp = results[4]
+            lp = np.float32(results[4])
             self.log_probs.append((self.iteration, lp))
     
             if verbose == 2:

@@ -1,4 +1,5 @@
 import numpy as np
+from vsm.zipfile import use_czipfile
 
 
 __all__ = [ 'init_priors', 'compute_top_doc', 'compute_word_top', 
@@ -23,7 +24,7 @@ def init_priors(V=0, K=0, beta=[], alpha=[]):
 
     return beta, alpha
 
-
+@use_czipfile
 def load_lda(filename, ldaclass):
     """
     A static method for loading a saved `ldaclass` model.
@@ -35,7 +36,6 @@ def load_lda(filename, ldaclass):
     
     :See Also: :class:`numpy.load`
     """
-    import vsm.zipfile
     import concurrent.futures
     def load_npz(filename, obj):
         zipfile = np.load(filename)
@@ -124,14 +124,20 @@ def save_lda(m, filename):
     
     :See Also: :class:`numpy.savez`
     """
-    import vsm.zipfile
+
     arrays_out = dict()
 
     arrays_out['context_type'] = m.context_type
     if hasattr(m, 'dtype'):
-        arrays_out['dtype'] = str(m.dtype)
+        if m.dtype == np.uint16:
+            arrays_out['dtype'] = 'uint16'
+        elif m.dtype == np.uint32:
+            arrays_out['dtype'] = 'uint32'
     if hasattr(m, 'Ktype'):
-        arrays_out['Ktype'] = str(m.Ktype)
+        if m.dtype == np.uint16:
+            arrays_out['Ktype'] = 'uint16'
+        elif m.dtype == np.uint32:
+            arrays_out['Ktype'] = 'uint32'
 
     arrays_out['alpha'] = m.alpha
     arrays_out['beta'] = m.beta
@@ -146,6 +152,7 @@ def save_lda(m, filename):
     dt = dtype=[('i', np.int), ('v', np.float)]
     arrays_out['log_probs'] = np.array(m.log_probs, dtype=dt)
 
+    potential_views = ['top_doc','word_top','inv_top_sums']
     arrays_out['top_doc'] = m.top_doc
     arrays_out['word_top'] = m.word_top
     arrays_out['inv_top_sums'] = m.inv_top_sums
@@ -165,7 +172,7 @@ def save_lda(m, filename):
             arrays_out[key] = s
     
     print 'Saving LDA model to', filename
-    np.savez(filename, **arrays_out)
+    use_czipfile(np.savez)(filename, **arrays_out)
 
 
 def compute_log_prob(W, Z, word_top, top_doc):

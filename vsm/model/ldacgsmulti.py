@@ -4,8 +4,9 @@ import numpy as np
 from vsm.split import split_documents
 from ldafunctions import load_lda
 from ldacgsseq import *
-from _cgs_update import (cgs_update_int_char, cgs_update_short_char,
-                         cgs_update_int_short, cgs_update_short_short)
+
+from _cgs_update import cgs_update
+import cython
 
 import platform # For Windows comaptability
 import itertools
@@ -135,7 +136,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def word_top(self):
         if self._read_globals:
-            return np.frombuffer(_word_top, np.float64).reshape(self.V, self.K)
+            return np.frombuffer(_word_top, np.float32).reshape(self.V, self.K)
         return self._word_top_local
         
     @word_top.setter
@@ -143,7 +144,7 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _word_top
             if not '_word_top' in globals():
-                _word_top = mp.Array('d', self.V * self.K, lock=False)
+                _word_top = mp.Array('f', self.V * self.K, lock=False)
             _word_top[:] = a.reshape(-1,)
         else:
             self._word_top_local = a
@@ -152,7 +153,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def inv_top_sums(self):
         if self._read_globals:
-            return np.frombuffer(_inv_top_sums, np.float64)
+            return np.frombuffer(_inv_top_sums, np.float32)
         return self._inv_top_sums_local
 
     @inv_top_sums.setter
@@ -160,7 +161,7 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _inv_top_sums
             if not '_inv_top_sums' in globals():
-                _inv_top_sums = mp.Array('d', self.K, lock=False)
+                _inv_top_sums = mp.Array('f', self.K, lock=False)
             _inv_top_sums[:] = a
         else:
             self._inv_top_sums_local = a
@@ -169,7 +170,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def top_doc(self):
         if self._read_globals:
-            top_doc = np.frombuffer(_top_doc, np.float64)
+            top_doc = np.frombuffer(_top_doc, np.float32)
             return top_doc.reshape(self.K, len(self.indices))
         return self._top_doc_local
         
@@ -178,7 +179,7 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _top_doc
             if not '_top_doc' in globals():
-                _top_doc = mp.Array('d', self.K * len(self.indices), lock=False)
+                _top_doc = mp.Array('f', self.K * len(self.indices), lock=False)
             _top_doc[:] = a.reshape(-1,)
         else:
             self._top_doc_local = a
@@ -218,8 +219,15 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _Z
             if not '_Z' in globals():
-                _Z = mp.Array('i', len(a), lock=False)
+                if self.K < 2 ** 8:
+                    Ktype = 'B'
+                elif self.K < 2 ** 16:
+                    Ktype = 'H'
+                else:
+                    raise NotImplementedError
+                _Z = mp.Array(Ktype, len(a), lock=False)
             _Z[:] = a
+
         else:
             self._Z_local = a
 
@@ -345,7 +353,7 @@ class LdaCgsMulti(LdaCgsSeq):
                 self.top_doc[:, doc_indices[t][0]:doc_indices[t][1]] = top_doc_ls[t]
             self.word_top = self.word_top + np.sum(word_top_ls, axis=0)
             self.inv_top_sums = 1. / self.word_top.sum(0)
-            lp = np.sum(logp_ls)
+            lp = np.sum(logp_ls, dtype=np.float32)
             self.log_probs.append((self.iteration, lp))
 
             if verbose == 2:
@@ -388,20 +396,23 @@ def update((docs, doc_indices, mtrand_state, dtype)):
     """
     start, stop = docs[0][0], docs[-1][1]
 
-    if _K < 2 ** 8:
+    global Ktype
+    if _K.value < 2 ** 8:
         Ktype = np.uint8
-    elif _K < 2 ** 16:
+    elif _K.value < 2 ** 16:
         Ktype = np.uint16
+    else:
+        raise NotImplementedError("Invalid Ktype. k={}".format(_K))
 
     corpus = np.frombuffer(_corpus, dtype=dtype)[start:stop]
     Z = np.frombuffer(_Z, dtype=Ktype)[start:stop].copy()
 
-    gbl_word_top = np.frombuffer(_word_top, dtype='d')
+    gbl_word_top = np.frombuffer(_word_top, dtype=np.float32)
     gbl_word_top = gbl_word_top.reshape(_V.value, _K.value)
     loc_word_top = gbl_word_top.copy()
-    inv_top_sums = np.frombuffer(_inv_top_sums, dtype='d').copy()
+    inv_top_sums = np.frombuffer(_inv_top_sums, dtype=np.float32).copy()
 
-    top_doc = np.frombuffer(_top_doc, dtype='d')
+    top_doc = np.frombuffer(_top_doc, dtype=np.float32)
     top_doc = top_doc.reshape(_K.value, top_doc.size/_K.value)
     top_doc = top_doc[:, doc_indices[0]:doc_indices[1]].copy()
 
@@ -412,13 +423,13 @@ def update((docs, doc_indices, mtrand_state, dtype)):
     indices = np.array([(j - start) for (i,j) in docs], dtype='i')
 
     if dtype == np.uint16 and Ktype == np.uint8:
-        update_fn = cgs_update_short_char
-    elif dtype == np.uint32 and Ktype == np.uint8:
-        update_fn = cgs_update_int_char
+        update_fn = cgs_update[cython.ushort,cython.uchar]
     elif dtype == np.uint16 and Ktype == np.uint16:
-        update_fn = cgs_update_short_short
+        update_fn = cgs_update[cython.ushort,cython.ushort]
+    elif dtype == np.uint32 and Ktype == np.uint8:
+        update_fn = cgs_update[cython.uint,cython.uchar]
     elif dtype == np.uint32 and Ktype == np.uint16:
-        update_fn = cgs_update_int_short
+        update_fn = cgs_update[cython.uint,cython.ushort]
     else:
         raise NotImplementedError
 
@@ -435,6 +446,10 @@ def update((docs, doc_indices, mtrand_state, dtype)):
                          mtrand_state[3],
                          mtrand_state[4])
 
+    #final_results = [np.asarray(result, dtype=dtype) 
+    #                     for result,dtype in zip(results[:4], 
+    #                                             [Ktype, np.float32, np.float32, np.float32])]
+    #final_results.extend(results[4:])
     (loc_word_top, inv_top_sums, top_doc, Z, log_p, mtrand_str, mtrand_keys, 
      mtrand_pos, mtrand_has_gauss, mtrand_cached_gaussian) = results
 

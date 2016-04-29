@@ -11,6 +11,7 @@ __all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
 
 from bisect import bisect_left
 from datetime import datetime
+from vsm.zipfile import use_czipfile
 
 
 
@@ -23,6 +24,7 @@ def binary_search_set(a,x):
     pos = a.bisect_left(x)
     return (pos if pos != len(a)  and a[pos] == x else -1) # don't walk off the end
 """
+
 def load_npz(filename, obj):
     zipfile = np.load(filename)
     return zipfile.__getitem__(obj)
@@ -557,6 +559,7 @@ class Corpus(BaseCorpus):
         return [arr.tolist() for arr in ls]
 
     @staticmethod
+    @use_czipfile
     def load(file=None, corpus_dir=None,
              corpus_file='corpus.npy',
              words_file='words.npy',
@@ -596,20 +599,21 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`, :meth:`Corpus.save`, :meth:`numpy.load`
 
         """
-        import vsm.zipfile
         import concurrent.futures
         import functools
+        from pickle import PickleError, UnpicklingError
         def set_from_future(obj, future):
             setattr(c, obj, future.result())
         def set_list_from_future(obj, future):
             setattr(c, obj, future.result().tolist())
         def set_set_from_future(obj, future):
-            setattr(c, obj, set(future.result().tolist()))
+            try:
+                setattr(c, obj, set(future.result().tolist()))
+            except UnpicklingError:
+                setattr(c, obj, set())
+                
         def set_list_item_from_future(obj, i, future):
             getattr(c, obj)[i] = future.result()
-
-            
-        assign = functools.partial(set_from_future)
 
         if file is not None:
             c = Corpus([], remove_empty=False)
@@ -623,10 +627,12 @@ class Corpus(BaseCorpus):
                     functools.partial(set_from_future, 'words'))
 
                 c.context_types = executor.submit(load_npz, file, 'context_types')
-
-                c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
-                c.stopped_words.add_done_callback(
-                    functools.partial(set_set_from_future, 'stopped_words'))
+                try:
+                    c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
+                    c.stopped_words.add_done_callback(
+                         functools.partial(set_set_from_future, 'stopped_words'))
+                except UnpicklingError:
+                    pass
 
                 c.dtype = executor.submit(load_npz, file, 'dtype')
                 c.dtype.add_done_callback(
@@ -673,6 +679,7 @@ class Corpus(BaseCorpus):
             return c
 
 
+    @use_czipfile
     def save(self, file):
         """
         Saves data from a Corpus object as an `npz` file.

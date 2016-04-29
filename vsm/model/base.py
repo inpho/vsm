@@ -1,5 +1,5 @@
 import numpy as np
-
+from vsm.zipfile import use_czipfile
 
 __all__ = ['BaseModel']
 
@@ -35,7 +35,7 @@ class BaseModel(object):
         self.matrix = matrix
         self.context_type = context_type
 
-
+    @use_czipfile
     def save(self, f):
         """
         Takes a filename or file object and saves `self.matrix` in an
@@ -54,6 +54,7 @@ class BaseModel(object):
 
 
     @staticmethod
+    @use_czipfile
     def load(f):
         """
         Takes a filename or file object and loads it as an npz archive
@@ -73,4 +74,4 @@ class BaseModel(object):
         
         # The slice [()] is to unwrap sparse matrices, which get saved
         # in singleton object arrays
-        return BaseModel(matrix=npz['matrix'][()], context_type=npz['context_type'][()])
+        return BaseModel(matrix=npz['matrix'], context_type=npz['context_type'])

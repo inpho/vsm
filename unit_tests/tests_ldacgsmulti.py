@@ -230,7 +230,6 @@ class MPTester:
             assert (m0.Z[i] == m1.Z[i]).all()
             assert (m0.top_doc == m1.top_doc).all()
             assert (m0.word_top == m1.word_top).all()
-            assert (np.isclose(m0.inv_top_sums, m1.inv_top_sums)).all()
     
             assert m0.seeds[0] == m1.seed
             assert m0._mtrand_states[0][0] == m1._mtrand_state[0]
@@ -242,6 +241,7 @@ class MPTester:
             print iteration, m0.log_probs[-1], m1.log_probs[-1] 
             for i in range(iteration):
                 assert np.isclose(m0.log_probs[i][1], m1.log_probs[i][1])
+            assert (np.isclose(m0.inv_top_sums, m1.inv_top_sums)).all()
 
 
 class TestLdaCgsMulti(unittest.TestCase):
