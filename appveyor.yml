@@ -28,7 +28,7 @@ after_test:
   # 64-bit Python 3.3/3.4. And you need to use %PYTHON% to get the correct
   # interpreter
   - "%PYTHON%\\python.exe setup.py bdist_egg"
-  - "%PYTHON%\\python.exe -m wheel convert dist\*.egg"
+  - "%PYTHON%\\python.exe -m wheel convert dist\\*.egg"
 
 artifacts:
   # bdist_wheel puts your built wheel in the dist directory
