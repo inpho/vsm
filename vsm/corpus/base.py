@@ -12,7 +12,7 @@ __all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
 from bisect import bisect_left
 from datetime import datetime
 from vsm.zipfile import use_czipfile
-from copy import deepcopy
+from copy import deepcopy, copy
 
 
 
@@ -829,18 +829,37 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
-        new_c = deepcopy(self)
-        return new_c.in_place_stoplist(stoplist=stoplist, freq=freq)
+        from sortedcontainers import SortedSet, SortedList
+        stoplist = SortedList(stoplist)
 
-    def __deepcopy__(self, memo):
+        if self and len(stoplist) == len(self.words) and (self.words == stoplist).all():
+            return type(self)([], remove_empty=False)
+        elif not (np.in1d(self.words, stoplist)).any():
+            return deepcopy(self).stopped_words.update(stoplist)
+        else:
+            return copy(self).in_place_stoplist(stoplist=stoplist, freq=freq)
+    
+    def __copy__(self):
         c = type(self)([], remove_empty=False)
         c.corpus = self.corpus
         c.words = self.words
         c.context_types = self.context_types[:]
+        c.stopped_words = self.stopped_words.copy()
+        c.dtype = self.dtype
+        c.words_int = self.words_int.copy()
+        c.context_data = self.context_data[:]
+        
+        return c
+
+    def __deepcopy__(self, memo):
+        c = type(self)([], remove_empty=False)
+        c.corpus = deepcopy(self.corpus, memo)
+        c.words = deepcopy(self.words, memo)
+        c.context_types = self.context_types[:]
         c.stopped_words = deepcopy(self.stopped_words, memo)
         c.dtype = self.dtype
         c.words_int = deepcopy(self.words_int, memo)
-        c.context_data = self.context_data
+        c.context_data = [deepcopy(data, memo) for data in self.context_data]
 
         return c
 
