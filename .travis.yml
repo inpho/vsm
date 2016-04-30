@@ -15,7 +15,7 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda --yes
   - conda create -n py -q --yes pip numpy scipy scikit-learn unidecode nltk futures chardet "python=$TRAVIS_PYTHON_VERSION"
-  - activate py
+  - source activate py
   - python --version
   - pip --version
   # command to install dependencies
