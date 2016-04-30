@@ -59,7 +59,7 @@ class TestCore(unittest.TestCase):
         self.assertTrue(np.array_equiv(ea1, 
             np.array([(0,7), (1,3), (2,1), (3,8), (4,2)],
                     dtype=[('i', '<i8'), ('value', '<i8')])))
-        self.assertTrue(np.array_equiv(ea2
+        self.assertTrue(np.array_equiv(ea2,
             np.array([(0,6), (1,3), (2,7), (3,2), (4,0), (5,4)],
                     dtype=[('i', '<i8'), ('value', '<i8')])))
         
