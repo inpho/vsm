@@ -17,7 +17,8 @@ install_requires=[
         "progressbar>=2.3",
         "chardet>=2.3.0",
         "sortedcontainers>=1.4.0",
-        "czipfile==1.0.0"
+        "czipfile==1.0.0",
+        "cython"
     ]
 
 if platform.python_version_tuple()[0] == '2':
