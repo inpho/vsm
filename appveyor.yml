@@ -11,6 +11,7 @@ install:
   - "%PYTHON%\\python.exe -m pip install unittest2 nose"
 
 build: off
+version: '1.0.{build}'
 
 test_script:
   # Put your test command here.
