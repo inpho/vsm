@@ -114,8 +114,9 @@ class TestLdaCgsSeq(unittest.TestCase):
         self.assertTrue(q.word_top.shape==(2, 2))
         self.assertTrue((q.word_top==m.word_top).all())
         self.assertTrue(q.top_doc.shape==(2, 1))
-        self.assertTrue((q.top_doc==[[ 0.01 ],
-                                     [ 0.01 ]]).all())
+        self.assertTrue((q.top_doc==np.array([[ 0.01 ],
+                                              [ 0.01 ]],
+                                              dtype=q.top_doc.dtype)).all())
         self.assertTrue(q.inv_top_sums.shape==(2, ))
         self.assertTrue((q.inv_top_sums==m.inv_top_sums).all())
         self.assertTrue(q.alpha.shape==(2, 1))

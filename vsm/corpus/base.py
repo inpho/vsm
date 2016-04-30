@@ -12,6 +12,7 @@ __all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
 from bisect import bisect_left
 from datetime import datetime
 from vsm.zipfile import use_czipfile
+from copy import deepcopy
 
 
 
@@ -768,6 +769,11 @@ class Corpus(BaseCorpus):
             spans.append(new_t.size if new_t.size else 0)
             if new_t.size:
                 new_corpus.append(new_t)
+
+        # Stopped all words from Corpus
+        if not new_corpus:
+            return Corpus([])
+
         new_base = self.context_data[BASE].copy()
         new_base['idx'] = np.cumsum(spans)
 
@@ -823,54 +829,21 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
-        print "Using apply_stoplist for some reason"
-        stoplist = set(stoplist)
-        if freq:
-            #TODO: Use the TF model instead
+        new_c = deepcopy(self)
+        return new_c.in_place_stoplist(stoplist=stoplist, freq=freq)
 
-            # print 'Computing collection frequencies'
-            cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
-    
-            for word in self.corpus:
-                cfs[word] += 1
+    def __deepcopy__(self, memo):
+        c = type(self)([], remove_empty=False)
+        c.corpus = self.corpus
+        c.words = self.words
+        c.context_types = self.context_types[:]
+        c.stopped_words = deepcopy(self.stopped_words, memo)
+        c.dtype = self.dtype
+        c.words_int = deepcopy(self.words_int, memo)
+        c.context_data = self.context_data
 
-            # print 'Selecting words of frequency <=', freq
-            freq_stop = np.arange(cfs.size)[(cfs <= freq)]
-            stop = set(freq_stop)
-            for word in stop:
-                stoplist.add(self.words[word])
-        else:
-            stop = set()
-
-        # filter stoplist
-        stoplist = [t for t in stoplist if t in self.words]
-        for t in stoplist:
-            stop.add(self.words_int[t])
-
-        if not stop:
-            # print 'Stop list is empty.'
-            return self
-    
-        # print 'Removing stop words'
-        f = np.vectorize(lambda x: x not in stop)
-        corpus = self.corpus[f(self.corpus)]
-
-        # print 'Rebuilding corpus'
-        corpus = [self.words[i] for i in corpus]
-        context_data = []
-        for i in xrange(len(self.context_data)):
-            # print 'Recomputing token breaks:', self.context_types[i]
-            tokens = self.view_contexts(self.context_types[i])
-            spans = [t[f(t)].size for t in tokens]
-            tok = self.context_data[i].copy()
-            tok['idx'] = np.cumsum(spans)
-            context_data.append(tok)
-
-        c = Corpus(corpus, context_data=context_data, context_types=self.context_types)
-        if self.stopped_words:
-            c.stopped_words.update(self.stopped_words)
-        c.stopped_words.update(stoplist)
         return c
+
 
 
 def add_metadata(corpus, ctx_type, new_field, metadata):
