@@ -18,19 +18,15 @@ class TestBaseModel(unittest.TestCase):
         import os
 
         c = random_corpus(1000, 50, 6, 100)
-        tmp = NTF(delete=False, suffix='.npz')
-        
-        try:
+        with NTF(delete=False, suffix='.npz') as tmp:
             m0 = BaseModel(c.corpus, 'context')
             m0.save(tmp.name)
             m1 = BaseModel.load(tmp.name)
 
             self.assertEqual(m0.context_type, m1.context_type)
             self.assertTrue((m0.matrix == m1.matrix).all())
-        finally:
-            os.remove(tmp.name)
 
-
+        os.remove(tmp.name)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestBaseModel)
 unittest.TextTestRunner(verbosity=2).run(suite)
