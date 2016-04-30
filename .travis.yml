@@ -13,15 +13,14 @@ install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-
-  # sudo conda update conda --yes
-  - conda create -p $HOME/py --yes pip numpy scipy scikit-learn "python=$TRAVIS_PYTHON_VERSION"
-  - export PATH=$HOME/py/bin:$PATH
+  - conda update -q conda --yes
+  - conda create -n py -q --yes pip numpy scipy scikit-learn unidecode nltk futures chardet "python=$TRAVIS_PYTHON_VERSION"
+  - activate py
+  - python --version
+  - pip --version
   # command to install dependencies
-  - pip install unidecode nltk
   - pip install coveralls
-  - python2.7 -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
+  - python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
   - python setup.py develop
 # command to run tests
 before_script: 
