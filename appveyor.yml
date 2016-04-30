@@ -40,13 +40,14 @@ artifacts:
   # bdist_wheel puts your built wheel in the dist directory
   - path: dist\*
 
-deploy_script: |
-  if($env:appveyor_repo_tag -eq 'True') {
-    if($env:appveyor_repo_branch -eq 'master') {
-      %PYTHON%\\python.exe -m pip install twine
-      %PYTHON%\\python.exe -m twine upload %twineargs% dist/*.whl
-    }
-  }
+deploy_script:
+  - ps: >- 
+      if($env:appveyor_repo_tag -eq 'True') {
+        if($env:appveyor_repo_branch -eq 'master') {
+          %PYTHON%\\python.exe -m pip install twine
+          %PYTHON%\\python.exe -m twine upload %twineargs% dist/*.whl
+        }
+      }
 
 #on_success:
 #  You can use this step to upload your artifacts to a public website.
