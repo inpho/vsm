@@ -602,14 +602,21 @@ class Corpus(BaseCorpus):
         import concurrent.futures
         import functools
         from pickle import PickleError, UnpicklingError
+        from threading import RLock
+        corpus_lock = RLock()
+
         def set_from_future(obj, future):
-            setattr(c, obj, future.result())
+            with corpus_lock:
+                setattr(c, obj, future.result())
         def set_list_from_future(obj, future):
-            setattr(c, obj, future.result().tolist())
+            with corpus_lock:
+                setattr(c, obj, future.result().tolist())
         def set_set_from_future(obj, future):
-            setattr(c, obj, set(future.result().tolist()))
+            with corpus_lock:
+                setattr(c, obj, set(future.result().tolist()))
         def set_list_item_from_future(obj, i, future):
-            getattr(c, obj)[i] = future.result()
+            with corpus_lock:
+                getattr(c, obj)[i] = future.result()
 
         if file is not None:
             c = Corpus([], remove_empty=False)
