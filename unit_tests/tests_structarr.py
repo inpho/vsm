@@ -18,7 +18,7 @@ class TestCore(unittest.TestCase):
 
         test_arr = arr_add_field(arr, new_field, vals)
 
-        self.assertTrue((new_arr==test_arr).all())
+        self.assertTrue(np.array_equiv(new_arr, test_arr))
         self.assertTrue(new_arr.dtype==test_arr.dtype)
 
     def test_enum_matrix(self):
@@ -27,10 +27,10 @@ class TestCore(unittest.TestCase):
         em1 = enum_matrix(arr)
         em2 = enum_matrix(arr, indices=[10,20,30], field_name='tens')
 
-        self.assertTrue((em1 == np.array([[(2,7), (0,6), (1, 3)],[(2,4), (0,2), (1,0)]],
-                        dtype=[('i', '<i8'), ('value', '<i8')])).all())
-        self.assertTrue((em2 == np.array([[(30,7), (10,6), (20, 3)],[(30,4), (10,2), (20,0)]],
-                        dtype=[('tens', '<i8'), ('value', '<i8')])).all())
+        self.assertTrue(np.array_equal(em1, np.array([[(2,7), (0,6), (1, 3)],[(2,4), (0,2), (1,0)]],
+                        dtype=[('i', '<i8'), ('value', '<i8')])))
+        self.assertTrue(np.array_equal(em2, np.array([[(30,7), (10,6), (20, 3)],[(30,4), (10,2), (20,0)]],
+                        dtype=[('tens', '<i8'), ('value', '<i8')])))
         
 
 
@@ -40,13 +40,13 @@ class TestCore(unittest.TestCase):
         sorted_arr = enum_sort(arr)
         sorted_arr1 = enum_sort(arr, indices=[10,20,30,40,50])
 
-        self.assertTrue((sorted_arr == 
+        self.assertTrue(np.array_equal(sorted_arr, 
             np.array([(3, 8), (0, 7), (1, 3), (4, 2), (2, 1)],
-            dtype=[('i', '<i8'), ('value', '<i8')])).all())
+            dtype=[('i', '<i8'), ('value', '<i8')])))
 
-        self.assertTrue((sorted_arr1 ==
+        self.assertTrue(np.array_equal(sorted_arr1,
             np.array([(40, 8), (10, 7), (20, 3), (50, 2), (30, 1)], 
-                  dtype=[('i', '<i8'), ('value', '<i8')])).all())
+                  dtype=[('i', '<i8'), ('value', '<i8')])))
 
 
     def test_enum_array(self):
@@ -70,8 +70,8 @@ class TestCore(unittest.TestCase):
         arr2 = np.array([[1,3], [5,7]])
 
         zipped = zip_arr(arr1, arr2, field_names=['even', 'odd'])
-        self.assertTrue((zipped == np.array([[(2,1), (4,3)], [(6,5), (8,7)]],
-                        dtype=[('even', '<i8'), ('odd', '<i8')])).all())
+        self.assertTrue(np.array_equal(zipped, np.array([[(2,1), (4,3)], [(6,5), (8,7)]],
+                        dtype=[('even', '<i8'), ('odd', '<i8')])))
 
 
     def test_map_strarr(self):
@@ -81,9 +81,9 @@ class TestCore(unittest.TestCase):
         m = ['foo', 'bar']
         arr = map_strarr(arr, m, 'i', new_k='str')
 
-        self.assertTrue((arr['str'] == np.array(m, 
-                        dtype=np.array(m).dtype)).all())
-        self.assertTrue((arr['v'] == np.array([1., 2.], dtype='f4')).all())
+        self.assertTrue(np.array_equal(arr['str'], 
+                        np.array(m, dtype=np.array(m).dtype)))
+        self.assertTrue(np.array_equal(arr['v'], np.array([1., 2.], dtype='f4')))
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestCore)

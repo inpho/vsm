@@ -53,7 +53,10 @@ class TestLdaCgsSeq(unittest.TestCase):
             m1 = LdaCgsSeq.load(tmp.name)
             self.assertTrue(not hasattr(m1, 'log_prob'))
         finally:
-            os.remove(tmp.name)
+            try:
+                os.remove(tmp.name)
+            except WindowsError:
+                pass
     
     def test_LdaCgsSeq_SeedTypes(self):
         """ Test for issue #74 issues. """
@@ -76,7 +79,10 @@ class TestLdaCgsSeq(unittest.TestCase):
             self.assertTrue(type(m0._mtrand_state[3]) == type(m1._mtrand_state[3]))
             self.assertTrue(type(m0._mtrand_state[4]) == type(m1._mtrand_state[4]))
         finally:
-            os.remove(tmp.name)
+            try:
+                os.remove(tmp.name)
+            except WindowsError:
+                pass
 
 
     def test_LdaCgsQuerySampler_init(self):
