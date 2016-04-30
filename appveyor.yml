@@ -5,6 +5,10 @@ environment:
     - PYTHON: "C:\\Miniconda"
     - PYTHON: "C:\\Miniconda-x64"
 
+  twineargs:
+    secure: Hj0/nwvDm2ghYAjXDELxtkKOroTwKq1hDRekkNCSEdG9lsIn/8ymmF6RuNN7scSa
+
+
 install:
   - "%PYTHON%\\python.exe -m conda install -q --yes pip numpy scipy scikit-learn unidecode nltk futures chardet cython"
   - "%PYTHON%\\python.exe -c \"import nltk; nltk.download('stopwords'); nltk.download('punkt')\""
@@ -34,6 +38,14 @@ after_test:
 artifacts:
   # bdist_wheel puts your built wheel in the dist directory
   - path: dist\*
+
+deploy_script: |
+  if($env:appveyor_repo_tag -eq 'True') {
+    if($env:appveyor_repo_branch -eq 'master') {
+      %PYTHON%\\python.exe -m pip install twine
+      %PYTHON%\\python.exe -m twine upload %twineargs% dist/*.whl
+    }
+  }
 
 #on_success:
 #  You can use this step to upload your artifacts to a public website.
