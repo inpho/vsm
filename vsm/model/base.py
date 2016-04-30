@@ -35,7 +35,6 @@ class BaseModel(object):
         self.matrix = matrix
         self.context_type = context_type
 
-    @use_czipfile
     def save(self, f):
         """
         Takes a filename or file object and saves `self.matrix` in an
@@ -50,11 +49,10 @@ class BaseModel(object):
         :See Also: :meth:`numpy.savez`
         """
         print 'Saving model to', f
-        np.savez(f, matrix=self.matrix, context_type=np.array(self.context_type))
+        np.savez(f, matrix=np.array(self.matrix), context_type=np.array(self.context_type))
 
 
     @staticmethod
-    @use_czipfile
     def load(f):
         """
         Takes a filename or file object and loads it as an npz archive

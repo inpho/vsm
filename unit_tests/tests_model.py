@@ -21,12 +21,12 @@ class TestBaseModel(unittest.TestCase):
         tmp = NTF(delete=False, suffix='.npz')
         
         try:
-            m0 = BaseModel(c, 'context')
+            m0 = BaseModel(c.corpus, 'context')
             m0.save(tmp.name)
             m1 = BaseModel.load(tmp.name)
 
             self.assertEqual(m0.context_type, m1.context_type)
-            self.assertTrue((m0.matrix.corpus == m1.matrix.corpus).all())
+            self.assertTrue((m0.matrix == m1.matrix).all())
         finally:
             os.remove(tmp.name)
 
