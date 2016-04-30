@@ -58,6 +58,6 @@ setup(
         #    define_macros=[('CYTHON_TRACE','1')]
         ),
     ],
+    test_suite = "unittest2.collector",
     tests_require=['unittest2'],
-    test_suite = "unit_tests",
 )
