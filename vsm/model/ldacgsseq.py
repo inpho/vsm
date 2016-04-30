@@ -50,7 +50,6 @@ class LdaCgsSeq(object):
             self.indices = corpus.view_contexts(self.context_type, as_indices=True)
             self.corpus = corpus.corpus
             self.dtype = corpus.corpus.dtype
-            print np.dtype(str(self.dtype))
         else:
             self.V = V
             self.indices = []
