@@ -27,9 +27,9 @@ class TestCore(unittest.TestCase):
         em1 = enum_matrix(arr)
         em2 = enum_matrix(arr, indices=[10,20,30], field_name='tens')
 
-        self.assertTrue(np.array_equal(em1, np.array([[(2,7), (0,6), (1, 3)],[(2,4), (0,2), (1,0)]],
+        self.assertTrue(np.array_equiv(em1, np.array([[(2,7), (0,6), (1, 3)],[(2,4), (0,2), (1,0)]],
                         dtype=[('i', '<i8'), ('value', '<i8')])))
-        self.assertTrue(np.array_equal(em2, np.array([[(30,7), (10,6), (20, 3)],[(30,4), (10,2), (20,0)]],
+        self.assertTrue(np.array_equiv(em2, np.array([[(30,7), (10,6), (20, 3)],[(30,4), (10,2), (20,0)]],
                         dtype=[('tens', '<i8'), ('value', '<i8')])))
         
 
@@ -40,11 +40,11 @@ class TestCore(unittest.TestCase):
         sorted_arr = enum_sort(arr)
         sorted_arr1 = enum_sort(arr, indices=[10,20,30,40,50])
 
-        self.assertTrue(np.array_equal(sorted_arr, 
+        self.assertTrue(np.array_equiv(sorted_arr, 
             np.array([(3, 8), (0, 7), (1, 3), (4, 2), (2, 1)],
             dtype=[('i', '<i8'), ('value', '<i8')])))
 
-        self.assertTrue(np.array_equal(sorted_arr1,
+        self.assertTrue(np.array_equiv(sorted_arr1,
             np.array([(40, 8), (10, 7), (20, 3), (50, 2), (30, 1)], 
                   dtype=[('i', '<i8'), ('value', '<i8')])))
 
@@ -56,12 +56,12 @@ class TestCore(unittest.TestCase):
         arr2 = np.array([6,3,7,2,0,4])
         ea2 = enum_array(arr2)
 
-        self.assertTrue((ea1 == 
+        self.assertTrue(np.array_equiv(ea1, 
             np.array([(0,7), (1,3), (2,1), (3,8), (4,2)],
-                    dtype=[('i', '<i8'), ('value', '<i8')])).all())
-        self.assertTrue((ea2 ==
+                    dtype=[('i', '<i8'), ('value', '<i8')])))
+        self.assertTrue(np.array_equiv(ea2
             np.array([(0,6), (1,3), (2,7), (3,2), (4,0), (5,4)],
-                    dtype=[('i', '<i8'), ('value', '<i8')])).all())
+                    dtype=[('i', '<i8'), ('value', '<i8')])))
         
 
     def test_zip_arr(self):
@@ -70,7 +70,7 @@ class TestCore(unittest.TestCase):
         arr2 = np.array([[1,3], [5,7]])
 
         zipped = zip_arr(arr1, arr2, field_names=['even', 'odd'])
-        self.assertTrue(np.array_equal(zipped, np.array([[(2,1), (4,3)], [(6,5), (8,7)]],
+        self.assertTrue(np.array_equiv(zipped, np.array([[(2,1), (4,3)], [(6,5), (8,7)]],
                         dtype=[('even', '<i8'), ('odd', '<i8')])))
 
 
