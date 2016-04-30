@@ -6,7 +6,7 @@ environment:
     - PYTHON: "C:\\Miniconda-x64"
 
 install:
-  - "%PYTHON%\\python.exe -m conda install --yes pip numpy scipy scikit-learn unidecode nltk futures chardet cython"
+  - "%PYTHON%\\python.exe -m conda install -q --yes pip numpy scipy scikit-learn unidecode nltk futures chardet cython"
   - "%PYTHON%\\python.exe -c import nltk; nltk.download('stopwords'); nltk.download('punkt')"
   - "%PYTHON%\\python.exe -m pip install unittest2 nose"
 
