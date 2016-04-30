@@ -607,11 +607,7 @@ class Corpus(BaseCorpus):
         def set_list_from_future(obj, future):
             setattr(c, obj, future.result().tolist())
         def set_set_from_future(obj, future):
-            try:
-                setattr(c, obj, set(future.result().tolist()))
-            except UnpicklingError:
-                setattr(c, obj, set())
-                
+            setattr(c, obj, set(future.result().tolist()))
         def set_list_item_from_future(obj, i, future):
             getattr(c, obj)[i] = future.result()
 
@@ -627,12 +623,9 @@ class Corpus(BaseCorpus):
                     functools.partial(set_from_future, 'words'))
 
                 c.context_types = executor.submit(load_npz, file, 'context_types')
-                try:
-                    c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
-                    c.stopped_words.add_done_callback(
+                c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
+                c.stopped_words.add_done_callback(
                          functools.partial(set_set_from_future, 'stopped_words'))
-                except UnpicklingError:
-                    pass
 
                 c.dtype = executor.submit(load_npz, file, 'dtype')
                 c.dtype.add_done_callback(
@@ -645,15 +638,6 @@ class Corpus(BaseCorpus):
                 for i,f in enumerate(c.context_data):
                     f.add_done_callback(
                         functools.partial(set_list_item_from_future, 'context_data', i))
-
-                if c.stopped_words.exception() is not None:
-                    c.stopped_words = set()
-
-                """
-                for n in files.result():
-                    if n.startswith('context_data_'):
-                        context_data[n] = executor.submit(load_npz, file, n)
-                """
 
 
             # get futures results
