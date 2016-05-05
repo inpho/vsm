@@ -469,7 +469,9 @@ class Corpus(BaseCorpus):
         # Integer encoding of a string-type corpus
         self.dtype = np.int32
         self.corpus = np.asarray([self.words_int[unicode(word)] 
-                                  for word in self.corpus],
+                                  for word in self.corpus 
+                                      if unicode(word) not in ['\x00']
+                                      ],
                                  dtype=self.dtype)
 
         self.stopped_words = set()
