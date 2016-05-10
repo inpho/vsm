@@ -12,7 +12,7 @@ from progressbar import ProgressBar, Percentage, Bar
 __all__ = ['empty_corpus', 'random_corpus',
            'toy_corpus', 'corpus_fromlist',
            'file_corpus', 'dir_corpus', 'coll_corpus', 'json_corpus',
-           'corpus_from_strings']
+           'corpus_from_strings', 'walk_corpus']
 
 
 
@@ -552,7 +552,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
             chk_n += 1
     else:
         for chk, label in zip(chunks, labels):
-            # print 'Tokenizing', label
+            print 'Tokenizing', label
             if simple:
                 w = tokenizer(chk)
                 words.extend(w)
@@ -1059,6 +1059,49 @@ def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle']
                               freq=stop_freq, add_stop=add_stop)
     return c
 
+
+def walk_corpus(walk_dir, chunk_name='document', encoding='utf8', 
+                ignore=['.json', '.log', '.pickle'],
+                nltk_stop=True, stop_freq=1, add_stop=None, 
+                decode=False, verbose=1, simple=False, tokenizer=word_tokenize):
+
+    filenames = []
+    for root, dirs, files in os.walk(walk_dir):
+        for file in files:
+            filenames.append(os.path.join(root, file))
+
+    # filter the blacklist (typically .json, .log, etc.)
+    filenames = filter_by_suffix(filenames, ignore)
+    files = []
+    for filename in filenames:
+        if encoding == 'detect':
+            encoding = detect_encoding(filename)
+
+        try:
+            if decode:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    files.append(unidecode(f.read()))
+            else:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    files.append(f.read())
+        except UnicodeDecodeError:
+            encoding = detect_encoding(filename)
+            if decode:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    files.append(unidecode(f.read()))
+            else:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    files.append(f.read())
+
+    words, tok = dir_tokenize(files, filenames, chunk_name=chunk_name,
+        paragraphs=False, verbose=verbose, simple=simple, tokenizer=tokenizer)
+    names, data = zip(*tok.items())
+
+    c = Corpus(words, context_data=data, context_types=names)
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
+    return c
 
 
 ###########
