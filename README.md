@@ -1,6 +1,7 @@
 #VSM
 
-[![Build Status](https://travis-ci.org/inpho/vsm.svg?branch=master)](https://travis-ci.org/inpho/vsm)
+[![Build Status](https://img.shields.io/travis/inpho/vsm.svg?label=UNIX+build)](https://travis-ci.org/inpho/vsm)
+[![Appveyor](https://img.shields.io/appveyor/ci/JaimieMurdock/vsm.svg?label=Windows+build)](https://ci.appveyor.com/project/JaimieMurdock/vsm)
 [![Coveralls](https://img.shields.io/coveralls/inpho/vsm.svg)](https://coveralls.io/r/inpho/vsm)
 [![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/inpho/vsm/blob/master/LICENSE.txt)
 [![PyPI](https://img.shields.io/pypi/v/vsm.svg)](https://pypi.python.org/pypi/vsm)
