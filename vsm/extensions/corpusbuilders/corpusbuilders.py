@@ -552,7 +552,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
             chk_n += 1
     else:
         for chk, label in zip(chunks, labels):
-            print 'Tokenizing', label
+            # print 'Tokenizing', label
             if simple:
                 w = tokenizer(chk)
                 words.extend(w)
