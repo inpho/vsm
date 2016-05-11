@@ -16,7 +16,7 @@ install_requires=[
 
 setup(
     name = "vsm",
-    version = "0.4.0a27",
+    version = "0.4.0a28",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
