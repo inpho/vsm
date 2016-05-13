@@ -285,7 +285,7 @@ class CorpusSent(Corpus):
 
 def make_sent_view_fn(corp):
     return (lambda md: 
-        np.array(['{0}, {1}'.format(id, sent) 
+        np.array([u'{0}, {1}'.format(id, sent) 
             for id, sent in zip(md['sentence_label'], corp.sentences)]))
     
 

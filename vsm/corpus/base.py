@@ -276,7 +276,11 @@ class BaseCorpus(object):
 
         ind_set = np.ones(tok.size, dtype=bool)
         for k,v in query.iteritems():
-            ind_set = np.logical_and(ind_set, (tok[k] == v))
+            try:
+                ind_set = np.logical_and(ind_set, (tok[k] == v))
+            except UnicodeDecodeError:
+                v = v.decode('utf-8')
+                ind_set = np.logical_and(ind_set, (tok[k] == v))
 
         n = np.count_nonzero(ind_set)
         if n == 0:
@@ -489,7 +493,9 @@ class Corpus(BaseCorpus):
             self.dtype = np.uint32
 
         self.corpus = np.asarray([self.words_int[unicode(word)] 
-                                  for word in self.corpus],
+                                  for word in self.corpus 
+                                      if unicode(word) not in ['\x00']
+                                      ],
                                  dtype=self.dtype)
 
         self.stopped_words = set()
