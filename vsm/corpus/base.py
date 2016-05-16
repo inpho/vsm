@@ -639,7 +639,7 @@ class Corpus(BaseCorpus):
         if file is not None and not notebook:
             c = Corpus([], remove_empty=False)
             # submit futures
-            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 c.corpus = executor.submit(load_npz, file, 'corpus')
                 c.corpus.add_done_callback(functools.partial(set_from_future, 'corpus'))
 
