@@ -615,20 +615,31 @@ class Corpus(BaseCorpus):
         def set_from_future(obj, future):
             with corpus_lock:
                 setattr(c, obj, future.result())
+
         def set_list_from_future(obj, future):
             with corpus_lock:
                 setattr(c, obj, future.result().tolist())
+
         def set_set_from_future(obj, future):
             with corpus_lock:
                 setattr(c, obj, set(future.result().tolist()))
+
         def set_list_item_from_future(obj, i, future):
             with corpus_lock:
                 getattr(c, obj)[i] = future.result()
 
-        if file is not None:
+        try:
+            __IPYTHON__
+            notebook = True
+            print "Running from notebook, using serial load function."
+        except NameError:
+            notebook = False
+
+
+        if file is not None and not notebook:
             c = Corpus([], remove_empty=False)
             # submit futures
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 c.corpus = executor.submit(load_npz, file, 'corpus')
                 c.corpus.add_done_callback(functools.partial(set_from_future, 'corpus'))
 
@@ -644,23 +655,40 @@ class Corpus(BaseCorpus):
                 c.dtype = executor.submit(load_npz, file, 'dtype')
                 c.dtype.add_done_callback(
                     functools.partial(set_from_future, 'dtype'))
+                
 
                 concurrent.futures.wait([c.context_types])
-                c.context_types = c.context_types.result().tolist()
-                c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
-                c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
-                for i,f in enumerate(c.context_data):
-                    f.add_done_callback(
-                        functools.partial(set_list_item_from_future, 'context_data', i))
-
-
-            # get futures results
-            #c.corpus = c.corpus.result()
-            #c.context_data = [d.result() for d in c.context_data]
+                with corpus_lock:
+                    c.context_types = c.context_types.result().tolist()
+                    c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
+                    c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
+                    for i,f in enumerate(c.context_data):
+                        f.add_done_callback(
+                            functools.partial(set_list_item_from_future, 'context_data', i))
 
             # reset words_int dictionary
             c._set_words_int()
 
+            return c
+
+        elif notebook and file is not None:
+            arrays_in = np.load(file)
+
+            c = Corpus([], remove_empty=False)
+            c.corpus = arrays_in['corpus']
+            c.words = arrays_in['words']
+            c.context_types = arrays_in['context_types'].tolist()
+            try:
+                c.stopped_words = set(arrays_in['stopped_words'].tolist())
+            except:
+                c.stopped_words = set()
+
+            c.context_data = list()
+            for n in c.context_types:
+                t = arrays_in['context_data_' + n]
+                c.context_data.append(t)
+
+            c._set_words_int()
 
             return c
 
@@ -675,7 +703,6 @@ class Corpus(BaseCorpus):
             c.context_data = [ np.load(os.path.join(corpus_dir, metadata_file)) ]
 
             return c
-
 
     @use_czipfile
     def save(self, file):
