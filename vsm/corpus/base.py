@@ -609,24 +609,7 @@ class Corpus(BaseCorpus):
         import concurrent.futures
         import functools
         from pickle import PickleError, UnpicklingError
-        from threading import RLock
-        corpus_lock = RLock()
 
-        def set_from_future(obj, future):
-            with corpus_lock:
-                setattr(c, obj, future.result())
-
-        def set_list_from_future(obj, future):
-            with corpus_lock:
-                setattr(c, obj, future.result().tolist())
-
-        def set_set_from_future(obj, future):
-            with corpus_lock:
-                setattr(c, obj, set(future.result().tolist()))
-
-        def set_list_item_from_future(obj, i, future):
-            with corpus_lock:
-                getattr(c, obj)[i] = future.result()
 
         try:
             __IPYTHON__
@@ -636,35 +619,36 @@ class Corpus(BaseCorpus):
             notebook = False
 
 
-        if file is not None and not notebook:
+        if file is not None and notebook:
             c = Corpus([], remove_empty=False)
             # submit futures
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                print "starting futures"
                 c.corpus = executor.submit(load_npz, file, 'corpus')
-                c.corpus.add_done_callback(functools.partial(set_from_future, 'corpus'))
-
                 c.words =  executor.submit(load_npz, file, 'words')
-                c.words.add_done_callback(
-                    functools.partial(set_from_future, 'words'))
 
                 c.context_types = executor.submit(load_npz, file, 'context_types')
                 c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
-                c.stopped_words.add_done_callback(
-                         functools.partial(set_set_from_future, 'stopped_words'))
 
                 c.dtype = executor.submit(load_npz, file, 'dtype')
-                c.dtype.add_done_callback(
-                    functools.partial(set_from_future, 'dtype'))
-                
-
+                print "waiting on future"
                 concurrent.futures.wait([c.context_types])
-                with corpus_lock:
-                    c.context_types = c.context_types.result().tolist()
-                    c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
-                    c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
-                    for i,f in enumerate(c.context_data):
-                        f.add_done_callback(
-                            functools.partial(set_list_item_from_future, 'context_data', i))
+                c.context_types = c.context_types.result().tolist()
+                c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
+                c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
+
+            print "future over"
+
+            c.corpus = c.corpus.result()
+            c.words = c.words.result()
+            c.dtype = c.dtype.result() 
+
+            c.context_data = [future.result() for future in c.context_data]
+
+            try:
+                c.stopped_words = set(c.stopped_words.result().tolist())
+            except:
+                c.stopped_words = set()
 
             # reset words_int dictionary
             c._set_words_int()
