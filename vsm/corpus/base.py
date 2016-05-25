@@ -619,7 +619,7 @@ class Corpus(BaseCorpus):
             notebook = False
 
 
-        if file is not None and notebook:
+        if not notebook and file is not None:
             c = Corpus([], remove_empty=False)
             # submit futures
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
