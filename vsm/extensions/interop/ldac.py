@@ -1,9 +1,9 @@
 """
-vsm.extensions.interop.ldac
+`vsm.extensions.interop.ldac`
 
 Module containing functions for import/export between VSM and lda-c, which is
 the original LDA implementation referenced in Blei, Ng, and Jordan (2003).
-lda-c is available at: http://www.cs.princeton.edu/~blei/lda-c/
+lda-c is available at: `<http://www.cs.princeton.edu/~blei/lda-c/>`
 """
 import os
 import os.path
