@@ -623,7 +623,6 @@ class Corpus(BaseCorpus):
             c = Corpus([], remove_empty=False)
             # submit futures
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-                print "starting futures"
                 c.corpus = executor.submit(load_npz, file, 'corpus')
                 c.words =  executor.submit(load_npz, file, 'words')
 
@@ -631,13 +630,11 @@ class Corpus(BaseCorpus):
                 c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
 
                 c.dtype = executor.submit(load_npz, file, 'dtype')
-                print "waiting on future"
                 concurrent.futures.wait([c.context_types])
                 c.context_types = c.context_types.result().tolist()
                 c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
                 c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
 
-            print "future over"
 
             c.corpus = c.corpus.result()
             c.words = c.words.result()
