@@ -59,6 +59,8 @@ setup(
         #    define_macros=[('CYTHON_TRACE','1')]
         ),
     ],
+    dependency_links=['https://inpho.cogs.indiana.edu/pypi/czipfile/',
+        'https://inpho.cogs.indiana.edu/pypi/pymmseg/'],
     test_suite = "unittest2.collector",
     tests_require=['unittest2'],
 )

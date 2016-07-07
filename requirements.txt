@@ -1,0 +1,8 @@
+--extra-index-url https://inpho.cogs.indiana.edu/pypi/simple/
+
+numpy>=1.6.1
+scipy>=0.13.0
+progressbar>=2.3
+chardet>=2.3.0
+sortedcontainers>=1.4.0
+czipfile==1.0.0
