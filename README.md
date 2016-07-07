@@ -18,5 +18,5 @@ Documentation can be found in the module and [here](http://inpho.github.io/vsm/)
 ```
 git clone git@github.com:inpho/vsm.git
 cd vsm
-python setup.py develop --user
+pip install -r requirements.txt -e .
 ```
