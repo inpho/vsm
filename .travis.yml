@@ -21,7 +21,7 @@ install:
   # command to install dependencies
   - pip install coveralls
   - python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
-  - pip install . -i https://inpho.cogs.indiana.edu/inpho/
+  - pip install . -i https://inpho.cogs.indiana.edu/pypi
 # command to run tests
 before_script: 
   - pip install unittest2 nose
