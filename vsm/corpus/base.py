@@ -638,7 +638,10 @@ class Corpus(BaseCorpus):
 
             c.corpus = c.corpus.result()
             c.words = c.words.result()
-            c.dtype = c.dtype.result() 
+            try:
+                c.dtype = c.dtype.result() 
+            except KeyError:
+                c.dtype = c.corpus.dtype 
 
             c.context_data = [future.result() for future in c.context_data]
 
