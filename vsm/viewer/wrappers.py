@@ -62,7 +62,7 @@ def doc_label_name(context_type):
 
     :returns: label name for `context_type` as string.
     """
-    return context_type + '_label'
+    return str(context_type) + '_label'
 
 
 # 

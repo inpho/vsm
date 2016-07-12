@@ -246,8 +246,8 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log', '.err'])
             with open(filename, 'r') as f:
                 page = f.read()
             if page:
-                logger.info('\nbook: %s\nfile: %s\nremoved header:\n%s\n',
-                             plain_root, page_file, line)
+                logger.info(u'\nbook: %s\nfile: %s\nremoved header:\n%s\n',
+                             unidecode(plain_root), unidecode(page_file), unidecode(line))
             page = fl.sub('', page)
 
             with open(filename, 'w') as f:
