@@ -26,7 +26,7 @@ if platform.python_version_tuple()[0] == '2':
 
 setup(
     name = "vsm",
-    version = "0.4.0b2",
+    version = "0.4.0b3",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
@@ -54,8 +54,8 @@ setup(
     ext_modules = [
         Extension('_cgs_update', ['vsm/model/_cgs_update.c'],
             include_dirs=[numpy.get_include()],
-            extra_compile_args=['-fopenmp', '-march=native'],
-            extra_link_args=['-fopenmp', '-march=native'],
+            extra_compile_args=['-march=native'],
+            extra_link_args=['-march=native'],
         #    define_macros=[('CYTHON_TRACE','1')]
         ),
     ],
