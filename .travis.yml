@@ -25,5 +25,6 @@ install:
 # command to run tests
 before_script: 
   - pip install unittest2 nose
-script: coverage run --source vsm.model,vsm.viewer,vsm.corpus,vsm.spatial,vsm.split,vsm.structarr,vsm.exceptions setup.py test
+  - pip install --pre topicexplorer
+script: bash coverage.sh
 after_success: coveralls
