@@ -52,7 +52,7 @@ def cgs_update(int itr,
     cdef int K = word_top.shape[1]
     cdef int W = word_top.shape[0]
     
-    cdef NP_float_t log_p = 0
+    cdef NP_FLOAT_t log_p = 0
     cdef np.ndarray[NP_FLOAT_t, ndim=2] log_wk = np.log(word_top * inv_top_sums)
     cdef np.ndarray[NP_FLOAT_t, ndim=2] log_kd = np.log(top_doc / top_doc.sum(0))
 
@@ -96,7 +96,12 @@ def cgs_update(int itr,
                     dist[t] = dist[t-1] + <NP_FLOAT_t>(inv_top_sums[t] * word_top[w,t] * top_doc[t,i])
                 
                 r = samples[idx] * dist[K-1]
-    
+                for k in range(K):
+                    if r < dist[k]:
+                        break
+                """
+                # This code implements binary search for the right insertion
+                # point for the probability in the cumulative distribution
                 first = 0
                 last = K - 1
                 while first < last:
@@ -105,6 +110,7 @@ def cgs_update(int itr,
                         last = k
                     else:
                         first = k + 1
+                """
     
                 word_top[w, k] += 1
                 s = inv_top_sums[k]
