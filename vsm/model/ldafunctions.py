@@ -113,8 +113,7 @@ def load_lda(filename, ldaclass):
             m.n_proc = len(m.seeds)
         return m
     except:
-        #return old_load_lda(filename, ldaclass)
-        pass
+        return old_load_lda(filename, ldaclass)
 
 
 def old_load_lda(filename, ldaclass):
