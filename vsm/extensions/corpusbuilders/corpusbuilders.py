@@ -106,6 +106,7 @@ def random_corpus(corpus_len,
     """
     random_state = np.random.RandomState(seed)
     corpus = random_state.randint(n_words, size=corpus_len)
+    corpus = [str(word) for word in corpus]
 
     indices = []
     i = np.random.randint(min_token_len, max_token_len)
@@ -309,22 +310,22 @@ def file_tokenize(text, tokenizer=word_tokenize, simple=False):
             w = tokenizer(par)
             words.extend(w)
             par_break += len(w)
-            par_tokens.append((par_break, par_n))
+            par_tokens.append((par_break, str(par_n)))
         else:
             sents = sentence_tokenize(par)
             for sent in sents:
                 w = tokenizer(sent)
                 words.extend(w)
                 sent_break += len(w)
-                sent_tokens.append((sent_break, par_n, sent_n))
+                sent_tokens.append((sent_break, str(par_n), str(sent_n)))
                 sent_n += 1
-            par_tokens.append((sent_break, par_n))
+            par_tokens.append((sent_break, str(par_n)))
         par_n += 1
 
     idx_dt = ('idx', np.int32)
     if simple == False:
-        sent_label_dt = ('sentence_label', np.array(sent_n, np.object_).dtype)
-    par_label_dt = ('paragraph_label', np.array(par_n, np.object_).dtype)
+        sent_label_dt = ('sentence_label', np.object_)
+    par_label_dt = ('paragraph_label', np.object_)
 
     corpus_data = dict()
     dtype = [idx_dt, par_label_dt]
@@ -541,10 +542,10 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
                     w = tokenizer(sent)
                     words.extend(w)
                     sent_break += len(w)
-                    sent_tokens.append((sent_break, label, par_n, sent_n))
+                    sent_tokens.append((sent_break, label, str(par_n), str(sent_n)))
                     sent_n += 1
 
-                par_tokens.append((sent_break, label, par_n))
+                par_tokens.append((sent_break, label, str(par_n)))
                 par_n += 1
     
             if verbose == 1:
@@ -570,7 +571,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
                     w = tokenizer(sent)
                     words.extend(w)
                     sent_break += len(w)
-                    sent_tokens.append((sent_break, label, sent_n))
+                    sent_tokens.append((sent_break, label, str(sent_n)))
                     sent_n += 1
                 chk_tokens.append((sent_break, label))
     
@@ -584,13 +585,13 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
     idx_dt = ('idx', np.int32)
     label_dt = (chunk_name + '_label', np.object_)
     if not simple:
-        sent_label_dt = ('sentence_label', np.array(sent_n, np.object_).dtype)
+        sent_label_dt = ('sentence_label', np.object_)
     corpus_data = dict()
     dtype = [idx_dt, label_dt]
     corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
 
     if paragraphs:
-        par_label_dt = ('paragraph_label', np.array(par_n, np.object_).dtype)
+        par_label_dt = ('paragraph_label', np.object_)
         dtype = [idx_dt, label_dt, par_label_dt]
         corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
         dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
@@ -746,7 +747,7 @@ def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize, simple=
                 w = tokenizer(page)
                 words.extend(w)
                 page_break += len(w)
-                page_tokens.append((page_break, page_n, book_label, page_file))
+                page_tokens.append((page_break, str(page_n), book_label, page_file))
             else:
                 sents = sentence_tokenize(page)
 
@@ -754,11 +755,11 @@ def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize, simple=
                     w = tokenizer(sent)
                     words.extend(w)
                     sent_break += len(w)
-                    sent_tokens.append((sent_break, sent_n,
-                                        page_n, book_label, page_file))
+                    sent_tokens.append((sent_break, str(sent_n),
+                                        str(page_n), book_label, page_file))
                     sent_n += 1
 
-                page_tokens.append((sent_break, page_n, book_label, page_file))
+                page_tokens.append((sent_break, str(page_n), book_label, page_file))
 
             page_n += 1
 
@@ -773,11 +774,11 @@ def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize, simple=
 
     idx_dt = ('idx', np.int32)
     book_label_dt = ('book_label', np.object_)
-    page_label_dt = ('page_label', np.array(page_n, np.object_).dtype)
+    page_label_dt = ('page_label', np.object_)
     if not simple:
-        sent_label_dt = ('sentence_label', np.array(sent_n, np.object_).dtype)
+        sent_label_dt = ('sentence_label', np.object_)
     files = [f for (a,b,c,f) in page_tokens]
-    file_dt = ('file', np.array(files, np.object_).dtype)
+    file_dt = ('file', np.object_)
 
     corpus_data = dict()
     dtype = [idx_dt, book_label_dt]
