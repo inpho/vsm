@@ -158,7 +158,7 @@ class BaseCorpus(object):
         # Since np.unique attempts to make a whole contiguous copy of the
         # corpus array, we instead use a sorted set and cast to a np array
         # equivalent to self.words = np.unique(self.corpus)
-        self.words = np.asarray(sorted(set(self.corpus)), dtype=dtype)
+        self.words = np.asarray(sorted(set(self.corpus)), dtype=np.object_)
 
         self.context_data = []
         for t in context_data:

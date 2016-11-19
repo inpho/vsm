@@ -38,6 +38,7 @@ def corpus_from_strings(strings, metadata=[], decode=False,
     if len(metadata) == 0:
         metadata = ['document_{0}'.format(i) for i in xrange(len(strings))]
     md_type = np.array(metadata).dtype
+    md_type = np.object_
     dtype = [('idx', np.int), ('document_label', md_type)]
     context_data = [np.array(zip(indices, metadata), dtype=dtype)]
 
@@ -117,7 +118,7 @@ def random_corpus(corpus_len,
         metadata_ = ['{0}_{1}'.format(context_type, i)
                      for i in xrange(len(indices))]
         dtype=[('idx', np.array(indices).dtype), 
-               (context_type + '_label', np.array(metadata_).dtype)]
+               (context_type + '_label', np.object_)]
         rand_tok = np.array(zip(indices, metadata_), dtype=dtype)
     else:
         rand_tok = np.array([(i,) for i in indices], 
@@ -160,6 +161,7 @@ def corpus_fromlist(ls, context_type='context'):
     metadata = ['{0}_{1}'.format(context_type, i)
                 for i in xrange(len(indices))]
     md_type = np.array(metadata).dtype
+    md_type = np.object_
     dtype = [('idx', np.int), (context_type + '_label', md_type)]
     context_data = [np.array(zip(indices, metadata), dtype=dtype)]
 
@@ -264,8 +266,9 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False
                    'of documents is {1}'.format(len(metadata), len(tok))
             raise Exception(msg)
         else:
+            md_type = np.object_
             dtype = [('idx', np.array(tok).dtype),
-                     ('document_label', np.array(metadata).dtype)]
+                     ('document_label', md_type)]
             tok = np.array(zip(tok, metadata), dtype=dtype)
     else:
         dtype = [('idx', np.array(tok).dtype)]
@@ -320,8 +323,8 @@ def file_tokenize(text, tokenizer=word_tokenize, simple=False):
 
     idx_dt = ('idx', np.int32)
     if simple == False:
-        sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
-    par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
+        sent_label_dt = ('sentence_label', np.array(sent_n, np.object_).dtype)
+    par_label_dt = ('paragraph_label', np.array(par_n, np.object_).dtype)
 
     corpus_data = dict()
     dtype = [idx_dt, par_label_dt]
@@ -466,7 +469,7 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
 
     # add document label and metadata
     dtype = [('idx', np.array(tok).dtype),
-             ('document_label', np.array(label).dtype),
+             ('document_label', np.object_),
              ('metadata', np.array(metadata).dtype)]         # todo: create separate dtype for each key?
     tok = np.array(zip(tok, label, metadata), dtype=dtype)
 
@@ -579,15 +582,15 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
 
     idx_dt = ('idx', np.int32)
-    label_dt = (chunk_name + '_label', np.array(labels).dtype)
+    label_dt = (chunk_name + '_label', np.object_)
     if not simple:
-        sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+        sent_label_dt = ('sentence_label', np.array(sent_n, np.object_).dtype)
     corpus_data = dict()
     dtype = [idx_dt, label_dt]
     corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
 
     if paragraphs:
-        par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
+        par_label_dt = ('paragraph_label', np.array(par_n, np.object_).dtype)
         dtype = [idx_dt, label_dt, par_label_dt]
         corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
         dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
@@ -769,12 +772,12 @@ def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize, simple=
         book_n += 1
 
     idx_dt = ('idx', np.int32)
-    book_label_dt = ('book_label', np.array(book_names).dtype)
-    page_label_dt = ('page_label', np.array(page_n, np.str_).dtype)
+    book_label_dt = ('book_label', np.object_)
+    page_label_dt = ('page_label', np.array(page_n, np.object_).dtype)
     if not simple:
-        sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+        sent_label_dt = ('sentence_label', np.array(sent_n, np.object_).dtype)
     files = [f for (a,b,c,f) in page_tokens]
-    file_dt = ('file', np.array(files, np.unicode_).dtype)
+    file_dt = ('file', np.array(files, np.object_).dtype)
 
     corpus_data = dict()
     dtype = [idx_dt, book_label_dt]
@@ -943,12 +946,12 @@ def record_tokenize(records, record_names, verbose=1):
         record_n += 1
 
     idx_dt = ('idx', np.int32)
-    record_label_dt = ('record_label', np.array(record_names).dtype)
-    book_label_dt = ('book_label', np.array(book_names).dtype)
-    page_label_dt = ('page_label', np.array(page_n, np.str_).dtype)
-    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    record_label_dt = ('record_label', np.object_)
+    book_label_dt = ('book_label', np.object_)
+    page_label_dt = ('page_label', np.array(page_n, np.object_).dtype)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.object_).dtype)
     files = [f for (a,b,c,f) in page_tokens]
-    file_dt = ('file', np.array(files, np.str_).dtype)
+    file_dt = ('file', np.array(files, np.object_).dtype)
 
     corpus_data = dict()
     dtype = [idx_dt, record_label_dt]

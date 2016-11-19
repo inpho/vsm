@@ -38,8 +38,20 @@ def arr_add_field(arr, new_field, vals):
     array([('a', 1, -1), ('b', 2, -2), ('c', 3, -3)], 
           dtype=[('field', '|S4'), ('i', '<i4'), ('neg_i', '<i8')])
     """
+    def all_same_type(ls):
+        t = type(ls[0])
+        for item in ls:
+            if type(item) != t:
+                return False
+        
+        return t
+
     # Constructing new dtype
-    new_dtype = np.array(vals).dtype
+    if not all_same_type(t) or isinstance(t, str) or isinstance(t, unicode):
+        new_dtype = np.object_
+    else:
+        new_dtype = np.array(vals).dtype
+
     dt = [(n, arr.dtype[n]) for n in arr.dtype.names]
     dt.append((new_field, new_dtype))
 
