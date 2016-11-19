@@ -46,8 +46,9 @@ def arr_add_field(arr, new_field, vals):
         
         return t
 
+    t = all_same_type(vals)
     # Constructing new dtype
-    if not all_same_type(t) or isinstance(t, str) or isinstance(t, unicode):
+    if not t or t == str or t == unicode:
         new_dtype = np.object_
     else:
         new_dtype = np.array(vals).dtype

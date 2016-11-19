@@ -480,7 +480,7 @@ class Corpus(BaseCorpus):
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
                                      context_data=context_data,
-                                     dtype=np.unicode_,
+                                     dtype=np.object_,
                                      remove_empty=False,
                                      to_array=False)
 
@@ -492,7 +492,7 @@ class Corpus(BaseCorpus):
         else:
             self.dtype = np.uint32
 
-        self.corpus = np.asarray([self.words_int[unicode(word)] 
+        self.corpus = np.asarray([self.words_int[word]
                                   for word in self.corpus 
                                       if unicode(word) not in ['\x00']
                                       ],
