@@ -616,7 +616,7 @@ class Corpus(BaseCorpus):
 
 
         if not notebook and file is not None:
-            return Coprus._parallel_load(file)
+            return Corpus._parallel_load(file)
 
         elif notebook and file is not None:
             return Corpus._serial_load(file)
