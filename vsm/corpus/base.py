@@ -566,7 +566,6 @@ class Corpus(BaseCorpus):
         return [arr.tolist() for arr in ls]
 
     @staticmethod
-    @use_czipfile
     def load(file=None, corpus_dir=None,
              corpus_file='corpus.npy',
              words_file='words.npy',
@@ -606,9 +605,6 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`, :meth:`Corpus.save`, :meth:`numpy.load`
 
         """
-        import concurrent.futures
-        import functools
-        from pickle import PickleError, UnpicklingError
 
 
         try:
@@ -620,73 +616,95 @@ class Corpus(BaseCorpus):
 
 
         if not notebook and file is not None:
-            c = Corpus([], remove_empty=False)
-            # submit futures
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-                c.corpus = executor.submit(load_npz, file, 'corpus')
-                c.words =  executor.submit(load_npz, file, 'words')
-
-                c.context_types = executor.submit(load_npz, file, 'context_types')
-                c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
-
-                c.dtype = executor.submit(load_npz, file, 'dtype')
-                concurrent.futures.wait([c.context_types])
-                c.context_types = c.context_types.result().tolist()
-                c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
-                c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
-
-
-            c.corpus = c.corpus.result()
-            c.words = c.words.result()
-            try:
-                c.dtype = c.dtype.result() 
-            except KeyError:
-                c.dtype = c.corpus.dtype 
-
-            c.context_data = [future.result() for future in c.context_data]
-
-            try:
-                c.stopped_words = set(c.stopped_words.result().tolist())
-            except:
-                c.stopped_words = set()
-
-            # reset words_int dictionary
-            c._set_words_int()
-
-            return c
+            return Coprus._parallel_load(file)
 
         elif notebook and file is not None:
-            arrays_in = np.load(file)
+            return Corpus._serial_load(file)
 
-            c = Corpus([], remove_empty=False)
-            c.corpus = arrays_in['corpus']
-            c.words = arrays_in['words']
-            c.context_types = arrays_in['context_types'].tolist()
-            try:
-                c.stopped_words = set(arrays_in['stopped_words'].tolist())
-            except:
-                c.stopped_words = set()
+        elif not corpus_dir is None:
+            return Corpus._multifile_load(corpus_dir=corpus_dir,
+                corpus_file=corpus_file, words_file=words_file,
+                metadata_file=metadata_file)
 
-            c.context_data = list()
-            for n in c.context_types:
-                t = arrays_in['context_data_' + n]
-                c.context_data.append(t)
 
-            c._set_words_int()
+    @staticmethod
+    @use_czipfile
+    def _parallel_load(file):
+        import concurrent.futures
+        import functools
+        from pickle import PickleError, UnpicklingError
 
-            return c
+        c = Corpus([], remove_empty=False)
+        # submit futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            c.corpus = executor.submit(load_npz, file, 'corpus')
+            c.words =  executor.submit(load_npz, file, 'words')
 
-        if not corpus_dir is None:
+            c.context_types = executor.submit(load_npz, file, 'context_types')
+            c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
 
-            c = Corpus([], remove_empty=False)
+            c.dtype = executor.submit(load_npz, file, 'dtype')
+            concurrent.futures.wait([c.context_types])
+            c.context_types = c.context_types.result().tolist()
+            c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
+            c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
 
-            c.corpus = np.load(os.path.join(corpus_dir, corpus_file))
-            c.words = np.load(os.path.join(corpus_dir, words_file))
-            c._set_words_int()
-            c.context_types = [ 'document' ]
-            c.context_data = [ np.load(os.path.join(corpus_dir, metadata_file)) ]
 
-            return c
+        c.corpus = c.corpus.result()
+        c.words = c.words.result()
+        try:
+            c.dtype = c.dtype.result() 
+        except KeyError:
+            c.dtype = c.corpus.dtype 
+
+        c.context_data = [future.result() for future in c.context_data]
+
+        try:
+            c.stopped_words = set(c.stopped_words.result().tolist())
+        except:
+            c.stopped_words = set()
+
+        # reset words_int dictionary
+        c._set_words_int()
+
+        return c
+
+    @staticmethod
+    def _serial_load(file):
+        arrays_in = np.load(file)
+
+        c = Corpus([], remove_empty=False)
+        c.corpus = arrays_in['corpus']
+        c.words = arrays_in['words']
+        c.context_types = arrays_in['context_types'].tolist()
+        try:
+            c.stopped_words = set(arrays_in['stopped_words'].tolist())
+        except:
+            c.stopped_words = set()
+
+        c.context_data = list()
+        for n in c.context_types:
+            t = arrays_in['context_data_' + n]
+            c.context_data.append(t)
+
+        c._set_words_int()
+
+        return c
+
+    @staticmethod
+    def _multifile_load(corpus_dir=None,
+                        corpus_file='corpus.npy',
+                        words_file='words.npy',
+                        metadata_file='metadata.npy'):
+        c = Corpus([], remove_empty=False)
+
+        c.corpus = np.load(os.path.join(corpus_dir, corpus_file))
+        c.words = np.load(os.path.join(corpus_dir, words_file))
+        c._set_words_int()
+        c.context_types = [ 'document' ]
+        c.context_data = [ np.load(os.path.join(corpus_dir, metadata_file)) ]
+
+        return c
 
     @use_czipfile
     def save(self, file):
