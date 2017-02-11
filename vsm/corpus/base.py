@@ -868,16 +868,16 @@ class Corpus(BaseCorpus):
         return new_c.in_place_stoplist(stoplist=stoplist, freq=freq)
 
     def __deepcopy__(self, memo):
-        c = type(self)([], remove_empty=False)
-        c.corpus = self.corpus
-        c.words = self.words
-        c.context_types = self.context_types[:]
-        c.stopped_words = deepcopy(self.stopped_words, memo)
-        c.dtype = self.dtype
-        c.words_int = deepcopy(self.words_int, memo)
-        c.context_data = self.context_data
+        _c = type(self)([], remove_empty=False)
+        _c.corpus = np.copy(self.corpus)
+        _c.words = np.copy(self.words)
+        _c.context_types = self.context_types[:]
+        _c.stopped_words = deepcopy(self.stopped_words, memo)
+        _c.dtype = self.dtype
+        _c.words_int = deepcopy(self.words_int, memo)
+        _c.context_data = [np.copy(ctx) for ctx in self.context_data]
 
-        return c
+        return _c
 
 
 
