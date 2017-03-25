@@ -19,17 +19,17 @@ notebook session extended with matplotlib and scikit-learn.
 """
 
 
-import corpus
-from corpus import *
-import model
-from model import *
-import viewer
-from viewer import *
+import vsm.corpus
+from vsm.corpus import *
+import vsm.model
+from vsm.model import *
+import vsm.viewer
+from vsm.viewer import *
 
 __version__ = '0.4.0a11'
 
 __all__ = ['__version__']
-__all__ += corpus.__all__[:]
-__all__ += model.__all__
-__all__ += viewer.__all__
+__all__ += vsm.corpus.__all__[:]
+__all__ += vsm.model.__all__
+__all__ += vsm.viewer.__all__
 

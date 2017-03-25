@@ -1,3 +1,7 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 
 import numpy as np
@@ -187,7 +191,7 @@ class BaseCorpus(object):
         """
         if self.context_data:
             a = len(context_types) if context_types else 0
-            for i in xrange(a, len(self.context_data)):
+            for i in range(a, len(self.context_data)):
                 context_types.append('ctx_' + str(i))
 
         self.context_types = context_types
@@ -275,7 +279,7 @@ class BaseCorpus(object):
         tok = self.view_metadata(ctx_type)
 
         ind_set = np.ones(tok.size, dtype=bool)
-        for k,v in query.iteritems():
+        for k,v in query.items():
             try:
                 ind_set = np.logical_and(ind_set, (tok[k] == v))
             except UnicodeDecodeError:
@@ -286,7 +290,7 @@ class BaseCorpus(object):
         if n == 0:
             raise KeyError('No token fits the description: ' +
                 ', '.join(['{q}:{l}'.format(q=k, l=v) 
-                                for k,v in query.iteritems()]))
+                                for k,v in query.items()]))
         elif n > 1:
             msg = ('Multiple tokens fit that description:\n'
                    + str(tok[ind_set]))
@@ -345,7 +349,7 @@ class BaseCorpus(object):
                 
             slices = []
             slices.append(slice(0, indices[0]))
-            for i in xrange(len(indices) - 1):
+            for i in range(len(indices) - 1):
                 slices.append(slice(indices[i], indices[i+1]))
             return slices        
             
@@ -494,7 +498,7 @@ class Corpus(BaseCorpus):
 
         self.corpus = np.asarray([self.words_int[word]
                                   for word in self.corpus 
-                                      if unicode(word) not in ['\x00']
+                                      if str(word) not in ['\x00']
                                       ],
                                  dtype=self.dtype)
 
@@ -610,7 +614,7 @@ class Corpus(BaseCorpus):
         try:
             __IPYTHON__
             notebook = True
-            print "Running from notebook, using serial load function."
+            print("Running from notebook, using serial load function.")
         except NameError:
             notebook = False
 
@@ -720,7 +724,7 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`, :meth:`Corpus.load`, :meth:`np.savez`
         """
         import vsm.zipfile
-        print 'Saving corpus as', file
+        print('Saving corpus as {}'.format(file))
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
         arrays_out['words'] = self.words
@@ -814,7 +818,7 @@ class Corpus(BaseCorpus):
 
         context_data = []
         # calculate new tokenizations for every context_type
-        for i in xrange(len(self.context_data)):
+        for i in range(len(self.context_data)):
             if i == BASE:
                 context_data.append(new_base)
             else:
@@ -925,10 +929,10 @@ def align_corpora(old_corpus, new_corpus, remove_empty=True):
     int_words = out.words
     words_int = old_corpus.words_int
     int_int = {}
-    for i in xrange(len(int_words)):
+    for i in range(len(int_words)):
         int_int[i] = words_int[int_words[i]]
 
-    for i in xrange(len(out.corpus)):
+    for i in range(len(out.corpus)):
         out.corpus[i] = int_int[out.corpus[i]]
     out.words = old_corpus.words.copy()
     out._set_words_int()
