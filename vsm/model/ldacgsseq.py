@@ -1,11 +1,17 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
+from builtins import object
+
 import numpy as np
 import time
 from vsm.split import split_corpus
 from vsm.corpus import align_corpora as align
-from ldafunctions import *
+from vsm.model.ldafunctions import *
 from progressbar import ProgressBar, Percentage, Bar
 
-from _cgs_update import cgs_update
+#from _cgs_update import cgs_update
 
 
 __all__ = [ 'LdaCgsSeq', 'LdaCgsQuerySampler' ]
@@ -193,7 +199,7 @@ class LdaCgsSeq(object):
             pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
     
         #print("Stop ", stop)
-        for itr in xrange(self.iteration , stop):
+        for itr in range(self.iteration , stop):
             results = update(self.iteration, self.corpus, self.word_top,
                                  self.inv_top_sums, self.top_doc, self.Z,
                                  self.indices, self._mtrand_state[0],
@@ -220,8 +226,8 @@ class LdaCgsSeq(object):
         if verbose == 1:
             pbar.finish();
         if verbose > 1:
-            print '-'*60, ('\n\nWalltime per iteration: {0} seconds'
-                           .format(np.around((t-start)/n_iterations, decimals=2)))
+            print('-'*60, ('\n\nWalltime per iteration: {0} seconds'
+                           .format(np.around((t-start)/n_iterations, decimals=2))))
 
 
 class LdaCgsQuerySampler(LdaCgsSeq):
@@ -265,11 +271,11 @@ def demo_LdaCgsSeq(doc_len=500, V=100000, n_docs=100,
 
     from vsm.extensions.corpusbuilders import random_corpus
 
-    print 'Words per document:', doc_len
-    print 'Words in vocabulary:', V
-    print 'Documents in corpus:', n_docs
-    print 'Number of topics:', K
-    print 'Iterations:', n_iterations
+    print('Words per document:', doc_len)
+    print('Words in vocabulary:', V)
+    print('Documents in corpus:', n_docs)
+    print('Number of topics:', K)
+    print('Iterations:', n_iterations)
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1, seed=corpus_seed)
     m = LdaCgsSeq(c, 'document', K=K, seed=model_seed)

@@ -6,7 +6,7 @@ from scipy.sparse import hstack
 
 from vsm.spatial import count_matrix
 from vsm.split import *
-from base import *
+from vsm.model.base import *
 
 
 __all__ = ['TF', 'TfSeq', 'TfMulti']

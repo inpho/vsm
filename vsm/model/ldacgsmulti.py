@@ -1,11 +1,18 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import zip
+from builtins import range
+
 from sys import stdout
 import multiprocessing as mp
 import numpy as np
 from vsm.split import split_documents
-from ldafunctions import load_lda
-from ldacgsseq import *
+from vsm.model.ldafunctions import load_lda
+from vsm.model.ldacgsseq import *
 
-from _cgs_update import cgs_update
+#from vsm.model._cgs_update import cgs_update
 import cython
 
 import platform # For Windows comaptability
@@ -58,7 +65,7 @@ class LdaCgsMulti(LdaCgsSeq):
             The length of the list should be same as `n_proc`. Default is `None`.
         :type seeds: list of integers, optional
         """
-	if platform.system() == 'Windows':
+        if platform.system() == 'Windows':
             raise NotImplementedError("""LdaCgsMulti is not implemented on 
             Windows. Please use LdaCgsSeq.""")
 
@@ -304,13 +311,13 @@ class LdaCgsMulti(LdaCgsSeq):
         docs = split_documents(self.corpus, self.indices, self.n_proc)
 
         doc_indices = [(0, len(docs[0]))]
-        for i in xrange(len(docs)-1):
+        for i in range(len(docs)-1):
             doc_indices.append((doc_indices[i][1],
                                 doc_indices[i][1] + len(docs[i+1])))
 
         p = mp.Pool(self.n_proc)
 
-	if verbose == 1:
+        if verbose == 1:
             pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
         
         n_iterations += self.iteration
@@ -321,12 +328,12 @@ class LdaCgsMulti(LdaCgsSeq):
                 stdout.write('\rIteration %d: mapping  ' % self.iteration)
                 stdout.flush()
 
-            data = zip(docs, doc_indices, self._mtrand_states,
-                       itertools.repeat(self.dtype))
+            data = list(zip(docs, doc_indices, self._mtrand_states,
+                       itertools.repeat(self.dtype)))
 
             # For debugging
 	    # results = map(update, data)
-	    if platform.system() == 'Windows':
+            if platform.system() == 'Windows':
                 raise NotImplementedError("""LdaCgsMulti is not implemented on Windows. 
                 Please use LdaCgsSeq.""")
             else:
@@ -336,18 +343,18 @@ class LdaCgsMulti(LdaCgsSeq):
                 stdout.write('\rIteration %d: reducing ' % self.iteration)
                 stdout.flush()
             
-	    if verbose == 1:
+            if verbose == 1:
                 #print("Self iteration", self.iteration)
                 pbar.update(iteration)
 
             (Z_ls, top_doc_ls, word_top_ls, logp_ls, mtrand_str_ls, 
              mtrand_keys_ls, mtrand_pos_ls, mtrand_has_gauss_ls, 
-             mtrand_cached_gaussian_ls) = zip(*results)
+             mtrand_cached_gaussian_ls) = list(zip(*results))
             
-            self._mtrand_states = zip(mtrand_str_ls, mtrand_keys_ls, mtrand_pos_ls, 
-                                mtrand_has_gauss_ls, mtrand_cached_gaussian_ls)
+            self._mtrand_states = list(zip(mtrand_str_ls, mtrand_keys_ls, mtrand_pos_ls, 
+                                mtrand_has_gauss_ls, mtrand_cached_gaussian_ls))
 
-            for t in xrange(len(results)):
+            for t in range(len(results)):
                 start, stop = docs[t][0][0], docs[t][-1][1]
                 self.Z[start:stop] = Z_ls[t]
                 self.top_doc[:, doc_indices[t][0]:doc_indices[t][1]] = top_doc_ls[t]
@@ -359,7 +366,7 @@ class LdaCgsMulti(LdaCgsSeq):
             if verbose == 2:
                 stdout.write('\rIteration %d: log_prob=' % self.iteration)
                 stdout.flush()
-                print '%f' % lp
+                print('%f' % lp)
 
             iteration += 1
             self.iteration += 1
@@ -383,17 +390,18 @@ class LdaCgsMulti(LdaCgsSeq):
 
         :See Also: :class:`numpy.load`
         """
-	if platform.system() == 'Windows':
+        if platform.system() == 'Windows':
             raise NotImplementedError("""LdaCgsMulti is not implemented on 
             Windows. Please use LdaCgsSeq.""")
         return load_lda(filename, LdaCgsMulti)
 
 
 
-def update((docs, doc_indices, mtrand_state, dtype)):
+def update(args):
     """
     For LdaCgsMulti
     """
+    (docs, doc_indices, mtrand_state, dtype) = args
     start, stop = docs[0][0], docs[-1][1]
 
     global Ktype
@@ -472,12 +480,12 @@ def demo_LdaCgsMulti(doc_len=500, V=100000, n_docs=100,
 
     from vsm.extensions.corpusbuilders import random_corpus
     
-    print 'Words per document:', doc_len
-    print 'Words in vocabulary:', V
-    print 'Documents in corpus:', n_docs
-    print 'Number of topics:', K
-    print 'Iterations:', n_iterations
-    print 'Number of processors:', n_proc
+    print('Words per document:', doc_len)
+    print('Words in vocabulary:', V)
+    print('Documents in corpus:', n_docs)
+    print('Number of topics:', K)
+    print('Iterations:', n_iterations)
+    print('Number of processors:', n_proc)
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1, seed=corpus_seed)
     m = LdaCgsMulti(c, 'document', K=K, n_proc=n_proc, seeds=model_seeds)

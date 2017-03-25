@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.sparse import csr_matrix
 
-from base import BaseModel
+from vsm.model.base import BaseModel
 
 
 __all__ = [ 'TfIdf' ]

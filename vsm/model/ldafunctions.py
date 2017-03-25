@@ -1,3 +1,10 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import str
+from builtins import zip
+from builtins import map
+from builtins import range
+from past.utils import old_div
 import numpy as np
 from vsm.zipfile import use_czipfile
 
@@ -41,7 +48,7 @@ def load_lda(filename, ldaclass):
             zipfile = np.load(filename)
             return zipfile.__getitem__(obj)
     
-        print 'Loading LDA data from', filename
+        print('Loading LDA data from {}'.format(filename))
     
         arrays_in = np.load(filename)
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -105,11 +112,11 @@ def load_lda(filename, ldaclass):
             m._mtrand_state = [f(s) for f, s in zip(fns, m._mtrand_state)]
     
         if 'seeds' in arrays_in.files:
-            m.seeds = map(int, seeds.result())
+            m.seeds = list(map(int, seeds.result()))
             m._mtrand_states = [s.result() for s in mtrand_states]
             fns = (str, lambda x: x, int, int, float)
-            m._mtrand_states = [map(f, s) for f, s in zip(fns, m._mtrand_states)]
-            m._mtrand_states = zip(*m._mtrand_states)
+            m._mtrand_states = [list(map(f, s)) for f, s in zip(fns, m._mtrand_states)]
+            m._mtrand_states = list(zip(*m._mtrand_states))
             m.n_proc = len(m.seeds)
         return m
     except:
@@ -127,7 +134,7 @@ def old_load_lda(filename, ldaclass):
     
     :See Also: :class:`numpy.load`
     """
-    print 'Loading LDA data from', filename
+    print('Loading LDA data from {}'.format(filename))
     arrays_in = np.load(filename)
 
     context_type = arrays_in['context_type'][()]
@@ -209,12 +216,12 @@ def old_load_lda(filename, ldaclass):
                            float(arrays_in['mtrand_state4']))
 
     if 'seeds' in arrays_in:
-        m.seeds = map(int, list(arrays_in['seeds']))
-        m._mtrand_states = zip(map(str, arrays_in['mtrand_states0']),
+        m.seeds = list(map(int, list(arrays_in['seeds'])))
+        m._mtrand_states = list(zip(list(map(str, arrays_in['mtrand_states0'])),
                                arrays_in['mtrand_states1'],
-                               map(int, arrays_in['mtrand_states2']),
-                               map(int, arrays_in['mtrand_states3']),
-                               map(float, arrays_in['mtrand_states4']))
+                               list(map(int, arrays_in['mtrand_states2'])),
+                               list(map(int, arrays_in['mtrand_states3'])),
+                               list(map(float, arrays_in['mtrand_states4']))))
         m.n_proc = len(m.seeds)
 
     return m
@@ -276,7 +283,7 @@ def save_lda(m, filename):
             key = 'mtrand_states{0}'.format(i)
             arrays_out[key] = s
     
-    print 'Saving LDA model to', filename
+    print('Saving LDA model to {}'.format(filename))
     use_czipfile(np.savez)(filename, **arrays_out)
 
 
@@ -284,9 +291,9 @@ def compute_log_prob(W, Z, word_top, top_doc):
     log_wt = np.log(word_top / word_top.sum(0))
     log_td = np.log(top_doc / top_doc.sum(0))
     log_prob = 0
-    for i in xrange(len(W)):
+    for i in range(len(W)):
         W_i, Z_i = W[i], Z[i]
-        for j in xrange(len(W_i)):
+        for j in range(len(W_i)):
             w, k = W_i[j], Z_i[j]
             log_prob += log_wt[w,k] + log_td[k,i]
     return log_prob
@@ -303,8 +310,8 @@ def compute_top_doc(Z, K, alpha=[]):
     else:
         top_doc = np.zeros((K, len(Z)), dtype=np.float) + alpha
 
-    for i in xrange(len(Z)):
-        for j in xrange(len(Z[i])):
+    for i in range(len(Z)):
+        for j in range(len(Z[i])):
             z = Z[i][j]
             top_doc[z][i] += 1
 
@@ -323,8 +330,8 @@ def compute_word_top(W, Z, K, V, beta=[]):
     else:
         word_top = np.zeros((V, K), dtype=np.float) + beta
 
-    for i in xrange(len(Z)):
-        for j in xrange(len(Z[i])):
+    for i in range(len(Z)):
+        for j in range(len(Z[i])):
             w = W[i][j]
             k = Z[i][j]
             word_top[w][k] += 1

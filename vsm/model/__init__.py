@@ -1,7 +1,7 @@
 """
 [General Documentation about :mod:`model` classes]
 """
-
+"""
 import vsm.model.beaglecomposite
 from vsm.model.beaglecomposite import *
 import vsm.model.beaglecontext
@@ -34,3 +34,4 @@ __all__ += vsm.model.ldacgsmulti.__all__
 __all__ += vsm.model.lsa.__all__
 __all__ += vsm.model.tf.__all__
 __all__ += vsm.model.tfidf.__all__
+"""
