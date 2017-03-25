@@ -1,37 +1,37 @@
 """
 [General Documentation about :mod:`model` classes]
 """
-"""
-import vsm.model.beaglecomposite
-from vsm.model.beaglecomposite import *
-import vsm.model.beaglecontext
-from vsm.model.beaglecontext import *
-import vsm.model.beagleenvironment
-from vsm.model.beagleenvironment import *
-import vsm.model.beagleorder
-from vsm.model.beagleorder import *
-import vsm.model.lda
-from vsm.model.lda import *
-import vsm.model.ldacgsseq
-from vsm.model.ldacgsseq import *
-import vsm.model.ldacgsmulti
-from vsm.model.ldacgsmulti import *
-import vsm.model.lsa
-from vsm.model.lsa import *
-import vsm.model.tf
-from vsm.model.tf import *
-import vsm.model.tfidf
-from vsm.model.tfidf import *
+from __future__ import absolute_import
+
+from . import beaglecomposite
+from .beaglecomposite import *
+from . import beaglecontext
+from .beaglecontext import *
+from . import beagleenvironment
+from .beagleenvironment import *
+from . import beagleorder
+from .beagleorder import *
+from . import lda
+from .lda import *
+from . import ldacgsseq
+from .ldacgsseq import *
+from . import ldacgsmulti
+from .ldacgsmulti import *
+from . import lsa
+from .lsa import *
+from . import tf
+from .tf import *
+from . import tfidf
+from .tfidf import *
 
 
-__all__ = vsm.model.beaglecomposite.__all__[:]
-__all__ += vsm.model.beaglecontext.__all__
-__all__ += vsm.model.beagleenvironment.__all__
-__all__ += vsm.model.beagleorder.__all__
-__all__ += vsm.model.lda.__all__
-__all__ += vsm.model.ldacgsseq.__all__
-__all__ += vsm.model.ldacgsmulti.__all__
-__all__ += vsm.model.lsa.__all__
-__all__ += vsm.model.tf.__all__
-__all__ += vsm.model.tfidf.__all__
-"""
+__all__ = beaglecomposite.__all__[:]
+__all__ += beaglecontext.__all__
+__all__ += beagleenvironment.__all__
+__all__ += beagleorder.__all__
+__all__ += lda.__all__
+__all__ += ldacgsseq.__all__
+__all__ += ldacgsmulti.__all__
+__all__ += lsa.__all__
+__all__ += tf.__all__
+__all__ += tfidf.__all__

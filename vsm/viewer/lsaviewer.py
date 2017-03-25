@@ -1,11 +1,16 @@
+from __future__ import division
+from __future__ import absolute_import
+from builtins import zip
+from builtins import object
+from past.utils import old_div
 import numpy as np
 
 from vsm.spatial import angle
 from vsm.structarr import *
 from vsm.exceptions import *
-from types import *
-from labeleddata import *
-from wrappers import *
+from .types import *
+from .labeleddata import *
+from .wrappers import *
 
 
 __all__ = ['LsaViewer']
@@ -193,7 +198,7 @@ class LsaViewer(object):
         # Resolve `word_or_words`
         if isstr(word_or_words):
             word_or_words = [word_or_words]
-        words, labels = zip(*[res_word_type(self.corpus, w) for w in word_or_words])
+        words, labels = list(zip(*[res_word_type(self.corpus, w) for w in word_or_words]))
         words, labels = list(words), list(labels)
 
         # Generate pseudo-document
@@ -203,7 +208,7 @@ class LsaViewer(object):
         else:
             doc[words,:] = weights
 
-        doc = np.dot(np.dot(np.diag(1 /self.model.eigenvalues), 
+        doc = np.dot(np.dot(np.diag(1 /self.model.eigenvalues),
                             self.model.word_matrix.T), doc)
 
         # Compute distances

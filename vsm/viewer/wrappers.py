@@ -4,8 +4,8 @@ from scipy.sparse import issparse, csr_matrix, coo_matrix
 
 from vsm.spatial import angle, JS_dist
 from vsm.structarr import *
-from types import *
-from labeleddata import *
+from vsm.viewer.types import *
+from vsm.viewer.labeleddata import *
 
 
 __all__ = ['def_label_fn', 'doc_label_name',
@@ -324,7 +324,7 @@ def dist_top_doc(topic_or_topics, mat, corp, context_type, weights=[],
         docs = label_fn(md)
         d_arr = enum_sort(d_arr, indices=docs, field_name='doc')
     else:
-	d_arr = enum_sort(d_arr, filter_nan=filter_nan)
+        d_arr = enum_sort(d_arr, filter_nan=filter_nan)
 
     if order=='d':
         pass
