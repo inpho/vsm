@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from builtins import zip
+from builtins import str
+from builtins import range
 import os
 
 import numpy as np
@@ -5,7 +9,7 @@ from unidecode import unidecode
 from codecs import open
 
 from vsm.corpus import Corpus
-from util import *
+from .util import *
 
 from progressbar import ProgressBar, Percentage, Bar
 
@@ -26,8 +30,8 @@ def corpus_from_strings(strings, metadata=[], decode=False,
 
     """
     if decode:
-        for i in xrange(len(strings)):
-            if isinstance(strings[i], unicode):
+        for i in range(len(strings)):
+            if isinstance(strings[i], str):
                 strings[i] = unidecode(strings[i])
 
     documents = [tokenizer(s) for s in strings]
@@ -36,11 +40,11 @@ def corpus_from_strings(strings, metadata=[], decode=False,
     del documents
 
     if len(metadata) == 0:
-        metadata = ['document_{0}'.format(i) for i in xrange(len(strings))]
+        metadata = ['document_{0}'.format(i) for i in range(len(strings))]
     md_type = np.array(metadata).dtype
     md_type = np.object_
     dtype = [('idx', np.int), ('document_label', md_type)]
-    context_data = [np.array(zip(indices, metadata), dtype=dtype)]
+    context_data = [np.array(list(zip(indices, metadata)), dtype=dtype)]
 
     c = Corpus(corpus, context_data=context_data, context_types=['document'])
     if nltk_stop or stop_freq or add_stop:
@@ -117,10 +121,10 @@ def random_corpus(corpus_len,
 
     if metadata:
         metadata_ = ['{0}_{1}'.format(context_type, i)
-                     for i in xrange(len(indices))]
+                     for i in range(len(indices))]
         dtype=[('idx', np.array(indices).dtype), 
                (context_type + '_label', np.object_)]
-        rand_tok = np.array(zip(indices, metadata_), dtype=dtype)
+        rand_tok = np.array(list(zip(indices, metadata_)), dtype=dtype)
     else:
         rand_tok = np.array([(i,) for i in indices], 
                             dtype=[('idx', np.array(indices).dtype)])
@@ -160,11 +164,11 @@ def corpus_fromlist(ls, context_type='context'):
 
     indices = np.cumsum([len(sbls) for sbls in ls])
     metadata = ['{0}_{1}'.format(context_type, i)
-                for i in xrange(len(indices))]
+                for i in range(len(indices))]
     md_type = np.array(metadata).dtype
     md_type = np.object_
     dtype = [('idx', np.int), (context_type + '_label', md_type)]
-    context_data = [np.array(zip(indices, metadata), dtype=dtype)]
+    context_data = [np.array(list(zip(indices, metadata)), dtype=dtype)]
 
     return Corpus(corpus, context_data=context_data,
                   context_types=[context_type])
@@ -270,7 +274,7 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False
             md_type = np.object_
             dtype = [('idx', np.array(tok).dtype),
                      ('document_label', md_type)]
-            tok = np.array(zip(tok, metadata), dtype=dtype)
+            tok = np.array(list(zip(tok, metadata)), dtype=dtype)
     else:
         dtype = [('idx', np.array(tok).dtype)]
         tok = np.array([(i,) for i in tok], dtype=dtype)
@@ -390,7 +394,7 @@ def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1,
         text = unidecode(text)
 
     words, tok = file_tokenize(text, simple=simple, tokenizer=tokenizer)
-    names, data = zip(*tok.items())
+    names, data = list(zip(*list(tok.items())))
     
     c = Corpus(words, context_data=data, context_types=names)
     if nltk_stop or stop_freq or add_stop:
@@ -472,7 +476,7 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
     dtype = [('idx', np.array(tok).dtype),
              ('document_label', np.object_),
              ('metadata', np.array(metadata).dtype)]         # todo: create separate dtype for each key?
-    tok = np.array(zip(tok, label, metadata), dtype=dtype)
+    tok = np.array(list(zip(tok, label, metadata)), dtype=dtype)
 
     
     c = Corpus(corpus, context_data=[tok], context_types=['document'])
@@ -700,7 +704,7 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
     words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
                               paragraphs=paragraphs, verbose=verbose,
                               simple=simple, tokenizer=tokenizer)
-    names, data = zip(*tok.items())
+    names, data = list(zip(*list(tok.items())))
     
     c = Corpus(words, context_data=data, context_types=names)
     if nltk_stop or stop_freq or add_stop:
@@ -879,7 +883,7 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
 
     words, tok = coll_tokenize(books, book_names, simple=simple,
                                tokenizer=tokenizer)
-    names, data = zip(*tok.items())
+    names, data = list(zip(*list(tok.items())))
     
     c = Corpus(words, context_data=data, context_types=names)
     in_place_stoplist(c, nltk_stop=nltk_stop,
@@ -1055,7 +1059,7 @@ def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle']
         records.append(books)
 
     words, tok = record_tokenize(records, record_names, record_book_names)
-    names, data = zip(*tok.items())
+    names, data = list(zip(*list(tok.items())))
     
     c = Corpus(words, context_data=data, context_types=names)
     if nltk_stop or stop_freq or add_stop:
@@ -1099,7 +1103,7 @@ def walk_corpus(walk_dir, chunk_name='document', encoding='utf8',
 
     words, tok = dir_tokenize(files, filenames, chunk_name=chunk_name,
         paragraphs=False, verbose=verbose, simple=simple, tokenizer=tokenizer)
-    names, data = zip(*tok.items())
+    names, data = list(zip(*list(tok.items())))
 
     c = Corpus(words, context_data=data, context_types=names)
     if nltk_stop or stop_freq or add_stop:
@@ -1155,7 +1159,7 @@ def test_dir_tokenize():
              '',
              'foo\n\nfoo']
 
-    labels = [str(i) for i in xrange(len(chunks))]
+    labels = [str(i) for i in range(len(chunks))]
     words, context_data = dir_tokenize(chunks, labels)
 
     assert len(words) == 11
@@ -1186,7 +1190,7 @@ def test_coll_tokenize():
              [('','3'),
               ('foo.\n\nfoo', '4')]]
 
-    book_names = [str(i) for i in xrange(len(books))]
+    book_names = [str(i) for i in range(len(books))]
     words, context_data = coll_tokenize(books, book_names)
 
     assert len(words) == 11

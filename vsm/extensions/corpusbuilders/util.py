@@ -1,3 +1,7 @@
+from builtins import str
+from builtins import chr
+from builtins import range
+from builtins import object
 import re
 import string
 
@@ -11,11 +15,11 @@ __all__ = ['strip_punc', 'rem_num', 'rehyph',
 
 
 def _unicode_range(start, stop):
-    return u''.join([unichr(i) for i in range(int(start,16), int(stop,16))])
+    return u''.join([chr(i) for i in range(int(start,16), int(stop,16))])
 
 PUNCTUATION_START = re.compile(ur'^([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)'.format(string.punctuation))
 PUNCTUATION_END = re.compile(ur'([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$'.format(string.punctuation))
-PUNC = unicode(string.punctuation) + _unicode_range('2000','206F') + _unicode_range('3000', '303F') + _unicode_range('FF00', 'FFFF')
+PUNC = str(string.punctuation) + _unicode_range('2000','206F') + _unicode_range('3000', '303F') + _unicode_range('FF00', 'FFFF')
 PUNC_TABLE = {ord(c): None for c in PUNC}
 
 def strip_punc(tsent):
@@ -30,7 +34,7 @@ def strip_punc(tsent):
     return out
 
 def strip_punc_word(word):
-    if isinstance(word, unicode):
+    if isinstance(word, str):
         return word.translate(PUNC_TABLE)
     elif isinstance(word, str):
         return word.translate(None, string.punctuation)
@@ -51,7 +55,7 @@ def rem_num(tsent):
     return out
 
 def rem_num_word(word):
-    if isinstance(word, unicode):
+    if isinstance(word, str):
         return word.translate(NUMS_TABLE)
     elif isinstance(word, str):
         return word.translate(None, string.digits)
@@ -66,7 +70,7 @@ BIG_TABLE = NUMS_TABLE.copy()
 BIG_TABLE.update(PUNC_TABLE)
 BIG_LIST = string.digits + string.punctuation
 def process_word(word):
-    if isinstance(word, unicode):
+    if isinstance(word, str):
         return word.translate(BIG_TABLE)
     elif isinstance(word, str):
         return word.translate(None, BIG_LIST)
@@ -172,7 +176,7 @@ def filter_by_suffix(l, ignore, filter_dotfiles=True):
         filter_list = [e for e in filter_list if not e.startswith('.')]
     return filter_list
 
-class _tokenizer:
+class _tokenizer(object):
     def tokenize(self, text):
         return text.split()
 
