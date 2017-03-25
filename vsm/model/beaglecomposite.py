@@ -1,7 +1,9 @@
+from __future__ import division
+from __future__ import print_function
 import numpy as np
 
-from base import BaseModel
-from beaglecontext import realign_env_mat
+from vsm.model.base import BaseModel
+from vsm.model.beaglecontext import realign_env_mat
 
 
 __all__ = [ 'BeagleComposite' ]
@@ -56,6 +58,6 @@ class BeagleComposite(BaseModel):
        
         :returns: `None`
         """
-        print 'Summing context and order vectors'        
+        print('Summing context and order vectors')
         self.matrix = wgt * self.ctx_matrix + (1 - wgt) * self.ord_matrix
 

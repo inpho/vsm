@@ -1,12 +1,19 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import str
+from builtins import range
 import os
 import shutil
 import tempfile
 import multiprocessing as mp
-import cPickle as cpickle
+import pickle as cpickle
 
 import numpy as np
 
-from base import BaseModel
+from vsm.model.base import BaseModel
 
 
 __all__ = [ 'BeagleContextSeq', 'BeagleContextMulti' ]
@@ -108,7 +115,7 @@ class BeagleContextMulti(BaseModel):
         _shape = mp.Array('i', 2, lock=False)
         _shape[:] = env_matrix.shape
         
-        print 'Copying env matrix to shared mp array'
+        print('Copying env matrix to shared mp array')
         global _env_matrix
         _env_matrix = mp.Array('d', env_matrix.size, lock=False)
         _env_matrix[:] = env_matrix.ravel()[:]
@@ -131,13 +138,13 @@ class BeagleContextMulti(BaseModel):
 
         tmp_dir = tempfile.mkdtemp()
         tmp_files = [os.path.join(tmp_dir, 'tmp_' + str(i))
-                     for i in xrange(len(sent_lists))]
+                     for i in range(len(sent_lists))]
 
-        sent_lists = zip(sent_lists, tmp_files)
+        sent_lists = list(zip(sent_lists, tmp_files))
         del self.sents
 
         try:
-            print 'Forking'
+            print('Forking')
             # For debugging
             # tmp_files = map(mpfn, sent_lists)
             
@@ -145,7 +152,7 @@ class BeagleContextMulti(BaseModel):
             tmp_files = p.map(mpfn, sent_lists, 1)
             p.close()
 
-            print 'Reducing'
+            print('Reducing')
             self.matrix = np.zeros(tuple(_shape), dtype=self.dtype)
 
             for filename in tmp_files:
@@ -153,18 +160,19 @@ class BeagleContextMulti(BaseModel):
                 with open(filename, 'rb') as f:
                     result = cpickle.load(f)
 
-                for k,v in result.iteritems():
+                for k,v in result.items():
                     self.matrix[k, :] += v
 
         finally:
-            print 'Removing', tmp_dir
+            print('Removing {}'.format(tmp_dir))
             shutil.rmtree(tmp_dir)
 
 
 
-def mpfn((sents, filename)):
+def mpfn(sents_filename):
     """
     """
+    sents, filename = sents_filename
     result = dict()
 
     for sent in sents:

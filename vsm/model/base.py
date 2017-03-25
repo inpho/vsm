@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import object
 import numpy as np
 from vsm.zipfile import use_czipfile
 
@@ -48,7 +50,7 @@ class BaseModel(object):
 
         :See Also: :meth:`numpy.savez`
         """
-        print 'Saving model to', f
+        print('Saving model to {}'.format(f))
         np.savez(f, matrix=np.array(self.matrix), context_type=np.array(self.context_type))
 
 
@@ -67,7 +69,7 @@ class BaseModel(object):
 
         :See Also: :meth:`numpy.load`
         """
-        print 'Loading model from', f
+        print('Loading model from {}'.format(f))
         npz = np.load(f)
         
         # The slice [()] is to unwrap sparse matrices, which get saved
