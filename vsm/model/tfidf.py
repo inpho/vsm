@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import range
+
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -75,7 +78,7 @@ class TfIdf(BaseModel):
         if self.matrix.size > 0:
             n_docs = np.float64(self.matrix.shape[1])
             
-            for i in xrange(self.matrix.indptr.shape[0] - 1):
+            for i in range(self.matrix.indptr.shape[0] - 1):
 
                 start = self.matrix.indptr[i]
                 stop = self.matrix.indptr[i + 1]

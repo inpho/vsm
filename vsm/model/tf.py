@@ -1,3 +1,4 @@
+from builtins import object
 import multiprocessing as mp
 import platform, warnings
 
