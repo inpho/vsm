@@ -17,8 +17,8 @@ __all__ = ['strip_punc', 'rem_num', 'rehyph',
 def _unicode_range(start, stop):
     return u''.join([chr(i) for i in range(int(start,16), int(stop,16))])
 
-PUNCTUATION_START = re.compile(ur'^([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)'.format(string.punctuation))
-PUNCTUATION_END = re.compile(ur'([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$'.format(string.punctuation))
+PUNCTUATION_START = re.compile(r'^([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)'.format(string.punctuation))
+PUNCTUATION_END = re.compile(r'([{}\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$'.format(string.punctuation))
 PUNC = str(string.punctuation) + _unicode_range('2000','206F') + _unicode_range('3000', '303F') + _unicode_range('FF00', 'FFFF')
 PUNC_TABLE = {ord(c): None for c in PUNC}
 
@@ -296,4 +296,4 @@ def detect_encoding(filename):
     detector.close()
 
     return detector.result['encoding']
-     
+ 
