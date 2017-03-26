@@ -2,23 +2,29 @@ from setuptools import setup, Extension, Command, find_packages
 import platform
 import numpy
 
+from Cython.Build import cythonize
+
 
 # find packages in vsm subdirectory
 # this will skip the unittests, etc.
 packages = ['vsm.'+pkg for pkg in find_packages('vsm')]
 packages.append('vsm')
 
-
-
+extensions = [Extension(sources=['vsm/model/_cgs_update.pyx'], language='c++',
+                include_dirs=[numpy.get_include()], name='vsm.model._cgs_update')]
+        #    extra_compile_args=['-march=native'],
+        #    extra_link_args=['-march=native'],
+        #    define_macros=[('CYTHON_TRACE','1')]
 
 install_requires=[
         "numpy>=1.6.1",
         "scipy>=0.13.0",
-        "progressbar>=2.3",
+        "progressbar2",
         "chardet>=2.3.0",
         "sortedcontainers>=1.4.0",
-        "czipfile==1.0.0",
-        "cython"
+#        "czipfile==1.0.0",
+        "cython",
+        "unidecode"
     ]
 
 if platform.python_version_tuple()[0] == '2':
@@ -51,14 +57,7 @@ setup(
     install_requires=install_requires,
     license = 'MIT',
     packages=packages,
-    ext_modules = [
-        Extension('_cgs_update', ['vsm/model/_cgs_update.c'],
-            include_dirs=[numpy.get_include()],
-            extra_compile_args=['-march=native'],
-            extra_link_args=['-march=native'],
-        #    define_macros=[('CYTHON_TRACE','1')]
-        ),
-    ],
+    ext_modules = cythonize(extensions),
     dependency_links=['https://inpho.cogs.indiana.edu/pypi/czipfile/',
         'https://inpho.cogs.indiana.edu/pypi/pymmseg/'],
     test_suite = "unittest2.collector",

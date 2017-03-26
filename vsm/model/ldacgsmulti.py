@@ -12,7 +12,7 @@ from vsm.split import split_documents
 from vsm.model.ldafunctions import load_lda
 from vsm.model.ldacgsseq import *
 
-#from vsm.model._cgs_update import cgs_update
+from vsm.model._cgs_update import cgs_update
 import cython
 
 import platform # For Windows comaptability

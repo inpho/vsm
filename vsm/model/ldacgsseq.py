@@ -11,7 +11,7 @@ from vsm.corpus import align_corpora as align
 from vsm.model.ldafunctions import *
 from progressbar import ProgressBar, Percentage, Bar
 
-#from _cgs_update import cgs_update
+from vsm.model._cgs_update import cgs_update
 
 
 __all__ = [ 'LdaCgsSeq', 'LdaCgsQuerySampler' ]
