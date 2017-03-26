@@ -3,6 +3,7 @@ Functions for splitting lists and arrays
 """
 
 
+from builtins import range
 import numpy as np
 
 
@@ -40,11 +41,11 @@ def split_corpus(arr, indices):
     if (indices >= len(arr)).any():
         out = out[:-1]
     try:
-        for i in xrange(len(out)):
+        for i in range(len(out)):
             if out[i].size == 0:
                 out[i] = np.array([], dtype=arr.dtype)
     except AttributeError:
-        for i in xrange(len(out)):
+        for i in range(len(out)):
             if out[i].size == 0:
                 out[i] = np.array([])
 
@@ -76,7 +77,7 @@ def split_documents(corpus, indices, n_partitions):
     """
     """
     docs = [(0, indices[0])]
-    for i in xrange(len(indices)-1):
+    for i in range(len(indices)-1):
         docs.append((indices[i], indices[i+1]))
     docs = np.array(docs, dtype='i8, i8')
 

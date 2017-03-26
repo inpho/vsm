@@ -3,6 +3,7 @@
 """
 
 
+from builtins import range
 import numpy as np
 
 
@@ -48,7 +49,7 @@ def arr_add_field(arr, new_field, vals):
 
     t = all_same_type(vals)
     # Constructing new dtype
-    if not t or t == str or t == unicode:
+    if not t or t == str or t == str:
         new_dtype = np.object_
     else:
         new_dtype = np.array(vals).dtype
@@ -141,19 +142,19 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     
     if type(indices) == list:
         indices = np.array(indices)
-    ind = np.array([indices.copy() for i in xrange(arr.shape[0])])
+    ind = np.array([indices.copy() for i in range(arr.shape[0])])
     dt = [(field_name, indices.dtype), ('value', arr.dtype)]
     mt = zip_arr(ind, arr, field_names=[field_name, 'value'])
 
     if len(arr.shape) > 1:
         if axis:
-            for i in xrange(arr.shape[axis]):
+            for i in range(arr.shape[axis]):
                 idx = np.argsort(mt['value'][:,i])
                 mt[field_name][:,i] = ind[:,i][idx]
                 mt['value'][:,i] = arr[:,i][idx]
                 mt[:,i] = mt[:,i][::-1]	
         else:
-            for i in xrange(arr.shape[axis]):
+            for i in range(arr.shape[axis]):
                 idx = np.argsort(mt['value'][i])
                 mt[field_name][i] = ind[i][idx]
                 mt['value'][i] = arr[i][idx]
