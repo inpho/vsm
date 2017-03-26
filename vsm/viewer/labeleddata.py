@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 from __future__ import division
 from __future__ import absolute_import
 
+from future.utils import python_2_unicode_compatible
+
 from builtins import zip
 from builtins import str
 from builtins import range
@@ -100,6 +102,7 @@ def max_col_num(li, max_width):
     return num
 
 
+@python_2_unicode_compatible
 class LabeledColumn(np.ndarray):
     """
     A subclass of np.ndarray whose purpose is to store labels and
@@ -342,6 +345,7 @@ class LabeledColumn(np.ndarray):
         return s
 
 
+@python_2_unicode_compatible
 class DataTable(list):
     """
     A subclass of list whose purpose is to store labels and
