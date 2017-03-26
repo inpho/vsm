@@ -41,7 +41,7 @@ class TestCorpusbuilders(unittest.TestCase):
                  'Though seen of none save him whose strenuous tongue\n\n'
                  'Can burst Joy\'s grape against his palate fine;\n\n'
                  'His soul shall taste the sadness of her might,\n\n'
-                 'And be among her cloudy trophies hung.').encode('utf-8')
+                 'And be among her cloudy trophies hung.')#.encode('utf-8')
 
         self.assertTrue(toy_corpus(keats))
         self.assertTrue(toy_corpus(keats, nltk_stop=True))
@@ -54,7 +54,7 @@ class TestCorpusbuilders(unittest.TestCase):
         from tempfile import NamedTemporaryFile as NFT
 
         tmp = NFT(delete=False)
-        tmp.write(keats)
+        tmp.write(keats.encode('utf-8'))
         tmp.close()
 
         c = toy_corpus(tmp.name, is_filename=True,
