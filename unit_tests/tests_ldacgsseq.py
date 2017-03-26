@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import zip
+from builtins import range
 import unittest2 as unittest
 import numpy as np
 
@@ -30,11 +33,11 @@ class TestLdaCgsSeq(unittest.TestCase):
             self.assertTrue((m0.alpha == m1.alpha).all())
             self.assertTrue((m0.beta == m1.beta).all())
             self.assertTrue(m0.log_probs == m1.log_probs)
-            for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+            for i in range(max(len(m0.corpus), len(m1.corpus))):
                 self.assertTrue(m0.corpus[i].all() == m1.corpus[i].all())
             self.assertTrue(m0.V == m1.V)
             self.assertTrue(m0.iteration == m1.iteration)
-            for i in xrange(max(len(m0.Z), len(m1.Z))):
+            for i in range(max(len(m0.Z), len(m1.Z))):
                 self.assertTrue(m0.Z[i].all() == m1.Z[i].all())
             self.assertTrue(m0.top_doc.all() == m1.top_doc.all())
             self.assertTrue(m0.word_top.all() == m1.word_top.all())
@@ -160,11 +163,11 @@ class TestLdaCgsSeq(unittest.TestCase):
         self.assertTrue((m0.alpha == m1.alpha).all())
         self.assertTrue((m0.beta == m1.beta).all())
         self.assertTrue(m0.log_probs == m1.log_probs)
-        for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+        for i in range(max(len(m0.corpus), len(m1.corpus))):
             self.assertTrue(m0.corpus[i].all() == m1.corpus[i].all())
         self.assertTrue(m0.V == m1.V)
         self.assertTrue(m0.iteration == m1.iteration)
-        for i in xrange(max(len(m0.Z), len(m1.Z))):
+        for i in range(max(len(m0.Z), len(m1.Z))):
             self.assertTrue(m0.Z[i].all() == m1.Z[i].all())
         self.assertTrue(m0.top_doc.all() == m1.top_doc.all())
         self.assertTrue(m0.word_top.all() == m1.word_top.all())
@@ -204,11 +207,11 @@ class TestLdaCgsSeq(unittest.TestCase):
         self.assertTrue((m0.alpha == m1.alpha).all())
         self.assertTrue((m0.beta == m1.beta).all())
         self.assertTrue(m0.log_probs == m1.log_probs)
-        for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+        for i in range(max(len(m0.corpus), len(m1.corpus))):
             self.assertTrue(m0.corpus[i].all() == m1.corpus[i].all())
         self.assertTrue(m0.V == m1.V)
         self.assertTrue(m0.iteration == m1.iteration)
-        for i in xrange(max(len(m0.Z), len(m1.Z))):
+        for i in range(max(len(m0.Z), len(m1.Z))):
             self.assertTrue(m0.Z[i].all() == m1.Z[i].all())
         self.assertTrue(m0.top_doc.all() == m1.top_doc.all())
         self.assertTrue(m0.word_top.all() == m1.word_top.all())

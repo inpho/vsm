@@ -1,3 +1,4 @@
+from builtins import range
 import unittest2 as unittest
 
 from vsm.corpus import add_metadata
@@ -31,7 +32,7 @@ class TestCorpusUtil(unittest.TestCase):
 
         c = random_corpus(1000, 50, 0, 20, context_type='sentence', metadata=True)
         n = c.view_metadata('sentence').size
-        meta = ['m_{0}'.format(i) for i in xrange(n)]
+        meta = ['m_{0}'.format(i) for i in range(n)]
         new_c = add_metadata(c, 'sentence', 'new_meta', meta)
 
         self.assertEqual(new_c.view_metadata('sentence')['new_meta'].tolist(), meta)
