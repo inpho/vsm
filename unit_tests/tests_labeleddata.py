@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import zip
+from builtins import range
 import unittest2 as unittest
 import numpy as np
 
@@ -14,7 +17,7 @@ class TestLabeleddata(unittest.TestCase):
         values = [np.random.random() for t in words]
         d = [('i', np.array(words).dtype), 
              ('value', np.array(values).dtype)]
-        self.v = np.array(zip(words, values), dtype=d)
+        self.v = np.array(list(zip(words, values)), dtype=d)
 
 
 
@@ -26,7 +29,7 @@ class TestLabeleddata(unittest.TestCase):
         arr.col_len = 10
         arr1 = self.v.view(LabeledColumn)
 
-        self.assertTrue(type(arr.__str__()) == unicode)
+        self.assertTrue(type(arr.__str__()) == str)
         self.assertTrue(sum(arr.subcol_widths) <= arr.col_width)
         self.assertEqual(arr.shape[0], arr1.col_len)
         self.assertFalse(arr1.col_header)
@@ -39,7 +42,7 @@ class TestLabeleddata(unittest.TestCase):
         v.subcol_widths = [30, 20]
         v.col_len = 10
         t = []
-        for i in xrange(5):
+        for i in range(5):
             t.append(v.copy())
             t[i].col_header = 'Iteration ' + str(i)
         
@@ -47,11 +50,11 @@ class TestLabeleddata(unittest.TestCase):
         schf = ['Word', 'Value'] 
         t = DataTable(t, 'Song', subcolhdr_compact=schc, subcolhdr_full=schf)
 
-        self.assertTrue(type(t.__str__()) == unicode)
+        self.assertTrue(type(t.__str__()) == str)
         self.assertTrue('Song', t.table_header)
 
         t.compact_view = False
-        self.assertTrue(type(t.__str__()) == unicode)
+        self.assertTrue(type(t.__str__()) == str)
         self.assertTrue('Song', t.table_header)
 
 

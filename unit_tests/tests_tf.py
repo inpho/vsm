@@ -1,3 +1,4 @@
+from builtins import object
 import unittest2 as unittest
 import numpy as np
 
@@ -5,7 +6,7 @@ from vsm.model import tf
 from multiprocessing import Process
 import platform
 
-class MPTester:
+class MPTester(object):
     def setUp(self):
         self.corpus = np.array([0, 1, 3, 1, 1, 0, 3, 0, 3,
                                 3, 0, 1, 0,
