@@ -76,6 +76,7 @@ class TestLdaCgsSeq(unittest.TestCase):
             m1 = LdaCgsSeq.load(tmp.name)
 
             self.assertTrue(type(m0.seed) == type(m1.seed))
+            print("seed types:", type(m0._mtrand_state[0]), type(m1._mtrand_state[0]))
             self.assertTrue(type(m0._mtrand_state[0]) == type(m1._mtrand_state[0]))
             self.assertTrue(type(m0._mtrand_state[1]) == type(m1._mtrand_state[1]))
             self.assertTrue(type(m0._mtrand_state[2]) == type(m1._mtrand_state[2]))
