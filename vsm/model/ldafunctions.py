@@ -4,6 +4,7 @@ from builtins import str
 from builtins import zip
 from builtins import map
 from builtins import range
+from past.builtins import basestring
 from past.utils import old_div
 import numpy as np
 from vsm.zipfile import use_czipfile
@@ -108,13 +109,13 @@ def load_lda(filename, ldaclass):
         if 'seed' in arrays_in.files:
             m.seed = int(seed.result())
             m._mtrand_state = [s.result() for s in mtrand_state]
-            fns = (str, lambda x: x, int, int, float)
+            fns = (bytes, lambda x: x, int, int, float)
             m._mtrand_state = [f(s) for f, s in zip(fns, m._mtrand_state)]
     
         if 'seeds' in arrays_in.files:
             m.seeds = list(map(int, seeds.result()))
             m._mtrand_states = [s.result() for s in mtrand_states]
-            fns = (str, lambda x: x, int, int, float)
+            fns = (bytes, lambda x: x, int, int, float)
             m._mtrand_states = [list(map(f, s)) for f, s in zip(fns, m._mtrand_states)]
             m._mtrand_states = list(zip(*m._mtrand_states))
             m.n_proc = len(m.seeds)
@@ -209,7 +210,7 @@ def old_load_lda(filename, ldaclass):
 
     if 'seed' in arrays_in:
         m.seed = int(arrays_in['seed'])
-        m._mtrand_state = (str(arrays_in['mtrand_state0']),
+        m._mtrand_state = (bytes(arrays_in['mtrand_state0']),
                            arrays_in['mtrand_state1'],
                            int(arrays_in['mtrand_state2']),
                            int(arrays_in['mtrand_state3']),
@@ -217,7 +218,7 @@ def old_load_lda(filename, ldaclass):
 
     if 'seeds' in arrays_in:
         m.seeds = list(map(int, list(arrays_in['seeds'])))
-        m._mtrand_states = list(zip(list(map(str, arrays_in['mtrand_states0'])),
+        m._mtrand_states = list(zip(list(map(bytes, arrays_in['mtrand_states0'])),
                                arrays_in['mtrand_states1'],
                                list(map(int, arrays_in['mtrand_states2'])),
                                list(map(int, arrays_in['mtrand_states3'])),
