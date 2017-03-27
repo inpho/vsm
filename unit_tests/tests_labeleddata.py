@@ -71,7 +71,7 @@ class TestLabeleddata(unittest.TestCase):
         m = LdaCgsSeq(c, 'document', K=20)
         viewer = LdaCgsViewer(c, m)
         
-        li = ['0', '1', '10']
+        li = [0, 1, 10]
         isa = viewer.dismat_top(li)
         
         self.assertEqual(isa.shape[0], len(li))
