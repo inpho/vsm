@@ -26,7 +26,6 @@ install:
 # command to run tests
 before_script: 
   - pip install unittest2 nose
-
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
      pip install --pre topicexplorer; fi
 script: bash coverage.sh

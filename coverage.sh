@@ -7,10 +7,15 @@ rm -rf .coverage
 coverage debug sys
 
 $CMD setup.py test
+EXIT=$?
 
-#pip install --pre topicexplorer
 rm -rf ap.ini ap ap.tgz
-$CMD -m topicexplorer.demo
+#pip install --pre topicexplorer
+#$CMD -m topicexplorer.demo
+#EXIT=$?+$EXIT
 #$CMD -m topicexplorer.serve ap.ini 
 
 coverage report
+
+echo "Test exit code: $EXIT"
+exit $EXIT
