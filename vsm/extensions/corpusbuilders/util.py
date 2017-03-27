@@ -38,7 +38,7 @@ def strip_punc_word(word):
     if isinstance(word, str):
         return word.translate(PUNC_TABLE)
     elif isinstance(word, basestring):
-        return word.translate(None, PUNC)
+        return word.translate(None, PUNC.encode('utf-8'))
         
 
 NUMS = string.digits
@@ -60,9 +60,7 @@ def rem_num_word(word):
     if isinstance(word, str):
         return word.translate(NUMS_TABLE)
     elif isinstance(word, basestring):
-        return word.translate(None, NUMS)
-    else:
-        raise Exception(type(word))
+        return word.translate(None, NUMS.encode('utf-8'))
 
 def rehyph(sent):
     """
@@ -77,7 +75,7 @@ def process_word(word):
     if isinstance(word, str):
         return word.translate(BIG_TABLE)
     elif isinstance(word, basestring):
-        return word.translate(None, BIG_LIST)
+        return word.translate(None, BIG_LIST.encode('utf-8'))
 
 def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0, in_place=True):
     """
