@@ -421,7 +421,7 @@ def update(args):
     inv_top_sums = np.frombuffer(_inv_top_sums, dtype=np.float32).copy()
 
     top_doc = np.frombuffer(_top_doc, dtype=np.float32)
-    top_doc = top_doc.reshape(_K.value, top_doc.size/_K.value)
+    top_doc = top_doc.reshape(_K.value, int(top_doc.size/_K.value))
     top_doc = top_doc[:, doc_indices[0]:doc_indices[1]].copy()
 
     log_p = 0
