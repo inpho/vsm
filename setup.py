@@ -24,7 +24,8 @@ install_requires=[
         "sortedcontainers>=1.4.0",
 #        "czipfile==1.0.0",
         "cython",
-        "unidecode"
+        "unidecode",
+        "future"
     ]
 
 if platform.python_version_tuple()[0] == '2':
