@@ -1,10 +1,8 @@
 from __future__ import division
 from __future__ import print_function
-from builtins import str
 from builtins import zip
 from builtins import map
 from builtins import range
-from past.builtins import basestring
 from past.utils import old_div
 import numpy as np
 from vsm.zipfile import use_czipfile
@@ -210,15 +208,19 @@ def old_load_lda(filename, ldaclass):
 
     if 'seed' in arrays_in:
         m.seed = int(arrays_in['seed'])
-        m._mtrand_state = (bytes(arrays_in['mtrand_state0']),
-                           arrays_in['mtrand_state1'],
-                           int(arrays_in['mtrand_state2']),
-                           int(arrays_in['mtrand_state3']),
-                           float(arrays_in['mtrand_state4']))
+        try:
+            m._mtrand_state = (str(arrays_in['mtrand_state0']),
+                               arrays_in['mtrand_state1'],
+                               int(arrays_in['mtrand_state2']),
+                               int(arrays_in['mtrand_state3']),
+                               float(arrays_in['mtrand_state4']))
+        except TypeError:
+            raise Exception(arrays_in['mtrand_state0'],
+            type(arrays_in['mtrand_state0']))
 
     if 'seeds' in arrays_in:
         m.seeds = list(map(int, list(arrays_in['seeds'])))
-        m._mtrand_states = list(zip(list(map(bytes, arrays_in['mtrand_states0'])),
+        m._mtrand_states = list(zip(list(map(str, arrays_in['mtrand_states0'])),
                                arrays_in['mtrand_states1'],
                                list(map(int, arrays_in['mtrand_states2'])),
                                list(map(int, arrays_in['mtrand_states3'])),
