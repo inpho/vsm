@@ -2,6 +2,7 @@ from builtins import str
 from builtins import chr
 from builtins import range
 from builtins import object
+from past.builtins import basestring
 import re
 import string
 
@@ -36,8 +37,9 @@ def strip_punc(tsent):
 def strip_punc_word(word):
     if isinstance(word, str):
         return word.translate(PUNC_TABLE)
-    elif isinstance(word, str):
-        return word.translate(None, string.punctuation)
+    elif isinstance(word, basestring):
+        return word.translate(None, PUNC)
+        
 
 NUMS = string.digits
 NUMS_TABLE =  {ord(c): None for c in NUMS}
@@ -57,8 +59,10 @@ def rem_num(tsent):
 def rem_num_word(word):
     if isinstance(word, str):
         return word.translate(NUMS_TABLE)
-    elif isinstance(word, str):
-        return word.translate(None, string.digits)
+    elif isinstance(word, basestring):
+        return word.translate(None, NUMS)
+    else:
+        raise Exception(type(word))
 
 def rehyph(sent):
     """
@@ -72,7 +76,7 @@ BIG_LIST = string.digits + string.punctuation
 def process_word(word):
     if isinstance(word, str):
         return word.translate(BIG_TABLE)
-    elif isinstance(word, str):
+    elif isinstance(word, basestring):
         return word.translate(None, BIG_LIST)
 
 def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0, in_place=True):
