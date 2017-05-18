@@ -33,7 +33,7 @@ if platform.python_version_tuple()[0] == '2':
 
 setup(
     name = "vsm",
-    version = "0.4.0b9",
+    version = "0.4.0rc1",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
@@ -45,6 +45,7 @@ setup(
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Intended Audience :: Developers",
