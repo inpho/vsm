@@ -1,3 +1,8 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
 import os
 import shutil
 import re
@@ -15,8 +20,8 @@ from vsm.extensions.corpusbuilders.util import filter_by_suffix
 
 import json
 from time import sleep
-from urllib2 import urlopen
-from urllib import quote_plus
+from urllib.request import urlopen
+from urllib.parse import quote_plus
 
 def metadata(id, sleep_time=1):
     """
@@ -39,10 +44,10 @@ def metadata(id, sleep_time=1):
         sleep(sleep_time) ## JUST TO MAKE SURE WE ARE THROTTLED
     try:
         data = json.load(urlopen(solr))
-        print id
+        print(id)
         return data['response']['docs'][0]
-    except ValueError, IndexError:
-        print "No result found for " + id 
+    except ValueError as IndexError:
+        print("No result found for " + id) 
         return dict()
 
 def proc_htrc_coll(coll_dir, ignore=['.json', '.log', '.err']):
@@ -100,7 +105,7 @@ def proc_htrc_book(book, coll_dir, ignore=['.json', '.log', '.err']):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    print 'Processing', book_root
+    print('Processing', book_root)
 
     try:
         rm_pg_headers(book_root, logger, ignore=ignore)
@@ -216,7 +221,7 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log', '.err'])
 
     # Remove capitalization, roman numerals for numbers under 50,
     # punctuation, arabic numerals from first lines
-    for i in xrange(len(first_lines)):
+    for i in range(len(first_lines)):
         line = first_lines[i]
         line = line.lower()
 
@@ -293,10 +298,10 @@ def htrc_get_titles(metadata, vol_id):
     """
     try:
         md = metadata[vol_id]
-        return md[md.keys()[0]]['titles']
+        return md[list(md.keys())[0]]['titles']
 
     except KeyError:
-        print 'Volume ID not found:', vol_id
+        print('Volume ID not found:', vol_id)
         raise
 
 
@@ -373,7 +378,7 @@ def htrc_find_duplicates(metadata, vol_list):
     
     :See Also: :meth: htrc_load_metadata_86, :meth: htrc_load_metadata_1315
     """
-    record_ids = [metadata[vol].keys()[0] for vol in vol_list]
+    record_ids = [list(metadata[vol].keys())[0] for vol in vol_list]
     
     mem, indices = [], []
 
