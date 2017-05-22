@@ -164,7 +164,7 @@ def rm_lb_hyphens(plain_root, logger, ignore=['.json', '.log', '.err']):
     for i, page_file in enumerate(page_files):
         filename = os.path.join(plain_root, page_file)
 
-        with open(filename, 'r+w') as f:
+        with open(filename, 'w+') as f:
             page = f.read()
             page = inner(page)
             f.seek(0)
