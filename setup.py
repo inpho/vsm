@@ -33,7 +33,7 @@ if platform.python_version_tuple()[0] == '2':
 
 setup(
     name = "vsm",
-    version = "0.4.0rc1",
+    version = "0.4.0rc1.post1",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
@@ -60,6 +60,7 @@ setup(
     license = 'MIT',
     packages=packages,
     ext_modules = cythonize(extensions),
+    package_data = {'vsm': ['vsm/model/_cgs_update.pyx']},
     dependency_links=['https://inpho.cogs.indiana.edu/pypi/czipfile/',
         'https://inpho.cogs.indiana.edu/pypi/pymmseg/'],
     test_suite = "unittest2.collector",
