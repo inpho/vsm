@@ -220,7 +220,7 @@ def cross_H(P,Q):
     return out
 
 
-def KL_div(P, Q):
+def KL_div(P, Q, safe=False):
     """
     P and Q are arrays of either dimension 1 or 2.
 
@@ -228,9 +228,14 @@ def KL_div(P, Q):
     is assumed to be left stochastic.) If Q is a matrix, KL divergence
     is computed column-wise on Q. (Q is assumed to be right
     stochastic.)
+
+    :param safe: Marks whether to use 0 values or a small correction of 1e-21
+    :type boolean:
     """
     P = P.astype(np.float)
     Q = Q.astype(np.float)
+    P[P==0.] = 1e-21
+    Q[Q==0.] = 1e-21
 
     if P.ndim < 2:
         return np.squeeze(cross_H(P, Q) - H(P))
