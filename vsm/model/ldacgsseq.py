@@ -235,7 +235,7 @@ class LdaCgsQuerySampler(LdaCgsSeq):
     """
     def __init__(self, lda_obj=None, new_corpus=None,
                  align_corpora=False, old_corpus=None,
-                 context_type=None):
+                 context_type=None, seed=None):
 
         if align_corpora:
             new_corp = align(old_corpus, new_corpus)
@@ -250,6 +250,9 @@ class LdaCgsQuerySampler(LdaCgsSeq):
                           alpha=lda_obj.alpha, beta=lda_obj.beta)
         else:
             kwargs = dict(corpus=new_corpus)
+
+        if seed is not None:
+            kwargs.update(seed=seed)
 
 
         super(LdaCgsQuerySampler, self).__init__(**kwargs)

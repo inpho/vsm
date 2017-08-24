@@ -18,7 +18,7 @@ __all__ = ['empty_corpus', 'random_corpus',
            'file_corpus', 'dir_corpus', 'coll_corpus', 'json_corpus',
            'corpus_from_strings', 'walk_corpus']
 
-
+IGNORE = ['.json','.log','.pickle', '.DS_Store']
 
 def corpus_from_strings(strings, metadata=[], decode=False,
                         nltk_stop=True, stop_freq=0, add_stop=None, tokenizer=word_tokenize):
@@ -612,9 +612,9 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
 
 def dir_corpus(plain_dir, chunk_name='article', encoding='utf8', 
-               paragraphs=True, ignore=['.json','.log','.pickle'], 
-               nltk_stop=True, stop_freq=1, add_stop=None, decode=False, 
-               verbose=1, simple=False, tokenizer=word_tokenize):
+               paragraphs=True, ignore=IGNORE, nltk_stop=True, 
+               stop_freq=1, add_stop=None, decode=False, verbose=1,
+               simple=False, tokenizer=word_tokenize):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -647,7 +647,7 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
     
     :param ignore: The list containing suffixes of files to be filtered.
         The suffix strings are normally file types. Default is ['.json',
-        '.log','.pickle'].
+        '.log','.pickle', '.DS_Store'].
     :type ignore: list of strings, optional
 
     :param nltk_stop: If `True` then the corpus object is masked 
@@ -799,7 +799,7 @@ def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize, simple=
     return words, corpus_data
 
 #TODO: This should be a whitelist not a blacklist
-def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
+def coll_corpus(coll_dir, encoding='utf8', ignore=IGNORE,
                 nltk_stop=True, stop_freq=1, add_stop=None, 
                 decode=False, verbose=1, simple=False, tokenizer=word_tokenize):
     """
@@ -820,7 +820,7 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
     
     :param ignore: The list containing suffixes of files to be filtered.
         The suffix strings are normally file types. Default is ['.json',
-        '.log','.pickle'].
+        '.log','.pickle', '.DS_Store'].
     :type ignore: list of strings, optional
 
     :param nltk_stop: If `True` then the corpus object is masked 
@@ -975,7 +975,7 @@ def record_tokenize(records, record_names, verbose=1):
 
 
 #TODO: This should be a whitelist not a blacklist
-def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
+def record_corpus(base_dir, encoding='utf8', ignore=IGNORE,
                 nltk_stop=True, stop_freq=1, add_stop=None, 
                 decode=False, verbose=1):
     """
@@ -996,7 +996,7 @@ def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle']
     
     :param ignore: The list containing suffixes of files to be filtered.
         The suffix strings are normally file types. Default is ['.json',
-        '.log','.pickle'].
+        '.log','.pickle', '.DS_Store].
     :type ignore: list of strings, optional
 
     :param nltk_stop: If `True` then the corpus object is masked 
@@ -1069,9 +1069,9 @@ def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle']
 
 
 def walk_corpus(walk_dir, chunk_name='document', encoding='utf8', 
-                ignore=['.json', '.log', '.pickle'],
-                nltk_stop=True, stop_freq=1, add_stop=None, 
-                decode=False, verbose=1, simple=False, tokenizer=word_tokenize):
+                ignore=IGNORE, nltk_stop=True, stop_freq=1, add_stop=None,
+                decode=False, verbose=1, simple=False,
+                tokenizer=word_tokenize):
 
     filenames = []
     for root, dirs, files in os.walk(walk_dir):
