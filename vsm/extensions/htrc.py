@@ -13,7 +13,6 @@ import numpy as np
 from unidecode import unidecode
 
 from nltk.corpus import wordnet as wn
-import enchant
 
 from vsm.extensions.corpusbuilders.util import filter_by_suffix
 
@@ -135,42 +134,7 @@ def rm_lb_hyphens(plain_root, logger, ignore=['.json', '.log', '.err']):
 
     :returns: None
     """
-
-    try:
-        d = enchant.Dict('en_US')
-    except ImportError:
-        d = None
-
-    def recon(match_obj):
-        rc_word = match_obj.group(1) + match_obj.group(2)
-        
-        if wn.synsets(rc_word) or (d and d.check(rc_word)):
-            logger.info('\nbook: %s\nreconstructed word:\n%s\n',
-                         plain_root, rc_word)
-            return rc_word
-        
-        logger.info('\nbook: %s\nignored expression:\nleft: %s\nright: %s\n',
-                     plain_root, match_obj.group(1), match_obj.group(2))
-
-        return match_obj.group(0)
-
-    def inner(s):
-        lb_hyphenated = re.compile(r'(\w+)-\s+(\w+)')
-        return lb_hyphenated.sub(recon, s)
-    
-    page_files = os.listdir(plain_root)
-    page_files = filter_by_suffix(page_files, ignore)
-
-    for i, page_file in enumerate(page_files):
-        filename = os.path.join(plain_root, page_file)
-
-        with open(filename, 'w+') as f:
-            page = f.read()
-            page = inner(page)
-            f.seek(0)
-            f.write(page)
-            f.truncate()
-
+    pass
 
 
 def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log', '.err']):

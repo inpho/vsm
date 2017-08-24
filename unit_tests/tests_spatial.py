@@ -37,16 +37,6 @@ class TestSpatial(unittest.TestCase):
         self.assertTrue(np.allclose(JS_dist(self.p,self.q), JSD(self.p,self.q)))
 
 
-    def test_KL_div_old(self):
-        p = np.array([0,1])
-        Q = np.array([[0,1],
-                      [.5,.5],
-                      [1,0]])
-        out = np.array([0., 1., np.inf])
-
-        self.assertTrue(np.allclose(out, KL_div(p,Q.T)))
-
-
     def test_count_matrix(self):
     
         arr = [1, 2, 4, 2, 1]
