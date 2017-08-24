@@ -218,7 +218,13 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def Z(self):
         if self._read_globals:
-            return np.frombuffer(_Z, np.uint8)
+            if self.K < 2 ** 8:
+                Ktype = np.uint8
+            elif self.K < 2 ** 16:
+                Ktype = np.uint16
+            else:
+                raise NotImplementedError("Invalid Ktype. k={}".format(self.K))
+            return np.frombuffer(_Z, Ktype)
         return self._Z_local
 
     @Z.setter
