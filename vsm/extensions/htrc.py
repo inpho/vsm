@@ -266,8 +266,7 @@ def htrc_load_metadata_1315():
     import os
     import json
 
-    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-1315/'
-                'htrc-1315-metadata.json')
+    filename = ('vsm-data/htrc-1315-metadata.json')
 
     with open(filename) as f:
         metadata = json.load(f)
@@ -282,8 +281,7 @@ def htrc_load_metadata_86():
     import os
     import json
 
-    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-86/'
-                'htrc-anthropomorphism-86-metadata.json')
+    filename = ('vsm-data/htrc-anthropomorphism-86-metadata.json')
 
     with open(filename) as f:
         metadata = json.load(f)
