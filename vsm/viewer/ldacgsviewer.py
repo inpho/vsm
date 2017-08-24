@@ -635,7 +635,7 @@ class LdaCgsViewer(object):
                                self.model.context_type, weights=weights, 
                                print_len=print_len, as_strings=False, 
                                label_fn=label_fn, filter_nan=filter_nan, 
-                               dist_fn=dist_fn)
+                               dist_fn=dist_fn, order=order)
 
         topics = res_top_type(topic_or_topics)
 
