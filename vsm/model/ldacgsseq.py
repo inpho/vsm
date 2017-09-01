@@ -247,12 +247,10 @@ class LdaCgsQuerySampler(LdaCgsSeq):
             kwargs = dict(corpus=new_corpus,
                           context_type=context_type,
                           K=lda_obj.K, V=lda_obj.V,
-                          alpha=lda_obj.alpha, beta=lda_obj.beta)
+                          alpha=lda_obj.alpha, beta=lda_obj.beta, seed=seed)
         else:
             kwargs = dict(corpus=new_corpus)
 
-        if seed is not None:
-            kwargs.update(seed=seed)
 
 
         super(LdaCgsQuerySampler, self).__init__(**kwargs)
