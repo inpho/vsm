@@ -14,7 +14,7 @@ install:
   - "%PYTHON%\\python.exe -m conda install -q --yes pip numpy scipy scikit-learn unidecode nltk futures chardet cython"
   - "%PYTHON%\\python.exe -c \"import nltk; nltk.download('stopwords'); nltk.download('punkt')\""
   - "%PYTHON%\\python.exe -m pip install unittest2 nose"
-  - "%PYTHON%\\python.exe -m pip install vsm -i https://inpho.cogs.indiana.edu/pypi"
+  - "%PYTHON%\\python.exe -m pip install vsm"
 
 build: off
 version: '1.0.{build}'
