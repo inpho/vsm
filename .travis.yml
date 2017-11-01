@@ -1,11 +1,11 @@
-language: python
+#language: python
 python:
   - "2.7"
   - "3.6"
 # command to install dependencies
 os:
   - linux
-  - osx
+#  - osx
 install:
   # Install conda
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
