@@ -98,7 +98,7 @@ class LdaCgsMulti(LdaCgsSeq):
         del self.seed
         del self._mtrand_state
         
-        
+
     def _move_globals_to_locals(self):
         
         self._write_globals = False
