@@ -497,9 +497,7 @@ class Corpus(BaseCorpus):
             self.dtype = np.uint32
 
         self.corpus = np.asarray([self.words_int[word]
-                                  for word in self.corpus 
-                                      if str(word) not in ['\x00']
-                                      ],
+                                  for word in self.corpus],
                                  dtype=self.dtype)
 
         self.stopped_words = set()
