@@ -485,8 +485,9 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
                               freq=stop_freq, add_stop=add_stop)
     return c
 
-
-
+import sys
+from memory_profiler import profile
+@profile
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
                  verbose=1, tokenizer=word_tokenize, simple=False):
     """`dir_tokenize` is a helper function for :meth:`dir_corpus`.
@@ -521,6 +522,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
         are np.arrays.
 
     """
+    verbose = 0
     words, chk_tokens, sent_tokens = [], [], []
     chk_break, par_break, sent_break = 0, 0 ,0
     chk_n, par_n, sent_n = 0, 0, 0
@@ -559,13 +561,14 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
             chk_n += 1
     else:
-        for chk, label in zip(chunks, labels):
+        for i, chk, label in zip(range(len(chunks)), chunks, labels):
             # print 'Tokenizing', label
             if simple:
-                w = tokenizer(chk)
-                words.extend(w)
-                chk_break += len(w)
+                text, count = tokenizer(chk)
+                words.append(text)
+                chk_break += count
                 chk_tokens.append((chk_break, label))
+                print(label, count, chk_break)
   
 
             else:
@@ -600,7 +603,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
         corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
         dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
-    elif not simple:
+    elif not simple and not paragraphs:
         dtype = [idx_dt, label_dt, sent_label_dt]
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
     
@@ -705,7 +708,7 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
                               paragraphs=paragraphs, verbose=verbose,
                               simple=simple, tokenizer=tokenizer)
     names, data = list(zip(*list(tok.items())))
-    
+    print(data[0][0][0], data[0][-1][0]) 
     c = Corpus(words, context_data=data, context_types=names)
     if nltk_stop or stop_freq or add_stop:
         c = apply_stoplist(c, nltk_stop=nltk_stop,

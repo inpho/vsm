@@ -150,9 +150,11 @@ class BaseCorpus(object):
                  context_types=[],
                  context_data=[],
                  remove_empty=False,
-                 to_array=True):
+                 to_array=True,
+                 validate_indices=True):
 
         if to_array:
+            print("Converting to array")
             self.corpus = np.asarray(corpus, dtype=dtype)
             self.dtype = self.corpus.dtype
         else:
@@ -162,11 +164,15 @@ class BaseCorpus(object):
         # Since np.unique attempts to make a whole contiguous copy of the
         # corpus array, we instead use a sorted set and cast to a np array
         # equivalent to self.words = np.unique(self.corpus)
-        self.words = np.asarray(sorted(set(self.corpus)), dtype=np.object_)
+        self.words = set()
+        for text in self.corpus:
+            self.words.update(text.split())
+        self.words = sorted(self.words)
+        self.words = np.asarray(self.words, dtype=np.object_)
 
         self.context_data = []
         for t in context_data:
-            if self._validate_indices(t['idx']):
+            if not validate_indices or self._validate_indices(t['idx']):
                 self.context_data.append(t)
 
         self._gen_context_types(context_types)
@@ -239,6 +245,10 @@ class BaseCorpus(object):
                 token_list = self.view_contexts(t)
                 
                 indices = np.array([ctx.size != 0 for ctx in token_list], dtype=np.bool)
+                #print(len(indices), len(self.context_data[j]),
+                #','.join(self.words[:5]))
+                #for i, t in enumerate(token_list):
+                    #print(i, t, len(t), self.words[t])
                 self.context_data[j] = self.context_data[j][indices]
 
 
@@ -487,7 +497,8 @@ class Corpus(BaseCorpus):
                                      context_data=context_data,
                                      dtype=np.object_,
                                      remove_empty=False,
-                                     to_array=False)
+                                     to_array=False,
+                                     validate_indices=False)
 
         self._set_words_int()
 
@@ -496,10 +507,12 @@ class Corpus(BaseCorpus):
             self.dtype = np.uint16
         else:
             self.dtype = np.uint32
-
+        import itertools
+        raw_corpus = itertools.chain.from_iterable(text.split() for text in self.corpus)
         self.corpus = np.asarray([self.words_int[word]
-                                  for word in self.corpus],
+                                  for word in raw_corpus],
                                  dtype=self.dtype)
+        #print(len(self.words), len(self.corpus), len(self.context_data[0]))
 
         self.stopped_words = set()
 

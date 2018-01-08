@@ -39,7 +39,7 @@ def strip_punc_word(word):
         return word.translate(PUNC_TABLE)
     elif isinstance(word, basestring):
         return word.translate(None, PUNC.encode('utf-8'))
-        
+
 
 NUMS = string.digits
 NUMS_TABLE =  {ord(c): None for c in NUMS}
@@ -62,10 +62,11 @@ def rem_num_word(word):
     elif isinstance(word, basestring):
         return word.translate(None, NUMS.encode('utf-8'))
 
+REHYPH_REGEX = re.compile(r'(?P<x1>.)--(?P<x2>.)')
 def rehyph(sent):
     """
     """
-    return re.sub(r'(?P<x1>.)--(?P<x2>.)', '\g<x1> - \g<x2>', sent)
+    return REHYPH_REGEX.sub('\g<x1> - \g<x2>', sent)
 
 
 BIG_TABLE = NUMS_TABLE.copy()
@@ -87,7 +88,7 @@ def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0, in_place=True):
     :param nltk_stop: If `True` English stopwords from nltk are included
         in the stoplist. Default is `True`.
     :type nltk_stop: boolean, optional
-    
+
     :param add_stop: list of words to eliminate from `corp` words.
         Default is `None`.
     :type add_stop: List, optional
@@ -190,7 +191,7 @@ def word_tokenize(text):
     for hyphens, removed.
 
     The core work is done by NLTK's Treebank Word Tokenizer.
-    
+
     :param text: Text to be tokeized.
     :type text: string
 
@@ -202,15 +203,17 @@ def word_tokenize(text):
         word_tokenizer = nltk.TreebankWordTokenizer()
 
     text = rehyph(text)
-    text = process_word(text)
     text = text.replace(u'\x00','')
     text = text.lower()
-    tokens = word_tokenizer.tokenize(text)
+    text = process_word(text)
+    text = re.sub(r'\s+', r' ', text)
+    #tokens = word_tokenizer.tokenize(text)
+    #del text
 
     #process_word = lambda x: strip_punc_word(rem_num_word(word)).lower().replace(u'\x00','')
     #tokens = [process_word(word) for word in text]
 
-    return tokens
+    return text, (text.count(' ') - 1)
 
 
 sent_tokenizer = None
@@ -221,7 +224,7 @@ def sentence_tokenize(text):
     sentences in this text.
 
     This is a wrapper for NLTK's pre-trained Punkt Tokenizer.
-     
+
     :param text: Text to be tokeized.
     :type text: string
 
