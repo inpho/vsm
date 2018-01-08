@@ -486,7 +486,8 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
     return c
 
 
-
+from memory_profiler import profile
+@profile
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
                  verbose=1, tokenizer=word_tokenize, simple=False):
     """`dir_tokenize` is a helper function for :meth:`dir_corpus`.
@@ -559,13 +560,12 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
             chk_n += 1
     else:
+        toks = []
         for chk, label in zip(chunks, labels):
             # print 'Tokenizing', label
             if simple:
                 w = tokenizer(chk)
-                words.extend(w)
-                chk_break += len(w)
-                chk_tokens.append((chk_break, label))
+                toks.append(w)
   
 
             else:
@@ -584,7 +584,19 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
   
             chk_n += 1
+    
+    if verbose == 1:
+        pbar.finish()
 
+        pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(chunks)).start()
+
+    del chunks
+    for i,w in enumerate(toks):
+        words.extend(w)
+        chk_break = len(words)
+        chk_tokens.append((chk_break, label))
+        if verbose == 1:
+            pbar.update(i)
 
     idx_dt = ('idx', np.int32)
     label_dt = (chunk_name + '_label', np.object_)
@@ -606,6 +618,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
     
     if verbose == 1:
         pbar.finish()
+    print(paragraphs, not simple, len(chk_tokens), len(chk_tokens[0]))
 
     return words, corpus_data
 

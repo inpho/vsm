@@ -3,6 +3,8 @@ from builtins import chr
 from builtins import range
 from builtins import object
 from past.builtins import basestring
+
+from memory_profiler import profile
 import re
 import string
 
@@ -39,7 +41,7 @@ def strip_punc_word(word):
         return word.translate(PUNC_TABLE)
     elif isinstance(word, basestring):
         return word.translate(None, PUNC.encode('utf-8'))
-        
+
 
 NUMS = string.digits
 NUMS_TABLE =  {ord(c): None for c in NUMS}
@@ -71,6 +73,7 @@ def rehyph(sent):
 BIG_TABLE = NUMS_TABLE.copy()
 BIG_TABLE.update(PUNC_TABLE)
 BIG_LIST = string.digits + string.punctuation
+#@profile
 def process_word(word):
     if isinstance(word, str):
         return word.translate(BIG_TABLE)
@@ -179,10 +182,20 @@ def filter_by_suffix(l, ignore, filter_dotfiles=True):
     return filter_list
 
 class _tokenizer(object):
+    def __init__(self):
+        self.regex = re.compile(r"\s+")
+
     def tokenize(self, text):
-        return text.split()
+        start = 0
+        for m in self.regex.finditer(text):
+            idx = m.start()
+            assert idx >= start
+            yield text[start:idx]
+            start = m.end()
+        yield text[start:]
 
 word_tokenizer = _tokenizer()
+#@profile
 def word_tokenize(text):
     """Takes a string and returns a list of strings. Intended use: the
     input string is English text and the output consists of the
@@ -190,7 +203,7 @@ def word_tokenize(text):
     for hyphens, removed.
 
     The core work is done by NLTK's Treebank Word Tokenizer.
-    
+
     :param text: Text to be tokeized.
     :type text: string
 
@@ -198,6 +211,7 @@ def word_tokenize(text):
     """
     global word_tokenizer
     if word_tokenizer is None:
+        print("Initializing an NLTK Tokenizer")
         import nltk
         word_tokenizer = nltk.TreebankWordTokenizer()
 
