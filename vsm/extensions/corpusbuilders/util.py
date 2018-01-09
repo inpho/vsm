@@ -213,7 +213,7 @@ def word_tokenize(text):
     #process_word = lambda x: strip_punc_word(rem_num_word(word)).lower().replace(u'\x00','')
     #tokens = [process_word(word) for word in text]
 
-    return text, (text.count(' ') - 1)
+    return text, text.count(' ') - 1
 
 
 sent_tokenizer = None

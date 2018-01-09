@@ -543,7 +543,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
             for par in pars:
                 sents = sentence_tokenize(par)
-                
+
                 for sent in sents:
                     w = tokenizer(sent)
                     words.extend(w)
@@ -553,7 +553,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
                 par_tokens.append((sent_break, label, str(par_n)))
                 par_n += 1
-    
+
             if verbose == 1:
                 pbar.update(chk_n)
 
@@ -566,10 +566,10 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
             if simple:
                 text, count = tokenizer(chk)
                 words.append(text)
-                chk_break += count
+                if count >= 0:
+                    chk_break += count
                 chk_tokens.append((chk_break, label))
-                print(label, count, chk_break)
-  
+                print(i, label, count, chk_break)
 
             else:
                 sents = sentence_tokenize(chk)
@@ -581,7 +581,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
                     sent_tokens.append((sent_break, label, str(sent_n)))
                     sent_n += 1
                 chk_tokens.append((sent_break, label))
-    
+
             if verbose == 1:
                 pbar.update(chk_n)
 
