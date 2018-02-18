@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import re
 import numpy as np
 
@@ -133,7 +135,7 @@ def savez(fname, ctx_type, itr, K, alpha, beta, doc_top, top_word, W):
     arrays_out['alpha'] = alpha
     arrays_out['beta'] = beta
     
-    print 'Saving LDA model to ', fname
+    print('Saving LDA model to ', fname)
     np.savez(fname, **arrays_out)
 
 

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import numpy as np
 import time
 from ldafunctions import load_lda, save_lda, init_priors
@@ -101,19 +103,19 @@ def demo_LdaCgs(doc_len=500, V=100000, n_docs=100,
                 K=20, n_iterations=5, n_threads=1):
 
     from vsm.extensions.corpusbuilders import random_corpus
-    
-    print 'Words per document:', doc_len
-    print 'Words in vocabulary:', V
-    print 'Documents in corpus:', n_docs
-    print 'Number of topics:', K
-    print 'Iterations:', n_iterations
+
+    print('Words per document:', doc_len)
+    print('Words in vocabulary:', V)
+    print('Documents in corpus:', n_docs)
+    print('Number of topics:', K)
+    print('Iterations:', n_iterations)
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1)
 
-    print 'Random corpus generated. Initializing model.'
+    print('Random corpus generated. Initializing model.')
     m = LdaCgs(c, 'document', K=K)
-    
-    print 'Begin estimation.'
+
+    print('Begin estimation.')
     m.train(n_iterations=n_iterations, n_threads=n_threads)
 
     return m

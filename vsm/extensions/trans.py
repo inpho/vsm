@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import nltk
 import re
@@ -58,7 +59,7 @@ if __name__=="__main__":
     
     for book in books:
         book_path = os.path.join(frompath, book)
-        print book_path
+        print(book_path)
         pages = os.listdir(book_path)
         pages.sort()
         
@@ -71,14 +72,14 @@ if __name__=="__main__":
                     out = out.encode('utf-8')
                 except:
                     out = ''
-                    print page_name, ' failed translation.'
+                    print(page_name, ' failed translation.')
                 
                 try:
                     os.mkdir(os.path.join(topath, book))
                 except OSError:
                     pass
                 topage = os.path.join(topath, book, page)
-                with open(topage, 'w') as fout:
+                #with open(topage, 'w') as fout:
     """ 
     # for individual pages 
     fin = 'darwin-de/wu.89101307601/00000636.txt'

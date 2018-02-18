@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import nltk
 from vsm.corpus import Corpus
 from vsm.extensions.corpusbuilders.util import *
@@ -41,8 +43,8 @@ def apply_stoplist_nltk(corp, nltk_stop=[], add_stop=None,
                 for w in nltk.corpus.stopwords.words(lang):
                     stoplist.add(w)
             except Exception:
-                print "{0} language not found in nltk.corpus\
-                        .stopwords".format(nltk_stop)
+                print("{0} language not found in nltk.corpus\
+                        .stopwords").format(nltk_stop)
     if add_stop:
         for w in add_stop:
             stoplist.add(w)
