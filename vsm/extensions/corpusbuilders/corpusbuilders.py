@@ -486,8 +486,6 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
     return c
 
 import sys
-from memory_profiler import profile
-@profile
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
                  verbose=1, tokenizer=word_tokenize, simple=False):
     """`dir_tokenize` is a helper function for :meth:`dir_corpus`.
@@ -569,7 +567,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
                 if count >= 0:
                     chk_break += count
                 chk_tokens.append((chk_break, label))
-                print(i, label, count, chk_break)
+                #print(i, label, count, chk_break)
 
             else:
                 sents = sentence_tokenize(chk)
@@ -708,7 +706,7 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
                               paragraphs=paragraphs, verbose=verbose,
                               simple=simple, tokenizer=tokenizer)
     names, data = list(zip(*list(tok.items())))
-    print(data[0][0][0], data[0][-1][0]) 
+
     c = Corpus(words, context_data=data, context_types=names)
     if nltk_stop or stop_freq or add_stop:
         c = apply_stoplist(c, nltk_stop=nltk_stop,

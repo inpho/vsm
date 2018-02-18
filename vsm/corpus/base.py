@@ -9,6 +9,7 @@ import numpy as np
 from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
 
+from memory_profiler import profile
 
 __all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
             'align_corpora','binary_search' ]
@@ -18,6 +19,10 @@ from datetime import datetime
 from vsm.zipfile import use_czipfile
 from copy import deepcopy
 
+try:
+    from isplit import isplit
+except ImportError:
+    isplit = str.split
 
 
 def binary_search(a, x, lo=0, hi=None):   # can't use a to specify default for hi
@@ -166,7 +171,7 @@ class BaseCorpus(object):
         # equivalent to self.words = np.unique(self.corpus)
         self.words = set()
         for text in self.corpus:
-            self.words.update(text.split())
+            self.words.update(isplit(text, ' '))
         self.words = sorted(self.words)
         self.words = np.asarray(self.words, dtype=np.object_)
 
@@ -245,10 +250,10 @@ class BaseCorpus(object):
                 token_list = self.view_contexts(t)
                 
                 indices = np.array([ctx.size != 0 for ctx in token_list], dtype=np.bool)
-                print(len(indices), len(self.context_data[j]),
-                ','.join(self.words[:5]))
-                for i, t in enumerate(token_list):
-                    print(i, t, len(t), self.words[t])
+                #print(len(indices), len(self.context_data[j]),
+                #','.join(self.words[:5]))
+                #for i, t in enumerate(token_list):
+                #    print(i, t, len(t), self.words[t])
                 self.context_data[j] = self.context_data[j][indices]
 
 
@@ -508,7 +513,7 @@ class Corpus(BaseCorpus):
         else:
             self.dtype = np.uint32
         import itertools
-        raw_corpus = itertools.chain.from_iterable(text.split() for text in self.corpus)
+        raw_corpus = itertools.chain.from_iterable(isplit(text, ' ') for text in self.corpus)
         self.corpus = np.asarray([self.words_int[word]
                                   for word in raw_corpus],
                                  dtype=self.dtype)
@@ -761,7 +766,7 @@ class Corpus(BaseCorpus):
 
         np.savez(file, **arrays_out)
 
-
+    @profile
     def in_place_stoplist(self, stoplist=None, freq=0):
         """ 
         Changes a Corpus object with words in the stoplist removed and with 
