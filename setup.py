@@ -17,15 +17,20 @@ extensions = [Extension(sources=['vsm/model/_cgs_update.pyx'], language='c++',
         #    define_macros=[('CYTHON_TRACE','1')]
 
 install_requires=[
-        "numpy>=1.6.1",
-        "scipy>=0.13.0",
-        "progressbar2",
-        "chardet>=2.3.0",
-        "sortedcontainers>=1.4.0",
-#        "czipfile==1.0.0",
-        "cython",
-        "unidecode",
-        "future"
+        'chardet',
+        'cython',
+        'future',
+        'matplotlib',
+        'nltk',
+        'numpy',
+        'porterstemmer',
+        'progressbar2',
+        'py4j',
+        'scikit_learn',
+        'scipy',
+        'sortedcontainers',
+        'translate',
+        'Unidecode',
     ]
 
 if platform.python_version_tuple()[0] == '2':
