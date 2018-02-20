@@ -14,10 +14,10 @@ environment:
 install:
   - ps: >- 
       if($env:PYTHON.EndsWith('x64')) {
-        call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
-        call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
+        & call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
+        & call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
       } else {
-          call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
+        & call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
       }
   - "%PYTHON%\\python.exe -m conda update -q --yes conda"
   - "%PYTHON%\\python.exe -m conda install -q --yes pip numpy scipy scikit-learn unidecode nltk chardet cython"
