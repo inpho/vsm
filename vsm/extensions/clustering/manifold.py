@@ -1,7 +1,9 @@
+from __future__ import absolute_import
+from builtins import object
 import numpy as np
 from sklearn.cluster import KMeans, AffinityPropagation, SpectralClustering
 from sklearn.manifold import Isomap, MDS
-from plotting import plot_clusters
+from .plotting import plot_clusters
 
 
 __all__ = [ 'Manifold' ]

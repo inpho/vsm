@@ -1,12 +1,22 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import zip
+from builtins import range
+
 from sys import stdout
 import multiprocessing as mp
 import numpy as np
 from vsm.split import split_documents
-from ldafunctions import load_lda
-from ldacgsseq import *
-from _cgs_update import cgs_update
+from vsm.model.ldafunctions import load_lda
+from vsm.model.ldacgsseq import *
+
+from vsm.model._cgs_update import cgs_update
+import cython
 
 import platform # For Windows comaptability
+import itertools
 
 from progressbar import ProgressBar, Percentage, Bar
 
@@ -55,7 +65,7 @@ class LdaCgsMulti(LdaCgsSeq):
             The length of the list should be same as `n_proc`. Default is `None`.
         :type seeds: list of integers, optional
         """
-	if platform.system() == 'Windows':
+        if platform.system() == 'Windows':
             raise NotImplementedError("""LdaCgsMulti is not implemented on 
             Windows. Please use LdaCgsSeq.""")
 
@@ -81,11 +91,14 @@ class LdaCgsMulti(LdaCgsSeq):
         super(LdaCgsMulti, self).__init__(corpus=corpus, context_type=context_type,
                                           K=K, V=V, alpha=alpha, beta=beta)
 
+        if corpus is not None:
+            self.dtype = corpus.corpus.dtype
+        
         # delete LdaCgsSeq seed and state
         del self.seed
         del self._mtrand_state
         
-        
+
     def _move_globals_to_locals(self):
         
         self._write_globals = False
@@ -130,7 +143,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def word_top(self):
         if self._read_globals:
-            return np.frombuffer(_word_top, np.float64).reshape(self.V, self.K)
+            return np.frombuffer(_word_top, np.float32).reshape(self.V, self.K)
         return self._word_top_local
         
     @word_top.setter
@@ -138,7 +151,7 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _word_top
             if not '_word_top' in globals():
-                _word_top = mp.Array('d', self.V * self.K, lock=False)
+                _word_top = mp.Array('f', self.V * self.K, lock=False)
             _word_top[:] = a.reshape(-1,)
         else:
             self._word_top_local = a
@@ -147,7 +160,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def inv_top_sums(self):
         if self._read_globals:
-            return np.frombuffer(_inv_top_sums, np.float64)
+            return np.frombuffer(_inv_top_sums, np.float32)
         return self._inv_top_sums_local
 
     @inv_top_sums.setter
@@ -155,7 +168,7 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _inv_top_sums
             if not '_inv_top_sums' in globals():
-                _inv_top_sums = mp.Array('d', self.K, lock=False)
+                _inv_top_sums = mp.Array('f', self.K, lock=False)
             _inv_top_sums[:] = a
         else:
             self._inv_top_sums_local = a
@@ -164,7 +177,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def top_doc(self):
         if self._read_globals:
-            top_doc = np.frombuffer(_top_doc, np.float64)
+            top_doc = np.frombuffer(_top_doc, np.float32)
             return top_doc.reshape(self.K, len(self.indices))
         return self._top_doc_local
         
@@ -173,7 +186,7 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _top_doc
             if not '_top_doc' in globals():
-                _top_doc = mp.Array('d', self.K * len(self.indices), lock=False)
+                _top_doc = mp.Array('f', self.K * len(self.indices), lock=False)
             _top_doc[:] = a.reshape(-1,)
         else:
             self._top_doc_local = a
@@ -182,7 +195,7 @@ class LdaCgsMulti(LdaCgsSeq):
     @property
     def corpus(self):
         if self._read_globals:
-            return np.frombuffer(_corpus, np.int32)
+            return np.frombuffer(_corpus, self.dtype)
         return self._corpus_local
 
     @corpus.setter
@@ -190,16 +203,28 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _corpus
             if not '_corpus' in globals():
-                _corpus = mp.Array('i', len(a), lock=False)
+                if self.corpus.dtype == 'uint16':
+                    dtype = 'H'
+                elif self.corpus.dtype == 'uint32':
+                    dtype = 'I'
+                else:
+                    raise NotImplementedError
+
+                _corpus = mp.Array(dtype, len(a), lock=False)
             _corpus[:] = a
         else:
             self._corpus_local = a
-
-
+    
     @property
     def Z(self):
         if self._read_globals:
-            return np.frombuffer(_Z, np.int32)
+            if self.K < 2 ** 8:
+                Ktype = np.uint8
+            elif self.K < 2 ** 16:
+                Ktype = np.uint16
+            else:
+                raise NotImplementedError("Invalid Ktype. k={}".format(self.K))
+            return np.frombuffer(_Z, Ktype)
         return self._Z_local
 
     @Z.setter
@@ -207,8 +232,15 @@ class LdaCgsMulti(LdaCgsSeq):
         if self._write_globals:
             global _Z
             if not '_Z' in globals():
-                _Z = mp.Array('i', len(a), lock=False)
+                if self.K < 2 ** 8:
+                    Ktype = 'B'
+                elif self.K < 2 ** 16:
+                    Ktype = 'H'
+                else:
+                    raise NotImplementedError
+                _Z = mp.Array(Ktype, len(a), lock=False)
             _Z[:] = a
+
         else:
             self._Z_local = a
 
@@ -285,13 +317,13 @@ class LdaCgsMulti(LdaCgsSeq):
         docs = split_documents(self.corpus, self.indices, self.n_proc)
 
         doc_indices = [(0, len(docs[0]))]
-        for i in xrange(len(docs)-1):
+        for i in range(len(docs)-1):
             doc_indices.append((doc_indices[i][1],
                                 doc_indices[i][1] + len(docs[i+1])))
 
         p = mp.Pool(self.n_proc)
 
-	if verbose == 1:
+        if verbose == 1:
             pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
         
         n_iterations += self.iteration
@@ -301,12 +333,13 @@ class LdaCgsMulti(LdaCgsSeq):
             if verbose == 2:
                 stdout.write('\rIteration %d: mapping  ' % self.iteration)
                 stdout.flush()
-        
-            data = zip(docs, doc_indices, self._mtrand_states)
+
+            data = list(zip(docs, doc_indices, self._mtrand_states,
+                       itertools.repeat(self.dtype)))
 
             # For debugging
 	    # results = map(update, data)
-	    if platform.system() == 'Windows':
+            if platform.system() == 'Windows':
                 raise NotImplementedError("""LdaCgsMulti is not implemented on Windows. 
                 Please use LdaCgsSeq.""")
             else:
@@ -316,30 +349,30 @@ class LdaCgsMulti(LdaCgsSeq):
                 stdout.write('\rIteration %d: reducing ' % self.iteration)
                 stdout.flush()
             
-	    if verbose == 1:
+            if verbose == 1:
                 #print("Self iteration", self.iteration)
                 pbar.update(iteration)
 
             (Z_ls, top_doc_ls, word_top_ls, logp_ls, mtrand_str_ls, 
              mtrand_keys_ls, mtrand_pos_ls, mtrand_has_gauss_ls, 
-             mtrand_cached_gaussian_ls) = zip(*results)
+             mtrand_cached_gaussian_ls) = list(zip(*results))
             
-            self._mtrand_states = zip(mtrand_str_ls, mtrand_keys_ls, mtrand_pos_ls, 
-                                mtrand_has_gauss_ls, mtrand_cached_gaussian_ls)
+            self._mtrand_states = list(zip(mtrand_str_ls, mtrand_keys_ls, mtrand_pos_ls, 
+                                mtrand_has_gauss_ls, mtrand_cached_gaussian_ls))
 
-            for t in xrange(len(results)):
+            for t in range(len(results)):
                 start, stop = docs[t][0][0], docs[t][-1][1]
                 self.Z[start:stop] = Z_ls[t]
                 self.top_doc[:, doc_indices[t][0]:doc_indices[t][1]] = top_doc_ls[t]
             self.word_top = self.word_top + np.sum(word_top_ls, axis=0)
             self.inv_top_sums = 1. / self.word_top.sum(0)
-            lp = np.sum(logp_ls)
+            lp = np.sum(logp_ls, dtype=np.float32)
             self.log_probs.append((self.iteration, lp))
 
             if verbose == 2:
                 stdout.write('\rIteration %d: log_prob=' % self.iteration)
                 stdout.flush()
-                print '%f' % lp
+                print('%f' % lp)
 
             iteration += 1
             self.iteration += 1
@@ -363,29 +396,38 @@ class LdaCgsMulti(LdaCgsSeq):
 
         :See Also: :class:`numpy.load`
         """
-	if platform.system() == 'Windows':
+        if platform.system() == 'Windows':
             raise NotImplementedError("""LdaCgsMulti is not implemented on 
             Windows. Please use LdaCgsSeq.""")
         return load_lda(filename, LdaCgsMulti)
 
 
 
-def update((docs, doc_indices, mtrand_state)):
+def update(args):
     """
     For LdaCgsMulti
     """
+    (docs, doc_indices, mtrand_state, dtype) = args
     start, stop = docs[0][0], docs[-1][1]
 
-    corpus = np.frombuffer(_corpus, dtype='i')[start:stop]
-    Z = np.frombuffer(_Z, dtype='i')[start:stop].copy()
+    global Ktype
+    if _K.value < 2 ** 8:
+        Ktype = np.uint8
+    elif _K.value < 2 ** 16:
+        Ktype = np.uint16
+    else:
+        raise NotImplementedError("Invalid Ktype. k={}".format(_K))
 
-    gbl_word_top = np.frombuffer(_word_top, dtype='d')
+    corpus = np.frombuffer(_corpus, dtype=dtype)[start:stop]
+    Z = np.frombuffer(_Z, dtype=Ktype)[start:stop].copy()
+
+    gbl_word_top = np.frombuffer(_word_top, dtype=np.float32)
     gbl_word_top = gbl_word_top.reshape(_V.value, _K.value)
     loc_word_top = gbl_word_top.copy()
-    inv_top_sums = np.frombuffer(_inv_top_sums, dtype='d').copy()
+    inv_top_sums = np.frombuffer(_inv_top_sums, dtype=np.float32).copy()
 
-    top_doc = np.frombuffer(_top_doc, dtype='d')
-    top_doc = top_doc.reshape(_K.value, top_doc.size/_K.value)
+    top_doc = np.frombuffer(_top_doc, dtype=np.float32)
+    top_doc = top_doc.reshape(_K.value, int(top_doc.size/_K.value))
     top_doc = top_doc[:, doc_indices[0]:doc_indices[1]].copy()
 
     log_p = 0
@@ -394,7 +436,18 @@ def update((docs, doc_indices, mtrand_state)):
 
     indices = np.array([(j - start) for (i,j) in docs], dtype='i')
 
-    results = cgs_update(_iteration.value,
+    if dtype == np.uint16 and Ktype == np.uint8:
+        update_fn = cgs_update[cython.ushort,cython.uchar]
+    elif dtype == np.uint16 and Ktype == np.uint16:
+        update_fn = cgs_update[cython.ushort,cython.ushort]
+    elif dtype == np.uint32 and Ktype == np.uint8:
+        update_fn = cgs_update[cython.uint,cython.uchar]
+    elif dtype == np.uint32 and Ktype == np.uint16:
+        update_fn = cgs_update[cython.uint,cython.ushort]
+    else:
+        raise NotImplementedError
+
+    results = update_fn(_iteration.value,
                          corpus,
                          loc_word_top,
                          inv_top_sums,
@@ -407,6 +460,10 @@ def update((docs, doc_indices, mtrand_state)):
                          mtrand_state[3],
                          mtrand_state[4])
 
+    #final_results = [np.asarray(result, dtype=dtype) 
+    #                     for result,dtype in zip(results[:4], 
+    #                                             [Ktype, np.float32, np.float32, np.float32])]
+    #final_results.extend(results[4:])
     (loc_word_top, inv_top_sums, top_doc, Z, log_p, mtrand_str, mtrand_keys, 
      mtrand_pos, mtrand_has_gauss, mtrand_cached_gaussian) = results
 
@@ -429,12 +486,12 @@ def demo_LdaCgsMulti(doc_len=500, V=100000, n_docs=100,
 
     from vsm.extensions.corpusbuilders import random_corpus
     
-    print 'Words per document:', doc_len
-    print 'Words in vocabulary:', V
-    print 'Documents in corpus:', n_docs
-    print 'Number of topics:', K
-    print 'Iterations:', n_iterations
-    print 'Number of processors:', n_proc
+    print('Words per document:', doc_len)
+    print('Words in vocabulary:', V)
+    print('Documents in corpus:', n_docs)
+    print('Number of topics:', K)
+    print('Iterations:', n_iterations)
+    print('Number of processors:', n_proc)
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1, seed=corpus_seed)
     m = LdaCgsMulti(c, 'document', K=K, n_proc=n_proc, seeds=model_seeds)

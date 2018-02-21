@@ -1,3 +1,6 @@
+from builtins import str
+from builtins import int
+from past.builtins import basestring
 import numpy as np
 
 
@@ -22,8 +25,7 @@ def isint(x):
     """
     Returns True if `x` is an instance of an int.
     """
-    return (isinstance(x, np.integer) 
-            or isinstance(x, int) or isinstance(x, long))
+    return (isinstance(x, np.integer) or isinstance(x, int))
 
 
 def isstr(x):

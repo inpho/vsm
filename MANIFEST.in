@@ -1,0 +1,1 @@
+include vsm/model/_cgs_update.pyx

@@ -1,6 +1,13 @@
 """
 Provides the class `LdaCgsViewer`.
 """
+from __future__ import division
+from __future__ import absolute_import
+
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
 
 import numpy as np
 
@@ -8,9 +15,9 @@ from vsm.spatial import H, JS_dist, KL_div
 from vsm.structarr import *
 from vsm.split import split_corpus
 from vsm.exceptions import *
-from types import *
-from labeleddata import *
-from wrappers import *
+from .types import *
+from .labeleddata import *
+from .wrappers import *
 
 
 __all__ = [ 'LdaCgsViewer' ]
@@ -228,7 +235,7 @@ class LdaCgsViewer(object):
         else:
             sort = 'index'
             th = 'Topics Sorted by Index' 
-            topic_indices = range(self.model.K)
+            topic_indices = list(range(self.model.K))
 
         return (th, np.array(topic_indices))
     
@@ -268,7 +275,7 @@ class LdaCgsViewer(object):
         """
         if topic_indices is not None\
             and (not hasattr(topic_indices, '__len__') or\
-                isinstance(topic_indices, (str, unicode))):
+                isinstance(topic_indices, str)):
             raise ValueError("Invalid value for topic_indices," + 
                              "must be a list of integers")
 
@@ -337,15 +344,15 @@ class LdaCgsViewer(object):
             k_arr.col_len = print_len
             return k_arr
 
-        docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
+        docs, labels = list(zip(*[self._res_doc_type(d) for d in doc_or_docs]))
 
-        k_arr = enum_matrix(self.theta.T, indices=range(self.model.K), 
+        k_arr = enum_matrix(self.theta.T, indices=list(range(self.model.K)), 
                             field_name='topic')
 
         th = 'Distributions over Topics'
         
         table = []
-        for i in xrange(len(docs)):
+        for i in range(len(docs)):
             if topic_labels is None: 
                 ch = 'Doc: ' + labels[i]
             else:
@@ -368,7 +375,7 @@ class LdaCgsViewer(object):
         uniformly to the aggregate distribution.
 
         """
-        docs, labels = zip(*[self._res_doc_type(d) for d in docs])
+        docs, labels = list(zip(*[self._res_doc_type(d) for d in docs]))
         
         if normed_sum:
             S = self.theta[:, docs].sum(1)
@@ -401,7 +408,7 @@ class LdaCgsViewer(object):
             doc, label = self._res_doc_type(doc_or_docs)
             k_arr = self.theta[:, doc].T
         else:
-            docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
+            docs, labels = list(zip(*[self._res_doc_type(d) for d in doc_or_docs]))
             k_arr = self.theta[:, docs].T
 
         return k_arr
@@ -424,7 +431,7 @@ class LdaCgsViewer(object):
             doc, label = self._res_doc_type(doc_or_docs)
             docs = list(doc)
         else:
-            docs, labels = zip(*[self._res_doc_type(d) for d in doc_or_docs])
+            docs, labels = list(zip(*[self._res_doc_type(d) for d in doc_or_docs]))
         
         all_docs = self.corpus.view_contexts(self.model.context_type,
                         as_strings=as_strings)
@@ -460,9 +467,9 @@ class LdaCgsViewer(object):
         # positions and topic assignments for each found
         ct = self.model.context_type
         contexts = self.corpus.view_contexts(ct)
-        idx = [(contexts[d] == w) for d in xrange(len(contexts))]
+        idx = [(contexts[d] == w) for d in range(len(contexts))]
         Z = split_corpus(self.model.Z, self.model.indices)
-        Z_w = [(d, i, t) for d in xrange(len(Z)) 
+        Z_w = [(d, i, t) for d in range(len(Z)) 
                for i,t in enumerate(Z[d]) if idx[d][i]]
 
         # Label data
@@ -558,7 +565,7 @@ class LdaCgsViewer(object):
                                 topic_labels=topic_labels)
             
             k_arr.table_header = 'Sorted by Topic Distance'
-            for i in xrange(distances.size):
+            for i in range(distances.size):
                 k_arr[i].col_header += ' ({0:.3f})'.format(distances[i][1])
 
             return k_arr
@@ -628,7 +635,7 @@ class LdaCgsViewer(object):
                                self.model.context_type, weights=weights, 
                                print_len=print_len, as_strings=False, 
                                label_fn=label_fn, filter_nan=filter_nan, 
-                               dist_fn=dist_fn)
+                               dist_fn=dist_fn, order=order)
 
         topics = res_top_type(topic_or_topics)
 
@@ -646,7 +653,7 @@ class LdaCgsViewer(object):
             docs = label_fn(md)
             d_arr = map_strarr(d_arr, docs, k='i', new_k='doc')
 
-    	return d_arr
+        return d_arr
 
    
     @deprecated_meth("dist_word_top")
@@ -732,7 +739,7 @@ class LdaCgsViewer(object):
             # Filter based on topic assignments to words (Z values) 
             topic_indices = sum([self.word_topics(w)['value'].tolist() 
                            for w in word_or_words], [])
-            topic_indices = [i for i in xrange(distances.size) if distances[i][0] in topic_indices]
+            topic_indices = [i for i in range(distances.size) if distances[i][0] in topic_indices]
             distances = distances[topic_indices]
             topic_indices = distances[distances.dtype.names[0]]
 
@@ -747,7 +754,7 @@ class LdaCgsViewer(object):
 
             # Relabel results
             k_arr.table_header = 'Sorted by Topic Distance'
-            for i in xrange(distances.size):
+            for i in range(distances.size):
                 k_arr[i].col_header += ' ({0:.5f})'.format(distances[i][1])
 
             return k_arr
@@ -835,7 +842,7 @@ class LdaCgsViewer(object):
         :See Also: :meth:`vsm.viewer.wrapper.dismat_documents`
         """
         if len(docs) == 0:
-            docs = range(self.model.top_doc.shape[1])
+            docs = list(range(self.model.top_doc.shape[1]))
 
         Q = self.model.top_doc / self.model.top_doc.sum(0)
 
@@ -869,7 +876,7 @@ class LdaCgsViewer(object):
         """
 
         if len(topics) == 0:
-            topics = range(self.model.word_top.shape[1])
+            topics = list(range(self.model.word_top.shape[1]))
 
         Q = self.model.word_top / self.model.word_top.sum(0)
 
@@ -976,7 +983,7 @@ class LdaCgsViewer(object):
 
         if len(d_indices) == 0:
             i = self.corpus.context_types.index(self.model.context_type)
-            d_indices = xrange(len(self.corpus.context_data[i]))
+            d_indices = range(len(self.corpus.context_data[i]))
 
         td_mat = self.model.top_doc[:, d_indices]
         td_mat /= td_mat.sum(0)
@@ -986,7 +993,7 @@ class LdaCgsViewer(object):
             arr = arr[topic_indices]
 
         l = enum_sort(arr)
-        rank, prob = zip(*l)
+        rank, prob = list(zip(*l))
 
         y_pos = np.arange(len(rank))
         fig = plt.figure(figsize=(10,10))

@@ -1,3 +1,8 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
 import os
 import shutil
 import re
@@ -8,15 +13,14 @@ import numpy as np
 from unidecode import unidecode
 
 from nltk.corpus import wordnet as wn
-import enchant
 
 from vsm.extensions.corpusbuilders.util import filter_by_suffix
 
 
 import json
 from time import sleep
-from urllib2 import urlopen
-from urllib import quote_plus
+from urllib.request import urlopen
+from urllib.parse import quote_plus
 
 def metadata(id, sleep_time=1):
     """
@@ -39,10 +43,10 @@ def metadata(id, sleep_time=1):
         sleep(sleep_time) ## JUST TO MAKE SURE WE ARE THROTTLED
     try:
         data = json.load(urlopen(solr))
-        print id
+        print(id)
         return data['response']['docs'][0]
-    except ValueError, IndexError:
-        print "No result found for " + id 
+    except ValueError as IndexError:
+        print("No result found for " + id) 
         return dict()
 
 def proc_htrc_coll(coll_dir, ignore=['.json', '.log', '.err']):
@@ -100,7 +104,7 @@ def proc_htrc_book(book, coll_dir, ignore=['.json', '.log', '.err']):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    print 'Processing', book_root
+    print('Processing', book_root)
 
     try:
         rm_pg_headers(book_root, logger, ignore=ignore)
@@ -130,39 +134,7 @@ def rm_lb_hyphens(plain_root, logger, ignore=['.json', '.log', '.err']):
 
     :returns: None
     """
-
-    d = enchant.Dict('en_US')
-
-    def recon(match_obj):
-        rc_word = match_obj.group(1) + match_obj.group(2)
-        
-        if wn.synsets(rc_word) or d.check(rc_word):
-            logger.info('\nbook: %s\nreconstructed word:\n%s\n',
-                         plain_root, rc_word)
-            return rc_word
-        
-        logger.info('\nbook: %s\nignored expression:\nleft: %s\nright: %s\n',
-                     plain_root, match_obj.group(1), match_obj.group(2))
-
-        return match_obj.group(0)
-
-    def inner(s):
-        lb_hyphenated = re.compile(r'(\w+)-\s+(\w+)')
-        return lb_hyphenated.sub(recon, s)
-    
-    page_files = os.listdir(plain_root)
-    page_files = filter_by_suffix(page_files, ignore)
-
-    for i, page_file in enumerate(page_files):
-        filename = os.path.join(plain_root, page_file)
-
-        with open(filename, 'r+w') as f:
-            page = f.read()
-            page = inner(page)
-            f.seek(0)
-            f.write(page)
-            f.truncate()
-
+    pass
 
 
 def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log', '.err']):
@@ -213,7 +185,7 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log', '.err'])
 
     # Remove capitalization, roman numerals for numbers under 50,
     # punctuation, arabic numerals from first lines
-    for i in xrange(len(first_lines)):
+    for i in range(len(first_lines)):
         line = first_lines[i]
         line = line.lower()
 
@@ -243,8 +215,8 @@ def rm_pg_headers(plain_root, logger, bound=1, ignore=['.json', '.log', '.err'])
             with open(filename, 'r') as f:
                 page = f.read()
             if page:
-                logger.info('\nbook: %s\nfile: %s\nremoved header:\n%s\n',
-                             plain_root, page_file, line)
+                logger.info(u'\nbook: %s\nfile: %s\nremoved header:\n%s\n',
+                             unidecode(plain_root), unidecode(page_file), unidecode(line))
             page = fl.sub('', page)
 
             with open(filename, 'w') as f:
@@ -258,8 +230,7 @@ def htrc_load_metadata_1315():
     import os
     import json
 
-    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-1315/'
-                'htrc-1315-metadata.json')
+    filename = ('vsm-data/htrc-1315-metadata.json')
 
     with open(filename) as f:
         metadata = json.load(f)
@@ -274,8 +245,7 @@ def htrc_load_metadata_86():
     import os
     import json
 
-    filename = ('/var/inphosemantics/data/20130101/htrc-anthropomorphism-86/'
-                'htrc-anthropomorphism-86-metadata.json')
+    filename = ('vsm-data/htrc-anthropomorphism-86-metadata.json')
 
     with open(filename) as f:
         metadata = json.load(f)
@@ -290,10 +260,10 @@ def htrc_get_titles(metadata, vol_id):
     """
     try:
         md = metadata[vol_id]
-        return md[md.keys()[0]]['titles']
+        return md[list(md.keys())[0]]['titles']
 
     except KeyError:
-        print 'Volume ID not found:', vol_id
+        print('Volume ID not found:', vol_id)
         raise
 
 
@@ -370,7 +340,7 @@ def htrc_find_duplicates(metadata, vol_list):
     
     :See Also: :meth: htrc_load_metadata_86, :meth: htrc_load_metadata_1315
     """
-    record_ids = [metadata[vol].keys()[0] for vol in vol_list]
+    record_ids = [list(metadata[vol].keys())[0] for vol in vol_list]
     
     mem, indices = [], []
 

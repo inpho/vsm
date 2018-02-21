@@ -1,4 +1,9 @@
 from __future__ import print_function
+
+from builtins import zip
+from builtins import range
+from builtins import object
+
 import unittest2 as unittest
 import numpy as np
 
@@ -8,7 +13,7 @@ from vsm.model.ldacgsseq import *
 from vsm.model.ldacgsmulti import *
 from multiprocessing import Process
 
-class MPTester:
+class MPTester(object):
     def test_demo_LdaCgsMulti(self):
         from vsm.model.ldacgsmulti import demo_LdaCgsMulti
         demo_LdaCgsMulti()
@@ -29,11 +34,11 @@ class MPTester:
             assert (m0.alpha == m1.alpha).all()
             assert (m0.beta == m1.beta).all()
             assert m0.log_probs == m1.log_probs
-            for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+            for i in range(max(len(m0.corpus), len(m1.corpus))):
                 assert m0.corpus[i].all() == m1.corpus[i].all()
             assert m0.V == m1.V
             assert m0.iteration == m1.iteration
-            for i in xrange(max(len(m0.Z), len(m1.Z))):
+            for i in range(max(len(m0.Z), len(m1.Z))):
                 assert m0.Z[i].all() == m1.Z[i].all()
             assert m0.top_doc.all() == m1.top_doc.all()
             assert m0.word_top.all() == m1.word_top.all()
@@ -105,11 +110,11 @@ class MPTester:
         assert (m0.alpha == m1.alpha).all()
         assert (m0.beta == m1.beta).all()
         assert m0.log_probs == m1.log_probs
-        for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+        for i in range(max(len(m0.corpus), len(m1.corpus))):
             assert m0.corpus[i].all() == m1.corpus[i].all()
         assert m0.V == m1.V
         assert m0.iteration == m1.iteration
-        for i in xrange(max(len(m0.Z), len(m1.Z))):
+        for i in range(max(len(m0.Z), len(m1.Z))):
             assert m0.Z[i].all() == m1.Z[i].all()
         assert m0.top_doc.all() == m1.top_doc.all()
         assert m0.word_top.all() == m1.word_top.all()
@@ -149,11 +154,11 @@ class MPTester:
         assert (m0.alpha == m1.alpha).all()
         assert (m0.beta == m1.beta).all()
         assert m0.log_probs == m1.log_probs
-        for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+        for i in range(max(len(m0.corpus), len(m1.corpus))):
             assert m0.corpus[i].all() == m1.corpus[i].all()
         assert m0.V == m1.V
         assert m0.iteration == m1.iteration
-        for i in xrange(max(len(m0.Z), len(m1.Z))):
+        for i in range(max(len(m0.Z), len(m1.Z))):
             assert m0.Z[i].all() == m1.Z[i].all()
         assert m0.top_doc.all() == m1.top_doc.all()
         assert m0.word_top.all() == m1.word_top.all()
@@ -188,7 +193,7 @@ class MPTester:
             assert m0.K == m1.K
             assert (m0.alpha == m1.alpha).all()
             assert (m0.beta == m1.beta).all()
-            for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+            for i in range(max(len(m0.corpus), len(m1.corpus))):
                 assert m0.corpus[i].all() == m1.corpus[i].all()
             assert m0.V == m1.V
             assert m0.iteration == m1.iteration
@@ -205,6 +210,7 @@ class MPTester:
             assert m0._mtrand_states[0][3] == m1._mtrand_state[3]
             assert m0._mtrand_states[0][4] == m1._mtrand_state[4]
             print(iteration, m0.log_probs[-1], m1.log_probs[-1]) 
+
             for i in range(iteration):
                 assert np.isclose(m0.log_probs[i][1], m1.log_probs[i][1])
     
@@ -224,14 +230,13 @@ class MPTester:
             assert m0.K == m1.K
             assert (m0.alpha == m1.alpha).all()
             assert (m0.beta == m1.beta).all()
-            for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+            for i in range(max(len(m0.corpus), len(m1.corpus))):
                 assert m0.corpus[i].all() == m1.corpus[i].all()
             assert m0.V == m1.V
             assert m0.iteration == m1.iteration
             assert (m0.Z[i] == m1.Z[i]).all()
             assert (m0.top_doc == m1.top_doc).all()
             assert (m0.word_top == m1.word_top).all()
-            assert (np.isclose(m0.inv_top_sums, m1.inv_top_sums)).all()
     
             assert m0.seeds[0] == m1.seed
             assert m0._mtrand_states[0][0] == m1._mtrand_state[0]
@@ -240,9 +245,11 @@ class MPTester:
             assert m0._mtrand_states[0][2] == m1._mtrand_state[2]
             assert m0._mtrand_states[0][3] == m1._mtrand_state[3]
             assert m0._mtrand_states[0][4] == m1._mtrand_state[4]
+
             print(iteration, m0.log_probs[-1], m1.log_probs[-1]) 
             for i in range(iteration):
                 assert np.isclose(m0.log_probs[i][1], m1.log_probs[i][1])
+            assert (np.isclose(m0.inv_top_sums, m1.inv_top_sums)).all()
 
 
 class TestLdaCgsMulti(unittest.TestCase):

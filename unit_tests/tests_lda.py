@@ -21,8 +21,9 @@ class TestLda(unittest.TestCase):
         m=LDA(multiprocessing=False, seed_or_seeds=2)
         self.assertTrue(isinstance(m, LdaCgsSeq))
         self.assertTrue(m.seed == 2)
-        with self.assertRaises(ValueError):
-            m=LDA(multiprocessing=False, seed_or_seeds=[2,4])
+        if platform.system() != 'Windows':
+            with self.assertRaises(ValueError):
+                m=LDA(multiprocessing=False, seed_or_seeds=[2,4])
     
     
     def test_Lda_proper_class(self):
@@ -42,8 +43,9 @@ class TestLda(unittest.TestCase):
             self.assertTrue(m.seeds == [2,4])
 
         # test improper numper of seed_or_seeds with multiprocessing
-        with self.assertRaises(ValueError):
-            m=LDA(multiprocessing=True, seed_or_seeds=[2], n_proc=2)
+        if platform.system() != 'Windows':
+            with self.assertRaises(ValueError):
+                m=LDA(multiprocessing=True, seed_or_seeds=[2], n_proc=2)
         
 
 if __name__ == '__main__':

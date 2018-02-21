@@ -1,3 +1,4 @@
+from builtins import range
 import unittest2 as unittest
 import numpy as np
 import os
@@ -13,7 +14,7 @@ class TestCorpus(unittest.TestCase):
                                 2, 1, 2, 2], dtype=np.int)
         contextData = np.array([(3, 'doc0'), (5, 'doc1'), (7,'doc2'), (11,'doc3'),
                 (11,'doc4'), (15,'doc5'), (18,'doc6'), (20,'doc7')], 
-                dtype=[('idx', '<i8'), ('doc', '|S4')])
+                dtype=[('idx', '<i8'), ('doc', '|U4')])
 
         self.bc = BaseCorpus(corpus, context_data=[contextData],
                                      context_types=['document'],
@@ -37,15 +38,16 @@ class TestCorpus(unittest.TestCase):
         even_expected = [np.array([0, 1]), np.array([0, 3]),
                 np.array([0, 2])]
 
-        for i in xrange(len(odd)):
+        for i in range(len(odd)):
             np.testing.assert_array_equal(odd[i], odd_expected[i])
-        for i in xrange(len(even)):
+        for i in range(len(even)):
             np.testing.assert_array_equal(even[i], even_expected[i])
 
     def test_apply_stoplist(self):
         stopped_corpus = self.corpus.apply_stoplist(['I'])
-        new_ctx = np.equal(stopped_corpus.context_data[0], np.array([(1,'Veni'), (2,'Vidi'), 
-                (3,'Vici')], dtype=[('idx', '<i8'), ('sent', '|S6')]))
+        new_ctx = all(np.equal(a, b) for a, b in zip(stopped_corpus.context_data[0], 
+            np.array([(1,'Veni'), (2,'Vidi'), 
+                (3,'Vici')], dtype=[('idx', '<i8'), ('sent', '|S6')])))
         self.assertTrue(new_ctx, msg=None)
         self.assertItemsEqual(['I'], stopped_corpus.stopped_words)
 
@@ -86,9 +88,10 @@ class TestCorpus(unittest.TestCase):
 
     def test_RemoveEmpty(self):
         self.bc.remove_empty()
-        new_ctx = np.equal(self.bc.context_data[0], np.array([(3,'doc0'), (5,'doc1'), 
+        new_ctx = all(np.equal(a, b) for a,b in zip(self.bc.context_data[0],
+            np.array([(3,'doc0'), (5,'doc1'), 
                 (7,'doc2'), (11,'doc3'), (15,'doc5'), (18,'doc6'), 
-                (20,'doc7')], dtype=[('idx', '<i8'), ('sent', '|S6')]))
+                (20,'doc7')], dtype=[('idx', '<i8'), ('sent', '|S6')])))
         self.assertTrue(new_ctx, msg=None)
 
     def test_ViewMetadata(self):
@@ -100,7 +103,7 @@ class TestCorpus(unittest.TestCase):
         expected = [np.array([0,3,2]), np.array([1,0]), np.array([3,0]),
              np.array([2,3,0,2]), np.array([3,1,2,0]), np.array([3,2,1]),
              np.array([2,2])]
-        for i in xrange(len(ctx)):
+        for i in range(len(ctx)):
             np.testing.assert_array_equal(ctx[i], expected[i])
         
     
@@ -120,7 +123,7 @@ class TestCorpus(unittest.TestCase):
     def test_ViewContexts(self):
         expected = [np.array(['I','came']), np.array(['I', 'saw']), np.array(['I', 'conquered'])]
         ctx = self.corpus.view_contexts('sentence', as_strings=True)
-        for i in xrange(len(ctx)):
+        for i in range(len(ctx)):
             np.testing.assert_array_equal(ctx[i], expected[i])
 
     def test_SaveLoad(self):
@@ -129,6 +132,7 @@ class TestCorpus(unittest.TestCase):
             tmp = NamedTemporaryFile(delete=False, suffix='.npz')
             self.corpus.save(tmp.name)
             tmp.close()
+
             c_reloaded = Corpus.load(tmp.name)
 
             self.assertTrue((self.corpus.corpus == c_reloaded.corpus).all())
@@ -136,13 +140,13 @@ class TestCorpus(unittest.TestCase):
             self.assertTrue(self.corpus.words_int == c_reloaded.words_int)
             self.assertTrue(self.corpus.context_types == c_reloaded.context_types)
             
-            for i in xrange(len(self.corpus.context_data)):
+            for i in range(len(self.corpus.context_data)):
                 self.assertTrue((self.corpus.context_data[i] == 
                         c_reloaded.context_data[i]).all(), msg=None)
     
         finally:
             os.remove(tmp.name)
 
-
-suite = unittest.TestLoader().loadTestsFromTestCase(TestCorpus)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestCorpus)
+    unittest.TextTestRunner(verbosity=2).run(suite)

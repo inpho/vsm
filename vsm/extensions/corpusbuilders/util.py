@@ -1,8 +1,12 @@
+from builtins import str
+from builtins import chr
+from builtins import range
+from builtins import object
+from past.builtins import basestring
 import re
 import string
 
 from chardet.universaldetector import UniversalDetector
-import nltk
 import numpy as np
 
 __all__ = ['strip_punc', 'rem_num', 'rehyph',
@@ -11,35 +15,67 @@ __all__ = ['strip_punc', 'rem_num', 'rehyph',
            'sentence_span_tokenize', 'in_place_stoplist']
 
 
+def _unicode_range(start, stop):
+    return u''.join([chr(i) for i in range(int(start,16), int(stop,16))])
+
+PUNCTUATION_START = re.compile(r'^(['+string.punctuation+r'\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)')
+PUNCTUATION_END = re.compile(r'(['+string.punctuation+r'\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$')
+PUNC = str(string.punctuation) + _unicode_range('2000','206F') + _unicode_range('3000', '303F') + _unicode_range('FF00', 'FFFF')
+PUNC_TABLE = {ord(c): None for c in PUNC}
 
 def strip_punc(tsent):
     """
     """
-    p1 = re.compile(ur'^([{}\u0000-\u0020\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)'.format(string.punctuation))
-    p2 = re.compile(ur'([{}\u0000-\u0020\u2000-\u206F\u3000-\u303F\uFF00-\uFFFF]*)$'.format(string.punctuation))
-
     out = []
     for word in tsent:
-        w = re.sub(p2, '', re.sub(p1, '', word))
+        w = strip_punc_word(word)
         if w:
             out.append(w)
 
     return out
 
+def strip_punc_word(word):
+    if isinstance(word, str):
+        return word.translate(PUNC_TABLE)
+    elif isinstance(word, basestring):
+        return word.translate(None, PUNC.encode('utf-8'))
+        
+
+NUMS = string.digits
+NUMS_TABLE =  {ord(c): None for c in NUMS}
 
 def rem_num(tsent):
     """
     """
-    p = re.compile(r'(^\D+$)|(^\D*[1-2]\d\D*$|^\D*\d\D*$)')
+    #p = re.compile(r'(^\D+$)|(^\D*[1-2]\d\D*$|^\D*\d\D*$)')
+    out = []
+    for word in tsent:
+        w = rem_num_word(word)
+        if w:
+            out.append(w)
 
-    return [word for word in tsent if re.search(p, word)]
+    return out
 
+def rem_num_word(word):
+    if isinstance(word, str):
+        return word.translate(NUMS_TABLE)
+    elif isinstance(word, basestring):
+        return word.translate(None, NUMS.encode('utf-8'))
 
 def rehyph(sent):
     """
     """
     return re.sub(r'(?P<x1>.)--(?P<x2>.)', '\g<x1> - \g<x2>', sent)
 
+
+BIG_TABLE = NUMS_TABLE.copy()
+BIG_TABLE.update(PUNC_TABLE)
+BIG_LIST = string.digits + string.punctuation
+def process_word(word):
+    if isinstance(word, str):
+        return word.translate(BIG_TABLE)
+    elif isinstance(word, basestring):
+        return word.translate(None, BIG_LIST.encode('utf-8'))
 
 def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0, in_place=True):
     """
@@ -66,6 +102,7 @@ def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0, in_place=True):
     """
     stoplist = set()
     if nltk_stop:
+        import nltk
         for w in nltk.corpus.stopwords.words('english'):
             stoplist.add(w)
     if add_stop:
@@ -103,6 +140,7 @@ def in_place_stoplist(corp, nltk_stop=True, add_stop=None, freq=0):
     """
     stoplist = set()
     if nltk_stop:
+        import nltk
         for w in nltk.corpus.stopwords.words('english'):
             stoplist.add(w)
     if add_stop:
@@ -140,7 +178,11 @@ def filter_by_suffix(l, ignore, filter_dotfiles=True):
         filter_list = [e for e in filter_list if not e.startswith('.')]
     return filter_list
 
+class _tokenizer(object):
+    def tokenize(self, text):
+        return text.split()
 
+word_tokenizer = _tokenizer()
 def word_tokenize(text):
     """Takes a string and returns a list of strings. Intended use: the
     input string is English text and the output consists of the
@@ -154,17 +196,24 @@ def word_tokenize(text):
 
     :returns: tokens : list of strings
     """
+    global word_tokenizer
+    if word_tokenizer is None:
+        import nltk
+        word_tokenizer = nltk.TreebankWordTokenizer()
 
     text = rehyph(text)
-    text = nltk.TreebankWordTokenizer().tokenize(text)
+    text = process_word(text)
+    text = text.replace(u'\x00','')
+    text = text.lower()
+    tokens = word_tokenizer.tokenize(text)
 
-    tokens = [word.lower() for word in text]
-    tokens = strip_punc(tokens)
-    tokens = rem_num(tokens)
-    
+    #process_word = lambda x: strip_punc_word(rem_num_word(word)).lower().replace(u'\x00','')
+    #tokens = [process_word(word) for word in text]
+
     return tokens
 
 
+sent_tokenizer = None
 def sentence_tokenize(text):
     """
     Takes a string and returns a list of strings. Intended use: the
@@ -178,9 +227,12 @@ def sentence_tokenize(text):
 
     :returns: tokens : list of strings
     """
-    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    global sent_tokenizer
+    if sent_tokenizer is None:
+        import nltk
+        sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
-    return tokenizer.tokenize(text)
+    return sent_tokenizer.tokenize(text)
 
 def sentence_span_tokenize(text):
     """
@@ -195,9 +247,12 @@ def sentence_span_tokenize(text):
 
     :returns: token_spans : iterator of (start,stop) tuples.
     """
-    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    global sent_tokenizer
+    if sent_tokenizer is None:
+        import nltk
+        sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
-    return tokenizer.span_tokenize(text)
+    return sent_tokenizer.span_tokenize(text)
 
 
 
@@ -243,4 +298,4 @@ def detect_encoding(filename):
     detector.close()
 
     return detector.result['encoding']
-     
+ 

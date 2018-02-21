@@ -1,9 +1,10 @@
-*.py[co]
+*.py[cod]
 *.so
 
 # Packages
 *.egg
 *.egg-info
+.eggs
 dist
 build
 eggs
@@ -26,3 +27,8 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+
+# API keys
+.travis.key
+.appveyor.key

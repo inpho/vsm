@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import range
 import unittest2 as unittest
 import numpy as np
 
@@ -12,7 +14,7 @@ class TestBeagleComposite(unittest.TestCase):
         from vsm.model.beagleorder import BeagleOrderSeq
 
         self.ec = random_corpus(1000, 50, 0, 20, context_type='sentence')
-        self.cc = self.ec.apply_stoplist(stoplist=[str(i) for i in xrange(0,50,7)])
+        self.cc = self.ec.apply_stoplist(stoplist=[str(i) for i in range(0,50,7)])
 
         self.e = BeagleEnvironment(self.ec, n_cols=5)
         self.e.train()

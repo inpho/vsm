@@ -1,9 +1,17 @@
 from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
 
+from future.utils import python_2_unicode_compatible
+
+from builtins import zip
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import numpy as np
 
 from vsm.structarr import *
-from types import *
+from .types import *
 
 
 __all__ = ['DataTable', 'IndexedSymmArray', 'LabeledColumn']
@@ -61,7 +69,7 @@ def default_col_widths(dtype, col_header):
     """
     col_widths = []
     
-    values =zip(*dtype.fields.values())[0]
+    values = list(zip(*list(dtype.fields.values())))[0]
 
     for t in values:
         if t.kind == 'S':
@@ -74,7 +82,7 @@ def default_col_widths(dtype, col_header):
 
 def calc_col_num(col_len, n):
     
-    num = col_len / n
+    num = old_div(col_len, n)
 
     if col_len % n > 0:
         num += 1
@@ -88,12 +96,13 @@ def max_col_num(li, max_width):
     in LabeledColumn.
     """
     w = sum(li)
-    num = max_width/w
+    num = old_div(max_width,w)
     if num == 0:
         return 1
     return num
 
 
+@python_2_unicode_compatible
 class LabeledColumn(np.ndarray):
     """
     A subclass of np.ndarray whose purpose is to store labels and
@@ -251,14 +260,14 @@ class LabeledColumn(np.ndarray):
             out += line
             
         if self.subcol_headers:
-            for i in xrange(len(self.subcol_headers)):
+            for i in range(len(self.subcol_headers)):
                 w = self.subcol_widths[i]
                 out += '{0:<{1}}'.format(format_(self.subcol_headers[i], w), w)
             out += '\n'
             out += line
 
-        for i in xrange(self.col_len):
-            for j in xrange(len(self.dtype)):
+        for i in range(self.col_len):
+            for j in range(len(self.dtype)):
                 w = self.subcol_widths[j]
                 n = self.dtype.names[j]
                 out += '{0:<{1}}'.format(format_(self[n][i], w), w)
@@ -289,20 +298,20 @@ class LabeledColumn(np.ndarray):
             
             count = self.col_len
             last_row = self.col_len % self.col_num
-            rows = self.col_len / self.col_num
+            rows = old_div(self.col_len, self.col_num)
             
             li = [rows] * self.col_num
-            li = [li[i]+1 if i<last_row else li[i] for i in xrange(self.col_num)]
+            li = [li[i]+1 if i<last_row else li[i] for i in range(self.col_num)]
             li = [0] + li[:-1]
             if last_row > 0:
                 rows += 1            
 
-            for k in xrange(rows):
+            for k in range(rows):
                 s += '<tr>'
                 ind = k
-                for i in xrange(self.col_num):
+                for i in range(self.col_num):
                     ind += li[i]
-                    for j in xrange(len(self.dtype)):
+                    for j in range(len(self.dtype)):
                         w = self.subcol_widths[j]
                         n = self.dtype.names[j]
                         if count > 0:
@@ -324,9 +333,9 @@ class LabeledColumn(np.ndarray):
                           </th>'.format(sch)
                 s += '</tr>'
         
-            for i in xrange(self.col_len):
+            for i in range(self.col_len):
                 s += '<tr>'
-                for j in xrange(len(self.dtype)):
+                for j in range(len(self.dtype)):
                     w = self.subcol_widths[j]
                     n = self.dtype.names[j]
                     s += '<td>{0:<{1}}</td>'.format(format_(self[n][i], w), w)
@@ -336,6 +345,7 @@ class LabeledColumn(np.ndarray):
         return s
 
 
+@python_2_unicode_compatible
 class DataTable(list):
     """
     A subclass of list whose purpose is to store labels and
@@ -471,12 +481,12 @@ class DataTable(list):
             out += '{0:<{1}}\n'.format(format_(subcol_headers[1], w2), w2)
             out += line
         
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             j = 0
             # topic info
             out += '{0:<{1}}'.format(format_(self[i].col_header, w1), w1)
             # words or tokens
-            for idx in xrange(self[i].col_len):
+            for idx in range(self[i].col_len):
                 if j == 0 and idx > 0 :
                     out += " " * w1
                 word = self[i].dtype.names[0]
@@ -536,14 +546,14 @@ class DataTable(list):
                  >{0}</th>'.format(sch)
         s += '</tr>'
         
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             s += '<tr>'
             w = self[0].subcol_widths[1]
             s += '<td style="padding-left:0.75em;">{0}</td>'.format(
                     format_(self[i].col_header, w), w)
 # line break.
             s += '<td>' 
-            for j in xrange(self[0].col_len):
+            for j in range(self[0].col_len):
                 n = self[0].dtype.names[0] 
                 w = self[0].subcol_widths[0]
                 if j == self[0].col_len -1:
@@ -589,7 +599,7 @@ class DataTable(list):
                  colspan="{0}">{1}</th>'.format(n_cols, lc.col_header)
 
                 if end > n_arr and m and i == len(group)-1 and start > 0:
-                    for j in xrange(end - n_arr):
+                    for j in range(end - n_arr):
                         s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
                         colspan="{0}"> {1}</th>'.format(n_cols, ' ' * col_w)
             s += '</tr>'
@@ -602,23 +612,23 @@ class DataTable(list):
                         {0}</th>'.format(sch)
 
                 if end > n_arr and m and i == len(group)-1 and start > 0:
-                    for j in xrange(end - n_arr):
+                    for j in range(end - n_arr):
                         s += '<th style="border-color: #EFF2FB; background: #EFF2FB;"\
                          colspan="{0}"> {1}</th>'.format(n_cols, ' ' * col_w)
             s += '</tr>'
             
-            for i in xrange(self[0].col_len):
+            for i in range(self[0].col_len):
     
                 s += '<tr>'
                 for k, lc in enumerate(group):
                   
-                    for j in xrange(len(lc.dtype)):
+                    for j in range(len(lc.dtype)):
                         w = lc.subcol_widths[j]
                         n = lc.dtype.names[j]
                         s += '<td>{0}</td>'.format(format_(lc[n][i], w))
     
                     if end > n_arr and m and k == len(group)-1 and start > 0:
-                        for e in xrange(end - n_arr):
+                        for e in range(end - n_arr):
                             s += '<td style="border-color: #EFF2FB; background: #EFF2FB;"\
                             colspan="{0}"> {1} </th>'.format(n_cols, ' ' * col_w)
                 s += '</tr>'    

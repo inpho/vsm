@@ -1,6 +1,6 @@
 import numpy as np
 
-from base import BaseModel
+from vsm.model.base import BaseModel
 
 
 __all__ = ['BeagleEnvironment']

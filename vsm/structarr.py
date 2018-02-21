@@ -3,6 +3,7 @@
 """
 
 
+from builtins import range
 import numpy as np
 
 
@@ -38,8 +39,21 @@ def arr_add_field(arr, new_field, vals):
     array([('a', 1, -1), ('b', 2, -2), ('c', 3, -3)], 
           dtype=[('field', '|S4'), ('i', '<i4'), ('neg_i', '<i8')])
     """
+    def all_same_type(ls):
+        t = type(ls[0])
+        for item in ls:
+            if type(item) != t:
+                return False
+        
+        return t
+
+    t = all_same_type(vals)
     # Constructing new dtype
-    new_dtype = np.array(vals).dtype
+    if not t or t == str or t == str:
+        new_dtype = np.object_
+    else:
+        new_dtype = np.array(vals).dtype
+
     dt = [(n, arr.dtype[n]) for n in arr.dtype.names]
     dt.append((new_field, new_dtype))
 
@@ -83,7 +97,7 @@ def enum_array(arr, indices=[], field_name='i'):
           dtype=[('i', '<i8'), ('value', '<i8')])
     """
     if len(indices) == 0:
-        indices = np.arange(arr.size)
+        indices = np.arange(arr.size, dtype=np.int)
     else:
         indices = np.array(indices)
     return zip_arr(indices, arr, field_names=[field_name, 'value'])
@@ -124,23 +138,23 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     #if len(indices) == 0:
     #    indices = np.arange(arr.shape[1])
     if len(indices) == 0 and len(arr.shape) > 1:
-        indices = np.arange(arr.shape[1])
+        indices = np.arange(arr.shape[1], dtype=np.int)
     
     if type(indices) == list:
         indices = np.array(indices)
-    ind = np.array([indices.copy() for i in xrange(arr.shape[0])])
+    ind = np.array([indices.copy() for i in range(arr.shape[0])])
     dt = [(field_name, indices.dtype), ('value', arr.dtype)]
     mt = zip_arr(ind, arr, field_names=[field_name, 'value'])
 
     if len(arr.shape) > 1:
         if axis:
-            for i in xrange(arr.shape[axis]):
+            for i in range(arr.shape[axis]):
                 idx = np.argsort(mt['value'][:,i])
                 mt[field_name][:,i] = ind[:,i][idx]
                 mt['value'][:,i] = arr[:,i][idx]
                 mt[:,i] = mt[:,i][::-1]	
         else:
-            for i in xrange(arr.shape[axis]):
+            for i in range(arr.shape[axis]):
                 idx = np.argsort(mt['value'][i])
                 mt[field_name][i] = ind[i][idx]
                 mt['value'][i] = arr[i][idx]
@@ -185,7 +199,7 @@ def enum_sort(arr, indices=[], field_name='i', filter_nan=False):
     """
     idx = np.argsort(arr)
     if len(indices) == 0:
-        indices = np.arange(arr.shape[0])
+        indices = np.arange(arr.shape[0], dtype=np.int)
     else:
         indices = np.array(indices)
 	

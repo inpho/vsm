@@ -1,3 +1,7 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 
 import numpy as np
@@ -5,16 +9,30 @@ import numpy as np
 from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
 
-__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata', 'align_corpora' ]
+
+__all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
+            'align_corpora','binary_search' ]
 
 from bisect import bisect_left
 from datetime import datetime
+from vsm.zipfile import use_czipfile
+from copy import deepcopy
+
+
 
 def binary_search(a, x, lo=0, hi=None):   # can't use a to specify default for hi
     hi = hi if hi is not None else len(a) # hi defaults to len(a)   
     pos = bisect_left(a,x,lo,hi)          # find insertion position
     return (pos if pos != hi and a[pos] == x else -1) # don't walk off the end
+"""
+def binary_search_set(a,x):
+    pos = a.bisect_left(x)
+    return (pos if pos != len(a)  and a[pos] == x else -1) # don't walk off the end
+"""
 
+def load_npz(filename, obj):
+    zipfile = np.load(filename)
+    return zipfile.__getitem__(obj)
 
 class BaseCorpus(object):
     """
@@ -124,6 +142,8 @@ class BaseCorpus(object):
     >>> c.view_metadata('sentences')[0]['sent_label']
     'transitive'
     """
+    __slots__ = ['words', 'context_data', 'corpus','dtype','stopped_words',
+                 'context_types', 'original_length']
     def __init__(self,
                  corpus,
                  dtype=None,
@@ -142,14 +162,17 @@ class BaseCorpus(object):
         # Since np.unique attempts to make a whole contiguous copy of the
         # corpus array, we instead use a sorted set and cast to a np array
         # equivalent to self.words = np.unique(self.corpus)
-        self.words = np.asarray(sorted(set(self.corpus)), dtype=dtype)
+        self.words = np.asarray(sorted(set(self.corpus)), dtype=np.object_)
 
         self.context_data = []
         for t in context_data:
             if self._validate_indices(t['idx']):
                 self.context_data.append(t)
-        
+
         self._gen_context_types(context_types)
+
+        self.stopped_words = set()
+        self.original_length = len(self.corpus)
 
         if remove_empty:
             self.remove_empty()
@@ -169,7 +192,7 @@ class BaseCorpus(object):
         """
         if self.context_data:
             a = len(context_types) if context_types else 0
-            for i in xrange(a, len(self.context_data)):
+            for i in range(a, len(self.context_data)):
                 context_types.append('ctx_' + str(i))
 
         self.context_types = context_types
@@ -257,14 +280,18 @@ class BaseCorpus(object):
         tok = self.view_metadata(ctx_type)
 
         ind_set = np.ones(tok.size, dtype=bool)
-        for k,v in query.iteritems():
-            ind_set = np.logical_and(ind_set, (tok[k] == v))
+        for k,v in query.items():
+            try:
+                ind_set = np.logical_and(ind_set, (tok[k] == v))
+            except UnicodeDecodeError:
+                v = v.decode('utf-8')
+                ind_set = np.logical_and(ind_set, (tok[k] == v))
 
         n = np.count_nonzero(ind_set)
         if n == 0:
             raise KeyError('No token fits the description: ' +
                 ', '.join(['{q}:{l}'.format(q=k, l=v) 
-                                for k,v in query.iteritems()]))
+                                for k,v in query.items()]))
         elif n > 1:
             msg = ('Multiple tokens fit that description:\n'
                    + str(tok[ind_set]))
@@ -323,7 +350,7 @@ class BaseCorpus(object):
                 
             slices = []
             slices.append(slice(0, indices[0]))
-            for i in xrange(len(indices) - 1):
+            for i in range(len(indices) - 1):
                 slices.append(slice(indices[i], indices[i+1]))
             return slices        
             
@@ -446,6 +473,9 @@ class Corpus(BaseCorpus):
       dtype='|S9')
 
     """
+    __slots__ = ['words', 'context_data', 'corpus','dtype','stopped_words',
+                 'words_int', 'context_types']
+
     def __init__(self,
                  corpus,
                  context_types=[],
@@ -455,15 +485,19 @@ class Corpus(BaseCorpus):
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
                                      context_data=context_data,
-                                     dtype=np.unicode_,
+                                     dtype=np.object_,
                                      remove_empty=False,
                                      to_array=False)
 
         self._set_words_int()
 
         # Integer encoding of a string-type corpus
-        self.dtype = np.int32
-        self.corpus = np.asarray([self.words_int[unicode(word)] 
+        if len(self.words) < 2 ** 16:
+            self.dtype = np.uint16
+        else:
+            self.dtype = np.uint32
+
+        self.corpus = np.asarray([self.words_int[word]
                                   for word in self.corpus],
                                  dtype=self.dtype)
 
@@ -534,7 +568,6 @@ class Corpus(BaseCorpus):
         ls = self.view_contexts(context_type, as_strings=as_strings)
         return [arr.tolist() for arr in ls]
 
-    
     @staticmethod
     def load(file=None, corpus_dir=None,
              corpus_file='corpus.npy',
@@ -575,40 +608,118 @@ class Corpus(BaseCorpus):
         :See Also: :class:`Corpus`, :meth:`Corpus.save`, :meth:`numpy.load`
 
         """
-        if not file is None:
-            arrays_in = np.load(file)
-
-            c = Corpus([], remove_empty=False)
-            c.corpus = arrays_in['corpus']
-            c.words = arrays_in['words']
-            c.context_types = arrays_in['context_types'].tolist()
-            try:
-                c.stopped_words = set(arrays_in['stopped_words'].tolist())
-            except:
-                c.stopped_words = set()
-
-            c.context_data = list()
-            for n in c.context_types:
-                t = arrays_in['context_data_' + n]
-                c.context_data.append(t)
-
-            c._set_words_int()
-
-            return c
-
-        if not corpus_dir is None:
-
-            c = Corpus([], remove_empty=False)
-
-            c.corpus = np.load(os.path.join(corpus_dir, corpus_file))
-            c.words = np.load(os.path.join(corpus_dir, words_file))
-            c._set_words_int()
-            c.context_types = [ 'document' ]
-            c.context_data = [ np.load(os.path.join(corpus_dir, metadata_file)) ]
-
-            return c
 
 
+        try:
+            __IPYTHON__
+            notebook = True
+            print("Running from notebook, using serial load function.")
+        except NameError:
+            notebook = False
+
+
+        if not notebook and file is not None:
+            return Corpus._parallel_load(file)
+
+        elif notebook and file is not None:
+            return Corpus._serial_load(file)
+
+        elif not corpus_dir is None:
+            return Corpus._multifile_load(corpus_dir=corpus_dir,
+                corpus_file=corpus_file, words_file=words_file,
+                metadata_file=metadata_file)
+
+
+    @staticmethod
+    @use_czipfile
+    def _parallel_load(file):
+        import concurrent.futures
+        import functools
+        from pickle import PickleError, UnpicklingError
+
+        c = Corpus([], remove_empty=False)
+        # submit futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            c.corpus = executor.submit(load_npz, file, 'corpus')
+            c.words =  executor.submit(load_npz, file, 'words')
+
+            c.context_types = executor.submit(load_npz, file, 'context_types')
+            c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
+            c.original_length = executor.submit(load_npz, file, 'original_length')
+
+            c.dtype = executor.submit(load_npz, file, 'dtype')
+            concurrent.futures.wait([c.context_types])
+            c.context_types = c.context_types.result().tolist()
+            c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
+            c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
+
+
+        c.corpus = c.corpus.result()
+        c.words = c.words.result()
+        try:
+            c.dtype = c.dtype.result()
+        except KeyError:
+            c.dtype = c.corpus.dtype
+        try:
+            c.original_length = c.original_length.result()
+        except KeyError:
+            c.original_length = None
+
+        c.context_data = [future.result() for future in c.context_data]
+
+        try:
+            c.stopped_words = set(c.stopped_words.result().tolist())
+        except:
+            c.stopped_words = set()
+
+        # reset words_int dictionary
+        c._set_words_int()
+
+        return c
+
+    @staticmethod
+    def _serial_load(file):
+        arrays_in = np.load(file)
+
+        c = Corpus([], remove_empty=False)
+        c.corpus = arrays_in['corpus']
+        c.words = arrays_in['words']
+        c.context_types = arrays_in['context_types'].tolist()
+        try:
+            c.stopped_words = set(arrays_in['stopped_words'].tolist())
+        except:
+            c.stopped_words = set()
+
+        try:
+            c.original_length = arrays_in['original_length']
+        except:
+            c.original_length = None
+
+        c.context_data = list()
+        for n in c.context_types:
+            t = arrays_in['context_data_' + n]
+            c.context_data.append(t)
+
+        c._set_words_int()
+
+        return c
+
+    @staticmethod
+    def _multifile_load(corpus_dir=None,
+                        corpus_file='corpus.npy',
+                        words_file='words.npy',
+                        metadata_file='metadata.npy'):
+        c = Corpus([], remove_empty=False)
+
+        c.corpus = np.load(os.path.join(corpus_dir, corpus_file))
+        c.words = np.load(os.path.join(corpus_dir, words_file))
+        c._set_words_int()
+        c.context_types = [ 'document' ]
+        c.context_data = [ np.load(os.path.join(corpus_dir, metadata_file)) ]
+
+        return c
+
+    @use_czipfile
     def save(self, file):
         """
         Saves data from a Corpus object as an `npz` file.
@@ -621,12 +732,15 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`, :meth:`Corpus.load`, :meth:`np.savez`
         """
-        print 'Saving corpus as', file
+        import vsm.zipfile
+        print('Saving corpus as {}'.format(file))
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
         arrays_out['words'] = self.words
         arrays_out['context_types'] = np.asarray(self.context_types)
         arrays_out['stopped_words'] = np.asarray(self.stopped_words)
+        arrays_out['dtype'] = str(self.dtype)
+        arrays_out['original_length'] = str(self.original_length)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]
@@ -652,78 +766,96 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
-        if stoplist is None:
-            stoplist = list()
-        else:
-            # convert to raw list from set, array, etc.
-            stoplist = [word for word in stoplist]
+        from sortedcontainers import SortedSet, SortedList
+        stop = SortedSet()
+
+        if stoplist:
+            for t in stoplist:
+                if t in self.words_int:
+                    stop.add(self.words_int[t])
 
         if freq:
-            #TODO: Use the TF model instead
+            cfs = np.bincount(self.corpus)
+            freq_stop = np.where(cfs <= freq)[0]
+            stop.update(freq_stop)
 
-            # print 'Computing collection frequencies'
-            cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
-    
-            for word in self.corpus:
-                cfs[word] += 1
-
-            # print 'Selecting words of frequency <=', freq
-            freq_stop = np.arange(cfs.size)[(cfs <= freq)]
-            stop = set(freq_stop)
-            for word in stop:
-                stoplist.append(self.words[word])
-        else:
-            stop = set()
-
-        # filter stoplist
-        # print len(stoplist), "filtering to",
-        stoplist = [t for t in stoplist if binary_search(self.words, t) >= 0]
-        # print len(stoplist)
-        for t in stoplist:
-            stop.add(self.words_int[t])
 
         if not stop:
             # print 'Stop list is empty.'
             return self
-
-        # print 'sorting stopwords', datetime.now() 
-        stoplist = sorted(stoplist)
-        stop = sorted(stop)
     
         # print 'Removing stop words', datetime.now()
-        f = np.vectorize(lambda x: binary_search(stop, x) < 0)
+        f = np.vectorize(stop.__contains__)
 
         # print 'Rebuilding context data', datetime.now()
         context_data = []
-        for i in xrange(len(self.context_data)):
-            # print 'Recomputing token breaks:', self.context_types[i]
-            tokens = self.view_contexts(self.context_types[i])
-            # print self.context_types[i], len(stoplist), len(stop), datetime.now()
-            spans = [t[f(t)].size if t.size else 0 for t in tokens]
-            tok = self.context_data[i].copy()
-            tok['idx'] = np.cumsum(spans)
-            context_data.append(tok)
+
+        BASE = len(self.context_data) - 1
+        # gathering list of new indicies from narrowest tokenization
+        def find_new_indexes(INTO, BASE=-1):
+            locs = np.where(np.in1d(self.context_data[BASE]['idx'], self.context_data[INTO]['idx']))[0]
+
+            # creating a list of lcoations that are non-identical
+            new_locs = np.array([loc for i, loc in enumerate(locs)
+                                     if i+1 == len(locs) or self.context_data[BASE]['idx'][locs[i]] != self.context_data[BASE]['idx'][locs[i+1]]])
+
+            # creating a search for locations that ARE identical
+            idxs = np.insert(self.context_data[INTO]['idx'], [0,-1], [-1,-1])
+            same_spots = np.where(np.equal(idxs[:-1], idxs[1:]))[0]
+
+            # readding the identical locations
+            really_new_locs = np.insert(new_locs, same_spots, new_locs[same_spots-1])
+            return really_new_locs
+
+        # Calculate new base tokens
+        tokens = self.view_contexts(self.context_types[BASE])
+        new_corpus = []
+        spans = []
+        for t in tokens:
+            new_t = t[np.logical_not(f(t))] if t.size else t
+            
+            # TODO: append to new_corpus as well
+            spans.append(new_t.size if new_t.size else 0)
+            if new_t.size:
+                new_corpus.append(new_t)
+
+        # Stopped all words from Corpus
+        if not new_corpus:
+            return Corpus([])
+
+        new_base = self.context_data[BASE].copy()
+        new_base['idx'] = np.cumsum(spans)
+
+        context_data = []
+        # calculate new tokenizations for every context_type
+        for i in range(len(self.context_data)):
+            if i == BASE:
+                context_data.append(new_base)
+            else:
+                context = self.context_data[i].copy()
+                context['idx'] = new_base['idx'][find_new_indexes(i, BASE)]
+                context_data.append(context)
 
         del self.context_data
         self.context_data = context_data
 
         # print 'Rebuilding corpus and updating stop words', datetime.now()
-        self.corpus = self.corpus[f(self.corpus)]
-        self.stopped_words.update(stoplist)
+        self.corpus = np.concatenate(new_corpus)
+        #self.corpus[f(self.corpus)]
+        self.stopped_words.update(self.words[stop])
 
-        # print 'adjusting words list', datetime.now()
-        new_words = np.array([t for t in self.words if binary_search(stoplist,t) < 0])
+        #print 'adjusting words list', datetime.now()
+        new_words = np.delete(self.words, stop)
 
         # print 'rebuilding word dictionary', datetime.now()
-        new_words_int = dict((word,i) for i, word in enumerate(new_words))
+        new_words_int = dict((word,i) for i, word in enumerate(new_words)) 
+        old_to_new =  dict((self.words_int[word],i) for i, word in enumerate(new_words)) 
 
-        # print "remapping corpus", datetime.now()
-        current_offset = 0
-        for i, tok in enumerate(self.corpus):
-            self.corpus[i] = new_words_int[self.words[tok]] 
-        # print len(self.words), len(self.words_int), len(new_words), len(new_words_int)
+        #print "remapping corpus", datetime.now()
+        f = np.vectorize(old_to_new.__getitem__)
+        self.corpus[:] = f(self.corpus)
 
-        # print 'storing new word dicts', datetime.now()
+        #print 'storing new word dicts', datetime.now()
         self.words = new_words
         self.words_int = new_words_int
 
@@ -746,54 +878,21 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
-        print "Using apply_stoplist for some reason"
-        stoplist = set(stoplist)
-        if freq:
-            #TODO: Use the TF model instead
+        new_c = deepcopy(self)
+        return new_c.in_place_stoplist(stoplist=stoplist, freq=freq)
 
-            # print 'Computing collection frequencies'
-            cfs = np.zeros_like(self.words, dtype=self.corpus.dtype)
-    
-            for word in self.corpus:
-                cfs[word] += 1
+    def __deepcopy__(self, memo):
+        _c = type(self)([], remove_empty=False)
+        _c.corpus = np.copy(self.corpus)
+        _c.words = np.copy(self.words)
+        _c.context_types = self.context_types[:]
+        _c.stopped_words = deepcopy(self.stopped_words, memo)
+        _c.dtype = self.dtype
+        _c.words_int = deepcopy(self.words_int, memo)
+        _c.context_data = [np.copy(ctx) for ctx in self.context_data]
 
-            # print 'Selecting words of frequency <=', freq
-            freq_stop = np.arange(cfs.size)[(cfs <= freq)]
-            stop = set(freq_stop)
-            for word in stop:
-                stoplist.add(self.words[word])
-        else:
-            stop = set()
+        return _c
 
-        # filter stoplist
-        stoplist = [t for t in stoplist if t in self.words]
-        for t in stoplist:
-            stop.add(self.words_int[t])
-
-        if not stop:
-            # print 'Stop list is empty.'
-            return self
-    
-        # print 'Removing stop words'
-        f = np.vectorize(lambda x: x not in stop)
-        corpus = self.corpus[f(self.corpus)]
-
-        # print 'Rebuilding corpus'
-        corpus = [self.words[i] for i in corpus]
-        context_data = []
-        for i in xrange(len(self.context_data)):
-            # print 'Recomputing token breaks:', self.context_types[i]
-            tokens = self.view_contexts(self.context_types[i])
-            spans = [t[f(t)].size for t in tokens]
-            tok = self.context_data[i].copy()
-            tok['idx'] = np.cumsum(spans)
-            context_data.append(tok)
-
-        c = Corpus(corpus, context_data=context_data, context_types=self.context_types)
-        if self.stopped_words:
-            c.stopped_words.update(self.stopped_words)
-        c.stopped_words.update(stoplist)
-        return c
 
 
 def add_metadata(corpus, ctx_type, new_field, metadata):
@@ -840,10 +939,10 @@ def align_corpora(old_corpus, new_corpus, remove_empty=True):
     int_words = out.words
     words_int = old_corpus.words_int
     int_int = {}
-    for i in xrange(len(int_words)):
+    for i in range(len(int_words)):
         int_int[i] = words_int[int_words[i]]
 
-    for i in xrange(len(out.corpus)):
+    for i in range(len(out.corpus)):
         out.corpus[i] = int_int[out.corpus[i]]
     out.words = old_corpus.words.copy()
     out._set_words_int()

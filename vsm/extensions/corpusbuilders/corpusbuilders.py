@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from builtins import zip
+from builtins import str
+from builtins import range
 import os
 
 import numpy as np
@@ -5,43 +9,48 @@ from unidecode import unidecode
 from codecs import open
 
 from vsm.corpus import Corpus
-from util import *
+from .util import *
 
 from progressbar import ProgressBar, Percentage, Bar
 
 __all__ = ['empty_corpus', 'random_corpus',
            'toy_corpus', 'corpus_fromlist',
            'file_corpus', 'dir_corpus', 'coll_corpus', 'json_corpus',
-           'corpus_from_strings']
+           'corpus_from_strings', 'walk_corpus']
 
-
+IGNORE = ['.json','.log','.pickle', '.DS_Store']
 
 def corpus_from_strings(strings, metadata=[], decode=False,
-                        nltk_stop=True, stop_freq=0, add_stop=None):
+                        nltk_stop=True, stop_freq=0, add_stop=None, tokenizer=word_tokenize):
     """
     Takes a list of strings and returns a Corpus object whose document
     tokens are the strings.
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     """
     if decode:
-        for i in xrange(len(strings)):
-            if isinstance(strings[i], unicode):
+        for i in range(len(strings)):
+            if isinstance(strings[i], str):
                 strings[i] = unidecode(strings[i])
 
-    documents = [word_tokenize(s) for s in strings]
+    documents = [tokenizer(s) for s in strings]
     corpus = sum(documents, [])
     indices = np.cumsum([len(d) for d in documents])
     del documents
 
     if len(metadata) == 0:
-        metadata = ['document_{0}'.format(i) for i in xrange(len(strings))]
+        metadata = ['document_{0}'.format(i) for i in range(len(strings))]
     md_type = np.array(metadata).dtype
+    md_type = np.object_
     dtype = [('idx', np.int), ('document_label', md_type)]
-    context_data = [np.array(zip(indices, metadata), dtype=dtype)]
+    context_data = [np.array(list(zip(indices, metadata)), dtype=dtype)]
 
     c = Corpus(corpus, context_data=context_data, context_types=['document'])
-    return apply_stoplist(c, nltk_stop=nltk_stop,
-                          freq=stop_freq, add_stop=add_stop)
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
+    return c
 
 
 
@@ -91,6 +100,9 @@ def random_corpus(corpus_len,
     :param metadata: If `True` generates metadata. If `False` the only
         metadata for the corpus is the index information.
     :type metadata: boolean, optional
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     :returns: Corpus object with random integers as its entries. 
 
@@ -98,6 +110,7 @@ def random_corpus(corpus_len,
     """
     random_state = np.random.RandomState(seed)
     corpus = random_state.randint(n_words, size=corpus_len)
+    corpus = [str(word) for word in corpus]
 
     indices = []
     i = np.random.randint(min_token_len, max_token_len)
@@ -108,10 +121,10 @@ def random_corpus(corpus_len,
 
     if metadata:
         metadata_ = ['{0}_{1}'.format(context_type, i)
-                     for i in xrange(len(indices))]
+                     for i in range(len(indices))]
         dtype=[('idx', np.array(indices).dtype), 
-               (context_type + '_label', np.array(metadata_).dtype)]
-        rand_tok = np.array(zip(indices, metadata_), dtype=dtype)
+               (context_type + '_label', np.object_)]
+        rand_tok = np.array(list(zip(indices, metadata_)), dtype=dtype)
     else:
         rand_tok = np.array([(i,) for i in indices], 
                             dtype=[('idx', np.array(indices).dtype)])
@@ -151,18 +164,19 @@ def corpus_fromlist(ls, context_type='context'):
 
     indices = np.cumsum([len(sbls) for sbls in ls])
     metadata = ['{0}_{1}'.format(context_type, i)
-                for i in xrange(len(indices))]
+                for i in range(len(indices))]
     md_type = np.array(metadata).dtype
+    md_type = np.object_
     dtype = [('idx', np.int), (context_type + '_label', md_type)]
-    context_data = [np.array(zip(indices, metadata), dtype=dtype)]
+    context_data = [np.array(list(zip(indices, metadata)), dtype=dtype)]
 
     return Corpus(corpus, context_data=context_data,
                   context_types=[context_type])
 
 
-def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', 
-               nltk_stop=False, stop_freq=0, add_stop=None, decode=False, 
-               metadata=None, autolabel=False):
+def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False,
+               stop_freq=0, add_stop=None, decode=False,
+               metadata=None, autolabel=False, tokenizer=word_tokenize, simple=False):
     """
     `toy_corpus` is a convenience function for generating Corpus
     objects from a given string or a single file.
@@ -221,6 +235,9 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8',
         documents by position in file. Default is False
     :type metadata: boolean, optional
     
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
+    
     :returns: c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
         corpus. Document tokens are named `documents`.
@@ -240,7 +257,7 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8',
         plain_corpus = unidecode(plain_corpus)
 
     docs = paragraph_tokenize(plain_corpus)
-    docs = [word_tokenize(d) for d in docs]
+    docs = [tokenizer(d) for d in docs]
 
     corpus = sum(docs, [])
     tok = np.cumsum(np.array([len(d) for d in docs]))
@@ -254,20 +271,21 @@ def toy_corpus(plain_corpus, is_filename=False, encoding='utf8',
                    'of documents is {1}'.format(len(metadata), len(tok))
             raise Exception(msg)
         else:
+            md_type = np.object_
             dtype = [('idx', np.array(tok).dtype),
-                     ('document_label', np.array(metadata).dtype)]
-            tok = np.array(zip(tok, metadata), dtype=dtype)
+                     ('document_label', md_type)]
+            tok = np.array(list(zip(tok, metadata)), dtype=dtype)
     else:
         dtype = [('idx', np.array(tok).dtype)]
         tok = np.array([(i,) for i in tok], dtype=dtype)
     
     c = Corpus(corpus, context_data=[tok], context_types=['document'])
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
-def file_tokenize(text):
+def file_tokenize(text, tokenizer=word_tokenize, simple=False):
     """
     `file_tokenize` is a helper function for :meth:`file_corpus`.
     
@@ -276,6 +294,9 @@ def file_tokenize(text):
 
     :param text: Content in a plain text file.
     :type text: string
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     :returns: words : List of words.
         Words in the `text` tokenized by :meth:`vsm.corpus.util.word_tokenize`.
@@ -284,38 +305,45 @@ def file_tokenize(text):
         are np.arrays.
     """
     words, par_tokens, sent_tokens = [], [], []
-    sent_break, par_n, sent_n = 0, 0, 0
+    par_break, sent_break, par_n, sent_n = 0, 0, 0, 0
 
     pars = paragraph_tokenize(text)
 
     for par in pars:
-        sents = sentence_tokenize(par)
-
-        for sent in sents:
-            w = word_tokenize(sent)
+        if simple == True:
+            w = tokenizer(par)
             words.extend(w)
-            sent_break += len(w)
-            sent_tokens.append((sent_break, par_n, sent_n))
-            sent_n += 1
-
-        par_tokens.append((sent_break, par_n))
+            par_break += len(w)
+            par_tokens.append((par_break, str(par_n)))
+        else:
+            sents = sentence_tokenize(par)
+            for sent in sents:
+                w = tokenizer(sent)
+                words.extend(w)
+                sent_break += len(w)
+                sent_tokens.append((sent_break, str(par_n), str(sent_n)))
+                sent_n += 1
+            par_tokens.append((sent_break, str(par_n)))
         par_n += 1
 
     idx_dt = ('idx', np.int32)
-    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
-    par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
+    if simple == False:
+        sent_label_dt = ('sentence_label', np.object_)
+    par_label_dt = ('paragraph_label', np.object_)
 
     corpus_data = dict()
     dtype = [idx_dt, par_label_dt]
     corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
-    dtype = [idx_dt, par_label_dt, sent_label_dt]
-    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+    if simple == False:
+        dtype = [idx_dt, par_label_dt, sent_label_dt]
+        corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
     return words, corpus_data
 
 
 def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1, 
-                add_stop=None, decode=False):
+                add_stop=None, decode=False, simple=False,
+                tokenizer=word_tokenize):
     """
     `file_corpus` is a convenience function for generating Corpus
     objects from a a plain text corpus contained in a single string.
@@ -365,18 +393,18 @@ def file_corpus(filename, encoding='utf8', nltk_stop=True, stop_freq=1,
     if decode:
         text = unidecode(text)
 
-    words, tok = file_tokenize(text)
-    names, data = zip(*tok.items())
+    words, tok = file_tokenize(text, simple=simple, tokenizer=tokenizer)
+    names, data = list(zip(*list(tok.items())))
     
     c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
 
 def json_corpus(json_file, doc_key, label_key, encoding='utf8',
-                nltk_stop=False, stop_freq=0, add_stop=None):
+                nltk_stop=False, stop_freq=0, add_stop=None, tokenizer=word_tokenize):
     """
     `json_corpus` is a convenience function for generating Corpus
     objects from a json file. It construct a corpus, document labels
@@ -412,6 +440,9 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
 
     :param add_stop: A list of stop words. Default is `None`.
     :type add_stop: array-like, optional
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     :returns: c : a Corpus object
         Contains the tokenized corpus built from the input plain-text
@@ -436,28 +467,28 @@ def json_corpus(json_file, doc_key, label_key, encoding='utf8',
         label.append(i.pop(label_key, None))
         metadata.append(i)   # metadata are all the rest
 
-    docs = [word_tokenize(d) for d in docs]
+    docs = [tokenizer(d) for d in docs]
 
     corpus = sum(docs, [])
     tok = np.cumsum(np.array([len(d) for d in docs]))
 
     # add document label and metadata
     dtype = [('idx', np.array(tok).dtype),
-             ('document_label', np.array(label).dtype),
+             ('document_label', np.object_),
              ('metadata', np.array(metadata).dtype)]         # todo: create separate dtype for each key?
-    tok = np.array(zip(tok, label, metadata), dtype=dtype)
+    tok = np.array(list(zip(tok, label, metadata)), dtype=dtype)
 
     
     c = Corpus(corpus, context_data=[tok], context_types=['document'])
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
 
 
 def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
-                 verbose=1):
+                 verbose=1, tokenizer=word_tokenize, simple=False):
     """`dir_tokenize` is a helper function for :meth:`dir_corpus`.
 
     Takes a list of strings and labels and returns words and corpus data.
@@ -478,7 +509,10 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
     :type paragraphs: boolean, optional
 
     :param verbose: Verbosity level. 1 prints a progress bar.
-    :type verbose: int, default 1 
+    :type verbose: int, default 1
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
     
     :returns: words : List of words.
         words in the `chunks` tokenized by :meth: word_tokenize.
@@ -488,10 +522,14 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
     """
     words, chk_tokens, sent_tokens = [], [], []
-    sent_break, chk_n, sent_n = 0, 0, 0
+    chk_break, par_break, sent_break = 0, 0 ,0
+    chk_n, par_n, sent_n = 0, 0, 0
     
     if verbose == 1:
         pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(chunks)).start()
+
+    if simple:
+        paragraphs = False;
 
     if paragraphs:
         par_tokens = []
@@ -503,55 +541,66 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
             for par in pars:
                 sents = sentence_tokenize(par)
-
+                
                 for sent in sents:
-                    w = word_tokenize(sent)
+                    w = tokenizer(sent)
                     words.extend(w)
                     sent_break += len(w)
-                    sent_tokens.append((sent_break, label, par_n, sent_n))
+                    sent_tokens.append((sent_break, label, str(par_n), str(sent_n)))
                     sent_n += 1
 
-                par_tokens.append((sent_break, label, par_n))
+                par_tokens.append((sent_break, label, str(par_n)))
                 par_n += 1
     
             if verbose == 1:
                 pbar.update(chk_n)
 
             chk_tokens.append((sent_break, label))
+
             chk_n += 1
     else:
         for chk, label in zip(chunks, labels):
             # print 'Tokenizing', label
-            sents = sentence_tokenize(chk)
-
-            for sent in sents:
-                w = word_tokenize(sent)
+            if simple:
+                w = tokenizer(chk)
                 words.extend(w)
-                sent_break += len(w)
-                sent_tokens.append((sent_break, label, sent_n))
-                sent_n += 1
+                chk_break += len(w)
+                chk_tokens.append((chk_break, label))
+  
+
+            else:
+                sents = sentence_tokenize(chk)
+
+                for sent in sents:
+                    w = tokenizer(sent)
+                    words.extend(w)
+                    sent_break += len(w)
+                    sent_tokens.append((sent_break, label, str(sent_n)))
+                    sent_n += 1
+                chk_tokens.append((sent_break, label))
     
             if verbose == 1:
                 pbar.update(chk_n)
 
-            chk_tokens.append((sent_break, label))
+  
             chk_n += 1
 
 
     idx_dt = ('idx', np.int32)
-    label_dt = (chunk_name + '_label', np.array(labels).dtype)
-    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    label_dt = (chunk_name + '_label', np.object_)
+    if not simple:
+        sent_label_dt = ('sentence_label', np.object_)
     corpus_data = dict()
     dtype = [idx_dt, label_dt]
     corpus_data[chunk_name] = np.array(chk_tokens, dtype=dtype)
 
     if paragraphs:
-        par_label_dt = ('paragraph_label', np.array(par_n, np.str_).dtype)
+        par_label_dt = ('paragraph_label', np.object_)
         dtype = [idx_dt, label_dt, par_label_dt]
         corpus_data['paragraph'] = np.array(par_tokens, dtype=dtype)
         dtype = [idx_dt, label_dt, par_label_dt, sent_label_dt]
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
-    else:
+    elif not simple:
         dtype = [idx_dt, label_dt, sent_label_dt]
         corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
     
@@ -563,9 +612,9 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
 
 
 def dir_corpus(plain_dir, chunk_name='article', encoding='utf8', 
-               paragraphs=True, ignore=['.json','.log','.pickle'], 
-               nltk_stop=True, stop_freq=1, add_stop=None, decode=False, 
-               verbose=1):
+               paragraphs=True, ignore=IGNORE, nltk_stop=True, 
+               stop_freq=1, add_stop=None, decode=False, verbose=1,
+               simple=False, tokenizer=word_tokenize):
     """
     `dir_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -598,7 +647,7 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
     
     :param ignore: The list containing suffixes of files to be filtered.
         The suffix strings are normally file types. Default is ['.json',
-        '.log','.pickle'].
+        '.log','.pickle', '.DS_Store'].
     :type ignore: list of strings, optional
 
     :param nltk_stop: If `True` then the corpus object is masked 
@@ -653,17 +702,18 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
                     chunks.append(f.read())
 
     words, tok = dir_tokenize(chunks, filenames, chunk_name=chunk_name,
-                              paragraphs=paragraphs, verbose=verbose)
-    names, data = zip(*tok.items())
+                              paragraphs=paragraphs, verbose=verbose,
+                              simple=simple, tokenizer=tokenizer)
+    names, data = list(zip(*list(tok.items())))
     
     c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
 
-def coll_tokenize(books, book_names, verbose=1):
+def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize, simple=False):
     """
     `coll_tokenize` is a helper function for :meth:`coll_corpus`.
 
@@ -677,7 +727,10 @@ def coll_tokenize(books, book_names, verbose=1):
     :type book_names: list
 
     :param verbose: Verbosity level. 1 prints a progress bar.
-    :type verbose: int, default 1 
+    :type verbose: int, default 1
+    
+    :param tokenizer: word tokenization function. Defaults to `vsm.extensions.corpusbuilders.util.word_tokenize`.
+    :type tokenizer: lambda s -> tokens
 
     :returns: words : List of words.
         words in the `books` tokenized by :meth:`word_tokenize`.
@@ -686,7 +739,7 @@ def coll_tokenize(books, book_names, verbose=1):
         are np.arrays.
     """
     words, book_tokens, page_tokens, sent_tokens = [], [], [], []
-    sent_break, book_n, page_n, sent_n = 0, 0, 0, 0
+    page_break, sent_break, book_n, page_n, sent_n = 0, 0, 0, 0, 0
 
     if verbose == 1:
         pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(books)).start()
@@ -694,37 +747,51 @@ def coll_tokenize(books, book_names, verbose=1):
     for book, book_label in zip(books, book_names):
         # print 'Tokenizing', book_label
         for page, page_file in book:
-            for sent_start, sent_stop in sentence_span_tokenize(page):
-                w = word_tokenize(page[sent_start:sent_stop])
+            if simple:
+                w = tokenizer(page)
                 words.extend(w)
-                sent_break += len(w)
-                sent_tokens.append((sent_break, sent_n,
-                                    page_n, book_label, page_file))
-                sent_n += 1
+                page_break += len(w)
+                page_tokens.append((page_break, str(page_n), book_label, page_file))
+            else:
+                sents = sentence_tokenize(page)
 
-            page_tokens.append((sent_break, page_n, book_label, page_file))
+                for sent in sents:
+                    w = tokenizer(sent)
+                    words.extend(w)
+                    sent_break += len(w)
+                    sent_tokens.append((sent_break, str(sent_n),
+                                        str(page_n), book_label, page_file))
+                    sent_n += 1
+
+                page_tokens.append((sent_break, str(page_n), book_label, page_file))
+
             page_n += 1
 
         if verbose == 1:
             pbar.update(book_n)
             
-        book_tokens.append((sent_break, book_label))
+        if not simple:
+            book_tokens.append((sent_break, book_label))
+        else:
+            book_tokens.append((page_break, book_label))
         book_n += 1
 
     idx_dt = ('idx', np.int32)
-    book_label_dt = ('book_label', np.array(book_names).dtype)
-    page_label_dt = ('page_label', np.array(page_n, np.str_).dtype)
-    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    book_label_dt = ('book_label', np.object_)
+    page_label_dt = ('page_label', np.object_)
+    if not simple:
+        sent_label_dt = ('sentence_label', np.object_)
     files = [f for (a,b,c,f) in page_tokens]
-    file_dt = ('file', np.array(files, np.str_).dtype)
+    file_dt = ('file', np.object_)
 
     corpus_data = dict()
     dtype = [idx_dt, book_label_dt]
     corpus_data['book'] = np.array(book_tokens, dtype=dtype)
     dtype = [idx_dt, page_label_dt, book_label_dt, file_dt]
     corpus_data['page'] = np.array(page_tokens, dtype=dtype)
-    dtype = [idx_dt, sent_label_dt, page_label_dt, book_label_dt, file_dt]
-    corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
+    if not simple:
+        dtype = [idx_dt, sent_label_dt, page_label_dt, book_label_dt, file_dt]
+        corpus_data['sentence'] = np.array(sent_tokens, dtype=dtype)
 
     if verbose == 1:
         pbar.finish()
@@ -732,9 +799,9 @@ def coll_tokenize(books, book_names, verbose=1):
     return words, corpus_data
 
 #TODO: This should be a whitelist not a blacklist
-def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
+def coll_corpus(coll_dir, encoding='utf8', ignore=IGNORE,
                 nltk_stop=True, stop_freq=1, add_stop=None, 
-                decode=False, verbose=1):
+                decode=False, verbose=1, simple=False, tokenizer=word_tokenize):
     """
     `coll_corpus` is a convenience function for generating Corpus
     objects from a directory of plain text files.
@@ -753,7 +820,7 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
     
     :param ignore: The list containing suffixes of files to be filtered.
         The suffix strings are normally file types. Default is ['.json',
-        '.log','.pickle'].
+        '.log','.pickle', '.DS_Store'].
     :type ignore: list of strings, optional
 
     :param nltk_stop: If `True` then the corpus object is masked 
@@ -814,8 +881,9 @@ def coll_corpus(coll_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
 
         books.append(pages)
 
-    words, tok = coll_tokenize(books, book_names)
-    names, data = zip(*tok.items())
+    words, tok = coll_tokenize(books, book_names, simple=simple,
+                               tokenizer=tokenizer)
+    names, data = list(zip(*list(tok.items())))
     
     c = Corpus(words, context_data=data, context_types=names)
     in_place_stoplist(c, nltk_stop=nltk_stop,
@@ -883,12 +951,12 @@ def record_tokenize(records, record_names, verbose=1):
         record_n += 1
 
     idx_dt = ('idx', np.int32)
-    record_label_dt = ('record_label', np.array(record_names).dtype)
-    book_label_dt = ('book_label', np.array(book_names).dtype)
-    page_label_dt = ('page_label', np.array(page_n, np.str_).dtype)
-    sent_label_dt = ('sentence_label', np.array(sent_n, np.str_).dtype)
+    record_label_dt = ('record_label', np.object_)
+    book_label_dt = ('book_label', np.object_)
+    page_label_dt = ('page_label', np.array(page_n, np.object_).dtype)
+    sent_label_dt = ('sentence_label', np.array(sent_n, np.object_).dtype)
     files = [f for (a,b,c,f) in page_tokens]
-    file_dt = ('file', np.array(files, np.str_).dtype)
+    file_dt = ('file', np.array(files, np.object_).dtype)
 
     corpus_data = dict()
     dtype = [idx_dt, record_label_dt]
@@ -907,7 +975,7 @@ def record_tokenize(records, record_names, verbose=1):
 
 
 #TODO: This should be a whitelist not a blacklist
-def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle'],
+def record_corpus(base_dir, encoding='utf8', ignore=IGNORE,
                 nltk_stop=True, stop_freq=1, add_stop=None, 
                 decode=False, verbose=1):
     """
@@ -928,7 +996,7 @@ def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle']
     
     :param ignore: The list containing suffixes of files to be filtered.
         The suffix strings are normally file types. Default is ['.json',
-        '.log','.pickle'].
+        '.log','.pickle', '.DS_Store].
     :type ignore: list of strings, optional
 
     :param nltk_stop: If `True` then the corpus object is masked 
@@ -991,14 +1059,57 @@ def record_corpus(base_dir, encoding='utf8', ignore=['.json', '.log', '.pickle']
         records.append(books)
 
     words, tok = record_tokenize(records, record_names, record_book_names)
-    names, data = zip(*tok.items())
+    names, data = list(zip(*list(tok.items())))
     
     c = Corpus(words, context_data=data, context_types=names)
-    c = apply_stoplist(c, nltk_stop=nltk_stop,
-                       freq=stop_freq, add_stop=add_stop)
-
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
     return c
 
+
+def walk_corpus(walk_dir, chunk_name='document', encoding='utf8', 
+                ignore=IGNORE, nltk_stop=True, stop_freq=1, add_stop=None,
+                decode=False, verbose=1, simple=False,
+                tokenizer=word_tokenize):
+
+    filenames = []
+    for root, dirs, files in os.walk(walk_dir):
+        for file in files:
+            filenames.append(os.path.join(root, file))
+
+    # filter the blacklist (typically .json, .log, etc.)
+    filenames = filter_by_suffix(filenames, ignore)
+    files = []
+    for filename in filenames:
+        if encoding == 'detect':
+            encoding = detect_encoding(filename)
+
+        try:
+            if decode:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    files.append(unidecode(f.read()))
+            else:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    files.append(f.read())
+        except UnicodeDecodeError:
+            encoding = detect_encoding(filename)
+            if decode:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    files.append(unidecode(f.read()))
+            else:
+                with open(filename, mode='r', encoding=encoding) as f:
+                    files.append(f.read())
+
+    words, tok = dir_tokenize(files, filenames, chunk_name=chunk_name,
+        paragraphs=False, verbose=verbose, simple=simple, tokenizer=tokenizer)
+    names, data = list(zip(*list(tok.items())))
+
+    c = Corpus(words, context_data=data, context_types=names)
+    if nltk_stop or stop_freq or add_stop:
+        c = apply_stoplist(c, nltk_stop=nltk_stop,
+                              freq=stop_freq, add_stop=add_stop)
+    return c
 
 
 ###########
@@ -1048,7 +1159,7 @@ def test_dir_tokenize():
              '',
              'foo\n\nfoo']
 
-    labels = [str(i) for i in xrange(len(chunks))]
+    labels = [str(i) for i in range(len(chunks))]
     words, context_data = dir_tokenize(chunks, labels)
 
     assert len(words) == 11
@@ -1079,7 +1190,7 @@ def test_coll_tokenize():
              [('','3'),
               ('foo.\n\nfoo', '4')]]
 
-    book_names = [str(i) for i in xrange(len(books))]
+    book_names = [str(i) for i in range(len(books))]
     words, context_data = coll_tokenize(books, book_names)
 
     assert len(words) == 11

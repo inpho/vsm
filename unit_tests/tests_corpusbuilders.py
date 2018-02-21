@@ -1,4 +1,7 @@
 from __future__ import print_function
+from builtins import str
+from builtins import range
+
 import unittest2 as unittest
 
 from vsm.extensions.corpusbuilders import *
@@ -39,7 +42,7 @@ class TestCorpusbuilders(unittest.TestCase):
                  'Though seen of none save him whose strenuous tongue\n\n'
                  'Can burst Joy\'s grape against his palate fine;\n\n'
                  'His soul shall taste the sadness of her might,\n\n'
-                 'And be among her cloudy trophies hung.')
+                 'And be among her cloudy trophies hung.')#.encode('utf-8')
 
         self.assertTrue(toy_corpus(keats))
         self.assertTrue(toy_corpus(keats, nltk_stop=True))
@@ -52,7 +55,7 @@ class TestCorpusbuilders(unittest.TestCase):
         from tempfile import NamedTemporaryFile as NFT
 
         tmp = NFT(delete=False)
-        tmp.write(keats)
+        tmp.write(keats.encode('utf-8'))
         tmp.close()
 
         c = toy_corpus(tmp.name, is_filename=True,
@@ -89,6 +92,7 @@ class TestCorpusbuilders(unittest.TestCase):
     def test_file_corpus(self):
         
         text = 'foo foo foo\n\nfoo foo. Foo bar. Foo bar. foo\n\nfoo'
+        text = text.encode('utf-8')
         
         import os
         from tempfile import NamedTemporaryFile as NFT
@@ -112,7 +116,7 @@ class TestCorpusbuilders(unittest.TestCase):
                  '',
                 'foo\n\nfoo']
 
-        labels = [str(i) for i in xrange(len(chunks))]
+        labels = [str(i) for i in range(len(chunks))]
         words, context_data = dir_tokenize(chunks, labels)
 
         print()
@@ -150,7 +154,7 @@ class TestCorpusbuilders(unittest.TestCase):
                  [('','3'),
                 ('foo.\n\nfoo', '4')]]
 
-        book_names = [str(i) for i in xrange(len(books))]
+        book_names = [str(i) for i in range(len(books))]
         words, context_data = coll_tokenize(books, book_names)
 
         self.assertTrue(len(words) == 11)

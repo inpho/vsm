@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import zip
+from builtins import range
 import unittest2 as unittest
 import numpy as np
 
@@ -30,11 +33,11 @@ class TestLdaCgsSeq(unittest.TestCase):
             self.assertTrue((m0.alpha == m1.alpha).all())
             self.assertTrue((m0.beta == m1.beta).all())
             self.assertTrue(m0.log_probs == m1.log_probs)
-            for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+            for i in range(max(len(m0.corpus), len(m1.corpus))):
                 self.assertTrue(m0.corpus[i].all() == m1.corpus[i].all())
             self.assertTrue(m0.V == m1.V)
             self.assertTrue(m0.iteration == m1.iteration)
-            for i in xrange(max(len(m0.Z), len(m1.Z))):
+            for i in range(max(len(m0.Z), len(m1.Z))):
                 self.assertTrue(m0.Z[i].all() == m1.Z[i].all())
             self.assertTrue(m0.top_doc.all() == m1.top_doc.all())
             self.assertTrue(m0.word_top.all() == m1.word_top.all())
@@ -43,7 +46,8 @@ class TestLdaCgsSeq(unittest.TestCase):
             self.assertTrue(m0.seed == m1.seed)
             self.assertTrue(m0._mtrand_state[0] == m1._mtrand_state[0])
             self.assertTrue((m0._mtrand_state[1] == m1._mtrand_state[1]).all())
-            self.assertTrue(m0._mtrand_state[2:] == m1._mtrand_state[2:])
+            for s1,s2 in zip(m0._mtrand_state[2:], m1._mtrand_state[2:]):
+                self.assertTrue(s1 == s2)
             
 
             m0 = LdaCgsSeq(c, 'document', K=10)
@@ -52,7 +56,10 @@ class TestLdaCgsSeq(unittest.TestCase):
             m1 = LdaCgsSeq.load(tmp.name)
             self.assertTrue(not hasattr(m1, 'log_prob'))
         finally:
-            os.remove(tmp.name)
+            try:
+                os.remove(tmp.name)
+            except WindowsError:
+                pass
     
     def test_LdaCgsSeq_SeedTypes(self):
         """ Test for issue #74 issues. """
@@ -69,13 +76,17 @@ class TestLdaCgsSeq(unittest.TestCase):
             m1 = LdaCgsSeq.load(tmp.name)
 
             self.assertTrue(type(m0.seed) == type(m1.seed))
+            print("seed types:", type(m0._mtrand_state[0]), type(m1._mtrand_state[0]))
             self.assertTrue(type(m0._mtrand_state[0]) == type(m1._mtrand_state[0]))
             self.assertTrue(type(m0._mtrand_state[1]) == type(m1._mtrand_state[1]))
             self.assertTrue(type(m0._mtrand_state[2]) == type(m1._mtrand_state[2]))
             self.assertTrue(type(m0._mtrand_state[3]) == type(m1._mtrand_state[3]))
             self.assertTrue(type(m0._mtrand_state[4]) == type(m1._mtrand_state[4]))
         finally:
-            os.remove(tmp.name)
+            try:
+                os.remove(tmp.name)
+            except WindowsError:
+                pass
 
 
     def test_LdaCgsQuerySampler_init(self):
@@ -113,8 +124,9 @@ class TestLdaCgsSeq(unittest.TestCase):
         self.assertTrue(q.word_top.shape==(2, 2))
         self.assertTrue((q.word_top==m.word_top).all())
         self.assertTrue(q.top_doc.shape==(2, 1))
-        self.assertTrue((q.top_doc==[[ 0.01 ],
-                                     [ 0.01 ]]).all())
+        self.assertTrue((q.top_doc==np.array([[ 0.01 ],
+                                              [ 0.01 ]],
+                                              dtype=q.top_doc.dtype)).all())
         self.assertTrue(q.inv_top_sums.shape==(2, ))
         self.assertTrue((q.inv_top_sums==m.inv_top_sums).all())
         self.assertTrue(q.alpha.shape==(2, 1))
@@ -152,11 +164,11 @@ class TestLdaCgsSeq(unittest.TestCase):
         self.assertTrue((m0.alpha == m1.alpha).all())
         self.assertTrue((m0.beta == m1.beta).all())
         self.assertTrue(m0.log_probs == m1.log_probs)
-        for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+        for i in range(max(len(m0.corpus), len(m1.corpus))):
             self.assertTrue(m0.corpus[i].all() == m1.corpus[i].all())
         self.assertTrue(m0.V == m1.V)
         self.assertTrue(m0.iteration == m1.iteration)
-        for i in xrange(max(len(m0.Z), len(m1.Z))):
+        for i in range(max(len(m0.Z), len(m1.Z))):
             self.assertTrue(m0.Z[i].all() == m1.Z[i].all())
         self.assertTrue(m0.top_doc.all() == m1.top_doc.all())
         self.assertTrue(m0.word_top.all() == m1.word_top.all())
@@ -196,11 +208,11 @@ class TestLdaCgsSeq(unittest.TestCase):
         self.assertTrue((m0.alpha == m1.alpha).all())
         self.assertTrue((m0.beta == m1.beta).all())
         self.assertTrue(m0.log_probs == m1.log_probs)
-        for i in xrange(max(len(m0.corpus), len(m1.corpus))):
+        for i in range(max(len(m0.corpus), len(m1.corpus))):
             self.assertTrue(m0.corpus[i].all() == m1.corpus[i].all())
         self.assertTrue(m0.V == m1.V)
         self.assertTrue(m0.iteration == m1.iteration)
-        for i in xrange(max(len(m0.Z), len(m1.Z))):
+        for i in range(max(len(m0.Z), len(m1.Z))):
             self.assertTrue(m0.Z[i].all() == m1.Z[i].all())
         self.assertTrue(m0.top_doc.all() == m1.top_doc.all())
         self.assertTrue(m0.word_top.all() == m1.word_top.all())

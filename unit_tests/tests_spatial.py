@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 import unittest2 as unittest
 import numpy as np
 
@@ -5,9 +7,9 @@ from vsm.spatial import *
 
 #TODO: add tests for recently added methods.
 def KL(p,q):
-    return sum(p*np.log2(p/q))
+    return sum(p*np.log2(old_div(p,q)))
 def partial_KL(p,q):
-    return p * np.log2((2*p) / (p+q))
+    return p * np.log2(old_div((2*p), (p+q)))
 def JS(p,q):
     return 0.5*(KL(p,((p+q)*0.5)) + KL(q,((p+q)*0.5)))
 def JSD(p,q):
@@ -33,16 +35,6 @@ class TestSpatial(unittest.TestCase):
     
     def test_JS_dist(self):
         self.assertTrue(np.allclose(JS_dist(self.p,self.q), JSD(self.p,self.q)))
-
-
-    def test_KL_div_old(self):
-        p = np.array([0,1])
-        Q = np.array([[0,1],
-                      [.5,.5],
-                      [1,0]])
-        out = np.array([0., 1., np.inf])
-
-        self.assertTrue(np.allclose(out, KL_div(p,Q.T)))
 
 
     def test_count_matrix(self):

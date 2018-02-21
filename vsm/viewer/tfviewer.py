@@ -1,11 +1,13 @@
+from __future__ import absolute_import
+from builtins import object
 import numpy as np
 
 from vsm.spatial import angle
 from vsm.structarr import *
 from vsm.exceptions import *
-from types import *
-from labeleddata import *
-from wrappers import *
+from .types import *
+from .labeleddata import *
+from .wrappers import *
 
 
 __all__ = ['TfViewer']

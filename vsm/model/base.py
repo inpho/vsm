@@ -1,5 +1,7 @@
+from __future__ import print_function
+from builtins import object
 import numpy as np
-
+from vsm.zipfile import use_czipfile
 
 __all__ = ['BaseModel']
 
@@ -35,7 +37,6 @@ class BaseModel(object):
         self.matrix = matrix
         self.context_type = context_type
 
-
     def save(self, f):
         """
         Takes a filename or file object and saves `self.matrix` in an
@@ -49,8 +50,8 @@ class BaseModel(object):
 
         :See Also: :meth:`numpy.savez`
         """
-        print 'Saving model to', f
-        np.savez(f, matrix=self.matrix, context_type=np.array(self.context_type))
+        print('Saving model to {}'.format(f))
+        np.savez(f, matrix=np.array(self.matrix), context_type=np.array(self.context_type))
 
 
     @staticmethod
@@ -68,9 +69,9 @@ class BaseModel(object):
 
         :See Also: :meth:`numpy.load`
         """
-        print 'Loading model from', f
+        print('Loading model from {}'.format(f))
         npz = np.load(f)
         
         # The slice [()] is to unwrap sparse matrices, which get saved
         # in singleton object arrays
-        return BaseModel(matrix=npz['matrix'][()], context_type=npz['context_type'][()])
+        return BaseModel(matrix=npz['matrix'], context_type=npz['context_type'])

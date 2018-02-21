@@ -1,10 +1,17 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
+from builtins import object
+
 import numpy as np
 import time
 from vsm.split import split_corpus
 from vsm.corpus import align_corpora as align
-from ldafunctions import *
-from _cgs_update import cgs_update
+from vsm.model.ldafunctions import *
 from progressbar import ProgressBar, Percentage, Bar
+
+from vsm.model._cgs_update import cgs_update
 
 
 __all__ = [ 'LdaCgsSeq', 'LdaCgsQuerySampler' ]
@@ -48,25 +55,36 @@ class LdaCgsSeq(object):
             self.V = corpus.words.size
             self.indices = corpus.view_contexts(self.context_type, as_indices=True)
             self.corpus = corpus.corpus
+            self.dtype = corpus.corpus.dtype
         else:
             self.V = V
             self.indices = []
             self.corpus = []
+            self.dtype = None
+
+        if self.K < 2 ** 8:
+            self.Ktype = np.uint8
+        elif self.K < 2 ** 16:
+            self.Ktype = np.uint16
+        else:
+            raise RuntimeError("More than 65536 topics are not supported")
 
         self.indices = np.array(self.indices, dtype='i')
-        self.Z = np.zeros_like(self.corpus, dtype='i')
+        self.Z = np.zeros_like(self.corpus, dtype=self.Ktype)
 
         priors = init_priors(self.V, self.K, beta, alpha)
         self.beta, self.alpha = priors
+        self.beta = self.beta.astype(np.float32)
+        self.alpha = self.alpha.astype(np.float32)
 
-        self.word_top = (np.zeros((self.V, self.K), dtype=np.float)
+        self.word_top = (np.zeros((self.V, self.K), dtype=np.float32)
                          + self.beta)
         if self.V==0:
             self.inv_top_sums = np.inf
         else:
             self.inv_top_sums = 1. / self.word_top.sum(0)
         self.top_doc = (np.zeros((self.K, len(self.indices)),
-                                 dtype=np.float) + self.alpha)
+                                 dtype=np.float32) + self.alpha)
 
         self.iteration = 0
         self.log_probs = []
@@ -78,11 +96,9 @@ class LdaCgsSeq(object):
             self.seed = seed
         self._mtrand_state = np.random.RandomState(self.seed).get_state()
 
-
     @property
     def Z_split(self):
         return split_corpus(self.Z, self.indices)
-
 
     @property
     def docs(self):
@@ -106,71 +122,11 @@ class LdaCgsSeq(object):
             self.iteration += 1
         else:
             return log_prob
-
-
+    """
     def train(self, n_iterations=100, verbose=1, **kwargs):
-        """
-        Takes an optional argument, `n_iterations` and updates the model
-        `n_iterations` times.
-
-        :param n_iterations: Number of iterations. Default is 100.
-        :type n_iterations: int, optional
-
-        :param verbose: If 1, current number of iterations
-            are printed out to notify the user. Default is 1.
-        :type verbose: int, optional
-        
-        :param kwargs: For compatability with calls to LdaCgsMulti.
-        :type kwargs: optional
-        """
-        random_state = np.random.RandomState(self.seed)
-        random_state.set_state(self._mtrand_state)
-
-
-        if verbose > 0:
-            print ('Begin LDA training for {0} iterations'\
-                   .format(n_iterations))
-            start = time.time()
-            t = start
-
-        # Training loop
-        stop = self.iteration + n_iterations
-        if verbose == 1:
-            pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
-
-        #print("Stop ", stop)
-        for itr in xrange(self.iteration , stop):
-
-            results = cgs_update(self.iteration, self.corpus, self.word_top,
-                                 self.inv_top_sums, self.top_doc, self.Z,
-                                 self.indices, self._mtrand_state[0],
-                                 self._mtrand_state[1], self._mtrand_state[2],
-                                 self._mtrand_state[3], self._mtrand_state[4])
-
-            lp = results[4]
-            self.log_probs.append((self.iteration, lp))
-
-            if verbose == 2:
-                itr_time = np.around(time.time()-t, decimals=1)
-                t = time.time()
-                if verbose > 1 or itr==stop-1:
-                    print ('\nIteration {0} complete: log_prob={1}, time={2}'
-                           .format(self.iteration, lp, itr_time))
-
-            if verbose == 1:
-                #print("Self iteration", self.iteration)
-                pbar.update(self.iteration - (stop - n_iterations))
-                time.sleep(0.01)
-
-            self.iteration += 1
-
-            self._mtrand_state = results[5:]
-        if verbose == 1:
-            pbar.finish();
-        if verbose > 1:
-            print '-'*60, ('\n\nWalltime per iteration: {0} seconds'
-                           .format(np.around((t-start)/n_iterations, decimals=2)))
-
+        return train(self, n_iterations, verbose)
+    """
+    
 
     @staticmethod
     def load(filename):
@@ -198,6 +154,80 @@ class LdaCgsSeq(object):
         """
         save_lda(self, filename)
 
+    def train(self, n_iterations=100, verbose=1, **kwargs):
+        """
+        Takes an optional argument, `n_iterations` and updates the model
+        `n_iterations` times.
+    
+        :param n_iterations: Number of iterations. Default is 100.
+        :type n_iterations: int, optional
+    
+        :param verbose: If 1, current number of iterations
+            are printed out to notify the user. Default is 1.
+        :type verbose: int, optional
+        
+        :param kwargs: For compatability with calls to LdaCgsMulti.
+        :type kwargs: optional
+        """
+        import cython
+        if self.dtype == np.uint16 and self.Ktype == np.uint8:
+            update = cgs_update[cython.ushort,cython.uchar]
+        elif self.dtype == np.uint16 and self.Ktype == np.uint16:
+            update = cgs_update[cython.ushort,cython.ushort]
+        elif self.dtype == np.uint32 and self.Ktype == np.uint8:
+            update = cgs_update[cython.uint,cython.uchar]
+        elif self.dtype == np.uint32 and self.Ktype == np.uint16:
+            update = cgs_update[cython.uint,cython.ushort]
+        else:
+            raise NotImplementedError(
+                "Unsupported corpus dtype ({}) and topic dtype ({}) combination".format(
+                    self.corpus.dtype, self.Ktype))
+    
+        random_state = np.random.RandomState(self.seed)
+        random_state.set_state(self._mtrand_state)
+    
+    
+        if verbose > 0:
+            print ('Begin LDA training for {0} iterations'\
+                   .format(n_iterations))
+            start = time.time()
+            t = start
+    
+        # Training loop
+        stop = self.iteration + n_iterations
+        if verbose == 1:
+            pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()
+    
+        #print("Stop ", stop)
+        for itr in range(self.iteration , stop):
+            results = update(self.iteration, self.corpus, self.word_top,
+                                 self.inv_top_sums, self.top_doc, self.Z,
+                                 self.indices, self._mtrand_state[0],
+                                 self._mtrand_state[1], self._mtrand_state[2],
+                                 self._mtrand_state[3], self._mtrand_state[4])
+    
+            lp = np.float32(results[4])
+            self.log_probs.append((self.iteration, lp))
+    
+            if verbose == 2:
+                itr_time = np.around(time.time()-t, decimals=1)
+                t = time.time()
+                if verbose > 1 or itr==stop-1:
+                    print ('\nIteration {0} complete: log_prob={1}, time={2}'
+                           .format(self.iteration, lp, itr_time))
+    
+            if verbose == 1:
+                #print("Self iteration", self.iteration)
+                pbar.update(self.iteration - (stop - n_iterations))
+    
+            self.iteration += 1
+    
+            self._mtrand_state = results[5:]
+        if verbose == 1:
+            pbar.finish();
+        if verbose > 1:
+            print('-'*60, ('\n\nWalltime per iteration: {0} seconds'
+                           .format(np.around((t-start)/n_iterations, decimals=2))))
 
 
 class LdaCgsQuerySampler(LdaCgsSeq):
@@ -205,7 +235,7 @@ class LdaCgsQuerySampler(LdaCgsSeq):
     """
     def __init__(self, lda_obj=None, new_corpus=None,
                  align_corpora=False, old_corpus=None,
-                 context_type=None):
+                 context_type=None, seed=None):
 
         if align_corpora:
             new_corp = align(old_corpus, new_corpus)
@@ -221,13 +251,15 @@ class LdaCgsQuerySampler(LdaCgsSeq):
         else:
             kwargs = dict(corpus=new_corpus)
 
+        if seed is not None:
+            kwargs.update(seed=seed)
+
 
         super(LdaCgsQuerySampler, self).__init__(**kwargs)
 
         if lda_obj:
             self.word_top[:] = lda_obj.word_top
             self.inv_top_sums[:] = lda_obj.inv_top_sums
-
 
 
 
@@ -242,11 +274,11 @@ def demo_LdaCgsSeq(doc_len=500, V=100000, n_docs=100,
 
     from vsm.extensions.corpusbuilders import random_corpus
 
-    print 'Words per document:', doc_len
-    print 'Words in vocabulary:', V
-    print 'Documents in corpus:', n_docs
-    print 'Number of topics:', K
-    print 'Iterations:', n_iterations
+    print('Words per document:', doc_len)
+    print('Words in vocabulary:', V)
+    print('Documents in corpus:', n_docs)
+    print('Number of topics:', K)
+    print('Iterations:', n_iterations)
 
     c = random_corpus(n_docs*doc_len, V, doc_len, doc_len+1, seed=corpus_seed)
     m = LdaCgsSeq(c, 'document', K=K, seed=model_seed)

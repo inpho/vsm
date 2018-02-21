@@ -3,7 +3,7 @@ import numpy as np
 from vsm.spatial import angle
 from vsm.exceptions import *
 
-from wrappers import *
+from vsm.viewer.wrappers import *
 
 
 __all__ = ['BeagleViewer']
