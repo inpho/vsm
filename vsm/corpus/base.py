@@ -474,7 +474,7 @@ class Corpus(BaseCorpus):
 
     """
     __slots__ = ['words', 'context_data', 'corpus','dtype','stopped_words',
-                 'words_int', 'context_types']
+                 'words_int', 'context_types', 'original_length']
 
     def __init__(self,
                  corpus,
@@ -502,6 +502,7 @@ class Corpus(BaseCorpus):
                                  dtype=self.dtype)
 
         self.stopped_words = set()
+        self.original_length = len(self.corpus)
 
         if remove_empty:
             self.remove_empty()
@@ -661,7 +662,7 @@ class Corpus(BaseCorpus):
         except KeyError:
             c.dtype = c.corpus.dtype
         try:
-            c.original_length = c.original_length.result()
+            c.original_length = int(c.original_length.result())
         except KeyError:
             c.original_length = None
 
@@ -691,7 +692,7 @@ class Corpus(BaseCorpus):
             c.stopped_words = set()
 
         try:
-            c.original_length = arrays_in['original_length']
+            c.original_length = int(arrays_in['original_length'])
         except:
             c.original_length = None
 
@@ -740,7 +741,7 @@ class Corpus(BaseCorpus):
         arrays_out['context_types'] = np.asarray(self.context_types)
         arrays_out['stopped_words'] = np.asarray(self.stopped_words)
         arrays_out['dtype'] = str(self.dtype)
-        arrays_out['original_length'] = str(self.original_length)
+        arrays_out['original_length'] = int(self.original_length)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]
