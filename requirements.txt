@@ -6,7 +6,6 @@ future==0.16.0
 matplotlib==2.0.2
 nltk==3.2.3
 numpy==1.12.1
-porterstemmer==0.5
 progressbar2==3.35.2
 py4j==0.10.6
 scikit_learn==0.19.1

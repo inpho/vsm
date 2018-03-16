@@ -23,7 +23,6 @@ install_requires=[
         'matplotlib',
         'nltk',
         'numpy',
-        'porterstemmer',
         'progressbar2',
         'py4j',
         'scikit_learn',
@@ -38,7 +37,7 @@ if platform.python_version_tuple()[0] == '2':
 
 setup(
     name = "vsm",
-    version = "0.4.2",
+    version = "0.4.3",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
