@@ -47,4 +47,4 @@ after_success:
   - pwd
   - python setup.py bdist_egg
   - pip install wheel
-  - wheel convert -d dist/*.egg
+  - wheel convert -d dist dist/*.egg
