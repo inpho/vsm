@@ -143,7 +143,7 @@ class BaseCorpus(object):
     'transitive'
     """
     __slots__ = ['words', 'context_data', 'corpus','dtype','stopped_words',
-                 'context_types']
+                 'context_types', 'original_length']
     def __init__(self,
                  corpus,
                  dtype=None,
@@ -168,10 +168,11 @@ class BaseCorpus(object):
         for t in context_data:
             if self._validate_indices(t['idx']):
                 self.context_data.append(t)
-        
+
         self._gen_context_types(context_types)
-        
+
         self.stopped_words = set()
+        self.original_length = len(self.corpus)
 
         if remove_empty:
             self.remove_empty()
@@ -473,7 +474,7 @@ class Corpus(BaseCorpus):
 
     """
     __slots__ = ['words', 'context_data', 'corpus','dtype','stopped_words',
-                 'words_int', 'context_types']
+                 'words_int', 'context_types', 'original_length']
 
     def __init__(self,
                  corpus,
@@ -497,12 +498,11 @@ class Corpus(BaseCorpus):
             self.dtype = np.uint32
 
         self.corpus = np.asarray([self.words_int[word]
-                                  for word in self.corpus 
-                                      if str(word) not in ['\x00']
-                                      ],
+                                  for word in self.corpus],
                                  dtype=self.dtype)
 
         self.stopped_words = set()
+        self.original_length = len(self.corpus)
 
         if remove_empty:
             self.remove_empty()
@@ -646,6 +646,7 @@ class Corpus(BaseCorpus):
 
             c.context_types = executor.submit(load_npz, file, 'context_types')
             c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
+            c.original_length = executor.submit(load_npz, file, 'original_length')
 
             c.dtype = executor.submit(load_npz, file, 'dtype')
             concurrent.futures.wait([c.context_types])
@@ -657,9 +658,13 @@ class Corpus(BaseCorpus):
         c.corpus = c.corpus.result()
         c.words = c.words.result()
         try:
-            c.dtype = c.dtype.result() 
+            c.dtype = c.dtype.result()
         except KeyError:
-            c.dtype = c.corpus.dtype 
+            c.dtype = c.corpus.dtype
+        try:
+            c.original_length = int(c.original_length.result())
+        except KeyError:
+            c.original_length = None
 
         c.context_data = [future.result() for future in c.context_data]
 
@@ -685,6 +690,11 @@ class Corpus(BaseCorpus):
             c.stopped_words = set(arrays_in['stopped_words'].tolist())
         except:
             c.stopped_words = set()
+
+        try:
+            c.original_length = int(arrays_in['original_length'])
+        except:
+            c.original_length = None
 
         c.context_data = list()
         for n in c.context_types:
@@ -731,6 +741,7 @@ class Corpus(BaseCorpus):
         arrays_out['context_types'] = np.asarray(self.context_types)
         arrays_out['stopped_words'] = np.asarray(self.stopped_words)
         arrays_out['dtype'] = str(self.dtype)
+        arrays_out['original_length'] = int(self.original_length)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]

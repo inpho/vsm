@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 
 
@@ -26,7 +27,7 @@ def lda_save(ctx_type, phifile, thetafile, zfile, restfile, modelfile):
     arrays_out['top_prior'] = np.array([float(dic['top_prior'])]
                                     * word_top.size)#.reshape(word_top.shape)
     
-    print 'Saving LDA model to', modelfile
+    print('Saving LDA model to', modelfile)
     np.savez(modelfile, **arrays_out)
 
 

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import numpy as np
 from itertools import product
 from ldacgsseq import LdaCgsSeq
@@ -101,7 +103,7 @@ class LdaExact(LdaCgsSeq):
         self.log_probs = [(1, max_log_prob)]
 
         if verbose > 0:
-            print 'Number of maxima:', len(self.arg_maxima)
+            print('Number of maxima:', len(self.arg_maxima))
 
 
     def all_estimates(self):

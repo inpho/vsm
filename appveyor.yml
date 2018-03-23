@@ -4,6 +4,8 @@ environment:
     # http://www.appveyor.com/docs/installed-software#python
     - PYTHON: "C:\\Miniconda"
     - PYTHON: "C:\\Miniconda-x64"
+    - PYTHON: "C:\\Miniconda36"
+    - PYTHON: "C:\\Miniconda36-x64"
 
   twineargs:
     secure: Hj0/nwvDm2ghYAjXDELxtkKOroTwKq1hDRekkNCSEdG9lsIn/8ymmF6RuNN7scSa
@@ -11,10 +13,10 @@ environment:
 
 install:
   - "%PYTHON%\\python.exe -m conda update -q --yes conda"
-  - "%PYTHON%\\python.exe -m conda install -q --yes pip numpy scipy scikit-learn unidecode nltk futures chardet cython"
+  - "%PYTHON%\\python.exe -m conda install -q --yes pip numpy scipy scikit-learn unidecode nltk chardet cython"
   - "%PYTHON%\\python.exe -c \"import nltk; nltk.download('stopwords'); nltk.download('punkt')\""
   - "%PYTHON%\\python.exe -m pip install unittest2 nose"
-  - "%PYTHON%\\python.exe -m pip install vsm -i https://inpho.cogs.indiana.edu/pypi"
+  - "%PYTHON%\\python.exe -m pip install ."
 
 build: off
 version: '1.0.{build}'
@@ -35,7 +37,7 @@ after_test:
   # 64-bit Python 3.3/3.4. And you need to use %PYTHON% to get the correct
   # interpreter
   - "%PYTHON%\\python.exe setup.py bdist_egg"
-  - "%PYTHON%\\python.exe -m wheel convert dist\\*.egg"
+  - "%PYTHON%\\python.exe -m wheel convert -d dist dist\\*.egg"
 
 artifacts:
   # bdist_wheel puts your built wheel in the dist directory
@@ -45,8 +47,8 @@ deploy_script:
   - ps: >- 
       if($env:appveyor_repo_tag -eq 'True') {
         if($env:appveyor_repo_branch -eq 'master') {
-          & %PYTHON%\\python.exe -m pip install twine
-          & %PYTHON%\\python.exe -m twine upload %twineargs% dist/*.whl
+          & "$env:PYTHON\python.exe" -m pip install twine
+          & "$env:PYTHON\python.exe" -m twine upload $env:twineargs dist/*.whl
         }
       }
 
