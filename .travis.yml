@@ -43,9 +43,10 @@ after_success:
   - python setup.py bdist_egg
   - pip install wheel
   - wheel convert -d dist dist/*.egg
+  - ls dist
 
 addons:
   artifacts:
     paths:
-    - dist/*.whl
-    - dist/*.egg
+    - $(ls dist/*.whl | tr "\n" ":")
+    - $(ls dist/*.egg | tr "\n" ":")
