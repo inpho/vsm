@@ -1,4 +1,9 @@
 #language: python
+addons:
+  artifacts: true
+    paths:
+    - dist/*.whl
+    - dist/*.egg
 env:
   - PYTHON_VERSION="2.7"
   - PYTHON_VERSION="3.6"
@@ -36,7 +41,10 @@ install:
 # command to run tests
 before_script: 
   - pip install unittest2 nose
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-     pip install --pre topicexplorer; fi
 script: bash coverage.sh
-after_success: coveralls
+after_success:
+  - coveralls
+  - pwd
+  - python setup.py bdist_egg
+  - pip install wheel
+  - wheel convert -d dist/*.egg
