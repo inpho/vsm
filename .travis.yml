@@ -1,9 +1,4 @@
 #language: python
-addons:
-  artifacts: true
-    paths:
-    - dist/*.whl
-    - dist/*.egg
 env:
   - PYTHON_VERSION="2.7"
   - PYTHON_VERSION="3.6"
@@ -48,3 +43,9 @@ after_success:
   - python setup.py bdist_egg
   - pip install wheel
   - wheel convert -d dist dist/*.egg
+
+addons:
+  artifacts:
+    paths:
+    - dist/*.whl
+    - dist/*.egg
