@@ -5,7 +5,7 @@ env:
 # command to install dependencies
 os:
   - linux
-#  - osx
+  - osx
 install:
   # Install conda
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
