@@ -25,8 +25,10 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda --yes
-  - conda create -n py -q --yes pip numpy scipy scikit-learn unidecode nltk chardet cython "python=$TRAVIS_PYTHON_VERSION"
+  - conda create -n py -q --yes pip numpy scipy scikit-learn unidecode nltk chardet cython "python=$PYTHON_VERSION"
   - source activate py
+  - which python
+  - which pip
   - python --version
   - pip --version
   # command to install dependencies
