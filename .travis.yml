@@ -52,3 +52,5 @@ addons:
     paths:
     - $(ls dist/*.whl | tr "\n" ":")
     - $(ls dist/*.egg | tr "\n" ":")
+    target_paths:
+    - /$TRAVIS_OS_NAME/$TRAVIS_BUILD_NUMBER
