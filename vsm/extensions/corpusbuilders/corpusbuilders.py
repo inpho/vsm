@@ -2,16 +2,17 @@ from __future__ import absolute_import
 from builtins import zip
 from builtins import str
 from builtins import range
+
+from codecs import open
+from itertools import chain
 import os
 
 import numpy as np
+from progressbar import ProgressBar, Percentage, Bar
 from unidecode import unidecode
-from codecs import open
 
 from vsm.corpus import Corpus
 from .util import *
-
-from progressbar import ProgressBar, Percentage, Bar
 
 __all__ = ['empty_corpus', 'random_corpus',
            'toy_corpus', 'corpus_fromlist',
@@ -160,7 +161,7 @@ def corpus_fromlist(ls, context_type='context'):
     [array([(2, 'sentence_0'), (3, 'sentence_1'), (5, 'sentence_2')], 
           dtype=[('idx', '<i8'), ('sentence_label', '|S10')])]
     """
-    corpus = [w for ctx in ls for w in ctx]
+    corpus = chain.from_iterable(ls)    #[w for ctx in ls for w in ctx]
 
     indices = np.cumsum([len(sbls) for sbls in ls])
     metadata = ['{0}_{1}'.format(context_type, i)

@@ -2,9 +2,12 @@ from __future__ import print_function
 from builtins import str
 from builtins import range
 from builtins import object
+
+from itertools import tee
 import os
 
 import numpy as np
+from sortedcontainers import SortedSet
 
 from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
@@ -155,15 +158,25 @@ class BaseCorpus(object):
         if to_array:
             self.corpus = np.asarray(corpus, dtype=dtype)
             self.dtype = self.corpus.dtype
+            self.words = np.unique(self.corpus)
         else:
-            self.corpus = corpus[:]
+            self.corpus, self.words = tee(corpus)
             self.dtype = dtype
+            self.words = np.asarray(SortedSet(self.words), dtype=np.object_)
 
         # Since np.unique attempts to make a whole contiguous copy of the
         # corpus array, we instead use a sorted set and cast to a np array
-        # equivalent to self.words = np.unique(self.corpus)
-        self.words = np.asarray(sorted(set(self.corpus)), dtype=np.object_)
+        # equivalent to 
 
+        if hasattr(self.corpus, '__len__'):
+            self._append_context_types(context_data, context_types)
+            self.original_length = len(self.corpus)
+
+        self.stopped_words = set()
+        if remove_empty:
+            self.remove_empty()
+    
+    def _append_context_types(self, context_data, context_types):
         self.context_data = []
         for t in context_data:
             if self._validate_indices(t['idx']):
@@ -171,11 +184,6 @@ class BaseCorpus(object):
 
         self._gen_context_types(context_types)
 
-        self.stopped_words = set()
-        self.original_length = len(self.corpus)
-
-        if remove_empty:
-            self.remove_empty()
 
     def __len__(self):
         """
@@ -497,9 +505,12 @@ class Corpus(BaseCorpus):
         else:
             self.dtype = np.uint32
 
-        self.corpus = np.asarray([self.words_int[word]
-                                  for word in self.corpus],
-                                 dtype=self.dtype)
+        self.corpus = np.fromiter(
+            (self.words_int[word] for word in self.corpus),
+            dtype=self.dtype)
+            #count=len(self.corpus))
+        
+        self._append_context_types(context_data, context_types)
 
         self.stopped_words = set()
         self.original_length = len(self.corpus)
