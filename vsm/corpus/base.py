@@ -499,7 +499,8 @@ class Corpus(BaseCorpus):
                                      context_data=context_data,
                                      dtype=np.object_,
                                      remove_empty=False,
-                                     to_array=False, words_corpus=words_corpus)
+                                     to_array=False,
+                                     words_corpus=words_corpus)
 
         self._set_words_int()
 
