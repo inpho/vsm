@@ -153,16 +153,19 @@ class BaseCorpus(object):
                  context_types=[],
                  context_data=[],
                  remove_empty=False,
-                 to_array=True):
+                 to_array=True,
+                 words_corpus=None):
 
         if to_array:
             self.corpus = np.asarray(corpus, dtype=dtype)
             self.dtype = self.corpus.dtype
             self.words = np.unique(self.corpus)
         else:
-            self.corpus, self.words = tee(corpus)
+            self.corpus = corpus
             self.dtype = dtype
-            self.words = np.asarray(SortedSet(self.words), dtype=np.object_)
+            self.words = np.asarray(
+                SortedSet(words_corpus if words_corpus else self.corpus), 
+                dtype=np.object_)
 
         # Since np.unique attempts to make a whole contiguous copy of the
         # corpus array, we instead use a sorted set and cast to a np array
@@ -488,14 +491,15 @@ class Corpus(BaseCorpus):
                  corpus,
                  context_types=[],
                  context_data=[],
-                 remove_empty=True):
+                 remove_empty=True,
+                 words_corpus=None):
 
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
                                      context_data=context_data,
                                      dtype=np.object_,
                                      remove_empty=False,
-                                     to_array=False)
+                                     to_array=False, words_corpus=words_corpus)
 
         self._set_words_int()
 

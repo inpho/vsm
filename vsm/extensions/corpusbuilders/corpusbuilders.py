@@ -4,6 +4,7 @@ from builtins import str
 from builtins import range
 
 from codecs import open
+from copy import copy
 from itertools import chain
 import os
 
@@ -162,8 +163,8 @@ def corpus_fromlist(ls, context_type='context'):
           dtype=[('idx', '<i8'), ('sentence_label', '|S10')])]
     """
     corpus = chain.from_iterable(ls)    #[w for ctx in ls for w in ctx]
-
     indices = np.cumsum([len(sbls) for sbls in ls])
+
     metadata = ['{0}_{1}'.format(context_type, i)
                 for i in range(len(indices))]
     md_type = np.array(metadata).dtype
@@ -172,7 +173,8 @@ def corpus_fromlist(ls, context_type='context'):
     context_data = [np.array(list(zip(indices, metadata)), dtype=dtype)]
 
     return Corpus(corpus, context_data=context_data,
-                  context_types=[context_type])
+                  context_types=[context_type], 
+                  words_corpus=chain.from_iterable(copy(ctx) for ctx in ls))
 
 
 def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False,
