@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import numpy as np
 from vsm.corpus import Corpus, binary_search
 from vsm.extensions.corpusbuilders import *
@@ -22,10 +24,10 @@ class CorpusSent(Corpus):
     :See Also: :class: Corpus
     """
     def __init__(self, corpus, sentences, context_types=[], context_data=[], 
-		remove_empty=False):
+        remove_empty=False):
        
        super(CorpusSent, self).__init__(corpus, context_types=context_types,
-		 context_data=context_data, remove_empty=remove_empty)
+         context_data=context_data, remove_empty=remove_empty)
        
        sentences = [re.sub('\n', ' ', s) for s in sentences]
        self.sentences = np.array(sentences)
@@ -148,7 +150,7 @@ class CorpusSent(Corpus):
 
         :See Also: :class:`Corpus`
         """
-        print "Using apply_stoplist for some reason"
+        print("Using apply_stoplist for some reason")
         stoplist = set(stoplist)
         if freq:
             #TODO: Use the TF model instead
@@ -213,7 +215,7 @@ class CorpusSent(Corpus):
 
         :See Also: :class: Corpus, :meth: Corpus.load, :meth: numpy.load
         """
-        print 'Loading corpus from', file
+        print('Loading corpus from', file)
         arrays_in = np.load(file)
 
         c = CorpusSent([], [])
@@ -247,8 +249,8 @@ class CorpusSent(Corpus):
 
         :See Also: :class: Corpus, :meth: Corpus.save, :meth: numpy.savez
         """
-	
-	print 'Saving corpus as', file
+    
+        print('Saving corpus as', file)
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
         arrays_out['words'] = self.words
@@ -386,7 +388,7 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10,
             words = beagleviewer.sim_word_word(w)['word']
             replacement = first_in_corp(ldavTo.corpus, words)
             wl.append(replacement)
-            print 'BEAGLE composite model replaced {0} by {1}'.format(w, 
+            print('BEAGLE composite model replaced {0} by {1}', w,
                                                         replacement)
         else:
             wl.append(w)
@@ -394,7 +396,7 @@ def sim_sent_sent_across(ldavFrom, ldavTo, beagleviewer, sent, print_len=10,
     # from ldavFrom:sent -> ldavTo:topics -> ldavTo:sent(doc)
     tops = ldavTo.sim_word_top(wl).first_cols[:(ldavTo.model.K/6)]
     tops = [int(t) for t in tops]
-    print "Related topics: ", tops 
+    print("Related topics: ", tops)
     # sim_sents = ldavTo.sim_top_doc(tops, print_len=print_len, 
     #                                as_strings=False)
     # lc = sim_sents['i'][:print_len]
@@ -637,7 +639,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
         par_n = 0
         
         for chk, label in zip(chunks, labels):
-            print 'Tokenizing', label
+            print('Tokenizing', label)
             pars = paragraph_tokenize(chk)
 
             for par in pars:
@@ -658,7 +660,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True):
             chk_n += 1
     else:
         for chk, label in zip(chunks, labels):
-            print 'Tokenizing', label
+            print('Tokenizing', label)
             sents = sentence_tokenize(chk)
 
             for sent in sents:
@@ -784,7 +786,7 @@ def dir_corpus(plain_dir, chunk_name='article', encoding='utf8',
     
     if corpus_sent:
         c = CorpusSent(words, sent, context_data=data, context_types=names,
-			remove_empty=False)
+            remove_empty=False)
     else:
         c = Corpus(words, context_data=data, context_types=names)
     

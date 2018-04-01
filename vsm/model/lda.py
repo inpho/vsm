@@ -2,6 +2,7 @@
 Provides a convenient alias for the LdaCgs* classes
 """
 from __future__ import absolute_import
+from __future__ import print_function
 from builtins import str
 from builtins import object
 import platform # For Windows workaround
@@ -73,13 +74,21 @@ class LDA(object):
         :See Also: :class:`numpy.load`
         """
         from .ldafunctions import load_lda
+        from .ldacgsmulti import LdaCgsMulti
+        from .ldacgsseq import LdaCgsSeq
 
         if multiprocessing and platform.system() != 'Windows':
-            from .ldacgsmulti import LdaCgsMulti
             return load_lda(filename, LdaCgsMulti)
         else:
-            if platform.system() == 'Windows':
+            if multiprocessing and platform.system() == 'Windows':
                 warnings.warn("""Multiprocessing is not implemented on Windows.
                 Defaulting to sequential algorithm.""", RuntimeWarning)
-            from .ldacgsseq import LdaCgsSeq 
-            return load_lda(filename, LdaCgsSeq)
+            m = load_lda(filename, LdaCgsSeq)
+            try:
+                if m.n_proc:
+                    print("reloading with multiprocessing support")
+                    m = load_lda(filename, LdaCgsMulti)
+            except AttributeError:
+                pass
+
+            return m

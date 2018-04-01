@@ -143,7 +143,7 @@ class BaseCorpus(object):
     'transitive'
     """
     __slots__ = ['words', 'context_data', 'corpus','dtype','stopped_words',
-                 'context_types']
+                 'context_types', 'original_length']
     def __init__(self,
                  corpus,
                  dtype=None,
@@ -168,10 +168,11 @@ class BaseCorpus(object):
         for t in context_data:
             if self._validate_indices(t['idx']):
                 self.context_data.append(t)
-        
+
         self._gen_context_types(context_types)
-        
+
         self.stopped_words = set()
+        self.original_length = len(self.corpus)
 
         if remove_empty:
             self.remove_empty()
@@ -473,7 +474,7 @@ class Corpus(BaseCorpus):
 
     """
     __slots__ = ['words', 'context_data', 'corpus','dtype','stopped_words',
-                 'words_int', 'context_types']
+                 'words_int', 'context_types', 'original_length']
 
     def __init__(self,
                  corpus,
@@ -497,12 +498,11 @@ class Corpus(BaseCorpus):
             self.dtype = np.uint32
 
         self.corpus = np.asarray([self.words_int[word]
-                                  for word in self.corpus 
-                                      if str(word) not in ['\x00']
-                                      ],
+                                  for word in self.corpus],
                                  dtype=self.dtype)
 
         self.stopped_words = set()
+        self.original_length = len(self.corpus)
 
         if remove_empty:
             self.remove_empty()
@@ -573,7 +573,8 @@ class Corpus(BaseCorpus):
     def load(file=None, corpus_dir=None,
              corpus_file='corpus.npy',
              words_file='words.npy',
-             metadata_file='metadata.npy'):
+             metadata_file='metadata.npy',
+             load_corpus=True):
         """Loads data into a Corpus object. 
         
         :param file: The file to read. See `numpy.load` for further
@@ -603,6 +604,11 @@ class Corpus(BaseCorpus):
         `idx` which stores the integer indices marking the document
         boundaries.
         :type corpus_file: string or file object
+
+        :param load_corpus: Determines whether to load the corpus. 
+        If False, only the word list is loaded, greatly improving
+        memory performance.
+        :type load_corpus: boolean
         
         :returns: A Corpus object.
 
@@ -616,14 +622,14 @@ class Corpus(BaseCorpus):
             notebook = True
             print("Running from notebook, using serial load function.")
         except NameError:
-            notebook = False
+            notebook = True
 
 
         if not notebook and file is not None:
-            return Corpus._parallel_load(file)
+            return Corpus._parallel_load(file, load_corpus=load_corpus)
 
         elif notebook and file is not None:
-            return Corpus._serial_load(file)
+            return Corpus._serial_load(file, load_corpus=load_corpus)
 
         elif not corpus_dir is None:
             return Corpus._multifile_load(corpus_dir=corpus_dir,
@@ -633,7 +639,7 @@ class Corpus(BaseCorpus):
 
     @staticmethod
     @use_czipfile
-    def _parallel_load(file):
+    def _parallel_load(file, load_corpus=True):
         import concurrent.futures
         import functools
         from pickle import PickleError, UnpicklingError
@@ -641,11 +647,13 @@ class Corpus(BaseCorpus):
         c = Corpus([], remove_empty=False)
         # submit futures
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            c.corpus = executor.submit(load_npz, file, 'corpus')
+            if load_corpus:
+                c.corpus = executor.submit(load_npz, file, 'corpus')
             c.words =  executor.submit(load_npz, file, 'words')
 
             c.context_types = executor.submit(load_npz, file, 'context_types')
             c.stopped_words = executor.submit(load_npz, file, 'stopped_words')
+            c.original_length = executor.submit(load_npz, file, 'original_length')
 
             c.dtype = executor.submit(load_npz, file, 'dtype')
             concurrent.futures.wait([c.context_types])
@@ -653,13 +661,16 @@ class Corpus(BaseCorpus):
             c.context_data = ['context_data_{}'.format(n) for n in c.context_types]
             c.context_data = [executor.submit(load_npz, file, name) for name in c.context_data]
 
-
-        c.corpus = c.corpus.result()
+        c.corpus = c.corpus.result() if load_corpus else None
         c.words = c.words.result()
         try:
-            c.dtype = c.dtype.result() 
+            c.dtype = c.dtype.result()
         except KeyError:
-            c.dtype = c.corpus.dtype 
+            c.dtype = c.corpus.dtype
+        try:
+            c.original_length = int(c.original_length.result())
+        except KeyError:
+            c.original_length = None
 
         c.context_data = [future.result() for future in c.context_data]
 
@@ -674,17 +685,25 @@ class Corpus(BaseCorpus):
         return c
 
     @staticmethod
-    def _serial_load(file):
+    def _serial_load(file, load_corpus=True):
         arrays_in = np.load(file)
 
         c = Corpus([], remove_empty=False)
-        c.corpus = arrays_in['corpus']
+        if load_corpus:
+            c.corpus = arrays_in['corpus']
+        else:
+            c.corpus = None
         c.words = arrays_in['words']
         c.context_types = arrays_in['context_types'].tolist()
         try:
             c.stopped_words = set(arrays_in['stopped_words'].tolist())
         except:
             c.stopped_words = set()
+
+        try:
+            c.original_length = int(arrays_in['original_length'])
+        except:
+            c.original_length = None
 
         c.context_data = list()
         for n in c.context_types:
@@ -731,6 +750,7 @@ class Corpus(BaseCorpus):
         arrays_out['context_types'] = np.asarray(self.context_types)
         arrays_out['stopped_words'] = np.asarray(self.stopped_words)
         arrays_out['dtype'] = str(self.dtype)
+        arrays_out['original_length'] = int(self.original_length)
 
         for i,t in enumerate(self.context_data):
             key = 'context_data_' + self.context_types[i]

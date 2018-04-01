@@ -1,3 +1,4 @@
+from __future__ import print_function
 from FileReadWrite import *
 from py4j.java_gateway import JavaGateway
 import numpy as np
@@ -64,7 +65,7 @@ def save(lda, ctx_type, fname, metafile):
     indices = range(0, int(dic['iteration']))
     arrays_out['log_prob_init'] = np.array(zip(indices, logs), dtype=dt)
     """
-    print 'Saving LDA model to', fname
+    print('Saving LDA model to', fname)
     np.savez(fname, **arrays_out)
    
 

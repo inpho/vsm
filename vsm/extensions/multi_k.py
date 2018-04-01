@@ -1,3 +1,5 @@
+from __future import print_function
+
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn import datasets
@@ -25,7 +27,7 @@ def multi_k(samples, n=30, distr=(10,30), cutoff=None, n_cls=None):
 
     if cutoff == None:
         cutoff = find_cutoff(cutplot, n_cls=n_cls)
-    print "Weight cutoff is set to ", cutoff
+    print("Weight cutoff is set to ", cutoff)
     category_func = category_mat(samples, mat, cutplot, cutoff=cutoff)
 
     x, y = zip(*cutplot)

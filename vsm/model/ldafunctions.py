@@ -89,10 +89,11 @@ def load_lda(filename, ldaclass):
                 mtrand_states = [executor.submit(load_npz, filename, 
                                                  'mtrand_states{}'.format(i)) 
                                      for i in range(5)]
-    
+
+        K = int(K.result())
+        V = int(V.result())
         m = ldaclass(context_type=context_type.result(), 
-                     K=K.result(), V=V.result(), 
-                     alpha=alpha.result(), beta=beta.result())
+                     K=K, V=V, alpha=alpha.result(), beta=beta.result())
     
         m.indices = indices.result()
         m.corpus = corpus.result()
@@ -141,12 +142,12 @@ def old_load_lda(filename, ldaclass):
     arrays_in = np.load(filename)
 
     context_type = arrays_in['context_type'][()]
-    K = arrays_in['K'][()]
+    K = int(arrays_in['K'][()])
 
     if 'm_words' in arrays_in:
-        V = arrays_in['m_words'][()]
+        V = int(arrays_in['m_words'][()])
     else:
-        V = arrays_in['V'][()]
+        V = int(arrays_in['V'][()])
 
     if 'ctx_prior' in arrays_in:
         alpha = arrays_in['ctx_prior']
