@@ -15,13 +15,17 @@ __all__ = [ 'init_priors', 'compute_top_doc', 'compute_word_top',
 
 def init_priors(V=0, K=0, beta=[], alpha=[]):
     # Topic and context priors; set defaults if need be
-    if len(beta) > 0:
+    if type(beta) == float:
+        beta = np.ones((V, 1), dtype=np.float) * beta
+    elif len(beta) > 0:
         beta = (np.array(beta, dtype=np.float).reshape(len(beta), 1))
     else:
         # Default is a flat prior of .01
         beta = np.ones((V, 1), dtype=np.float) * .01
 
-    if len(alpha) > 0:
+    if type(alpha) == float:
+        alpha = np.ones((K, 1), dtype=np.float) * alpha
+    elif len(alpha) > 0:
         alpha = (np.array(alpha, dtype=np.float).reshape(len(alpha), 1))
     else:
         # Default is a flat prior of .01
