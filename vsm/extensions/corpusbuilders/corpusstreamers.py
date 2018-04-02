@@ -8,7 +8,7 @@ from progressbar import ProgressBar, Bar, Percentage
 from vsm.extensions.corpusbuilders import corpus_fromlist
 from vsm.extensions.corpusbuilders.util import apply_stoplist, word_tokenize
 
-IGNORE = ['.json','.log','.pickle', '.DS_Store']
+IGNORE = ['.json','.log','.pickle', '.DS_Store', '.err', '.npz']
 
 def tokenize_and_pickle_file(filename, pickle_dir=None, tokenizer=word_tokenize):
     """
@@ -28,11 +28,16 @@ def tokenize_and_pickle_file(filename, pickle_dir=None, tokenizer=word_tokenize)
     return filename
 
 
-def corpus_from_files(filenames, encoding='utf8', ignore=IGNORE,
+def corpus_from_files(dir_or_filenames, encoding='utf8', ignore=IGNORE,
     nltk_stop=False, stop_freq=0, add_stop=None, decode=False, 
     verbose=True, simple=False, tokenizer=word_tokenize):
     if os.path.isdir(filenames):
-        filenames = [os.path.join(filenames, p) for p in os.listdir(filenames)]
+        # go through files in directory, filter hidden files
+        filenames = [os.path.join(root, path) 
+                        for root, dirs, files in os.walk(filenames)
+                            for path in files 
+                            if not path.startswith('.') and
+                                and not any(path.endswith(i) for i in ignore)]
 
     if verbose:
         pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(filenames))
