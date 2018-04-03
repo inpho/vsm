@@ -31,13 +31,17 @@ def tokenize_and_pickle_file(filename, pickle_dir=None, tokenizer=word_tokenize)
 def corpus_from_files(dir_or_filenames, encoding='utf8', ignore=IGNORE,
     nltk_stop=False, stop_freq=0, add_stop=None, decode=False, 
     verbose=True, simple=False, tokenizer=word_tokenize):
-    if os.path.isdir(filenames):
+    if os.path.isdir(dir_or_filenames):
         # go through files in directory, filter hidden files
         filenames = [os.path.join(root, path) 
-                        for root, dirs, files in os.walk(filenames)
+                        for root, dirs, files in os.walk(dir_or_filenames)
                             for path in files 
-                            if not path.startswith('.') and
-                                and not any(path.endswith(i) for i in ignore)]
+                            if not path.startswith('.')
+                               and not any(path.endswith(i) for i in ignore)]
+        labels = [filename.replace(dir_or_filenames + '/', '') for filename in filenames]
+    else:
+        filenames = dir_or_filenames
+        labels = filenames[:]
 
     if verbose:
         pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(filenames))
@@ -57,9 +61,9 @@ def corpus_from_files(dir_or_filenames, encoding='utf8', ignore=IGNORE,
             corpus = [f.result() for f in corpus]
         
         corpus = [PickledWords(f) for f in corpus]
-
-        corpus = corpus_fromlist(corpus, context_type='document')
-
+        corpus = corpus_fromlist(corpus, context_type='document', remove_empty=False)
+        corpus.context_data[0]['document_label'][:] = labels
+    
     corpus = apply_stoplist(corpus, nltk_stop=nltk_stop, freq=stop_freq)
 
     return corpus

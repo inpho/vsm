@@ -134,7 +134,7 @@ def random_corpus(corpus_len,
     return Corpus(corpus, context_types=[context_type], context_data=[rand_tok])
 
 
-def corpus_fromlist(ls, context_type='context'):
+def corpus_fromlist(ls, context_type='context', remove_empty=True):
     """
     Takes a list of lists or arrays containing strings or integers and
     returns a Corpus object. The label associated to a given context
@@ -174,7 +174,8 @@ def corpus_fromlist(ls, context_type='context'):
 
     return Corpus(corpus, context_data=context_data,
                   context_types=[context_type], 
-                  words_corpus=chain.from_iterable(copy(ctx) for ctx in ls))
+                  words_corpus=chain.from_iterable(copy(ctx) for ctx in ls),
+                  remove_empty=remove_empty)
 
 
 def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False,
