@@ -167,10 +167,6 @@ class BaseCorpus(object):
                 SortedSet(words_corpus if words_corpus else self.corpus), 
                 dtype=np.object_)
 
-        # Since np.unique attempts to make a whole contiguous copy of the
-        # corpus array, we instead use a sorted set and cast to a np array
-        # equivalent to 
-
         if hasattr(self.corpus, '__len__'):
             self._append_context_types(context_data, context_types)
             self.original_length = len(self.corpus)
