@@ -1,3 +1,8 @@
+from builtins import range
+import sys
+if sys.version_info[0] == 2:
+    import backports.tempfile
+
 from concurrent.futures import as_completed, ProcessPoolExecutor
 import pickle
 import tempfile
@@ -47,8 +52,12 @@ def corpus_from_files(dir_or_filenames, encoding='utf8', ignore=IGNORE,
         pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(filenames))
         pbar = pbar.start()
         n = 0
-
-    with tempfile.TemporaryDirectory(prefix='vsm-') as pickle_dir:
+    
+    if sys.version_info[0] == 2:
+        TD = backports.tempfile.TemporaryDirectory 
+    else:
+        TD = tempfile.TemporaryDirectory
+    with TD(prefix='vsm-') as pickle_dir:
         with ProcessPoolExecutor() as executor:
             corpus = [executor.submit(tokenize_and_pickle_file, filename, pickle_dir, tokenizer)
                           for filename in filenames]
