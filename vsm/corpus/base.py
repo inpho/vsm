@@ -828,18 +828,16 @@ class Corpus(BaseCorpus):
 
         # Calculate new base tokens
         tokens = self.view_contexts(self.context_types[BASE])
-        new_corpus = []
         spans = []
         for t in tokens:
             new_t = t[np.logical_not(stop)[t]] if t.size else t
             
             # TODO: append to new_corpus as well
             spans.append(new_t.size if new_t.size else 0)
-            if new_t.size:
-                new_corpus.append(new_t)
-
+        
+        self.corpus = self.corpus[np.logical_not(stop)[self.corpus]]
         # Stopped all words from Corpus
-        if not new_corpus:
+        if not self.corpus.size:
             return Corpus([])
 
         new_base = self.context_data[BASE].copy()
@@ -859,7 +857,6 @@ class Corpus(BaseCorpus):
         self.context_data = context_data
 
         # print 'Rebuilding corpus and updating stop words', datetime.now()
-        self.corpus = np.concatenate(new_corpus)
         self.stopped_words.update(self.words[stop])
 
         #print 'adjusting words list', datetime.now()
