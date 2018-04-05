@@ -870,6 +870,8 @@ class Corpus(BaseCorpus):
 
         #print "remapping corpus", datetime.now()
         self.corpus[:] = old_to_new_array[self.corpus]
+        if (self.corpus.dtype != np.uint16 and len(new_words) < 2**16):
+            self.corpus = self.corpus.astype(np.uint16)
 
         print(len(self.words), "unique words pre-stoplisting")
         #print 'storing new word dicts', datetime.now()
