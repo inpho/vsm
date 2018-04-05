@@ -788,26 +788,23 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
-        from sortedcontainers import SortedSet, SortedList
-        stop = SortedSet()
+        stop = np.zeros(self.words.shape, dtype=np.bool)
 
         if stoplist:
             for t in stoplist:
                 if t in self.words_int:
-                    stop.add(self.words_int[t])
+                    stop[self.words_int[t]] = 1
 
         if freq:
             cfs = np.bincount(self.corpus)
             freq_stop = np.where(cfs <= freq)[0]
-            stop.update(freq_stop)
+            stop[freq_stop] = 1
 
 
-        if not stop:
+        if not stop.any():
             # print 'Stop list is empty.'
             return self
     
-        # print 'Removing stop words', datetime.now()
-        f = np.vectorize(stop.__contains__)
 
         # print 'Rebuilding context data', datetime.now()
         context_data = []
@@ -834,7 +831,7 @@ class Corpus(BaseCorpus):
         new_corpus = []
         spans = []
         for t in tokens:
-            new_t = t[np.logical_not(f(t))] if t.size else t
+            new_t = t[np.logical_not(stop)[t]] if t.size else t
             
             # TODO: append to new_corpus as well
             spans.append(new_t.size if new_t.size else 0)
@@ -863,22 +860,24 @@ class Corpus(BaseCorpus):
 
         # print 'Rebuilding corpus and updating stop words', datetime.now()
         self.corpus = np.concatenate(new_corpus)
-        #self.corpus[f(self.corpus)]
         self.stopped_words.update(self.words[stop])
 
         #print 'adjusting words list', datetime.now()
-        new_words = np.delete(self.words, stop)
+        new_words = self.words[np.logical_not(stop)]
+        old_to_new_array = np.zeros(self.words.shape, dtype=self.corpus.dtype)
+        for i, word in enumerate(new_words):
+            old_to_new_array[self.words_int[word]] = i
 
         # print 'rebuilding word dictionary', datetime.now()
         new_words_int = dict((word,i) for i, word in enumerate(new_words)) 
-        old_to_new =  dict((self.words_int[word],i) for i, word in enumerate(new_words)) 
 
         #print "remapping corpus", datetime.now()
-        f = np.vectorize(old_to_new.__getitem__)
-        self.corpus[:] = f(self.corpus)
+        self.corpus[:] = old_to_new_array[self.corpus]
 
+        print(len(self.words), "unique words pre-stoplisting")
         #print 'storing new word dicts', datetime.now()
         self.words = new_words
+        print(len(self.words), "uniquewords post-stoplisting")
         self.words_int = new_words_int
 
         return self
