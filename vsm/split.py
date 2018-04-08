@@ -73,7 +73,7 @@ def mp_split_ls(ls, n):
     return np.array_split(ls, min(len(ls), n))
 
 
-def split_documents(corpus, indices, n_partitions):
+def split_documents(corpus, indices, max_partitions):
     """
     """
     docs = [(0, indices[0])]
@@ -81,9 +81,11 @@ def split_documents(corpus, indices, n_partitions):
         docs.append((indices[i], indices[i+1]))
     docs = np.array(docs, dtype='i8, i8')
 
-    corpus_chunks = np.array_split(corpus, n_partitions)
+    corpus_chunks = np.array_split(corpus, max_partitions)
     chunk_indices = np.cumsum([len(chunk) for chunk in corpus_chunks])
     doc_indices = np.searchsorted(indices, chunk_indices, side='right')
     doc_partitions = np.split(docs, doc_indices[:-1])
+
+    doc_partitions = [part for part in doc_partitions if part.size]
 
     return doc_partitions
