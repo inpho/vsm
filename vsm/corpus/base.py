@@ -719,7 +719,7 @@ class Corpus(BaseCorpus):
 
         c.context_data = list()
         for n in c.context_types:
-            t = arrays_in['context_data_' + n]
+            t = arrays_in['context_data_' + n.decode('utf-8')]
             c.context_data.append(t)
 
         c._set_words_int()
