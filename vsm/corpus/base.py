@@ -3,6 +3,8 @@ from builtins import str
 from builtins import range
 from builtins import object
 
+from past.builtins import basestring
+
 from itertools import tee
 import os
 
@@ -698,15 +700,25 @@ class Corpus(BaseCorpus):
 
     @staticmethod
     def _serial_load(file, load_corpus=True):
-        arrays_in = np.load(file)
+        arrays_in = np.load(file, encoding='bytes')
 
         c = Corpus([], remove_empty=False)
         if load_corpus:
             c.corpus = arrays_in['corpus']
         else:
             c.corpus = None
+
         c.words = arrays_in['words']
-        c.context_types = arrays_in['context_types'].tolist()
+        if isinstance(c.words[0], str):
+            pass
+        elif isinstance(c.words[0], basestring):
+            c.words[:] = [w.decode('utf-8') for w in c.words]
+        try:
+            c.context_types = [ctx.decode('utf-8') 
+                for ctx in arrays_in['context_types'].tolist()]
+        except AttributeError:
+            c.context_types = arrays_in['context_types'].tolist()
+
         try:
             c.stopped_words = set(arrays_in['stopped_words'].tolist())
         except:
@@ -719,7 +731,18 @@ class Corpus(BaseCorpus):
 
         c.context_data = list()
         for n in c.context_types:
-            t = arrays_in['context_data_' + n.decode('utf-8')]
+            try:
+                n = n.decode('utf-8')
+            except AttributeError:
+                pass
+            
+            t = arrays_in['context_data_{}'.format(n)]
+            
+            if isinstance(t['{}_label'.format(n)][0], str):
+                pass
+            elif isinstance(t['{}_label'.format(n)][0], basestring):
+                t['{}_label'.format(n)] = [lbl.decode('utf-8') for lbl in t['{}_label'.format(n)]]
+
             c.context_data.append(t)
 
         c._set_words_int()
