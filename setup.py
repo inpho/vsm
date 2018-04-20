@@ -38,7 +38,7 @@ if platform.python_version_tuple()[0] == '2':
 
 setup(
     name = "vsm",
-    version = "0.4.8",
+    version = "0.4.9",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",
