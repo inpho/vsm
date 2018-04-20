@@ -14,7 +14,7 @@ class TestCorpus(unittest.TestCase):
                                 2, 1, 2, 2], dtype=np.int)
         contextData = np.array([(3, 'doc0'), (5, 'doc1'), (7,'doc2'), (11,'doc3'),
                 (11,'doc4'), (15,'doc5'), (18,'doc6'), (20,'doc7')], 
-                dtype=[('idx', '<i8'), ('doc', '|U4')])
+                dtype=[('idx', '<i8'), ('document_label', '|U4')])
 
         self.bc = BaseCorpus(corpus, context_data=[contextData],
                                      context_types=['document'],
@@ -22,7 +22,7 @@ class TestCorpus(unittest.TestCase):
         
         text = ['I', 'came', 'I', 'saw', 'I', 'conquered']
         ctx_data = [np.array([(2, 'Veni'), (4, 'Vidi'), (6, 'Vici')],
-                            dtype=[('idx', '<i8'), ('sent', '|S6')])]
+                            dtype=[('idx', '<i8'), ('sentence_label', '|S6')])]
 
         self.corpus = Corpus(text, context_data=ctx_data,
                                     context_types=['sentence'])
@@ -108,11 +108,11 @@ class TestCorpus(unittest.TestCase):
         
     
     def test_MetaInt(self):
-        i = self.bc.meta_int('document', {'doc': 'doc3'})
+        i = self.bc.meta_int('document', {'document_label': 'doc3'})
         self.assertEqual(3, i)
 
     def test_GetMetadatum(self):
-        s = self.bc.get_metadatum('document', {'doc': 'doc0'}, 'doc')
+        s = self.bc.get_metadatum('document', {'document_label': 'doc0'}, 'document_label')
         self.assertEqual('doc0', s)
 
    
