@@ -3,24 +3,49 @@ import sys
 if sys.version_info[0] == 2:
     import backports.tempfile
 
+from codecs import open
 from concurrent.futures import as_completed, ProcessPoolExecutor
 import pickle
 import tempfile
 import os
 
 from progressbar import ProgressBar, Bar, Percentage
+from unidecode import unidecode
 
 from vsm.extensions.corpusbuilders import corpus_fromlist
-from vsm.extensions.corpusbuilders.util import apply_stoplist, word_tokenize
+from vsm.extensions.corpusbuilders.util import (apply_stoplist, 
+    detect_encoding, word_tokenize)
 
 IGNORE = ['.json','.log','.pickle', '.DS_Store', '.err', '.npz']
 
-def tokenize_and_pickle_file(filename, pickle_dir=None, tokenizer=word_tokenize):
+def read_file(filename, encoding='utf8', decode=False):
+    if encoding == 'detect':
+        encoding = detect_encoding(filename)
+    
+    try:
+        if decode:
+            with open(filename, mode='r', encoding=encoding) as f:
+                data = unidecode(f.read())
+        else:
+            with open(filename, mode='r', encoding=encoding) as f:
+                data = f.read()
+    except UnicodeDecodeError:
+        encoding = detect_encoding(filename)
+        if decode:
+            with open(filename, mode='r', encoding=encoding) as f:
+                data = unidecode(f.read())
+        else:
+            with open(filename, mode='r', encoding=encoding) as f:
+                data = f.read()
+
+    return data
+
+def tokenize_and_pickle_file(filename, pickle_dir=None, encoding='utf8',
+    decode=False, tokenizer=word_tokenize):
     """
     Tokenizes a file and returns a filename of a PickledWords instance.
     """
-    with open(filename) as infile:
-        data = infile.read()
+    data = read_file(filename, encoding=encoding, decode=decode)
 
     corpus = word_tokenize(data)
 
