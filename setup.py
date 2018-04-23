@@ -34,10 +34,11 @@ install_requires=[
 
 if platform.python_version_tuple()[0] == '2':
     install_requires.append("futures>=3.0.0")
+    install_requires.append("backports.tempfile==1.0")
 
 setup(
     name = "vsm",
-    version = "0.4.4",
+    version = "0.4.9",
     description = ('Vector Space Semantic Modeling Framework '\
                    'for the Indiana Philosophy Ontology Project'),
     author = "The Indiana Philosophy Ontology (InPhO) Project",

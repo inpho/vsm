@@ -321,7 +321,7 @@ class LdaCgsMulti(LdaCgsSeq):
             doc_indices.append((doc_indices[i][1],
                                 doc_indices[i][1] + len(docs[i+1])))
 
-        p = mp.Pool(self.n_proc)
+        p = mp.Pool(len(docs))
 
         if verbose == 1:
             pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=n_iterations).start()

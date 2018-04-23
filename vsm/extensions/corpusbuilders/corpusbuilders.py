@@ -2,16 +2,18 @@ from __future__ import absolute_import
 from builtins import zip
 from builtins import str
 from builtins import range
+
+from codecs import open
+from copy import copy
+from itertools import chain
 import os
 
 import numpy as np
+from progressbar import ProgressBar, Percentage, Bar
 from unidecode import unidecode
-from codecs import open
 
 from vsm.corpus import Corpus
 from .util import *
-
-from progressbar import ProgressBar, Percentage, Bar
 
 __all__ = ['empty_corpus', 'random_corpus',
            'toy_corpus', 'corpus_fromlist',
@@ -132,7 +134,7 @@ def random_corpus(corpus_len,
     return Corpus(corpus, context_types=[context_type], context_data=[rand_tok])
 
 
-def corpus_fromlist(ls, context_type='context'):
+def corpus_fromlist(ls, context_type='context', remove_empty=True):
     """
     Takes a list of lists or arrays containing strings or integers and
     returns a Corpus object. The label associated to a given context
@@ -160,9 +162,9 @@ def corpus_fromlist(ls, context_type='context'):
     [array([(2, 'sentence_0'), (3, 'sentence_1'), (5, 'sentence_2')], 
           dtype=[('idx', '<i8'), ('sentence_label', '|S10')])]
     """
-    corpus = [w for ctx in ls for w in ctx]
-
+    corpus = chain.from_iterable(ls)    #[w for ctx in ls for w in ctx]
     indices = np.cumsum([len(sbls) for sbls in ls])
+
     metadata = ['{0}_{1}'.format(context_type, i)
                 for i in range(len(indices))]
     md_type = np.array(metadata).dtype
@@ -171,7 +173,9 @@ def corpus_fromlist(ls, context_type='context'):
     context_data = [np.array(list(zip(indices, metadata)), dtype=dtype)]
 
     return Corpus(corpus, context_data=context_data,
-                  context_types=[context_type])
+                  context_types=[context_type], 
+                  words_corpus=chain.from_iterable(copy(ctx) for ctx in ls),
+                  remove_empty=remove_empty)
 
 
 def toy_corpus(plain_corpus, is_filename=False, encoding='utf8', nltk_stop=False,

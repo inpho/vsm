@@ -13,3 +13,5 @@ scipy==0.19.0
 sortedcontainers==1.5.7
 translate==3.5.0
 Unidecode==1.0.22
+
+backports.tempfile==1.0; python_version=='2.7' 

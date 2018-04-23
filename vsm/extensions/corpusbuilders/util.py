@@ -203,7 +203,10 @@ def word_tokenize(text):
 
     text = rehyph(text)
     text = process_word(text)
-    text = text.replace(u'\x00','')
+    if isinstance(text, str):
+        text = text.replace(u'\x00', '')
+    elif isinstance(text, basestring):
+        pass
     text = text.lower()
     tokens = word_tokenizer.tokenize(text)
 

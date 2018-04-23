@@ -2,9 +2,14 @@ from __future__ import print_function
 from builtins import str
 from builtins import range
 from builtins import object
+
+from past.builtins import basestring
+
+from itertools import tee
 import os
 
 import numpy as np
+from sortedcontainers import SortedSet
 
 from vsm.structarr import arr_add_field
 from vsm.split import split_corpus
@@ -150,20 +155,29 @@ class BaseCorpus(object):
                  context_types=[],
                  context_data=[],
                  remove_empty=False,
-                 to_array=True):
+                 to_array=True,
+                 words_corpus=None):
 
         if to_array:
             self.corpus = np.asarray(corpus, dtype=dtype)
             self.dtype = self.corpus.dtype
+            self.words = np.unique(self.corpus)
         else:
-            self.corpus = corpus[:]
+            self.corpus = corpus
             self.dtype = dtype
+            self.words = np.asarray(
+                SortedSet(words_corpus if words_corpus else self.corpus), 
+                dtype=np.object_)
 
-        # Since np.unique attempts to make a whole contiguous copy of the
-        # corpus array, we instead use a sorted set and cast to a np array
-        # equivalent to self.words = np.unique(self.corpus)
-        self.words = np.asarray(sorted(set(self.corpus)), dtype=np.object_)
+        if hasattr(self.corpus, '__len__'):
+            self._append_context_types(context_data, context_types)
+            self.original_length = len(self.corpus)
 
+        self.stopped_words = set()
+        if remove_empty:
+            self.remove_empty()
+    
+    def _append_context_types(self, context_data, context_types):
         self.context_data = []
         for t in context_data:
             if self._validate_indices(t['idx']):
@@ -171,11 +185,6 @@ class BaseCorpus(object):
 
         self._gen_context_types(context_types)
 
-        self.stopped_words = set()
-        self.original_length = len(self.corpus)
-
-        if remove_empty:
-            self.remove_empty()
 
     def __len__(self):
         """
@@ -480,14 +489,16 @@ class Corpus(BaseCorpus):
                  corpus,
                  context_types=[],
                  context_data=[],
-                 remove_empty=True):
+                 remove_empty=True,
+                 words_corpus=None):
 
         super(Corpus, self).__init__(corpus,
                                      context_types=context_types,
                                      context_data=context_data,
                                      dtype=np.object_,
                                      remove_empty=False,
-                                     to_array=False)
+                                     to_array=False,
+                                     words_corpus=words_corpus)
 
         self._set_words_int()
 
@@ -497,9 +508,12 @@ class Corpus(BaseCorpus):
         else:
             self.dtype = np.uint32
 
-        self.corpus = np.asarray([self.words_int[word]
-                                  for word in self.corpus],
-                                 dtype=self.dtype)
+        self.corpus = np.fromiter(
+            (self.words_int[word] for word in self.corpus),
+            dtype=self.dtype)
+            #count=len(self.corpus))
+        
+        self._append_context_types(context_data, context_types)
 
         self.stopped_words = set()
         self.original_length = len(self.corpus)
@@ -686,15 +700,25 @@ class Corpus(BaseCorpus):
 
     @staticmethod
     def _serial_load(file, load_corpus=True):
-        arrays_in = np.load(file)
+        arrays_in = np.load(file, encoding='bytes')
 
         c = Corpus([], remove_empty=False)
         if load_corpus:
             c.corpus = arrays_in['corpus']
         else:
             c.corpus = None
+
         c.words = arrays_in['words']
-        c.context_types = arrays_in['context_types'].tolist()
+        if isinstance(c.words[0], str):
+            pass
+        elif isinstance(c.words[0], basestring):
+            c.words[:] = [w.decode('utf-8') for w in c.words]
+        try:
+            c.context_types = [ctx.decode('utf-8') 
+                for ctx in arrays_in['context_types'].tolist()]
+        except AttributeError:
+            c.context_types = arrays_in['context_types'].tolist()
+
         try:
             c.stopped_words = set(arrays_in['stopped_words'].tolist())
         except:
@@ -707,7 +731,18 @@ class Corpus(BaseCorpus):
 
         c.context_data = list()
         for n in c.context_types:
-            t = arrays_in['context_data_' + n]
+            try:
+                n = n.decode('utf-8')
+            except AttributeError:
+                pass
+            
+            t = arrays_in['context_data_{}'.format(n)]
+            
+            if isinstance(t['{}_label'.format(n)][0], str):
+                pass
+            elif isinstance(t['{}_label'.format(n)][0], basestring):
+                t['{}_label'.format(n)] = [lbl.decode('utf-8') for lbl in t['{}_label'.format(n)]]
+
             c.context_data.append(t)
 
         c._set_words_int()
@@ -776,26 +811,23 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
-        from sortedcontainers import SortedSet, SortedList
-        stop = SortedSet()
+        stop = np.zeros(self.words.shape, dtype=np.bool)
 
         if stoplist:
             for t in stoplist:
                 if t in self.words_int:
-                    stop.add(self.words_int[t])
+                    stop[self.words_int[t]] = 1
 
         if freq:
             cfs = np.bincount(self.corpus)
             freq_stop = np.where(cfs <= freq)[0]
-            stop.update(freq_stop)
+            stop[freq_stop] = 1
 
 
-        if not stop:
+        if not stop.any():
             # print 'Stop list is empty.'
             return self
     
-        # print 'Removing stop words', datetime.now()
-        f = np.vectorize(stop.__contains__)
 
         # print 'Rebuilding context data', datetime.now()
         context_data = []
@@ -819,18 +851,16 @@ class Corpus(BaseCorpus):
 
         # Calculate new base tokens
         tokens = self.view_contexts(self.context_types[BASE])
-        new_corpus = []
         spans = []
         for t in tokens:
-            new_t = t[np.logical_not(f(t))] if t.size else t
+            new_t = t[np.logical_not(stop)[t]] if t.size else t
             
             # TODO: append to new_corpus as well
             spans.append(new_t.size if new_t.size else 0)
-            if new_t.size:
-                new_corpus.append(new_t)
-
+        
+        self.corpus = self.corpus[np.logical_not(stop)[self.corpus]]
         # Stopped all words from Corpus
-        if not new_corpus:
+        if not self.corpus.size:
             return Corpus([])
 
         new_base = self.context_data[BASE].copy()
@@ -850,23 +880,26 @@ class Corpus(BaseCorpus):
         self.context_data = context_data
 
         # print 'Rebuilding corpus and updating stop words', datetime.now()
-        self.corpus = np.concatenate(new_corpus)
-        #self.corpus[f(self.corpus)]
         self.stopped_words.update(self.words[stop])
 
         #print 'adjusting words list', datetime.now()
-        new_words = np.delete(self.words, stop)
+        new_words = self.words[np.logical_not(stop)]
+        old_to_new_array = np.zeros(self.words.shape, dtype=self.corpus.dtype)
+        for i, word in enumerate(new_words):
+            old_to_new_array[self.words_int[word]] = i
 
         # print 'rebuilding word dictionary', datetime.now()
         new_words_int = dict((word,i) for i, word in enumerate(new_words)) 
-        old_to_new =  dict((self.words_int[word],i) for i, word in enumerate(new_words)) 
 
         #print "remapping corpus", datetime.now()
-        f = np.vectorize(old_to_new.__getitem__)
-        self.corpus[:] = f(self.corpus)
+        self.corpus[:] = old_to_new_array[self.corpus]
+        if (self.corpus.dtype != np.uint16 and len(new_words) < 2**16):
+            self.corpus = self.corpus.astype(np.uint16)
 
+        print(len(self.words), "unique words pre-stoplisting")
         #print 'storing new word dicts', datetime.now()
         self.words = new_words
+        print(len(self.words), "uniquewords post-stoplisting")
         self.words_int = new_words_int
 
         return self
