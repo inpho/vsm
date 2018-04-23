@@ -700,7 +700,7 @@ class Corpus(BaseCorpus):
 
     @staticmethod
     def _serial_load(file, load_corpus=True):
-        arrays_in = np.load(file, encoding='bytes')
+        arrays_in = np.load(file)#, encoding='bytes')
 
         c = Corpus([], remove_empty=False)
         if load_corpus:
@@ -735,7 +735,6 @@ class Corpus(BaseCorpus):
                 n = n.decode('utf-8')
             except AttributeError:
                 pass
-            
             t = arrays_in['context_data_{}'.format(n)]
             
             if isinstance(t['{}_label'.format(n)][0], str):
