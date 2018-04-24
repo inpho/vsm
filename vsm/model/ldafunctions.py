@@ -92,7 +92,7 @@ def load_lda(filename, ldaclass):
 
         K = int(K.result())
         V = int(V.result())
-        m = ldaclass(context_type=context_type.result(), 
+        m = ldaclass(context_type=str(context_type.result()),
                      K=K, V=V, alpha=alpha.result(), beta=beta.result())
     
         m.indices = indices.result()

@@ -26,7 +26,7 @@ from vsm.model import *
 import vsm.viewer
 from vsm.viewer import *
 
-__version__ = '0.4.9'
+__version__ = '0.4.10'
 
 __all__ = ['__version__']
 __all__ += vsm.corpus.__all__[:]
