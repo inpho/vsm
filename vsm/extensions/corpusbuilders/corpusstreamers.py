@@ -40,8 +40,8 @@ def read_file(filename, encoding='utf8', decode=False):
 
     return data
 
-def tokenize_and_pickle_file(filename, pickle_dir=None, encoding='utf8',
-    decode=False, tokenizer=word_tokenize):
+def tokenize_and_pickle_file(filename, pickle_dir=None,
+    tokenizer=word_tokenize, encoding='utf8', decode=False):
     """
     Tokenizes a file and returns a filename of a PickledWords instance.
     """
@@ -101,7 +101,6 @@ def corpus_from_files(dir_or_filenames, encoding='utf8', ignore=IGNORE,
     corpus = apply_stoplist(corpus, nltk_stop=nltk_stop, freq=stop_freq)
 
     return corpus
-
 
 class PickledWords:
     def __init__(self, filename):
