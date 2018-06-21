@@ -134,6 +134,44 @@ class TestLdaCgsSeq(unittest.TestCase):
         self.assertTrue(q.beta.shape==(2, 1))
         self.assertTrue((q.beta==m.beta).all())
 
+    def test_theta_and_phi(self):
+        from vsm.corpus.util.corpusbuilders import random_corpus
+        from vsm.model.ldacgsseq import LdaCgsSeq
+
+        c = random_corpus(1000, 50, 0, 20, context_type='document',
+                            metadata=True)
+        m0 = LdaCgsSeq(c, 'document', K=10)
+        m0.train(n_iterations=50, verbose=0)
+        
+        phi = m0.word_top / m0.word_top.sum(0)
+        assert (phi.sum(axis=0).astype('float16') == 1.0).all()
+        assert phi.sum(dtype='float16') == 10.0
+
+        theta = m0.top_doc / m0.top_doc.sum(0)
+        assert (theta.sum(axis=0).astype('float16') == 1.0).all()
+        assert theta.sum().astype('float16') == theta.shape[1]
+        
+
+
+    def test_training_changes_something(self):
+        from vsm.corpus.util.corpusbuilders import random_corpus
+        from vsm.model.ldacgsseq import LdaCgsSeq
+
+        c = random_corpus(1000, 50, 0, 20, context_type='document',
+                            metadata=True)
+
+        m0 = LdaCgsSeq(c, 'document', K=10)
+        m1 = LdaCgsSeq(c, 'document', K=10, seed=m0.seed)
+
+        m0.train(n_iterations=1, verbose=0)
+        m1.train(n_iterations=2, verbose=0)
+
+        assert not (m0.Z == m1.Z).all()
+        assert not (m0.word_top == m1.word_top).all()
+        assert not (m0.inv_top_sums == m1.inv_top_sums).all()
+        assert not (m0.top_doc == m1.top_doc).all()
+
+
     def test_randomSeed(self):
         from vsm.corpus.util.corpusbuilders import random_corpus
         from vsm.model.ldacgsseq import LdaCgsSeq

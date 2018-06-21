@@ -14,6 +14,24 @@ from vsm.model.ldacgsmulti import *
 from multiprocessing import Process
 
 class MPTester(object):
+    def test_LdaCgsMulti_phi(self):
+        c = random_corpus(1000, 50, 6, 100)
+
+        m0 = LdaCgsMulti(c, 'document', K=10)
+        m0.train(n_iterations=20)
+        phi = m0.word_top / m0.word_top.sum(0)
+        assert (phi.sum(axis=0) == 1.0).all()
+        assert phi.sum() == 10.0
+
+    def test_LdaCgsMulti_theta(self):
+        c = random_corpus(1000, 50, 6, 100)
+
+        m0 = LdaCgsMulti(c, 'document', K=10)
+        m0.train(n_iterations=20)
+        theta = self.model.top_doc / self.model.top_doc.sum(0)
+        assert (theta.sum(axis=0) == 1.0).all()
+        assert theta.sum() == theta.shape[1]
+
     def test_demo_LdaCgsMulti(self):
         from vsm.model.ldacgsmulti import demo_LdaCgsMulti
         demo_LdaCgsMulti()
