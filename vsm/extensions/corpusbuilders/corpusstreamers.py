@@ -47,7 +47,7 @@ def tokenize_and_pickle_file(filename, pickle_dir=None,
     """
     data = read_file(filename, encoding=encoding, decode=decode)
 
-    corpus = word_tokenize(data)
+    corpus = tokenizer(data)
 
     # dump to picklefile
     with tempfile.NamedTemporaryFile(dir=pickle_dir, delete=False) as fp:
