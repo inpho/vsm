@@ -120,7 +120,7 @@ class PickledWords:
 
         del self.list
 
-        raise StopIteration()
+        return
 
     def __len__(self):
         return self.len
