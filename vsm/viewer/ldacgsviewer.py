@@ -486,6 +486,35 @@ class LdaCgsViewer(object):
 
         return Z_w
 
+    def get_sorted_words(self, topic=None):
+        """
+        the number of times of each word/term/token in the corpus is assigned to the given topic
+        return a tuple list and the tuples are sorted by the size of the corresponding value
+        :param topic: Integer
+        :return: an instance
+            Assume that there are three words(desk, chair, table) for the given topic and
+            their word weight is 40, 50 and 30 respectively
+            then print
+            [(chair, 50), (desk, 40), (table, 30)]
+        """
+        words_weight = {}
+        # self.model.Z records which topic each word in each document in the corpus is assigned to
+        for pos, t in enumerate(self.model.Z):
+            if t == topic:
+                # find the word according to the position
+                # ind_word is the word index and key is the word
+                ind_word = self.corpus.corpus[pos]
+                key = self.corpus.words[ind_word]
+
+                if words_weight.has_key(key):
+                    words_weight[key] += 1
+                else:
+                    words_weight[key] = 0
+        # sorted
+        sorted_word = sorted(words_weight.items(), key=lambda item:item[1], reverse=True)
+
+        return sorted_word
+
 
     @deprecated_meth("dist_top_top")
     def sim_top_top(self, topic_or_topics, weights=[], 
