@@ -10,12 +10,6 @@ from Cython.Build import cythonize
 packages = ['vsm.'+pkg for pkg in find_packages('vsm')]
 packages.append('vsm')
 
-extensions = [Extension(sources=['vsm/model/_cgs_update.pyx'], language='c++',
-                include_dirs=[numpy.get_include()], name='vsm.model._cgs_update')]
-        #    extra_compile_args=['-march=native'],
-        #    extra_link_args=['-march=native'],
-        #    define_macros=[('CYTHON_TRACE','1')]
-
 install_requires=[
         'chardet',
         'cython',
@@ -64,7 +58,13 @@ setup(
     install_requires=install_requires,
     license = 'MIT',
     packages=packages,
-    ext_modules = cythonize(extensions),
+    ext_modules = cythonize(
+        Extension(
+            "vsm.model._cgs_update",
+            sources=["vsm/model/_cgs_update.pyx"],
+            include_dirs=[numpy.get_include()]
+        )
+    ),
     package_data = {'vsm': ['vsm/model/_cgs_update.pyx']},
     dependency_links=['https://inpho.cogs.indiana.edu/pypi/czipfile/',
         'https://inpho.cogs.indiana.edu/pypi/pymmseg/'],

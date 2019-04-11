@@ -1,5 +1,6 @@
 *.py[cod]
 *.so
+vsm/model/_cgs_update.c
 
 # Packages
 *.egg
