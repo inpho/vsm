@@ -45,9 +45,12 @@ class TestCorpus(unittest.TestCase):
 
     def test_apply_stoplist(self):
         stopped_corpus = self.corpus.apply_stoplist(['I'])
-        new_ctx = all(np.equal(a, b) for a, b in zip(stopped_corpus.context_data[0], 
-            np.array([(1,'Veni'), (2,'Vidi'), 
-                (3,'Vici')], dtype=[('idx', '<i8'), ('sent', '|S6')])))
+        print(stopped_corpus.context_data[0].dtype)
+        new_ctx = all(a == b 
+            for a, b in zip(
+                stopped_corpus.context_data[0], 
+                np.array([(1,'Veni'), (2,'Vidi'), (3,'Vici')], dtype=[('idx', '<i8'), ('sentence_label', 'S6')])
+            ))
         self.assertTrue(new_ctx, msg=None)
         self.assertItemsEqual(['I'], stopped_corpus.stopped_words)
 
@@ -88,10 +91,11 @@ class TestCorpus(unittest.TestCase):
 
     def test_RemoveEmpty(self):
         self.bc.remove_empty()
-        new_ctx = all(np.equal(a, b) for a,b in zip(self.bc.context_data[0],
+        print(self.bc.context_data[0].dtype)
+        new_ctx = all(a == b for a,b in zip(self.bc.context_data[0],
             np.array([(3,'doc0'), (5,'doc1'), 
                 (7,'doc2'), (11,'doc3'), (15,'doc5'), (18,'doc6'), 
-                (20,'doc7')], dtype=[('idx', '<i8'), ('sent', '|S6')])))
+                (20,'doc7')], dtype=[('idx', '<i8'), ('document_label', '<U4')])))
         self.assertTrue(new_ctx, msg=None)
 
     def test_ViewMetadata(self):
