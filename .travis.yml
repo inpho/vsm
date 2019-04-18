@@ -43,9 +43,12 @@ script: bash coverage.sh
 after_success:
   - coveralls
   - pwd
-  - python setup.py bdist_egg
   - pip install wheel
-  - wheel convert -d dist dist/*.egg
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      python setup.py bdist_egg;
+    else
+      python setup.py bdist_wheel;
+    fi
   - ls dist
 
 addons:
