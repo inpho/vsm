@@ -6,7 +6,7 @@ environment:
     - PYTHON: "C:\\Miniconda37-x64"
 
 install:
-  - "$env:Path += \"%PYTHON%\\Library\\bin\""
+  - "setx path \"%path%;%PYTHON\\Library\\bin\""
   - "%PYTHON%\\python.exe -m conda update -q --yes conda"
   - "%PYTHON%\\python.exe -m conda install -q --yes pip numpy scipy scikit-learn unidecode nltk chardet cython sqlite"
   - "%PYTHON%\\python.exe -c \"import nltk; nltk.download('stopwords'); nltk.download('punkt')\""
