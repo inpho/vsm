@@ -6,6 +6,8 @@ environment:
     - PYTHON: "C:\\Miniconda-x64"
     - PYTHON: "C:\\Miniconda36"
     - PYTHON: "C:\\Miniconda36-x64"
+    - PYTHON: "C:\\Miniconda37"
+    - PYTHON: "C:\\Miniconda37-x64"
 
 install:
   - "%PYTHON%\\python.exe -m conda update -q --yes conda"
