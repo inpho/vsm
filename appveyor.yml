@@ -2,8 +2,13 @@ environment:
   matrix:
     # For Python versions available on Appveyor, see
     # http://www.appveyor.com/docs/installed-software#python
-    - PYTHON: "C:\\Miniconda37"
-    - PYTHON: "C:\\Miniconda37-x64"
+    - PYTHON: "C:\\Miniconda"
+    - PYTHON: "C:\\Miniconda-x64"
+    - PYTHON: "C:\\Miniconda36"
+    - PYTHON: "C:\\Miniconda36-x64"
+    # Currently doing manual 3.7 builds due to Appveyor issues
+    # - PYTHON: "C:\\Miniconda37"
+    # - PYTHON: "C:\\Miniconda37-x64"
 
 install:
   - "setx path \"%path%;%PYTHON%\\Library\\bin\""
