@@ -1,8 +1,8 @@
 #language: python
 env:
-  - PYTHON_VERSION="2.7"
-  - PYTHON_VERSION="3.6"
-  - PYTHON_VERSION="3.7"
+  - PYTHON_VERSION="2.7" NUMPY_VERSION="1.10.3"
+  - PYTHON_VERSION="3.6" NUMPY_VERSION="1.12.1"
+  - PYTHON_VERSION="3.7" NUMPY_VERSION="1.14.6"
 # command to install dependencies
 os:
   - linux
@@ -26,7 +26,7 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda --yes
-  - conda create -n py -q --yes pip numpy scipy scikit-learn unidecode nltk chardet cython "python=$PYTHON_VERSION"
+  - conda create -n py -q --yes pip numpy=$NUMPY_VERSION scipy scikit-learn unidecode nltk chardet cython "python=$PYTHON_VERSION"
   - source activate py
   - which python
   - which pip
