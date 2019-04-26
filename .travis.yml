@@ -48,7 +48,7 @@ after_success:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       python setup.py bdist_egg;
     else
-      python setup.py bdist_wheel --python-tag=cp27 --plat-name=macosx_10_7_x86_64;
+      python setup.py bdist_wheel --plat-name=macosx_10_7_x86_64;
     fi
   - ls dist
 
