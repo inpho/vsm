@@ -3,9 +3,13 @@ environment:
     # For Python versions available on Appveyor, see
     # http://www.appveyor.com/docs/installed-software#python
     - PYTHON: "C:\\Miniconda"
+      NUMPY: "0.10.3"
     - PYTHON: "C:\\Miniconda-x64"
+      NUMPY: "0.10.3"
     - PYTHON: "C:\\Miniconda36"
+      NUMPY: "1.12.1"
     - PYTHON: "C:\\Miniconda36-x64"
+      NUMPY: "1.12.1"
     # Currently doing manual 3.7 builds due to Appveyor issues
     # - PYTHON: "C:\\Miniconda37"
     # - PYTHON: "C:\\Miniconda37-x64"
@@ -13,7 +17,7 @@ environment:
 install:
   - "setx path \"%path%;%PYTHON%\\Library\\bin\""
   - "%PYTHON%\\python.exe -m conda update -q --yes conda"
-  - "%PYTHON%\\python.exe -m conda install -q --yes pip numpy scipy scikit-learn unidecode nltk chardet cython sqlite"
+  - "%PYTHON%\\python.exe -m conda install -q --yes pip numpy=%NUMPY% scipy scikit-learn unidecode nltk chardet cython sqlite"
   - "%PYTHON%\\python.exe -c \"import nltk; nltk.download('stopwords'); nltk.download('punkt')\""
   - "%PYTHON%\\python.exe -m pip install unittest2 nose"
   - "%PYTHON%\\python.exe -m pip install ."
