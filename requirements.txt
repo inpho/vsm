@@ -13,3 +13,4 @@ translate==3.5.0
 Unidecode==1.0.22
 
 backports.tempfile==1.0; python_version=='2.7' 
+numpy>=1.14.3; python_version=='3.7'
