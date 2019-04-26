@@ -3,9 +3,9 @@ environment:
     # For Python versions available on Appveyor, see
     # http://www.appveyor.com/docs/installed-software#python
     - PYTHON: "C:\\Miniconda"
-      NUMPY: "0.10.3"
+      NUMPY: "1.12.1"
     - PYTHON: "C:\\Miniconda-x64"
-      NUMPY: "0.10.3"
+      NUMPY: "1.12.1"
     - PYTHON: "C:\\Miniconda36"
       NUMPY: "1.12.1"
     - PYTHON: "C:\\Miniconda36-x64"

@@ -1,6 +1,7 @@
 #language: python
 env:
-  - PYTHON_VERSION="2.7" NUMPY_VERSION="1.10.3"
+  - PYTHON_VERSION="2.7" NUMPY_VERSION="1.12.1"
+  - PYTHON_VERSION="3.5" NUMPY_VERSION="1.12.1"
   - PYTHON_VERSION="3.6" NUMPY_VERSION="1.12.1"
   - PYTHON_VERSION="3.7" NUMPY_VERSION="1.14.6"
 # command to install dependencies
