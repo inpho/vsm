@@ -1,6 +1,6 @@
 from setuptools import setup, Extension, Command, find_packages
 import platform
-#import numpy
+import numpy
 
 from Cython.Build import cythonize
 
@@ -61,8 +61,8 @@ setup(
     ext_modules = cythonize(
         Extension(
             "vsm.model._cgs_update",
-            sources=["vsm/model/_cgs_update.pyx"]#,
-            #include_dirs=[numpy.get_include()]
+            sources=["vsm/model/_cgs_update.pyx"],
+            include_dirs=[numpy.get_include()]
         )
     ),
     zip_safe = False,

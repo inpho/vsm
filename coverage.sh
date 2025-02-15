@@ -6,7 +6,7 @@ CMD="coverage run -a --source vsm.model,vsm.viewer,vsm.corpus,vsm.spatial,vsm.sp
 rm -rf .coverage
 coverage debug sys
 
-$CMD setup.py test
+$CMD -m pytest unit_tests/*
 EXIT=$?
 
 rm -rf ap.ini ap ap.tgz
