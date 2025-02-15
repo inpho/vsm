@@ -212,7 +212,7 @@ def dist_word_doc(word_or_words, corp, context_type, mat, weights=[],
         raise Exception('At least one target word is needed.')
 
     # Generate pseudo-document
-    doc = np.zeros(mat.shape[0], dtype=np.float)
+    doc = np.zeros(mat.shape[0], dtype=float)
     if len(weights) == 0:
         doc[words] = np.ones(len(words))
     else:
@@ -266,7 +266,7 @@ def dist_word_top(word_or_words, corp, mat, weights=[],
         raise Exception('At least one target word is needed.')
 
     # Generate pseudo-topic
-    top = np.zeros(mat.shape[0], dtype=np.float)
+    top = np.zeros(mat.shape[0], dtype=float)
     if len(weights) == 0:
         top[words] = np.ones(len(words))
     else:
@@ -308,7 +308,7 @@ def dist_top_doc(topic_or_topics, mat, corp, context_type, weights=[],
         raise Exception('At least one target topic is needed.')
 
     # Generate pseudo-document
-    doc = np.zeros(mat.shape[0], dtype=np.float)
+    doc = np.zeros(mat.shape[0], dtype=float)
     if len(weights) == 0:
         doc[topics] = np.ones(len(topics))
     else:

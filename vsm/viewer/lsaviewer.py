@@ -202,7 +202,7 @@ class LsaViewer(object):
         words, labels = list(words), list(labels)
 
         # Generate pseudo-document
-        doc = np.zeros((self.model.word_matrix.shape[0],1), dtype=np.float)
+        doc = np.zeros((self.model.word_matrix.shape[0],1), dtype=float)
         if len(weights) == 0:
             doc[words,:] = np.ones(len(words))
         else:

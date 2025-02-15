@@ -57,8 +57,8 @@ def scipy_cdist(**kwargs):
 
     def dist_fn(P, Q):
 
-        P = P.astype(np.float)
-        Q = Q.astype(np.float)
+        P = P.astype(float)
+        Q = Q.astype(float)
 
         if P.ndim < 2:
             P = P.reshape((1,P.size))
@@ -89,8 +89,8 @@ def angle(P, Q):
     is a matrix, then angles are computed wrt the columns of Q.
 
     """
-    P = P.astype(np.float)
-    Q = Q.astype(np.float)
+    P = P.astype(float)
+    Q = Q.astype(float)
 
     if P.ndim < 2:
         P = P.reshape((1,P.size))
@@ -122,8 +122,8 @@ def angle_sparse(P, Q):
 
     Angles are computed wrt the rows of P and wrt the columns of Q.
     """
-    P = P.tocsc().astype(np.float)
-    Q = Q.tocsr().astype(np.float)
+    P = P.tocsc().astype(float)
+    Q = Q.tocsr().astype(float)
 
     # Normalize P row-wise and Q column-wise
     P_inv_norms = 1 / np.sqrt(P.multiply(P).sum(1))
@@ -162,7 +162,7 @@ def H(P):
     If P is a matrix, entropy is computed row-wise. (P is assumed to
     be left stochastic)
     """
-    P = P.astype(np.float)
+    P = P.astype(float)
 
     if P.ndim < 2:
         P = P.reshape((1,P.size))
@@ -190,8 +190,8 @@ def cross_H(P,Q):
     is computed column-wise on Q. (Q is assumed to be right
     stochastic.)
     """
-    P = P.astype(np.float)
-    Q = Q.astype(np.float)
+    P = P.astype(float)
+    Q = Q.astype(float)
 
     if P.ndim < 2:
         P = P.reshape((1,P.size))
@@ -232,8 +232,8 @@ def KL_div(P, Q, safe=False):
     :param safe: Marks whether to use 0 values or a small correction of 1e-21
     :type boolean:
     """
-    P = P.astype(np.float)
-    Q = Q.astype(np.float)
+    P = P.astype(float)
+    Q = Q.astype(float)
     P[P==0.] = 1e-21
     Q[Q==0.] = 1e-21
 
@@ -256,8 +256,8 @@ def JS_div(P, Q, metric=False):
     
     The square root of the JS divergence is a metric.
     """
-    P = P.astype(np.float)
-    Q = Q.astype(np.float)
+    P = P.astype(float)
+    Q = Q.astype(float)
 
     if P.ndim < 2:
         P = P.reshape((1,P.size))

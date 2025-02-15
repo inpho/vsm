@@ -1,4 +1,4 @@
-import unittest2 as unittest
+import unittest
 import numpy as np
 
 from vsm.corpus.util.corpusbuilders import random_corpus

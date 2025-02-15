@@ -18,7 +18,7 @@ def isfloat(x):
     """
     Returns True if `x` is an instance of a float.
     """
-    return (isinstance(x, np.inexact) or isinstance(x, np.float))
+    return (isinstance(x, np.inexact) or isinstance(x, float))
 
 
 def isint(x):

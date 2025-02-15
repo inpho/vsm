@@ -1,4 +1,4 @@
-import unittest2 as unittest
+import unittest
 import numpy as np
 from scipy.sparse import coo_matrix
 from vsm.model import tfidf
@@ -19,7 +19,7 @@ class TestTfIdf(unittest.TestCase):
         self.tf_mat = coo_matrix(np.array([[3, 2, 0, 0],
                                            [3, 1, 0, 1],
                                            [0, 0, 0, 0],
-                                           [3, 1, 1, 1]], dtype=np.int))
+                                           [3, 1, 1, 1]], dtype=int))
         self.tfidf_mat = np.array(\
             [[2.0794415, 1.3862944, 0, 0],
              [0.86304623, 0.28768209, 0, 0.28768209],

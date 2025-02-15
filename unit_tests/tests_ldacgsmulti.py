@@ -4,7 +4,7 @@ from builtins import zip
 from builtins import range
 from builtins import object
 
-import unittest2 as unittest
+import unittest
 import numpy as np
 
 from vsm.corpus import Corpus

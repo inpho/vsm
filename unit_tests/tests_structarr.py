@@ -1,4 +1,4 @@
-import unittest2 as unittest
+import unittest
 import numpy as np
 
 from vsm import *
@@ -9,12 +9,12 @@ class TestCore(unittest.TestCase):
     def test_arr_add_field(self):
 
         arr = np.array([(1, '1'), (2, '2'), (3, '3')],
-                   dtype=[('i', np.int), ('c', '|S1')])
+                   dtype=[('i', int), ('c', '|S1')])
         new_arr = np.array([(1, '1', 0), (2, '2', 0), (3, '3', 0)],
-                       dtype=[('i', np.int), ('c', '|S1'), ('new', np.int)])
+                       dtype=[('i', int), ('c', '|S1'), ('new', int)])
 
         new_field = 'new'
-        vals = np.zeros(3, dtype=np.int)
+        vals = np.zeros(3, dtype=int)
 
         test_arr = arr_add_field(arr, new_field, vals)
 
@@ -23,16 +23,16 @@ class TestCore(unittest.TestCase):
 
     def test_enum_matrix(self):
 
-        arr = np.array([[6,3,7], [2,0,4]], dtype=np.int)
+        arr = np.array([[6,3,7], [2,0,4]], dtype=int)
         em1 = enum_matrix(arr)
         em2 = enum_matrix(arr, 
                           indices=[10,20,30], 
                           field_name='tens')
 
         self.assertTrue(np.array_equiv(em1, np.array([[(2,7), (0,6), (1, 3)],[(2,4), (0,2), (1,0)]],
-                        dtype=[('i', np.int), ('value', np.int)])))
+                        dtype=[('i', int), ('value', int)])))
         self.assertTrue(np.array_equiv(em2, np.array([[(30,7), (10,6), (20, 3)],[(30,4), (10,2), (20,0)]],
-                        dtype=[('tens', np.int), ('value', np.int)])))
+                        dtype=[('tens', int), ('value', int)])))
         
 
 
@@ -44,11 +44,11 @@ class TestCore(unittest.TestCase):
 
         self.assertTrue(np.array_equiv(sorted_arr, 
             np.array([(3, 8), (0, 7), (1, 3), (4, 2), (2, 1)],
-            dtype=[('i', np.int), ('value', np.int)])))
+            dtype=[('i', int), ('value', int)])))
 
         self.assertTrue(np.array_equiv(sorted_arr1,
             np.array([(40, 8), (10, 7), (20, 3), (50, 2), (30, 1)], 
-                  dtype=[('i', np.int), ('value', np.int)])))
+                  dtype=[('i', int), ('value', int)])))
 
 
     def test_enum_array(self):
@@ -60,20 +60,20 @@ class TestCore(unittest.TestCase):
 
         self.assertTrue(np.array_equiv(ea1, 
             np.array([(0,7), (1,3), (2,1), (3,8), (4,2)],
-                    dtype=[('i', np.int), ('value', np.int)])))
+                    dtype=[('i', int), ('value', int)])))
         self.assertTrue(np.array_equiv(ea2,
             np.array([(0,6), (1,3), (2,7), (3,2), (4,0), (5,4)],
-                    dtype=[('i', np.int), ('value', np.int)])))
+                    dtype=[('i', int), ('value', int)])))
         
 
     def test_zip_arr(self):
         
-        arr1 = np.array([[2,4], [6,8]], dtype=np.int)
-        arr2 = np.array([[1,3], [5,7]], dtype=np.int)
+        arr1 = np.array([[2,4], [6,8]], dtype=int)
+        arr2 = np.array([[1,3], [5,7]], dtype=int)
 
         zipped = zip_arr(arr1, arr2, field_names=['even', 'odd'])
         self.assertTrue(np.array_equiv(zipped, np.array([[(2,1), (4,3)], [(6,5), (8,7)]],
-                        dtype=[('even', np.int), ('odd', np.int)])))
+                        dtype=[('even', int), ('odd', int)])))
 
 
     def test_map_strarr(self):

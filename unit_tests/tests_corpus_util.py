@@ -1,5 +1,5 @@
 from builtins import range
-import unittest2 as unittest
+import unittest
 
 from vsm.corpus import add_metadata
 from vsm.extensions.corpusbuilders.util import *

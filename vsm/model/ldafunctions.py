@@ -16,20 +16,20 @@ __all__ = [ 'init_priors', 'compute_top_doc', 'compute_word_top',
 def init_priors(V=0, K=0, beta=[], alpha=[]):
     # Topic and context priors; set defaults if need be
     if type(beta) == float:
-        beta = np.ones((V, 1), dtype=np.float) * beta
+        beta = np.ones((V, 1), dtype=float) * beta
     elif len(beta) > 0:
-        beta = (np.array(beta, dtype=np.float).reshape(len(beta), 1))
+        beta = (np.array(beta, dtype=float).reshape(len(beta), 1))
     else:
         # Default is a flat prior of .01
-        beta = np.ones((V, 1), dtype=np.float) * .01
+        beta = np.ones((V, 1), dtype=float) * .01
 
     if type(alpha) == float:
-        alpha = np.ones((K, 1), dtype=np.float) * alpha
+        alpha = np.ones((K, 1), dtype=float) * alpha
     elif len(alpha) > 0:
-        alpha = (np.array(alpha, dtype=np.float).reshape(len(alpha), 1))
+        alpha = (np.array(alpha, dtype=float).reshape(len(alpha), 1))
     else:
         # Default is a flat prior of .01
-        alpha = np.ones((K, 1), dtype=np.float) * .01
+        alpha = np.ones((K, 1), dtype=float) * .01
 
     return beta, alpha
 
@@ -269,7 +269,7 @@ def save_lda(m, filename):
     arrays_out['Z'] = m.Z
 
     arrays_out['iteration'] = m.iteration
-    dt = dtype=[('i', np.int), ('v', np.float)]
+    dt = dtype=[('i', int), ('v', float)]
     arrays_out['log_probs'] = np.array(m.log_probs, dtype=dt)
 
     potential_views = ['top_doc','word_top','inv_top_sums']
@@ -314,9 +314,9 @@ def compute_top_doc(Z, K, alpha=[]):
     used in the LDA model objects.
     """    
     if len(alpha)==0:
-        top_doc = np.zeros((K, len(Z)), dtype=np.float)
+        top_doc = np.zeros((K, len(Z)), dtype=float)
     else:
-        top_doc = np.zeros((K, len(Z)), dtype=np.float) + alpha
+        top_doc = np.zeros((K, len(Z)), dtype=float) + alpha
 
     for i in range(len(Z)):
         for j in range(len(Z[i])):
@@ -334,9 +334,9 @@ def compute_word_top(W, Z, K, V, beta=[]):
     LDA model objects.
     """    
     if len(beta)==0:
-        word_top = np.zeros((V, K), dtype=np.float)
+        word_top = np.zeros((V, K), dtype=float)
     else:
-        word_top = np.zeros((V, K), dtype=np.float) + beta
+        word_top = np.zeros((V, K), dtype=float) + beta
 
     for i in range(len(Z)):
         for j in range(len(Z[i])):

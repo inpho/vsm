@@ -1,5 +1,5 @@
 from builtins import range
-import unittest2 as unittest
+import unittest
 import numpy as np
 import os
 from vsm.corpus import *
@@ -11,7 +11,7 @@ class TestCorpus(unittest.TestCase):
 
     def setUp(self):
         corpus = np.array([0, 3, 2, 1, 0, 3, 0, 2, 3, 0, 2, 3, 1, 2, 0, 3,
-                                2, 1, 2, 2], dtype=np.int)
+                                2, 1, 2, 2], dtype=int)
         contextData = np.array([(3, 'doc0'), (5, 'doc1'), (7,'doc2'), (11,'doc3'),
                 (11,'doc4'), (15,'doc5'), (18,'doc6'), (20,'doc7')], 
                 dtype=[('idx', '<i8'), ('document_label', '|U4')])
@@ -52,7 +52,7 @@ class TestCorpus(unittest.TestCase):
                 np.array([(1,'Veni'), (2,'Vidi'), (3,'Vici')], dtype=[('idx', '<i8'), ('sentence_label', 'S6')])
             ))
         self.assertTrue(new_ctx, msg=None)
-        self.assertItemsEqual(['I'], stopped_corpus.stopped_words)
+        self.assertEqual({'I'}, stopped_corpus.stopped_words)
 
     def test_align_corpora(self):
         

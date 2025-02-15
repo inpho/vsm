@@ -247,7 +247,7 @@ class BaseCorpus(object):
             for j, t in enumerate(self.context_types):
                 token_list = self.view_contexts(t)
                 
-                indices = np.array([ctx.size != 0 for ctx in token_list], dtype=np.bool)
+                indices = np.array([ctx.size != 0 for ctx in token_list], dtype=bool)
                 self.context_data[j] = self.context_data[j][indices]
 
 
@@ -452,7 +452,7 @@ class Corpus(BaseCorpus):
     >>> from vsm.corpus import Corpus
     >>> c = Corpus(text, context_types=context_types, context_data=context_data)
     >>> c.corpus
-    array([0, 1, 0, 2, 0, 3], dtype=int32)
+    array([0, 1, 0, 2, 0, 3], dtype=np.int32)
     
     >>> c.words
     array(['I', 'came', 'saw', 'conquered'],
@@ -462,8 +462,8 @@ class Corpus(BaseCorpus):
     2
 
     >>> c.view_contexts('sentences')
-    [array([0, 3], dtype=int32), array([0, 2], dtype=int32),
-     array([0, 1], dtype=int32)]
+    [array([0, 3], dtype=np.int32), array([0, 2], dtype=np.int32),
+     array([0, 1], dtype=np.int32)]
 
     >>> c.view_contexts('sentences', as_strings=True)
     [array(['I', 'came'], 
@@ -700,7 +700,7 @@ class Corpus(BaseCorpus):
 
     @staticmethod
     def _serial_load(file, load_corpus=True):
-        arrays_in = np.load(file)#, encoding='bytes')
+        arrays_in = np.load(file, allow_pickle=True, encoding='bytes')
 
         c = Corpus([], remove_empty=False)
         if load_corpus:
@@ -810,7 +810,7 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`
         """
-        stop = np.zeros(self.words.shape, dtype=np.bool)
+        stop = np.zeros(self.words.shape, dtype=bool)
 
         if stoplist:
             for t in stoplist:

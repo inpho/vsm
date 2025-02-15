@@ -2,8 +2,8 @@ chardet==3.0.4
 cython==0.27.3
 future==0.16.0
 matplotlib==2.0.2
-nltk==3.2.3
-numpy>=1.12.1
+nltk>=3.0.0,<4.0.0
+numpy>=1.12.1,<2.0.0
 progressbar2==3.35.2
 py4j==0.10.6
 scikit_learn>=0.19.1

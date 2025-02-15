@@ -475,10 +475,10 @@ class LdaCgsViewer(object):
         # Label data
         if as_strings:
             docs = self.corpus.view_metadata(ct)[self._doc_label_name]
-            dt = [('doc', docs.dtype), ('pos',np.int), ('value', np.int)]
+            dt = [('doc', docs.dtype), ('pos',int), ('value', int)]
             Z_w = [(docs[d], i, t) for (d, i, t) in Z_w]
         else:
-            dt = [('i', np.int), ('pos',np.int), ('value', np.int)]
+            dt = [('i', int), ('pos',int), ('value', int)]
 
         Z_w = np.array(Z_w, dtype=dt).view(LabeledColumn)
         Z_w.col_header = 'Word: ' + word

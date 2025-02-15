@@ -1,5 +1,5 @@
 from builtins import object
-import unittest2 as unittest
+import unittest
 import numpy as np
 
 from vsm.model import tf

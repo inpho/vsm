@@ -1,7 +1,7 @@
 from __future__ import division
 from builtins import zip
 from builtins import range
-import unittest2 as unittest
+import unittest
 import numpy as np
 
 from vsm.corpus import Corpus

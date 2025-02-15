@@ -2,7 +2,7 @@ from __future__ import print_function
 from builtins import str
 from builtins import range
 
-import unittest2 as unittest
+import unittest
 
 from vsm.extensions.corpusbuilders import *
 from vsm.extensions.corpusbuilders.corpusbuilders import file_tokenize, coll_tokenize, dir_tokenize, corpus_fromlist

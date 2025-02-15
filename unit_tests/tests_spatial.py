@@ -1,6 +1,6 @@
 from __future__ import division
 from past.utils import old_div
-import unittest2 as unittest
+import unittest
 import numpy as np
 
 from vsm.spatial import *

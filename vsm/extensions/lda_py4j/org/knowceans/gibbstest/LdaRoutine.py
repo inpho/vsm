@@ -60,7 +60,7 @@ def save(lda, ctx_type, fname, metafile):
     arrays_out['log_prob_init'] = False
     """
     # log_prob_init = False for now
-    dt = [('i', np.int), ('v', np.float)]
+    dt = [('i', int), ('v', float)]
     logs = [float(dic['log_probs'])] * int(dic['iteration'])
     indices = range(0, int(dic['iteration']))
     arrays_out['log_prob_init'] = np.array(zip(indices, logs), dtype=dt)

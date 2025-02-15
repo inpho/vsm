@@ -1,6 +1,6 @@
 from builtins import str
 from builtins import range
-import unittest2 as unittest
+import unittest
 import numpy as np
 
 from vsm.viewer.beagleviewer import BeagleViewer 

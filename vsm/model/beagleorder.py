@@ -13,7 +13,7 @@ import multiprocessing as mp
 import pickle as cpickle
 
 import numpy as np
-from numpy import dual
+from numpy.fft import fft, ifft
 
 from vsm.spatial import rand_pt_unit_sphere
 from vsm.model.base import BaseModel
@@ -47,10 +47,10 @@ def mk_b_conv(n, rand_perm=None):
     
     def b_conv(v1, v2):
         
-        w1 = dual.fft(v1[rand_perm[0]])
-        w2 = dual.fft(v2[rand_perm[1]])
+        w1 = fft(v1[rand_perm[0]])
+        w2 = fft(v2[rand_perm[1]])
 
-        return np.real_if_close(dual.ifft(w1 * w2))
+        return np.real_if_close(ifft(w1 * w2))
 
     return b_conv
 

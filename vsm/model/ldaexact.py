@@ -54,7 +54,7 @@ class LdaExact(LdaCgsSeq):
         A = range(self.K)
         p = productoid(A, len(self.corpus))
         for t in p:
-            yield np.array(t, dtype=np.int)
+            yield np.array(t, dtype=int)
 
 
     def _init_model(self, Z):

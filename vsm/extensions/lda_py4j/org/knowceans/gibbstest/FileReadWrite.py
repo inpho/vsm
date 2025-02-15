@@ -10,7 +10,7 @@ def lda_save(ctx_type, phifile, thetafile, zfile, restfile, modelfile):
 
     arrays_out = dict()
     arrays_out['iteration'] = int(dic['iteration'])
-    dt = dtype=[('i', np.int), ('v', np.float)]
+    dt = dtype=[('i', int), ('v', float)]
     logs = [float(dic['log_probs'])] * int(dic['iteration'])
     indices = range(0, int(dic['iteration']))
     arrays_out['log_probs'] = np.array(zip(indices, logs), dtype=dt)

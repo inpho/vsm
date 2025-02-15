@@ -97,7 +97,7 @@ def enum_array(arr, indices=[], field_name='i'):
           dtype=[('i', '<i8'), ('value', '<i8')])
     """
     if len(indices) == 0:
-        indices = np.arange(arr.size, dtype=np.int)
+        indices = np.arange(arr.size, dtype=int)
     else:
         indices = np.array(indices)
     return zip_arr(indices, arr, field_names=[field_name, 'value'])
@@ -138,7 +138,7 @@ def enum_matrix(arr, axis=0, indices=[], field_name='i'):
     #if len(indices) == 0:
     #    indices = np.arange(arr.shape[1])
     if len(indices) == 0 and len(arr.shape) > 1:
-        indices = np.arange(arr.shape[1], dtype=np.int)
+        indices = np.arange(arr.shape[1], dtype=int)
     
     if type(indices) == list:
         indices = np.array(indices)
@@ -199,7 +199,7 @@ def enum_sort(arr, indices=[], field_name='i', filter_nan=False):
     """
     idx = np.argsort(arr)
     if len(indices) == 0:
-        indices = np.arange(arr.shape[0], dtype=np.int)
+        indices = np.arange(arr.shape[0], dtype=int)
     else:
         indices = np.array(indices)
 	

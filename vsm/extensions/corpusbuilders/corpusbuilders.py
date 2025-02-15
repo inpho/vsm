@@ -45,7 +45,7 @@ def corpus_from_strings(strings, metadata=[], decode=False,
         metadata = ['document_{0}'.format(i) for i in range(len(strings))]
     md_type = np.array(metadata).dtype
     md_type = np.object_
-    dtype = [('idx', np.int), ('document_label', md_type)]
+    dtype = [('idx', int), ('document_label', md_type)]
     context_data = [np.array(list(zip(indices, metadata)), dtype=dtype)]
 
     c = Corpus(corpus, context_data=context_data, context_types=['document'])
@@ -68,7 +68,7 @@ def empty_corpus(context_type='document'):
     :See Also: :class:`vsm.corpus.Corpus`
     """
     return Corpus([],
-                  context_data=[np.array([], dtype=[('idx', np.int)])],
+                  context_data=[np.array([], dtype=[('idx', int)])],
                   context_types=[context_type])
 
 
@@ -169,7 +169,7 @@ def corpus_fromlist(ls, context_type='context', remove_empty=True):
                 for i in range(len(indices))]
     md_type = np.array(metadata).dtype
     md_type = np.object_
-    dtype = [('idx', np.int), (context_type + '_label', md_type)]
+    dtype = [('idx', int), (context_type + '_label', md_type)]
     context_data = [np.array(list(zip(indices, metadata)), dtype=dtype)]
 
     return Corpus(corpus, context_data=context_data,
