@@ -773,7 +773,6 @@ class Corpus(BaseCorpus):
 
         :See Also: :class:`Corpus`, :meth:`Corpus.load`, :meth:`np.savez`
         """
-        import vsm.zipfile
         print('Saving corpus as {}'.format(file))
         arrays_out = dict()
         arrays_out['corpus'] = self.corpus
