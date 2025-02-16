@@ -1,6 +1,6 @@
 chardet==3.0.4
 cython==0.27.3
-future==0.16.0
+future==1.0.0
 matplotlib==2.0.2
 nltk>=3.0.0,<4.0.0
 numpy>=1.12.1,<2.0.0
