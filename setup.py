@@ -67,8 +67,8 @@ setup(
     ),
     zip_safe = False,
     package_data = {'vsm': ['vsm/model/_cgs_update.pyx']},
-    dependency_links=['https://inpho.cogs.indiana.edu/pypi/czipfile/',
-        'https://inpho.cogs.indiana.edu/pypi/pymmseg/'],
+    dependency_links=['https://inpho.cogs.indiana.edu/pypi/pymmseg/'],
+
     test_suite = "unittest2.collector",
     tests_require=['unittest2'],
 )

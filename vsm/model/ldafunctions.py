@@ -5,7 +5,6 @@ from builtins import map
 from builtins import range
 from past.utils import old_div
 import numpy as np
-from vsm.zipfile import use_czipfile
 
 
 __all__ = [ 'init_priors', 'compute_top_doc', 'compute_word_top', 
@@ -33,7 +32,6 @@ def init_priors(V=0, K=0, beta=[], alpha=[]):
 
     return beta, alpha
 
-@use_czipfile
 def load_lda(filename, ldaclass):
     """
     A static method for loading a saved `ldaclass` model.
@@ -292,7 +290,7 @@ def save_lda(m, filename):
             arrays_out[key] = s
     
     print('Saving LDA model to {}'.format(filename))
-    use_czipfile(np.savez)(filename, **arrays_out)
+    np.savez(filename, **arrays_out)
 
 
 def compute_log_prob(W, Z, word_top, top_doc):

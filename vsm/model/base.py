@@ -1,7 +1,6 @@
 from __future__ import print_function
 from builtins import object
 import numpy as np
-from vsm.zipfile import use_czipfile
 
 __all__ = ['BaseModel']
 

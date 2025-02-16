@@ -20,7 +20,6 @@ __all__ = [ 'BaseCorpus', 'Corpus', 'add_metadata',
 
 from bisect import bisect_left
 from datetime import datetime
-from vsm.zipfile import use_czipfile
 from copy import deepcopy
 
 
@@ -652,7 +651,6 @@ class Corpus(BaseCorpus):
 
 
     @staticmethod
-    @use_czipfile
     def _parallel_load(file, load_corpus=True):
         import concurrent.futures
         import functools
@@ -763,7 +761,6 @@ class Corpus(BaseCorpus):
 
         return c
 
-    @use_czipfile
     def save(self, file):
         """
         Saves data from a Corpus object as an `npz` file.
