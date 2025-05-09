@@ -16,6 +16,7 @@ Documentation can be found in the module and [here](http://inpho.github.io/vsm/)
 ##Installation
 
 ```
+pip install Cython==0.29.37 numpy==1.26.1
 git clone git@github.com:inpho/vsm.git
 cd vsm
 pip install -r requirements.txt -e .
