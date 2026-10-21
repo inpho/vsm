@@ -20,6 +20,9 @@ develop-eggs
 # Installer logs
 pip-log.txt
 
+# uv / virtualenv
+.venv/
+
 # Unit test / coverage reports
 .coverage
 .tox

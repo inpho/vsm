@@ -15,9 +15,37 @@ Documentation can be found in the module and [here](http://inpho.github.io/vsm/)
 
 ##Installation
 
+This project uses [uv](https://docs.astral.sh/uv/) to manage its environment and
+build the Cython extension. Install `uv` first (see the
+[installation instructions](https://docs.astral.sh/uv/getting-started/installation/)),
+then:
+
 ```
-pip install Cython==0.29.37 numpy==1.26.1
 git clone git@github.com:inpho/vsm.git
 cd vsm
-pip install -r requirements.txt -e .
+uv sync --group dev
+```
+
+`uv sync` creates a `.venv`, resolves the dependencies, and installs `vsm` as an
+editable package (compiling the Cython extension in place). Python 3.10 or newer
+is required; pass `--python 3.12` to select a specific interpreter.
+
+To run the tests:
+
+```
+uv run pytest unit_tests/*
+```
+
+The trailing glob is needed because the test modules are named `tests_*.py`,
+which does not match pytest's default discovery pattern.
+
+###Installing without uv
+
+The traditional workflow still works; `[build-system]` in `pyproject.toml` pulls
+in Cython and NumPy for the build, so no separate pre-install step is needed:
+
+```
+git clone git@github.com:inpho/vsm.git
+cd vsm
+pip install -e .
 ```
