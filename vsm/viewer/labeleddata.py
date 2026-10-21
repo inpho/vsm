@@ -73,7 +73,7 @@ def default_col_widths(dtype, col_header):
 
 def calc_col_num(col_len, n):
     
-    num = old_div(col_len, n)
+    num = col_len // n
 
     if col_len % n > 0:
         num += 1
@@ -87,13 +87,12 @@ def max_col_num(li, max_width):
     in LabeledColumn.
     """
     w = sum(li)
-    num = old_div(max_width,w)
+    num = max_width // w
     if num == 0:
         return 1
     return num
 
 
-@python_2_unicode_compatible
 class LabeledColumn(np.ndarray):
     """
     A subclass of np.ndarray whose purpose is to store labels and
@@ -289,7 +288,7 @@ class LabeledColumn(np.ndarray):
             
             count = self.col_len
             last_row = self.col_len % self.col_num
-            rows = old_div(self.col_len, self.col_num)
+            rows = self.col_len // self.col_num
             
             li = [rows] * self.col_num
             li = [li[i]+1 if i<last_row else li[i] for i in range(self.col_num)]
@@ -336,8 +335,8 @@ class LabeledColumn(np.ndarray):
         return s
 
 
-@python_2_unicode_compatible
 class DataTable(list):
+    
     """
     A subclass of list whose purpose is to store labels and
     formatting information for a list of 1-dimensional structured

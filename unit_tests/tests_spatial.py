@@ -6,9 +6,9 @@ from vsm.spatial import *
 
 #TODO: add tests for recently added methods.
 def KL(p,q):
-    return sum(p*np.log2(old_div(p,q)))
+    return sum(p*np.log2(p/q))
 def partial_KL(p,q):
-    return p * np.log2(old_div((2*p), (p+q)))
+    return p * np.log2((2*p)/(p+q))
 def JS(p,q):
     return 0.5*(KL(p,((p+q)*0.5)) + KL(q,((p+q)*0.5)))
 def JSD(p,q):
