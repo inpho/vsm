@@ -65,7 +65,7 @@ def plot_clusters(arr, labels, clusters=[], size=[]):
         colors = gen_colors(clusters)
         colors = [colors[i] for i in clusters]
 
-        for i in xrange(n):
+        for i in range(n):
             plt.scatter(X[i], Y[i], size, color=colors[i])
 
     ax.set_xlim(np.min(X) - .1, np.max(X) + .1)

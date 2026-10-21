@@ -1,5 +1,4 @@
-from __future__ import absolute_import
-from builtins import object
+
 from vsm.spatial import angle
 from vsm.exceptions import *
 from .wrappers import *

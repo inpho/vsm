@@ -1,7 +1,4 @@
-from __future__ import absolute_import
-from builtins import zip
-from builtins import str
-from builtins import range
+
 
 from codecs import open
 from copy import copy
@@ -540,7 +537,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
         par_n = 0
         
         for chk, label in zip(chunks, labels):
-            # print 'Tokenizing', label
+            # print('Tokenizing', label)
             pars = paragraph_tokenize(chk)
 
             for par in pars:
@@ -564,7 +561,7 @@ def dir_tokenize(chunks, labels, chunk_name='article', paragraphs=True,
             chk_n += 1
     else:
         for chk, label in zip(chunks, labels):
-            # print 'Tokenizing', label
+            # print('Tokenizing', label)
             if simple:
                 w = tokenizer(chk)
                 words.extend(w)
@@ -749,7 +746,7 @@ def coll_tokenize(books, book_names, verbose=1, tokenizer=word_tokenize, simple=
         pbar = ProgressBar(widgets=[Percentage(), Bar()], maxval=len(books)).start()
 
     for book, book_label in zip(books, book_names):
-        # print 'Tokenizing', book_label
+        # print('Tokenizing', book_label)
         for page, page_file in book:
             if simple:
                 w = tokenizer(page)
@@ -928,7 +925,7 @@ def record_tokenize(records, record_names, verbose=1):
         # TODO extract book data
 
         for book, book_label in zip(record, book_labels):
-            # print 'Tokenizing', book_label
+            # print('Tokenizing', book_label)
             for page, page_file in book:
                 sents = sentence_tokenize(page)
 

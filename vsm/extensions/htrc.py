@@ -1,8 +1,4 @@
-from __future__ import print_function
-from future import standard_library
-standard_library.install_aliases()
-from builtins import zip
-from builtins import range
+
 import os
 import shutil
 import re

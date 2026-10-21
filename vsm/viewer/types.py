@@ -1,6 +1,4 @@
-from builtins import str
-from builtins import int
-from past.builtins import basestring
+
 import numpy as np
 
 
@@ -32,7 +30,7 @@ def isstr(x):
     """
     Returns True if `x` is an instance of a string.
     """
-    return isinstance(x, basestring) or isinstance(x, np.flexible)
+    return isinstance(x, str) or isinstance(x, np.flexible)
 
 
 # 

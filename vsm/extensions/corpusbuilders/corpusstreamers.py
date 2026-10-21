@@ -1,7 +1,4 @@
-from builtins import range
 import sys
-if sys.version_info[0] == 2:
-    import backports.tempfile
 
 from codecs import open
 from concurrent.futures import as_completed, ProcessPoolExecutor

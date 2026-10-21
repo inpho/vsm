@@ -1,4 +1,4 @@
-from __future import print_function
+
 
 import numpy as np
 from sklearn.cluster import KMeans
@@ -54,7 +54,7 @@ def connection_matrix(samples, n=10, distr=(10,30)):
     r = len(samples)
     mat = np.zeros((r, r))
     
-    for n_ in xrange(n):
+    for n_ in range(n):
         # select integer d from distr[0] to distr[1] 
         d = randrange(distr[0],distr[1]+1)
         km = KMeans(n_clusters=d, init='k-means++',

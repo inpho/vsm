@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import re
 import numpy as np
@@ -25,7 +25,7 @@ def load_vals(txtfile):
     data = []
     li = load_help(txtfile)
         
-    for i in xrange(len(li)):
+    for i in range(len(li)):
         if li[i] == 'Value' and i < len(li)-1:
             dic = ast.literal_eval(li[i+1])
             data.append(dic)
@@ -54,7 +54,7 @@ def load_kv(txtfile):
     dic = {}
     li = load_help(txtfile)
         
-    for i in xrange(len(li)):
+    for i in range(len(li)):
         if li[i] == 'Key':
             dic[li[i+1]] = int(li[i+3])
             
@@ -68,7 +68,7 @@ def make_corpus(txtfile, word_int, as_strings=False):
     corp = []
     li = load_help(txtfile)
     
-    for i in xrange(len(li)):
+    for i in range(len(li)):
         if li[i] == 'Value':
             doc = li[i+1]
             doc = doc.strip()

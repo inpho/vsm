@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import numpy as np
 from vsm.corpus import Corpus, binary_search
@@ -99,7 +99,7 @@ class CorpusSent(Corpus):
 
         # print 'Rebuilding context data', datetime.now()
         context_data = []
-        for i in xrange(len(self.context_data)):
+        for i in range(len(self.context_data)):
             # print 'Recomputing token breaks:', self.context_types[i]
             tokens = self.view_contexts(self.context_types[i])
             # print self.context_types[i], len(stoplist), len(stop), datetime.now()
@@ -185,7 +185,7 @@ class CorpusSent(Corpus):
         # print 'Rebuilding corpus'
         corpus = [self.words[i] for i in corpus]
         context_data = []
-        for i in xrange(len(self.context_data)):
+        for i in range(len(self.context_data)):
             # print 'Recomputing token breaks:', self.context_types[i]
             tokens = self.view_contexts(self.context_types[i])
             spans = [t[f(t)].size for t in tokens]

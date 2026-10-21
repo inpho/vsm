@@ -1,13 +1,4 @@
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
 
-from future.utils import python_2_unicode_compatible
-
-from builtins import zip
-from builtins import str
-from builtins import range
-from past.utils import old_div
 import numpy as np
 
 from vsm.structarr import *

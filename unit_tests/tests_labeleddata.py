@@ -1,7 +1,4 @@
-from builtins import str
-from builtins import zip
-from builtins import range
-from past.builtins import basestring
+
 
 import unittest
 import numpy as np
@@ -31,7 +28,7 @@ class TestLabeleddata(unittest.TestCase):
         arr.col_len = 10
         arr1 = self.v.view(LabeledColumn)
 
-        self.assertTrue(isinstance(arr.__str__(), basestring))
+        self.assertTrue(isinstance(arr.__str__(), str))
         self.assertTrue(sum(arr.subcol_widths) <= arr.col_width)
         self.assertEqual(arr.shape[0], arr1.col_len)
         self.assertFalse(arr1.col_header)
@@ -52,11 +49,11 @@ class TestLabeleddata(unittest.TestCase):
         schf = ['Word', 'Value'] 
         t = DataTable(t, 'Song', subcolhdr_compact=schc, subcolhdr_full=schf)
 
-        self.assertTrue(isinstance(t.__str__(), basestring))
+        self.assertTrue(isinstance(t.__str__(), str))
         self.assertTrue('Song', t.table_header)
 
         t.compact_view = False
-        self.assertTrue(isinstance(t.__str__(), basestring))
+        self.assertTrue(isinstance(t.__str__(), str))
         self.assertTrue('Song', t.table_header)
 
 

@@ -32,7 +32,7 @@ def find_idx(ind, c1, c2):
     ctx2 = c2.view_contexts('sentence', as_strings=True)
     ctx = c1.view_contexts('sentence', as_strings=True)[ind]
     
-    for i in xrange(len(ctx2)):
+    for i in range(len(ctx2)):
         if eqva(ctx, ctx2[i]) < 2:
             return str(i)
     return ''

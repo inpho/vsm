@@ -38,7 +38,7 @@ def naive_cconv(v, w):
     """
     """
     out = np.empty_like(v)
-    for i in xrange(v.shape[0]):
+    for i in range(v.shape[0]):
         out[i] = np.dot(v, np.roll(w[::-1], i + 1))
 
     return out

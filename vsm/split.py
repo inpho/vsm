@@ -3,7 +3,7 @@ Functions for splitting lists and arrays
 """
 
 
-from builtins import range
+
 import numpy as np
 
 

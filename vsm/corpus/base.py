@@ -1,9 +1,4 @@
-from __future__ import print_function
-from builtins import str
-from builtins import range
-from builtins import object
 
-from past.builtins import basestring
 
 from itertools import tee
 import os
@@ -709,7 +704,7 @@ class Corpus(BaseCorpus):
         c.words = arrays_in['words']
         if isinstance(c.words[0], str):
             pass
-        elif isinstance(c.words[0], basestring):
+        elif isinstance(c.words[0], str):
             c.words[:] = [w.decode('utf-8') for w in c.words]
         try:
             c.context_types = [ctx.decode('utf-8') 
@@ -737,7 +732,7 @@ class Corpus(BaseCorpus):
             
             if isinstance(t['{}_label'.format(n)][0], str):
                 pass
-            elif isinstance(t['{}_label'.format(n)][0], basestring):
+            elif isinstance(t['{}_label'.format(n)][0], str):
                 t['{}_label'.format(n)] = [lbl.decode('utf-8') for lbl in t['{}_label'.format(n)]]
 
             c.context_data.append(t)
@@ -820,11 +815,11 @@ class Corpus(BaseCorpus):
 
 
         if not stop.any():
-            # print 'Stop list is empty.'
+            # print('Stop list is empty.')
             return self
     
 
-        # print 'Rebuilding context data', datetime.now()
+        # print('Rebuilding context data', datetime.now())
         context_data = []
 
         BASE = len(self.context_data) - 1
@@ -874,10 +869,10 @@ class Corpus(BaseCorpus):
         del self.context_data
         self.context_data = context_data
 
-        # print 'Rebuilding corpus and updating stop words', datetime.now()
+        # print('Rebuilding corpus and updating stop words', datetime.now())
         self.stopped_words.update(self.words[stop])
 
-        #print 'adjusting words list', datetime.now()
+        #print('adjusting words list', datetime.now())
         new_words = self.words[np.logical_not(stop)]
         old_to_new_array = np.zeros(self.words.shape, dtype=self.corpus.dtype)
         for i, word in enumerate(new_words):
@@ -886,7 +881,7 @@ class Corpus(BaseCorpus):
         # print 'rebuilding word dictionary', datetime.now()
         new_words_int = dict((word,i) for i, word in enumerate(new_words)) 
 
-        #print "remapping corpus", datetime.now()
+        #print("remapping corpus", datetime.now())
         self.corpus[:] = old_to_new_array[self.corpus]
         if (self.corpus.dtype != np.uint16 and len(new_words) < 2**16):
             self.corpus = self.corpus.astype(np.uint16)

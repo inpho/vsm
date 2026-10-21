@@ -1,4 +1,4 @@
-from builtins import range
+
 import unittest
 
 from vsm.corpus import add_metadata

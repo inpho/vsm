@@ -1,7 +1,7 @@
 """
 [General Documentation about :mod:`model` classes]
 """
-from __future__ import absolute_import
+
 
 from . import beaglecomposite
 from .beaglecomposite import *
