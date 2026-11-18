@@ -7,7 +7,7 @@ name = "vsm"
 version = "1.0.0b1"
 description = "Vector Space Semantic Modeling Framework for the Indiana Philosophy Ontology Project"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 authors = [
     {name = "The Indiana Philosophy Ontology (InPhO) Project", email = "inpho@indiana.edu"}
 ]
@@ -16,9 +16,10 @@ keywords = ["semantic", "modeling", "philosophy", "ontology"]
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Developers",

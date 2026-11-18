@@ -3,7 +3,7 @@
 # Test script to verify README.md instructions work across multiple Python versions
 # Uses uv to manage environments and build the Cython extension
 
-VERSIONS=("3.11" "3.12" "3.13" "3.14", "3.15")
+VERSIONS=("3.12" "3.13" "3.14", "3.15")
 BASE_DIR="/tmp/vsm_test_$(date +%s)"
 SOURCE_DIR="$(pwd)"
 
