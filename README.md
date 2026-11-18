@@ -33,11 +33,8 @@ is required; pass `--python 3.12` to select a specific interpreter.
 To run the tests:
 
 ```
-uv run pytest unit_tests/*
+uv run pytest unit_tests
 ```
-
-The trailing glob is needed because the test modules are named `tests_*.py`,
-which does not match pytest's default discovery pattern.
 
 ###Installing without uv
 
