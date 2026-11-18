@@ -27,7 +27,7 @@ uv sync --group dev
 ```
 
 `uv sync` creates a `.venv`, resolves the dependencies, and installs `vsm` as an
-editable package (compiling the Cython extension in place). Python 3.10 or newer
+editable package (compiling the Cython extension in place). Python 3.12 or newer
 is required; pass `--python 3.12` to select a specific interpreter.
 
 To run the tests:
