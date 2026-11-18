@@ -39,7 +39,7 @@ for VERSION in "${VERSIONS[@]}"; do
         
         # Run unit tests
         echo "Running unit tests..."
-        uv run pytest unit_tests/*
+        uv run pytest
         
         TEST_RESULT=$?
         

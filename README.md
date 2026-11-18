@@ -33,7 +33,7 @@ is required; pass `--python 3.12` to select a specific interpreter.
 To run the tests:
 
 ```
-uv run pytest unit_tests
+uv run pytest
 ```
 
 ###Installing without uv
