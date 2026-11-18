@@ -52,7 +52,7 @@ def new_material(c1, c2, idx=0):
     len2 = len(ctx2)
 
     new = []
-    for i in xrange(len(ctx1)):
+    for i in range(len(ctx1)):
         if i < len2:
             if len(ctx1[i]) == 0: # empty tokens.
                 pass

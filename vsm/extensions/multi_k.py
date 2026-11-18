@@ -71,7 +71,7 @@ def connection_matrix(samples, n=10, distr=(10,30)):
     mat /= n
 
     cutplot = np.zeros((n+1 ,2), dtype='f2<')
-    for l in xrange(n+1):
+    for l in range(n+1):
         # Construct graph for which mat[i][j] > l/n
         graph = mat > 1.0 * l /n
         

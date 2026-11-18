@@ -499,7 +499,7 @@ class LdaCgsViewer(object):
                 ind_word = self.corpus.corpus[pos]
                 key = self.corpus.words[ind_word]
 
-                if words_weight.has_key(key):
+                if key in words_weight:
                     words_weight[key] += 1
                 else:
                     words_weight[key] = 0

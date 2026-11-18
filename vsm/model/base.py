@@ -1,5 +1,3 @@
-from __future__ import print_function
-from builtins import object
 import numpy as np
 
 __all__ = ['BaseModel']

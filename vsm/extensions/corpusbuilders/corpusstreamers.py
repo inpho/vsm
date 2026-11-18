@@ -1,5 +1,3 @@
-import sys
-
 from codecs import open
 from concurrent.futures import as_completed, ProcessPoolExecutor
 import pickle
@@ -75,11 +73,7 @@ def corpus_from_files(dir_or_filenames, encoding='utf8', ignore=IGNORE,
         pbar = pbar.start()
         n = 0
     
-    if sys.version_info[0] == 2:
-        TD = backports.tempfile.TemporaryDirectory 
-    else:
-        TD = tempfile.TemporaryDirectory
-    with TD(prefix='vsm-') as pickle_dir:
+    with tempfile.TemporaryDirectory(prefix='vsm-') as pickle_dir:
         with ProcessPoolExecutor() as executor:
             corpus = [executor.submit(tokenize_and_pickle_file, filename, pickle_dir, tokenizer)
                           for filename in filenames]

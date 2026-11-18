@@ -34,7 +34,6 @@ dependencies = [
     # cython is imported at runtime by vsm/model/ldacgsmulti.py, so it is a
     # runtime dependency as well as a build requirement (see build-system).
     "cython",
-    "future",
     "matplotlib",
     "nltk",
     "numpy",

@@ -273,9 +273,9 @@ class CorpusSent(Corpus):
         """
         tok = self.view_contexts('sentence', as_strings=True)
         sent_li = []
-        for i in xrange(len(tok)):
+        for i in range(len(tok)):
             sent_li.append(sent)
-        keys = [i for i in xrange(len(tok)) 
+        keys = [i for i in range(len(tok)) 
                 if set(sent_li[i]).issubset(tok[i].tolist())]
         
         n = len(keys)
@@ -424,7 +424,7 @@ def extend_sdd(args, v, print_len=10):
     rows[1] += '<th style="text-align: center; background: #EFF2FB;">Argument\
                 Map</th></tr>'
     
-    for i in xrange(2,len(rows)-1):
+    for i in range(2,len(rows)-1):
         a = rows[i].split('</a>, ')
         arg = a[1].split(',')[0]
 
@@ -450,7 +450,7 @@ def extend_across(vFrom, vTo, beagle_v, args, txtFrom, txtTo, print_len=10):
                 Argument Map</th><th style="text-align: center; background: \
                 #EFF2FB;">Novelty</th></tr>'
     
-    for i in xrange(2,len(rows)-1):
+    for i in range(2,len(rows)-1):
         a = rows[i].split('</a>, ')
         arg = a[1].split(',')[0]
 
@@ -488,7 +488,7 @@ def in_ed1(idx, difftxt, ed1txt):
             txt = f.read() 
             entries = txt.split(',')
             
-            for i in xrange(len(entries)): 
+            for i in range(len(entries)):
                 if entries[i].startswith(str(idx) + ' '):
                     if '=' in entries[i]:
                         return ed1[i]

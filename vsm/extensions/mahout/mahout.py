@@ -41,7 +41,7 @@ def build_arr(dictli):
     
     arr = np.zeros((r,c))
     
-    for i in xrange(r):
+    for i in range(r):
         arr[i] = dictli[i].values()
         
     return arr

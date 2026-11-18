@@ -163,7 +163,7 @@ class LabeledColumn(np.ndarray):
     [11, 10]
     >>>  lc.col_len
     5
-    >>> print lc
+    >>> print(lc)
     Words        
     ---------------------
     Word       Value     
@@ -379,10 +379,10 @@ class DataTable(list):
             dtype=[('i', np.array(words).dtype), 
             ('value', np.array(values).dtype)])
     >>>  lc = LabeledColumn(arr, 'Lyrics')
-    >>>  l = [lc.copy() for i in xrange(2)]
+    >>>  l = [lc.copy() for i in range(2)]
     >>>  dt = DataTable(l, 'Let it be', subcolhdr_compact=['Topic', 'Words'],
                    subcolhdr_full=['Word', 'Prob'], compact_view=True)
-    >>>  print dt
+    >>>  print(dt)
     --------------------------------------------
                      Let it be                  
     --------------------------------------------
@@ -396,7 +396,7 @@ class DataTable(list):
     --------------------------------------------
 
     >>> dt.compact_view = False
-    >>>  print dt
+    >>>  print(dt)
         Let it be      
     ---------------------
             Words        

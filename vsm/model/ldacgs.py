@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import numpy as np
 import time
 from ldafunctions import load_lda, save_lda, init_priors

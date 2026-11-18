@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import numpy as np
 from itertools import product
 from ldacgsseq import LdaCgsSeq
@@ -26,7 +24,7 @@ def uniquify(l):
 def productoid(A, n):
 
     prod = product(A, repeat=n)
-    d = dict((i, A[:i]) for i in xrange(1, len(A)+1))
+    d = dict((i, A[:i]) for i in range(1, len(A)+1))
 
     for t in prod:
         elems = uniquify(t)

@@ -31,10 +31,7 @@ def strip_punc(tsent):
     return out
 
 def strip_punc_word(word):
-    if isinstance(word, str):
-        return word.translate(PUNC_TABLE)
-    elif isinstance(word, str):
-        return word.translate(None, PUNC.encode('utf-8'))
+    return word.translate(PUNC_TABLE)
         
 
 NUMS = string.digits
@@ -53,10 +50,7 @@ def rem_num(tsent):
     return out
 
 def rem_num_word(word):
-    if isinstance(word, str):
-        return word.translate(NUMS_TABLE)
-    elif isinstance(word, str):
-        return word.translate(None, NUMS.encode('utf-8'))
+    return word.translate(NUMS_TABLE)
 
 def rehyph(sent):
     """
@@ -66,12 +60,8 @@ def rehyph(sent):
 
 BIG_TABLE = NUMS_TABLE.copy()
 BIG_TABLE.update(PUNC_TABLE)
-BIG_LIST = string.digits + string.punctuation
 def process_word(word):
-    if isinstance(word, str):
-        return word.translate(BIG_TABLE)
-    elif isinstance(word, str):
-        return word.translate(None, BIG_LIST.encode('utf-8'))
+    return word.translate(BIG_TABLE)
 
 def apply_stoplist(corp, nltk_stop=True, add_stop=None, freq=0, in_place=True):
     """
@@ -199,10 +189,7 @@ def word_tokenize(text):
 
     text = rehyph(text)
     text = process_word(text)
-    if isinstance(text, str):
-        text = text.replace(u'\x00', '')
-    elif isinstance(text, str):
-        pass
+    text = text.replace('\x00', '')
     text = text.lower()
     tokens = word_tokenizer.tokenize(text)
 

@@ -90,19 +90,19 @@ class TestBeagleOrder(unittest.TestCase):
     #     a = np.arange(5)
     #     print 'array length', a.shape[0]
         
-    #     for i in xrange(a.shape[0]):
+    #     for i in range(a.shape[0]):
     #         n = 3
     #         print 'ngram length', n
     #         print 'index', i
     #         pprint.pprint(reduce_ngrams(fn, a, n, i))
 
-    #     for i in xrange(a.shape[0]):
+    #     for i in range(a.shape[0]):
     #         n = 4
     #         print 'ngram length', n
     #         print 'index', i
     #         pprint.pprint(reduce_ngrams(fn, a, n, i))
 
-    #     for i in xrange(a.shape[0]):
+    #     for i in range(a.shape[0]):
     #         n = 5
     #         print 'ngram length', n
     #         print 'index', i
@@ -119,19 +119,19 @@ class TestBeagleOrder(unittest.TestCase):
     #     a = np.arange(5)
     #     print 'array length', a.shape[0]
         
-    #     for i in xrange(a.shape[0]):
+    #     for i in range(a.shape[0]):
     #         n = 3
     #         print 'ngram length', n
     #         print 'index', i
     #         pprint.pprint(reduce_ngrams(fn, a, n, i))
 
-    #     for i in xrange(a.shape[0]):
+    #     for i in range(a.shape[0]):
     #         n = 4
     #         print 'ngram length', n
     #         print 'index', i
     #         pprint.pprint(reduce_ngrams(fn, a, n, i))
 
-    #     for i in xrange(a.shape[0]):
+    #     for i in range(a.shape[0]):
     #         n = 5
     #         print 'ngram length', n
     #         print 'index', i

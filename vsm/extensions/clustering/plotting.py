@@ -16,7 +16,7 @@ def gen_colors(clusters):
     import matplotlib.cm as cm
     
     n = len(set(clusters))
-    colorm = [cm.hsv(i * 1.0 /n, 1) for i in xrange(n)]
+    colorm = [cm.hsv(i * 1.0 /n, 1) for i in range(n)]
     return colorm
 
 
@@ -54,7 +54,7 @@ def plot_clusters(arr, labels, clusters=[], size=[]):
     Y = arr[:,1]
 
     if len(size) == 0:
-        size = [40 for i in xrange(n)]
+        size = [40 for i in range(n)]
         
     fig = plt.figure(figsize=(10,10))
     ax = plt.subplot(111)
